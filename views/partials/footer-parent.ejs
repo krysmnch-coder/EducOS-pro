@@ -1,0 +1,110 @@
+            </div>
+        </main>
+    </div>
+    <script>
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+        }
+        if (localStorage.getItem('darkMode') === 'true') document.body.classList.add('dark-mode');
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        }
+        document.querySelectorAll('.sidebar .nav-item').forEach(function(l) {
+            l.addEventListener('click', function() { if (window.innerWidth <= 768) toggleSidebar(); });
+        });
+        async function loadEnfantsSidebar() {
+            try {
+                var r = await fetch('/parent/api/enfants');
+                var enfants = await r.json();
+                var html = '';
+                var actif = localStorage.getItem('enfantActif');
+                if (enfants.length > 0) {
+                    enfants.forEach(function(e, i) {
+                        html += '<div class="enfant-mini ' + (actif == i ? 'active' : '') + '" onclick="selectEnfant(' + i + ')" title="' + e.nom + ' ' + e.prenom + ' - ' + e.classe + '"><div class="enfant-dot"></div><span>' + e.prenom + ' ' + e.nom.charAt(0) + '. (' + e.classe + ')</span></div>';
+                    });
+                } else {
+                    html = '<p style="color:#888;font-size:0.7rem;padding:8px;">Aucun enfant</p>';
+                }
+                document.getElementById('enfantsSidebar').innerHTML = html;
+            } catch(e) {}
+        }
+        function selectEnfant(index) {
+            localStorage.setItem('enfantActif', index);
+            fetch('/parent/api/enfants').then(r => r.json()).then(function(enfants) {
+                var e = enfants[index];
+                if (e) {
+                    localStorage.setItem('enfantNom', e.nom);
+                    localStorage.setItem('enfantPrenom', e.prenom);
+                    localStorage.setItem('enfantClasse', e.classe);
+                    loadEnfantsSidebar();
+                    var activeTab = document.querySelector('.tab-content.active');
+                    if (activeTab) {
+                        var tabId = activeTab.id.replace('tab-', '');
+                        if (typeof loadTabData === 'function') loadTabData(tabId);
+                    }
+                }
+            });
+        }
+        async function loadNotifCount() {
+            try {
+                var r = await fetch('/parent/api/notifications');
+                var notifs = await r.json();
+                var badge = document.getElementById('badgeNotif');
+                var nonLues = notifs.filter(function(n) { return !n.lu; }).length;
+                badge.textContent = nonLues;
+                badge.style.display = nonLues > 0 ? 'flex' : 'none';
+            } catch(e) {}
+        }
+        async function toggleNotifications() {
+            var dd = document.getElementById('notifDropdown');
+            if (dd.classList.contains('active')) { dd.classList.remove('active'); }
+            else { dd.classList.add('active'); loadNotifications(); }
+        }
+        async function loadNotifications() {
+            var r = await fetch('/parent/api/notifications');
+            var notifs = await r.json();
+            var html = notifs.length ? notifs.map(function(n) {
+                return '<div class="notif-item ' + (n.lu?'':'non-lu') + '" onclick="openNotif(' + n.id + ',' + (n.message_id||0) + ')"><div style="font-weight:600;">' + n.titre + '</div><div style="font-size:0.78rem;color:#666;">' + n.message + '</div></div>';
+            }).join('') : '<div style="padding:20px;">Aucune notification</div>';
+            document.getElementById('notifList').innerHTML = html;
+            var badge = document.getElementById('badgeNotif');
+            var nonLues = notifs.filter(function(n) { return !n.lu; }).length;
+            badge.textContent = nonLues;
+            badge.style.display = nonLues > 0 ? 'flex' : 'none';
+        }
+        async function openNotif(notifId, msgId) {
+            await fetch('/parent/api/notifications/' + notifId + '/read', { method: 'PUT' });
+            document.getElementById('notifDropdown').classList.remove('active');
+            if (msgId) {
+                var r = await fetch('/parent/api/messages');
+                var msgs = await r.json();
+                var msg = msgs.find(function(x) { return x.id === msgId; });
+                if (msg) {
+                    document.getElementById('modalMessageSujet').textContent = msg.sujet;
+                    document.getElementById('modalMessageContenu').textContent = msg.contenu;
+                    document.getElementById('messageModal').classList.add('active');
+                }
+            }
+            loadNotifications();
+        }
+        function closeMessageModal() { document.getElementById('messageModal').classList.remove('active'); }
+        loadEnfantsSidebar();
+        loadNotifCount();
+        setInterval(loadNotifCount, 30000);
+        async function viderNotifications() {
+    if (!confirm('Supprimer toutes les notifications ?')) return;
+    await fetch('/eleve/api/notifications', { method: 'DELETE' });
+    document.getElementById('notifList').innerHTML = '<div style="padding:20px;">Aucune notification</div>';
+    document.getElementById('badgeNotif').style.display = 'none';
+}
+
+async function openNotif(notifId) {
+    await fetch('/eleve/api/notifications/' + notifId + '/read', { method: 'PUT' });
+    document.getElementById('notifDropdown').classList.remove('active');
+    loadNotifCount();
+}
+    </script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+<%- include('../../partials/header-prof') %>
+
+<h2 style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#002FA7" stroke-width="2"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    Sanctions des élèves
+</h2>
+
+<div class="table-container">
+    <table class="data-table">
+        <thead><tr><th>Date</th><th>Élève</th><th>Type</th><th>Motif</th><th>Gravité</th><th>Parents notifiés</th></tr></thead>
+        <tbody id="sanctionsBody"><tr><td colspan="6">Chargement...</td></tr></tbody>
+    </table>
+</div>
+<div class="pagination" id="paginationSanctions"></div>
+
+<script>
+    async function loadSanctions(p) {
+        p = p || 1;
+        var r = await fetch('/vie-scolaire/api/sanctions?page=' + p);
+        var d = await r.json();
+        document.getElementById('sanctionsBody').innerHTML = d.sanctions && d.sanctions.length ? d.sanctions.map(function(s) {
+            var bg = (s.gravite === 'tres_grave' || s.gravite === 'grave') ? '#e74c3c' : '#f39c12';
+            return '<tr><td>' + s.date_sanction + '</td><td>' + s.nom + ' ' + s.prenom + '</td><td>' + s.type_sanction + '</td><td>' + s.motif + '</td><td><span class="badge" style="background:' + bg + ';color:white;">' + s.gravite + '</span></td><td>' + (s.notifie_parent ? '✅' : '❌') + '</td></tr>';
+        }).join('') : '<tr><td colspan="6">Aucune sanction</td></tr>';
+        var pag = '';
+        for (var i = 1; i <= d.pagination.totalPages; i++) pag += '<button class="' + (i === p ? 'active' : '') + '" onclick="loadSanctions(' + i + ')">' + i + '</button>';
+        document.getElementById('paginationSanctions').innerHTML = pag;
+    }
+    loadSanctions();
+</script>
+
+<%- include('../../partials/footer-prof') %>

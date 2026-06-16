@@ -1,0 +1,33 @@
+<%- include('../../partials/header-parent') %>
+
+<style>
+    .section { background: white; border-radius: 14px; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 6px rgba(0,0,0,0.04); }
+    .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; color: white; }
+</style>
+
+<h2 style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#002FA7" stroke-width="2"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" y1="8" x2="12" y2="12"/></svg>
+    Sanctions - <span id="enfantTitre" style="color:#888;font-size:0.9rem;"></span>
+</h2>
+
+<div id="noEnfant" style="display:none;"><div class="section"><p style="color:#888;">⚠️ Aucun enfant sélectionné. <a href="/dashboard/parent">Retour</a></p></div></div>
+<div id="contentEnfant"><div id="sanctionsEnfant"><p style="color:#888;">Chargement...</p></div></div>
+
+<script>
+    var enfantNom = localStorage.getItem('enfantNom');
+    var enfantPrenom = localStorage.getItem('enfantPrenom');
+    if (!enfantNom) { document.getElementById('noEnfant').style.display = 'block'; document.getElementById('contentEnfant').style.display = 'none'; }
+    else {
+        document.getElementById('enfantTitre').textContent = enfantNom + ' ' + enfantPrenom + ' - ' + localStorage.getItem('enfantClasse');
+        loadSanctions();
+    }
+    async function loadSanctions() {
+        var r = await fetch('/parent/api/sanctions?eleve_nom=' + encodeURIComponent(enfantNom) + '&eleve_prenom=' + encodeURIComponent(enfantPrenom));
+        var sanctions = await r.json();
+        document.getElementById('sanctionsEnfant').innerHTML = sanctions.length ? '<table class="data-table"><thead><tr><th>Date</th><th>Type</th><th>Motif</th><th>Gravité</th><th>Durée</th></tr></thead><tbody>' + sanctions.map(function(s) {
+            var bg = (s.gravite==='tres_grave'||s.gravite==='grave')?'#e74c3c':'#f39c12';
+            return '<tr><td>' + s.date_sanction + '</td><td>' + s.type_sanction + '</td><td>' + s.motif + '</td><td><span class="badge" style="background:' + bg + ';">' + s.gravite + '</span></td><td>' + (s.duree||'-') + '</td></tr>';
+        }).join('') + '</tbody></table>' : '<p style="color:#888;">Aucune sanction</p>';
+    }
+</script>
+<%- include('../../partials/footer-parent') %>

@@ -1,0 +1,286 @@
+<%- include('../../partials/header-vs') %>
+
+<style>
+    .pointage-row { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border: 1px solid #e8e8e8; border-radius: 10px; margin-bottom: 8px; flex-wrap: wrap; background: white; }
+    .pointage-row.present { border-left: 4px solid #27ae60; }
+    .pointage-row.absent { border-left: 4px solid #e74c3c; }
+    .pointage-row.retard { border-left: 4px solid #f39c12; }
+    .pointage-row select, .pointage-row input[type="time"], .pointage-row input[type="number"], .pointage-row input[type="text"] { padding: 7px 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.8rem; font-family: 'Inter', sans-serif; }
+    .pointage-row input[type="time"] { width: 110px; }
+    .pointage-row input[type="number"] { width: 65px; }
+    .pointage-row select { width: 130px; }
+    .pointage-row .statut-select { width: 110px; }
+    .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; white-space: nowrap; color: white; }
+    .badge-success { background: #27ae60; }
+    .badge-danger { background: #e74c3c; }
+    .badge-warning { background: #f39c12; }
+    .badge-info { background: #6366f1; }
+    .search-bar { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+    .search-bar input { padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 0.88rem; font-family: 'Inter', sans-serif; }
+    .motif-input { width: 150px !important; }
+    .btn { padding: 10px 18px; border: none; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; font-family: 'Inter', sans-serif; }
+    .btn-primary { background: #002FA7; color: white; }
+    .btn-danger { background: #e74c3c; color: white; }
+    .alert-avertissement { background: #fff3cd; border: 1px solid #ffc107; border-radius: 10px; padding: 14px 18px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+    .alert-avertissement svg { stroke: #e74c3c; flex-shrink: 0; }
+    .toast { position: fixed; top: 20px; right: 20px; padding: 14px 20px; border-radius: 10px; color: white; font-weight: 600; z-index: 3000; display: none; }
+    .toast.success { background: #27ae60; }
+    .toast.error { background: #e74c3c; }
+    @media (max-width: 768px) { .pointage-row { gap: 6px; } .pointage-row select, .pointage-row input { width: 90px !important; font-size: 0.7rem; } }
+</style>
+
+<h2 style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#002FA7" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    Pointage - <span id="datePointage"></span>
+</h2>
+
+<!-- Zone avertissements -->
+<div id="avertissementsZone"></div>
+
+<div class="search-bar">
+    <input type="date" id="pointageDate" onchange="loadPointages()">
+    <button class="btn btn-primary" onclick="pointerTous()">✅ Pointer tous présents</button>
+</div>
+
+<div id="pointageList"><p style="color:#888;padding:20px;">Chargement...</p></div>
+
+<hr style="margin:24px 0;">
+
+<h3 style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#002FA7" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
+    Cumul mensuel & Historique
+</h3>
+<div class="search-bar">
+    <input type="month" id="cumulMois" onchange="loadCumul()">
+</div>
+<div class="table-container">
+    <table class="data-table">
+        <thead><tr><th>Professeur</th><th>Contrat</th><th>Jours</th><th>Présent</th><th>Retard</th><th>Absent</th><th>Min retard</th><th>Cumul</th><th>Alerte</th></tr></thead>
+        <tbody id="cumulBody"><tr><td colspan="9">Chargement...</td></tr></tbody>
+    </table>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    var currentDate = new Date().toISOString().split('T')[0];
+
+    async function loadAvertissements() {
+        var mois = document.getElementById('cumulMois').value || new Date().toISOString().substring(0, 7);
+        try {
+            var r = await fetch('/vie-scolaire/api/avertissements?mois=' + mois);
+            var avertissements = await r.json();
+            var zone = document.getElementById('avertissementsZone');
+            if (avertissements.length > 0) {
+                zone.innerHTML = avertissements.map(function(a) {
+                    return '<div class="alert-avertissement">' +
+                        '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>' +
+                        '<div><strong>⚠️ ' + a.nom + ' ' + a.prenom + '</strong><br>' + a.message_avertissement + '</div></div>';
+                }).join('');
+            } else {
+                zone.innerHTML = '';
+            }
+        } catch(e) {}
+    }
+
+    async function loadPointages() {
+        var date = document.getElementById('pointageDate').value || currentDate;
+        currentDate = date;
+        document.getElementById('datePointage').textContent = new Date(date + 'T00:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+        
+        var r = await fetch('/vie-scolaire/api/pointages?date=' + date);
+        var d = await r.json();
+        var html = '';
+        
+        if (d.pointages && d.pointages.length > 0) {
+            d.pointages.forEach(function(p) {
+                var statutActuel = p.statut === 'sortie' ? 'present' : (p.statut || 'absent');
+                var isAbsent = statutActuel === 'absent';
+                var isRetard = statutActuel === 'retard';
+                
+                html += '<div class="pointage-row ' + statutActuel + '" id="row-' + p.prof_id + '">';
+                html += '<div style="flex:1;min-width:140px;"><strong>' + p.nom + ' ' + p.prenom + '</strong></div>';
+                html += '<select onchange="updateContrat(' + p.prof_id + ',this.value)" class="contrat-select"><option value="plein_temps" ' + (p.type_contrat === 'plein_temps' ? 'selected' : '') + '>Plein temps</option><option value="charge_cours" ' + (p.type_contrat === 'charge_cours' ? 'selected' : '') + '>Chargé de cours</option></select>';
+                html += '<select onchange="updateStatut(' + p.prof_id + ',this.value)" class="statut-select"><option value="present" ' + (!isAbsent && !isRetard ? 'selected' : '') + '>Présent</option><option value="retard" ' + (isRetard ? 'selected' : '') + '>Retard</option><option value="absent" ' + (isAbsent ? 'selected' : '') + '>Absent</option></select>';
+                html += '<input type="time" value="' + (p.heure_arrivee || '') + '" onchange="updateArrivee(' + p.prof_id + ',this.value)" placeholder="Arrivée" ' + (isAbsent ? 'disabled' : '') + '>';
+                html += '<input type="time" value="' + (p.heure_depart || '') + '" onchange="updateDepart(' + p.prof_id + ',this.value)" placeholder="Départ" ' + (isAbsent ? 'disabled' : '') + '>';
+                html += '<input type="number" value="' + (p.minutes_retard || 0) + '" onchange="updateMinutesRetard(' + p.prof_id + ',this.value)" placeholder="Min" min="0" ' + (!isRetard ? 'disabled' : '') + ' title="Minutes de retard">';
+                html += '<input type="text" value="' + (p.commentaire || '') + '" onchange="updateMotif(' + p.prof_id + ',this.value)" placeholder="Motif..." ' + (!isAbsent ? 'disabled' : '') + '>';
+                html += '<span class="badge badge-' + (isAbsent ? 'danger' : isRetard ? 'warning' : 'success') + '">' + statutActuel + '</span>';
+                html += '</div>';
+            });
+        }
+        
+        html += '<h4 style="margin-top:16px;">Non pointés</h4>';
+        if (d.nonPointes && d.nonPointes.length > 0) {
+            d.nonPointes.forEach(function(np) {
+                html += '<div class="pointage-row absent" id="row-' + np.id + '">';
+                html += '<div style="flex:1;"><strong>' + np.nom + ' ' + np.prenom + '</strong></div>';
+                html += '<select onchange="updateContrat(' + np.id + ',this.value)" class="contrat-select"><option value="plein_temps">Plein temps</option><option value="charge_cours">Chargé de cours</option></select>';
+                html += '<select onchange="updateStatut(' + np.id + ',this.value)" class="statut-select"><option value="absent" selected>Absent</option><option value="present">Présent</option><option value="retard">Retard</option></select>';
+                html += '<input type="time" onchange="updateArrivee(' + np.id + ',this.value)" placeholder="Arrivée" disabled>';
+                html += '<input type="time" onchange="updateDepart(' + np.id + ',this.value)" placeholder="Départ" disabled>';
+                html += '<input type="number" onchange="updateMinutesRetard(' + np.id + ',this.value)" placeholder="Min" disabled>';
+                html += '<input type="text" onchange="updateMotif(' + np.id + ',this.value)" placeholder="Motif...">';
+                html += '<span class="badge badge-danger">absent</span>';
+                html += '</div>';
+            });
+        } else {
+            html += '<p style="color:#888;">Tous les professeurs sont pointés</p>';
+        }
+        
+        document.getElementById('pointageList').innerHTML = html;
+    }
+
+    function updateUI(profId, statut) {
+    var row = document.getElementById('row-' + profId);
+    if (!row) return;
+    row.className = 'pointage-row ' + statut;
+    var arrivee = row.querySelector('input[type="time"]:nth-of-type(1)');
+    var depart = row.querySelector('input[type="time"]:nth-of-type(2)');
+    var minutes = row.querySelector('input[type="number"]');
+    var motif = row.querySelector('input[type="text"]');
+    var badge = row.querySelector('.badge');
+    
+    if (statut === 'absent') {
+        if (arrivee) { arrivee.disabled = true; arrivee.value = ''; }
+        if (depart) { depart.disabled = true; depart.value = ''; }
+        if (minutes) { minutes.disabled = true; minutes.value = 0; }
+        if (motif) motif.disabled = false;
+        if (badge) { badge.className = 'badge badge-danger'; badge.textContent = 'absent'; }
+    } else if (statut === 'retard') {
+        if (arrivee) arrivee.disabled = false;
+        if (depart) depart.disabled = false;
+        if (minutes) minutes.disabled = false;
+        if (motif) { motif.disabled = true; motif.value = ''; }
+        if (badge) { badge.className = 'badge badge-warning'; badge.textContent = 'retard'; }
+    } else {
+        if (arrivee) arrivee.disabled = false;
+        if (depart) depart.disabled = false;
+        if (minutes) { minutes.disabled = true; minutes.value = 0; }
+        if (motif) { motif.disabled = true; motif.value = ''; }
+        if (badge) { badge.className = 'badge badge-success'; badge.textContent = 'present'; }
+    }
+}
+    async function updateContrat(pid, c) {
+        await fetch('/vie-scolaire/api/pointer-arrivee', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prof_id: pid, type_contrat: c, date: currentDate }) });
+        loadCumul();
+    }
+    async function updateStatut(profId, statut) {
+    // Mettre à jour l'interface immédiatement
+    var row = document.getElementById('row-' + profId);
+    if (!row) return;
+    
+    // Mettre à jour la classe de la ligne
+    row.className = 'pointage-row ' + statut;
+    
+    // Récupérer les éléments
+    var arrivee = row.querySelector('input[type="time"]:nth-of-type(1)');
+    var depart = row.querySelector('input[type="time"]:nth-of-type(2)');
+    var minutes = row.querySelector('input[type="number"]');
+    var motif = row.querySelector('input[type="text"]');
+    var badge = row.querySelector('.badge');
+    
+    // Mettre à jour les champs selon le statut
+    if (statut === 'absent') {
+        if (arrivee) { arrivee.disabled = true; arrivee.value = ''; }
+        if (depart) { depart.disabled = true; depart.value = ''; }
+        if (minutes) { minutes.disabled = true; minutes.value = 0; }
+        if (motif) motif.disabled = false;
+        if (badge) { badge.className = 'badge badge-danger'; badge.textContent = 'absent'; }
+    } else if (statut === 'retard') {
+        if (arrivee) arrivee.disabled = false;
+        if (depart) depart.disabled = false;
+        if (minutes) minutes.disabled = false;
+        if (motif) { motif.disabled = true; motif.value = ''; }
+        if (badge) { badge.className = 'badge badge-warning'; badge.textContent = 'retard'; }
+    } else { // présent
+        if (arrivee) arrivee.disabled = false;
+        if (depart) depart.disabled = false;
+        if (minutes) { minutes.disabled = true; minutes.value = 0; }
+        if (motif) { motif.disabled = true; motif.value = ''; }
+        if (badge) { badge.className = 'badge badge-success'; badge.textContent = 'present'; }
+    }
+    
+    // Envoyer au serveur en arrière-plan
+    await fetch('/vie-scolaire/api/pointer-arrivee', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prof_id: profId, statut: statut, date: currentDate })
+    });
+    
+    loadCumul();
+    loadAvertissements();
+}
+    async function updateArrivee(pid, h) {
+        await fetch('/vie-scolaire/api/pointer-arrivee', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prof_id: pid, heure_arrivee: h || null, date: currentDate }) });
+        loadCumul();
+    }
+    async function updateDepart(pid, h) {
+        await fetch('/vie-scolaire/api/pointer-depart', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prof_id: pid, heure_depart: h || null, date: currentDate }) });
+        loadCumul();
+    }
+    async function updateMinutesRetard(pid, m) {
+        await fetch('/vie-scolaire/api/pointer-arrivee', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prof_id: pid, minutes_retard: parseInt(m) || 0, date: currentDate }) });
+        loadCumul();
+        loadAvertissements();
+    }
+    async function updateMotif(pid, m) {
+        await fetch('/vie-scolaire/api/pointer-arrivee', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prof_id: pid, commentaire: m, date: currentDate }) });
+    }
+
+    async function pointerTous() {
+        if (!confirm('Pointer tous les professeurs non pointés comme présents ?')) return;
+        var r = await fetch('/vie-scolaire/api/pointages?date=' + currentDate);
+        var d = await r.json();
+        if (d.nonPointes && d.nonPointes.length > 0) {
+            for (var i = 0; i < d.nonPointes.length; i++) {
+                await fetch('/vie-scolaire/api/pointer-arrivee', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prof_id: d.nonPointes[i].id, statut: 'present', type_contrat: 'plein_temps', date: currentDate }) });
+            }
+            loadPointages();
+            loadCumul();
+        }
+    }
+
+    async function loadCumul() {
+        var mois = document.getElementById('cumulMois').value || new Date().toISOString().substring(0, 7);
+        var r = await fetch('/vie-scolaire/api/cumul-pointages?mois=' + mois);
+        var rows = await r.json();
+        var html = '';
+        if (rows.length > 0) {
+            rows.forEach(function(r) {
+                var isPT = r.type_contrat === 'plein_temps';
+                var cumul = isPT ? (r.jours_presents || 0) + ' jours' : Number(r.total_heures || 0).toFixed(1) + ' h';
+                var alerteHtml = r.avertissement == 1 ? '<span class="badge badge-danger" title="' + (r.message_avertissement || '') + '">⚠️ Alerte</span>' : '<span class="badge badge-success">✓</span>';
+                html += '<tr>';
+                html += '<td>' + r.nom + ' ' + r.prenom + '</td>';
+                html += '<td><span class="badge badge-' + (isPT ? 'info' : 'warning') + '">' + (isPT ? 'Plein temps' : 'Chargé cours') + '</span></td>';
+                html += '<td>' + (r.jours_pointes || 0) + '</td>';
+                html += '<td>' + (r.jours_presents || 0) + '</td>';
+                html += '<td>' + (r.jours_retard || 0) + '</td>';
+                html += '<td>' + (r.jours_absents || 0) + '</td>';
+                html += '<td><strong>' + (r.total_minutes_retard || 0) + ' min</strong></td>';
+                html += '<td><strong>' + cumul + '</strong></td>';
+                html += '<td>' + alerteHtml + '</td>';
+                html += '</tr>';
+            });
+        } else {
+            html = '<tr><td colspan="9">Aucune donnée</td></tr>';
+        }
+        document.getElementById('cumulBody').innerHTML = html;
+        loadAvertissements();
+    }
+
+    function showToast(msg, type) {
+        var t = document.getElementById('toast');
+        t.textContent = msg; t.className = 'toast ' + type; t.style.display = 'block';
+        setTimeout(function() { t.style.display = 'none'; }, 3000);
+    }
+
+    document.getElementById('pointageDate').value = currentDate;
+    document.getElementById('cumulMois').value = new Date().toISOString().substring(0, 7);
+    loadPointages();
+    loadCumul();
+</script>
+
+<%- include('../../partials/footer-vs') %>

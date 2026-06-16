@@ -1,0 +1,218 @@
+<%- include('../../partials/header-admin') %>
+
+<style>
+    .btn { padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; font-family: 'Inter', sans-serif; }
+    .btn-primary { background: #002FA7; color: white; }
+    .btn-primary:hover { background: #003fd6; }
+    .btn-danger { background: #e74c3c; color: white; }
+    .btn-warning { background: #f39c12; color: white; }
+    .btn-sm { padding: 6px 10px; font-size: 0.73rem; }
+    .btn svg { width: 14px; height: 14px; stroke: currentColor; }
+    .btn-primary svg, .btn-danger svg, .btn-warning svg { stroke: white; }
+    .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center; padding: 20px; }
+    .modal.active { display: flex; }
+    .modal-content { background: white; border-radius: 16px; padding: 24px; width: 100%; max-width: 550px; max-height: 80vh; overflow-y: auto; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .close-modal { background: none; border: none; font-size: 1.4rem; cursor: pointer; color: #666; }
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.85rem; color: #333; }
+    .form-control { width: 100%; padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 0.88rem; font-family: 'Inter', sans-serif; }
+    .form-control:focus { border-color: #002FA7; outline: none; }
+    .form-row { display: flex; gap: 12px; }
+    .form-row .form-group { flex: 1; }
+    .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; white-space: nowrap; }
+    .badge-success { background: #d4edda; color: #155724; }
+    .badge-danger { background: #f8d7da; color: #721c24; }
+    .search-bar { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+    .search-wrapper { position: relative; flex: 1; min-width: 180px; }
+    .search-icon-svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; stroke: #999; pointer-events: none; }
+    .search-wrapper input { padding: 10px 12px 10px 36px !important; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 0.88rem; font-family: 'Inter', sans-serif; width: 100%; }
+    .search-wrapper input:focus { border-color: #002FA7; outline: none; }
+    .search-bar select { padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 0.88rem; font-family: 'Inter', sans-serif; }
+    .pagination { display: flex; gap: 6px; justify-content: center; margin-top: 16px; }
+    .pagination button { padding: 7px 12px; border: 1px solid #e0e0e0; background: white; border-radius: 6px; cursor: pointer; font-family: 'Inter', sans-serif; }
+    .pagination button.active { background: #002FA7; color: white; border-color: #002FA7; }
+    .stats-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 20px; }
+    .stat-card-mini { background: white; border-radius: 12px; padding: 16px 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+    .stat-card-mini .val { font-size: 1.5rem; font-weight: 700; }
+    .stat-card-mini .lbl { font-size: 0.75rem; color: #888; margin-top: 2px; }
+    .text-success { color: #27ae60; }
+    .text-danger { color: #e74c3c; }
+    .text-primary { color: #002FA7; }
+    .toast { position: fixed; top: 20px; right: 20px; padding: 14px 20px; border-radius: 10px; color: white; font-weight: 600; z-index: 3000; display: none; }
+    .toast.success { background: #27ae60; }
+    .toast.error { background: #e74c3c; }
+</style>
+
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:10px;">
+    <h2 style="display:flex;align-items:center;gap:10px;">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#002FA7" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Paiements en Ariary
+    </h2>
+    <button class="btn btn-primary" onclick="openModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nouvelle transaction
+    </button>
+</div>
+
+<div class="stats-cards">
+    <div class="stat-card-mini">
+        <div style="display:flex;align-items:center;gap:8px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#27ae60" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+            <span class="val text-success" id="totalRecettes">0 Ar</span>
+        </div>
+        <div class="lbl">Total Recettes</div>
+    </div>
+    <div class="stat-card-mini">
+        <div style="display:flex;align-items:center;gap:8px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
+            <span class="val text-danger" id="totalDepenses">0 Ar</span>
+        </div>
+        <div class="lbl">Total Dépenses</div>
+    </div>
+    <div class="stat-card-mini">
+        <div style="display:flex;align-items:center;gap:8px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#002FA7" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            <span class="val text-primary" id="solde">0 Ar</span>
+        </div>
+        <div class="lbl">Solde</div>
+    </div>
+</div>
+
+<div class="section">
+    <div class="search-bar">
+        <select id="filterType" onchange="loadPaiements()">
+            <option value="">Tous les types</option>
+            <option value="recette">Recette</option>
+            <option value="depense">Dépense</option>
+        </select>
+        <div class="search-wrapper">
+            <svg class="search-icon-svg" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="filterSearch" placeholder="Rechercher..." onkeyup="loadPaiements()">
+        </div>
+    </div>
+    <div class="table-container">
+        <table class="data-table">
+            <thead><tr><th>ID</th><th>Type</th><th>Catégorie</th><th>Montant</th><th>Description</th><th>Date</th><th>Bénéficiaire</th><th>Mode</th><th>Actions</th></tr></thead>
+            <tbody id="paiementsBody"><tr><td colspan="9">Chargement...</td></tr></tbody>
+        </table>
+    </div>
+    <div class="pagination" id="pagination"></div>
+</div>
+
+<div class="modal" id="paiementModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modalTitle">Nouvelle transaction</h3>
+            <button class="close-modal" onclick="closeModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <form onsubmit="savePaiement(event)">
+            <input type="hidden" id="paiementId">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Type *</label>
+                    <select id="paiementType" class="form-control" required onchange="updateCategories()">
+                        <option value="">Choisir</option>
+                        <option value="recette">Recette</option>
+                        <option value="depense">Dépense</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Catégorie *</label><select id="paiementCategorie" class="form-control" required></select></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Montant (Ar) *</label><input type="number" id="paiementMontant" class="form-control" required min="100"></div>
+                <div class="form-group"><label>Date *</label><input type="date" id="paiementDate" class="form-control" required></div>
+            </div>
+            <div class="form-group"><label>Description</label><input type="text" id="paiementDescription" class="form-control"></div>
+            <div class="form-row">
+                <div class="form-group"><label>Bénéficiaire / Payeur</label><input type="text" id="paiementBeneficiaire" class="form-control"></div>
+                <div class="form-group"><label>Mode</label><select id="paiementMode" class="form-control"><option value="especes">Espèces</option><option value="mobile_money">Mobile Money</option><option value="cheque">Chèque</option><option value="virement">Virement</option></select></div>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
+                Enregistrer
+            </button>
+        </form>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    let currentPage = 1;
+    const categories = {
+        recette: ['frais_scolarite','inscription','reinscription','cantine','transport','fournitures','autre'],
+        depense: ['salaire_personnel','maintenance','electricite','eau','internet','fournitures_bureau','autre']
+    };
+    function updateCategories() {
+        const type = document.getElementById('paiementType').value;
+        const sel = document.getElementById('paiementCategorie');
+        sel.innerHTML = '<option value="">Choisir</option>';
+        if(categories[type]) sel.innerHTML += categories[type].map(c => `<option value="${c}">${c.replace(/_/g,' ')}</option>`).join('');
+    }
+    async function loadStats() {
+        const r = await fetch('/admin/api/paiement-stats');
+        const s = await r.json();
+        document.getElementById('totalRecettes').textContent = Number(s.totalRecettes).toLocaleString('fr-FR') + ' Ar';
+        document.getElementById('totalDepenses').textContent = Number(s.totalDepenses).toLocaleString('fr-FR') + ' Ar';
+        document.getElementById('solde').textContent = Number(s.solde).toLocaleString('fr-FR') + ' Ar';
+    }
+    async function loadPaiements(page = 1) {
+        currentPage = page;
+        const params = new URLSearchParams({page, type:document.getElementById('filterType').value, search:document.getElementById('filterSearch').value});
+        const r = await fetch('/admin/api/paiements?'+params);
+        const d = await r.json();
+        document.getElementById('paiementsBody').innerHTML = d.paiements?.length ? d.paiements.map(p => `
+            <tr><td>#${p.id}</td>
+            <td><span class="badge ${p.type==='recette'?'badge-success':'badge-danger'}">${p.type==='recette'?'Recette':'Dépense'}</span></td>
+            <td>${p.categorie}</td>
+            <td style="font-weight:700;color:${p.type==='recette'?'#27ae60':'#e74c3c'};">${Number(p.montant).toLocaleString('fr-FR')} Ar</td>
+            <td>${p.description||'-'}</td><td>${p.date_paiement}</td><td>${p.beneficiaire||'-'}</td><td>${p.mode_paiement||'-'}</td>
+            <td><button class="btn btn-warning btn-sm" onclick="editPaiement(${p.id})"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+            <button class="btn btn-danger btn-sm" onclick="deletePaiement(${p.id})"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button></td></tr>`).join('') : '<tr><td colspan="9">Aucune</td></tr>';
+        let pag = '';
+        for(let i=1; i<=d.pagination.totalPages; i++) pag += `<button class="${i===page?'active':''}" onclick="loadPaiements(${i})">${i}</button>`;
+        document.getElementById('pagination').innerHTML = pag;
+    }
+    function openModal() {
+        document.getElementById('paiementId').value = '';
+        document.getElementById('modalTitle').textContent = 'Nouvelle transaction';
+        document.getElementById('paiementDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('paiementModal').classList.add('active');
+    }
+    async function editPaiement(id) {
+        const r = await fetch('/admin/api/paiements?page=1');
+        const d = await r.json();
+        const p = d.paiements.find(x => x.id === id);
+        if(!p) return;
+        document.getElementById('paiementId').value = p.id;
+        document.getElementById('modalTitle').textContent = 'Modifier';
+        document.getElementById('paiementType').value = p.type;
+        updateCategories();
+        setTimeout(() => document.getElementById('paiementCategorie').value = p.categorie, 100);
+        document.getElementById('paiementMontant').value = p.montant;
+        document.getElementById('paiementDate').value = p.date_paiement;
+        document.getElementById('paiementDescription').value = p.description||'';
+        document.getElementById('paiementBeneficiaire').value = p.beneficiaire||'';
+        document.getElementById('paiementMode').value = p.mode_paiement||'especes';
+        document.getElementById('paiementModal').classList.add('active');
+    }
+    async function savePaiement(e) {
+        e.preventDefault();
+        const data = {type:document.getElementById('paiementType').value, categorie:document.getElementById('paiementCategorie').value, montant:document.getElementById('paiementMontant').value, description:document.getElementById('paiementDescription').value, date_paiement:document.getElementById('paiementDate').value, beneficiaire:document.getElementById('paiementBeneficiaire').value, mode_paiement:document.getElementById('paiementMode').value};
+        const id = document.getElementById('paiementId').value;
+        const r = await fetch(id?`/admin/api/paiements/${id}`:'/admin/api/paiements', {method:id?'PUT':'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)});
+        const j = await r.json();
+        showToast(j.message||j.error, r.ok?'success':'error');
+        if(r.ok) { closeModal(); loadPaiements(); loadStats(); }
+    }
+    async function deletePaiement(id) { if(!confirm('Supprimer ?')) return; await fetch(`/admin/api/paiements/${id}`, {method:'DELETE'}); loadPaiements(); loadStats(); }
+    function closeModal() { document.getElementById('paiementModal').classList.remove('active'); }
+    function showToast(msg, type) { const t = document.getElementById('toast'); t.textContent = msg; t.className = `toast ${type}`; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 3000); }
+    document.getElementById('paiementModal').addEventListener('click', function(e) { if(e.target===this) closeModal(); });
+    loadStats(); loadPaiements();
+</script>
+
+<%- include('../../partials/footer-admin') %>

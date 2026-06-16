@@ -1,0 +1,155 @@
+<%- include('../../partials/header-vs') %>
+
+<style>
+    .btn { padding: 10px 18px; border: none; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; font-family: 'Inter', sans-serif; }
+    .btn-primary { background: #002FA7; color: white; }
+    .btn-danger { background: #e74c3c; color: white; }
+    .btn svg { width: 16px; height: 16px; }
+    .btn-primary svg, .btn-danger svg { stroke: white; }
+    .btn-sm { padding: 5px 10px; font-size: 0.73rem; }
+    .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; color: white; }
+    .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center; padding: 20px; }
+    .modal.active { display: flex; }
+    .modal-content { background: white; border-radius: 16px; padding: 24px; width: 100%; max-width: 500px; max-height: 80vh; overflow-y: auto; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .close-modal { background: none; border: none; font-size: 1.4rem; cursor: pointer; color: #666; }
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.85rem; color: #333; }
+    .form-control { width: 100%; padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 0.88rem; font-family: 'Inter', sans-serif; }
+    .form-control:focus { border-color: #002FA7; outline: none; }
+    .form-row { display: flex; gap: 12px; }
+    .form-row .form-group { flex: 1; }
+    .pagination { display: flex; gap: 6px; justify-content: center; margin-top: 16px; }
+    .pagination button { padding: 7px 12px; border: 1px solid #e0e0e0; background: white; border-radius: 6px; cursor: pointer; font-family: 'Inter', sans-serif; }
+    .pagination button.active { background: #002FA7; color: white; border-color: #002FA7; }
+    .toast { position: fixed; top: 20px; right: 20px; padding: 14px 20px; border-radius: 10px; color: white; font-weight: 600; z-index: 3000; display: none; }
+    .toast.success { background: #27ae60; }
+    .toast.error { background: #e74c3c; }
+</style>
+
+<h2 style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#002FA7" stroke-width="2"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    Sanctions
+</h2>
+
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+    <h3>Registre des sanctions</h3>
+    <button class="btn btn-primary" onclick="openModal('sanctionModal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nouvelle sanction
+    </button>
+</div>
+
+<div class="table-container">
+    <table class="data-table">
+        <thead><tr><th>Date</th><th>Élève</th><th>Type</th><th>Motif</th><th>Gravité</th><th>Parents</th><th>Action</th></tr></thead>
+        <tbody id="sanctionsBody"><tr><td colspan="7">Chargement...</td></tr></tbody>
+    </table>
+</div>
+<div class="pagination" id="paginationSanctions"></div>
+
+<div class="modal" id="sanctionModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Nouvelle sanction</h3>
+            <button class="close-modal" onclick="closeModal('sanctionModal')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <form onsubmit="saveSanction(event)">
+            <div class="form-group"><label>Élève *</label><select id="sancEleveId" class="form-control" required></select></div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Type *</label>
+                    <select id="sancType" class="form-control" required>
+                        <option value="avertissement">Avertissement</option><option value="blame">Blâme</option><option value="retenue">Retenue</option><option value="exclusion_temporaire">Exclusion temporaire</option><option value="travail_interet">Travail d'intérêt</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Gravité *</label>
+                    <select id="sancGravite" class="form-control" required>
+                        <option value="legere">Légère</option><option value="moyenne">Moyenne</option><option value="grave">Grave</option><option value="tres_grave">Très grave</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group"><label>Motif *</label><input type="text" id="sancMotif" class="form-control" required></div>
+            <div class="form-row">
+                <div class="form-group"><label>Durée</label><input type="text" id="sancDuree" class="form-control" placeholder="ex: 2 heures, 3 jours"></div>
+                <div class="form-group"><label style="display:flex;align-items:center;gap:8px;margin-top:28px;"><input type="checkbox" id="sancNotifie"> Parents notifiés</label></div>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
+                Enregistrer
+            </button>
+        </form>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    async function loadSanctions(p) {
+        p = p || 1;
+        var r = await fetch('/vie-scolaire/api/sanctions?page=' + p);
+        var d = await r.json();
+        var html = '';
+        if (d.sanctions && d.sanctions.length > 0) {
+            d.sanctions.forEach(function(s) {
+                var bgColor = (s.gravite === 'tres_grave' || s.gravite === 'grave') ? '#e74c3c' : (s.gravite === 'moyenne' ? '#f39c12' : '#f1c40f');
+                html += '<tr><td>' + s.date_sanction + '</td><td>' + s.nom + ' ' + s.prenom + '</td><td>' + s.type_sanction + '</td><td>' + s.motif + '</td>';
+                html += '<td><span class="badge" style="background:' + bgColor + ';">' + s.gravite + '</span></td>';
+                html += '<td>' + (s.notifie_parent ? '✅' : '❌') + '</td>';
+                html += '<td><button class="btn btn-danger btn-sm" onclick="deleteSanction(' + s.id + ')"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="12" height="12"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button></td></tr>';
+            });
+        } else {
+            html = '<tr><td colspan="7">Aucune sanction</td></tr>';
+        }
+        document.getElementById('sanctionsBody').innerHTML = html;
+        
+        var pag = '';
+        for (var i = 1; i <= d.pagination.totalPages; i++) {
+            pag += '<button class="' + (i === p ? 'active' : '') + '" onclick="loadSanctions(' + i + ')">' + i + '</button>';
+        }
+        document.getElementById('paginationSanctions').innerHTML = pag;
+    }
+
+    async function saveSanction(e) {
+        e.preventDefault();
+        var data = {
+            eleve_id: document.getElementById('sancEleveId').value,
+            type_sanction: document.getElementById('sancType').value,
+            motif: document.getElementById('sancMotif').value,
+            gravite: document.getElementById('sancGravite').value,
+            duree: document.getElementById('sancDuree').value,
+            notifie_parent: document.getElementById('sancNotifie').checked ? 1 : 0
+        };
+        var r = await fetch('/vie-scolaire/api/sanctions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+        var j = await r.json();
+        showToast(j.message || j.error, r.ok ? 'success' : 'error');
+        if (r.ok) { closeModal('sanctionModal'); loadSanctions(); }
+    }
+
+    async function deleteSanction(id) {
+        if (!confirm('Supprimer cette sanction ?')) return;
+        await fetch('/vie-scolaire/api/sanctions/' + id, { method: 'DELETE' });
+        loadSanctions();
+    }
+
+    function openModal(id) { document.getElementById(id).classList.add('active'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+    function showToast(msg, type) {
+        var t = document.getElementById('toast');
+        t.textContent = msg; t.className = 'toast ' + type; t.style.display = 'block';
+        setTimeout(function() { t.style.display = 'none'; }, 3000);
+    }
+
+    document.getElementById('sanctionModal').addEventListener('click', function(e) { if (e.target === this) closeModal('sanctionModal'); });
+
+    fetch('/vie-scolaire/api/eleves').then(function(r) { return r.json(); }).then(function(e) {
+        document.getElementById('sancEleveId').innerHTML = e.map(function(x) { return '<option value="' + x.id + '">' + x.nom + ' ' + x.prenom + '</option>'; }).join('');
+    });
+
+    loadSanctions();
+</script>
+
+<%- include('../../partials/footer-vs') %>

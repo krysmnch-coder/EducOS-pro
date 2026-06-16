@@ -1,0 +1,156 @@
+<%- include('../../partials/header-prof') %>
+
+<style>
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: white; border-radius: 14px; padding: 20px; display: flex; align-items: center; gap: 14px; box-shadow: 0 1px 6px rgba(0,0,0,0.04); }
+    .stat-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .stat-value { font-size: 1.6rem; font-weight: 700; }
+    .stat-label { font-size: 0.8rem; color: #888; }
+    .profil-card { background: white; border-radius: 14px; padding: 24px; box-shadow: 0 1px 6px rgba(0,0,0,0.04); margin-bottom: 24px; }
+    .profil-header { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+    .profil-avatar { width: 64px; height: 64px; border-radius: 16px; background: #002FA7; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 700; }
+    .profil-info h3 { font-size: 1.2rem; margin-bottom: 4px; }
+    .profil-info p { color: #888; font-size: 0.85rem; }
+    .profil-details { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+    .profil-detail { background: #f8f9fa; border-radius: 10px; padding: 12px; }
+    .profil-detail .label { font-size: 0.7rem; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+    .profil-detail .value { font-weight: 600; font-size: 0.9rem; margin-top: 2px; }
+    .section { background: white; border-radius: 14px; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 6px rgba(0,0,0,0.04); }
+    .section h3 { font-size: 1rem; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+    .bar-container { margin-bottom: 12px; }
+    .bar-label { display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 4px; }
+    .bar { height: 24px; background: #e0e0e0; border-radius: 12px; overflow: hidden; }
+    .bar-fill { height: 100%; background: #002FA7; border-radius: 12px; transition: width 0.5s ease; }
+    .form-control { padding: 8px 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 0.85rem; font-family: 'Inter', sans-serif; }
+    @media (max-width: 768px) { .profil-details { grid-template-columns: 1fr; } }
+</style>
+
+<h2 style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#002FA7" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    Tableau de bord
+</h2>
+
+<!-- Profil du professeur -->
+<div class="profil-card" id="profilCard">
+    <div class="profil-header">
+        <div class="profil-avatar"><%= user.prenom.charAt(0) %><%= user.nom.charAt(0) %></div>
+        <div class="profil-info">
+            <h3><%= user.prenom %> <%= user.nom %></h3>
+            <p>Professeur</p>
+        </div>
+    </div>
+    <div class="profil-details" id="profilDetails">
+        <div class="profil-detail"><div class="label">Matière</div><div class="value" id="profilMatiere">...</div></div>
+        <div class="profil-detail"><div class="label">Classes</div><div class="value" id="profilClasses">...</div></div>
+        <div class="profil-detail"><div class="label">Email</div><div class="value" id="profilEmail">...</div></div>
+        <div class="profil-detail"><div class="label">Téléphone</div><div class="value" id="profilTelephone">...</div></div>
+    </div>
+</div>
+
+<!-- Stats -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon" style="background:#eef2ff;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#002FA7" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg></div>
+        <div class="stat-info"><span class="stat-value" id="totalClasses">0</span><span class="stat-label">Classes</span></div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background:#f0fdf4;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#27ae60" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg></div>
+        <div class="stat-info"><span class="stat-value" id="totalRessources">0</span><span class="stat-label">Ressources</span></div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background:#fff7ed;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f39c12" stroke-width="2"><path d="M9 11l3 3L22 4"/></svg></div>
+        <div class="stat-info"><span class="stat-value" id="devoirsRendus">0</span><span class="stat-label">Devoirs rendus</span></div>
+    </div>
+</div>
+
+<!-- Performances -->
+<div class="section">
+    <h3>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#002FA7" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+        Performances par classe - <span id="chartMatiere"></span>
+        <select id="filtreMatiere" onchange="loadChartData()" class="form-control" style="width:auto;margin-left:12px;"></select>
+    </h3>
+    <div id="chartBars"><p style="color:#888;">Chargement...</p></div>
+</div>
+
+<!-- Top élèves -->
+<div class="section">
+    <h3>🏆 Meilleurs élèves - <span id="topMatiere"></span></h3>
+    <div class="table-container">
+        <table class="data-table">
+            <thead><tr><th>Rang</th><th>Élève</th><th>Classe</th><th>Moyenne</th></tr></thead>
+            <tbody id="topElevesBody"><tr><td colspan="4">Chargement...</td></tr></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    async function loadProfil() {
+        try {
+            var r = await fetch('/prof/api/profil');
+            var p = await r.json();
+            document.getElementById('profilMatiere').textContent = p.matiere_principale || 'Non définie';
+            document.getElementById('profilClasses').textContent = p.classes_assignees || 'Non définies';
+            document.getElementById('profilEmail').textContent = p.email;
+            document.getElementById('profilTelephone').textContent = p.telephone || 'Non défini';
+        } catch(e) {}
+    }
+
+    async function loadStats() {
+        var r = await fetch('/prof/api/stats');
+        var s = await r.json();
+        document.getElementById('totalClasses').textContent = s.totalClasses || 0;
+        document.getElementById('totalRessources').textContent = s.totalRessources || 0;
+        document.getElementById('devoirsRendus').textContent = s.devoirsRendus || 0;
+    }
+
+    async function loadMatieres() {
+        var r = await fetch('/prof/api/matieres');
+        var m = await r.json();
+        var sel = document.getElementById('filtreMatiere');
+        sel.innerHTML = '<option value="">Toutes mes matières</option>' + m.map(function(x) { return '<option value="' + x.matiere + '">' + x.matiere + '</option>'; }).join('');
+        // Afficher la matière principale par défaut
+        var rp = await fetch('/prof/api/profil');
+        var p = await rp.json();
+        if (p.matiere_principale) {
+            sel.value = p.matiere_principale;
+        }
+    }
+
+    async function loadChartData() {
+        var matiere = document.getElementById('filtreMatiere').value;
+        document.getElementById('chartMatiere').textContent = matiere || '(toutes)';
+        document.getElementById('topMatiere').textContent = matiere || '(toutes)';
+        
+        var r = await fetch('/prof/api/chart-data?matiere=' + encodeURIComponent(matiere));
+        var d = await r.json();
+        
+        var barsHtml = '';
+        if (d.moyennesParClasse && d.moyennesParClasse.length > 0) {
+            d.moyennesParClasse.forEach(function(c) {
+                var pct = Math.min((c.moyenne / 20) * 100, 100);
+                barsHtml += '<div class="bar-container"><div class="bar-label"><span>' + c.classe + '</span><span>' + Number(c.moyenne).toFixed(2) + '/20</span></div><div class="bar"><div class="bar-fill" style="width:' + pct + '%;"></div></div></div>';
+            });
+        } else {
+            barsHtml = '<p style="color:#888;">Aucune note enregistrée</p>';
+        }
+        document.getElementById('chartBars').innerHTML = barsHtml;
+        
+        var topHtml = '';
+        if (d.topEleves && d.topEleves.length > 0) {
+            d.topEleves.forEach(function(e, i) {
+                topHtml += '<tr><td>' + (i+1) + '</td><td><strong>' + e.nom + ' ' + e.prenom + '</strong></td><td>' + e.classe + '</td><td>' + Number(e.moyenne).toFixed(2) + '/20</td></tr>';
+            });
+        } else {
+            topHtml = '<tr><td colspan="4">Aucune note enregistrée</td></tr>';
+        }
+        document.getElementById('topElevesBody').innerHTML = topHtml;
+    }
+
+    loadProfil();
+    loadStats();
+    loadMatieres();
+    loadChartData();
+</script>
+
+<%- include('../../partials/footer-prof') %>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    <div class="dashboard-container">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>EducOS<span>-pro</span></h2>
+            </div>
+            <nav class="sidebar-nav">
+                <% if (user.role === 'admin') { %>
+                    <a href="/dashboard/admin" class="nav-item active"><span>📊 Tableau de bord</span></a>
+                    <a href="/dashboard/admin/utilisateurs" class="nav-item"><span>👥 Utilisateurs</span></a>
+                    <a href="/dashboard/admin/etablissement" class="nav-item"><span>🏫 Établissement</span></a>
+                    <a href="/dashboard/admin/paiements" class="nav-item"><span>💰 Paiements</span></a>
+                    <a href="/dashboard/admin/messages" class="nav-item"><span>💬 Messages</span></a>
+                    <a href="/dashboard/admin/parametres" class="nav-item"><span>⚙️ Paramètres</span></a>
+                <% } else if (user.role === 'vie_scolaire') { %>
+                    <a href="/dashboard/vie-scolaire" class="nav-item active"><span>📊 Tableau de bord</span></a>
+                <% } else if (user.role === 'prof') { %>
+                    <a href="/dashboard/prof" class="nav-item active"><span>📊 Tableau de bord</span></a>
+                <% } else if (user.role === 'parent') { %>
+                    <a href="/dashboard/parent" class="nav-item active"><span>📊 Tableau de bord</span></a>
+                <% } else { %>
+                    <a href="/dashboard/eleve" class="nav-item active"><span>📊 Tableau de bord</span></a>
+                <% } %>
+            </nav>
+            <div class="sidebar-footer">
+                <p><%= user.prenom %> <%= user.nom %></p>
+                <small><%= user.role %></small>
+                <a href="/auth/logout" class="logout-btn">🚪 Déconnexion</a>
+            </div>
+        </aside>
+        <main class="main-content">
+            <header class="content-header">
+                <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+                <h1><%= title %></h1>
+                <button onclick="toggleDarkMode()">🌓</button>
+            </header>
+            <div class="content-body">

@@ -1,0 +1,43 @@
+<%- include('../../partials/header-admin') %>
+
+<h2 style="display:flex;align-items:center;gap:10px;margin-bottom:24px;">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#002FA7" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    Paramètres
+</h2>
+
+<div class="section">
+    <form onsubmit="saveSettings(event)" style="max-width:500px;">
+        <div class="form-group"><label>Nom de l'application</label><input type="text" id="app_name" class="form-control"></div>
+        <div class="form-group"><label>Nombre maximum d'utilisateurs</label><input type="number" id="max_users" class="form-control"></div>
+        <div class="form-group"><label>Rôle par défaut</label><select id="default_role" class="form-control"><option value="eleve">Élève</option><option value="parent">Parent</option></select></div>
+        <div class="form-group"><label><input type="checkbox" id="allow_registration"> Autoriser les inscriptions</label></div>
+        <div class="form-group"><label><input type="checkbox" id="maintenance_mode"> Mode maintenance</label></div>
+        <button type="submit" class="btn btn-primary" style="padding:10px 20px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="16" height="16"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
+            Enregistrer
+        </button>
+    </form>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    fetch('/admin/api/settings').then(r => r.json()).then(s => {
+        document.getElementById('app_name').value = s.app_name || 'EducOS-pro';
+        document.getElementById('max_users').value = s.max_users || 5000;
+        document.getElementById('default_role').value = s.default_role || 'eleve';
+        document.getElementById('allow_registration').checked = s.allow_registration == 1;
+        document.getElementById('maintenance_mode').checked = s.maintenance_mode == 1;
+    });
+    function saveSettings(e) {
+        e.preventDefault();
+        const data = {app_name:document.getElementById('app_name').value, max_users:document.getElementById('max_users').value, default_role:document.getElementById('default_role').value, allow_registration:document.getElementById('allow_registration').checked?1:0, maintenance_mode:document.getElementById('maintenance_mode').checked?1:0};
+        fetch('/admin/api/settings', {method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)}).then(r=>r.json()).then(j => {
+            const t = document.getElementById('toast');
+            t.textContent = j.message||j.error; t.className = 'toast ' + (j.success?'success':'error'); t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 3000);
+        });
+    }
+</script>
+
+<%- include('../../partials/footer-admin') %>
