@@ -5,6 +5,7 @@ function getDb() {
 }
 
 const eleveController = {
+    // ✅ Utilise globalDb
     getProfil: (req, res) => {
         globalDb.get('SELECT nom, prenom, email, classes_assignees as classe, date_naissance, telephone FROM users WHERE id = ?', [req.session.user.id], (err, user) => {
             if (err || !user) return res.status(404).json({ error: 'Non trouvé' });
@@ -223,104 +224,18 @@ const eleveController = {
         });
     },
 
-    ajouterMembreGroupe: (req, res) => {
-        const db = getDb();
-        const { groupe_id, eleve_id } = req.body;
-        db.run('INSERT OR IGNORE INTO membres_groupes (groupe_id, eleve_id) VALUES (?, ?)', [groupe_id, eleve_id], (err) => {
-            if (err) return res.status(500).json({ error: 'Erreur' });
-            res.json({ success: true, message: 'Membre ajouté' });
-        });
-    },
+    ajouterMembreGroupe: (req, res) => { const db = getDb(); db.run('INSERT OR IGNORE INTO membres_groupes (groupe_id, eleve_id) VALUES (?, ?)', [req.body.groupe_id, req.body.eleve_id], (err) => { if (err) return res.status(500).json({ error: 'Erreur' }); res.json({ success: true, message: 'Membre ajouté' }); }); },
+    getMembresGroupe: (req, res) => { const db = getDb(); db.all("SELECT u.id, u.nom, u.prenom, u.classes_assignees as classe FROM membres_groupes mg JOIN users u ON mg.eleve_id = u.id WHERE mg.groupe_id = ?", [req.query.groupe_id], (err, rows) => res.json(rows || [])); },
+    retirerMembreGroupe: (req, res) => { const db = getDb(); db.run('DELETE FROM membres_groupes WHERE groupe_id = ? AND eleve_id = ?', [req.body.groupe_id, req.body.eleve_id], (err) => { if (err) return res.status(500).json({ error: 'Erreur' }); res.json({ success: true, message: 'Membre retiré' }); }); },
+    quitterGroupe: (req, res) => { const db = getDb(); const userId = req.session.user.id; const groupeId = req.body.groupe_id; db.get('SELECT createur_id FROM groupes WHERE id = ?', [groupeId], (err, groupe) => { if (err || !groupe) return res.status(404).json({ error: 'Groupe non trouvé' }); if (groupe.createur_id == userId) return res.status(400).json({ error: 'Le créateur ne peut pas quitter' }); db.run('DELETE FROM membres_groupes WHERE groupe_id = ? AND eleve_id = ?', [groupeId, userId], (err) => { if (err) return res.status(500).json({ error: 'Erreur' }); res.json({ success: true, message: 'Vous avez quitté le groupe' }); }); }); },
+    supprimerGroupe: (req, res) => { const db = getDb(); const userId = req.session.user.id; const groupeId = req.body.groupe_id; db.get('SELECT createur_id FROM groupes WHERE id = ?', [groupeId], (err, groupe) => { if (err || !groupe) return res.status(404).json({ error: 'Groupe non trouvé' }); if (groupe.createur_id != userId) return res.status(403).json({ error: 'Seul le créateur peut supprimer' }); db.run('DELETE FROM messages_groupes WHERE groupe_id = ?', [groupeId]); db.run('DELETE FROM membres_groupes WHERE groupe_id = ?', [groupeId]); db.run('DELETE FROM groupes WHERE id = ?', [groupeId], (err) => { if (err) return res.status(500).json({ error: 'Erreur' }); res.json({ success: true, message: 'Groupe supprimé' }); }); }); },
+    getGroupeInfo: (req, res) => { const db = getDb(); db.get("SELECT g.*, (SELECT COUNT(*) FROM membres_groupes WHERE groupe_id = g.id) as nb_membres FROM groupes g WHERE g.id = ?", [req.query.groupe_id], (err, groupe) => { if (err || !groupe) return res.status(404).json({ error: 'Groupe non trouvé' }); res.json(groupe); }); },
+    updateGroupeNom: (req, res) => { const db = getDb(); db.run('UPDATE groupes SET nom = ? WHERE id = ?', [req.body.nom.trim(), req.body.groupe_id], (err) => { if (err) return res.status(500).json({ error: 'Erreur' }); res.json({ success: true, message: 'Nom mis à jour' }); }); },
+    updateGroupePhoto: (req, res) => { const db = getDb(); const fichier = req.file ? req.file.filename : null; if (!fichier) return res.status(400).json({ error: 'Fichier requis' }); db.run('UPDATE groupes SET photo = ? WHERE id = ?', [fichier, req.body.groupe_id], (err) => { if (err) return res.status(500).json({ error: 'Erreur' }); res.json({ success: true, message: 'Photo mise à jour', fichier: fichier }); }); },
 
-    getMembresGroupe: (req, res) => {
-        const db = getDb();
-        db.all("SELECT u.id, u.nom, u.prenom, u.classes_assignees as classe FROM membres_groupes mg JOIN users u ON mg.eleve_id = u.id WHERE mg.groupe_id = ?", [req.query.groupe_id], (err, rows) => res.json(rows || []));
-    },
-
-    retirerMembreGroupe: (req, res) => {
-        const db = getDb();
-        db.run('DELETE FROM membres_groupes WHERE groupe_id = ? AND eleve_id = ?', [req.body.groupe_id, req.body.eleve_id], (err) => {
-            if (err) return res.status(500).json({ error: 'Erreur' });
-            res.json({ success: true, message: 'Membre retiré' });
-        });
-    },
-
-    quitterGroupe: (req, res) => {
-        const db = getDb();
-        const userId = req.session.user.id;
-        const groupeId = req.body.groupe_id;
-        db.get('SELECT createur_id FROM groupes WHERE id = ?', [groupeId], (err, groupe) => {
-            if (err || !groupe) return res.status(404).json({ error: 'Groupe non trouvé' });
-            if (groupe.createur_id == userId) return res.status(400).json({ error: 'Le créateur ne peut pas quitter. Supprimez le groupe.' });
-            db.run('DELETE FROM membres_groupes WHERE groupe_id = ? AND eleve_id = ?', [groupeId, userId], (err) => {
-                if (err) return res.status(500).json({ error: 'Erreur' });
-                res.json({ success: true, message: 'Vous avez quitté le groupe' });
-            });
-        });
-    },
-
-    supprimerGroupe: (req, res) => {
-        const db = getDb();
-        const userId = req.session.user.id;
-        const groupeId = req.body.groupe_id;
-        db.get('SELECT createur_id FROM groupes WHERE id = ?', [groupeId], (err, groupe) => {
-            if (err || !groupe) return res.status(404).json({ error: 'Groupe non trouvé' });
-            if (groupe.createur_id != userId) return res.status(403).json({ error: 'Seul le créateur peut supprimer' });
-            db.run('DELETE FROM messages_groupes WHERE groupe_id = ?', [groupeId]);
-            db.run('DELETE FROM membres_groupes WHERE groupe_id = ?', [groupeId]);
-            db.run('DELETE FROM groupes WHERE id = ?', [groupeId], (err) => {
-                if (err) return res.status(500).json({ error: 'Erreur' });
-                res.json({ success: true, message: 'Groupe supprimé' });
-            });
-        });
-    },
-
-    getGroupeInfo: (req, res) => {
-        const db = getDb();
-        const groupeId = req.query.groupe_id;
-        db.get("SELECT g.*, (SELECT COUNT(*) FROM membres_groupes WHERE groupe_id = g.id) as nb_membres FROM groupes g WHERE g.id = ?", [groupeId], (err, groupe) => {
-            if (err || !groupe) return res.status(404).json({ error: 'Groupe non trouvé' });
-            res.json(groupe);
-        });
-    },
-
-    updateGroupeNom: (req, res) => {
-        const db = getDb();
-        const { groupe_id, nom } = req.body;
-        if (!nom || !nom.trim()) return res.status(400).json({ error: 'Nom requis' });
-        db.run('UPDATE groupes SET nom = ? WHERE id = ?', [nom.trim(), groupe_id], (err) => {
-            if (err) return res.status(500).json({ error: 'Erreur' });
-            res.json({ success: true, message: 'Nom mis à jour' });
-        });
-    },
-
-    updateGroupePhoto: (req, res) => {
-        const db = getDb();
-        const fichier = req.file ? req.file.filename : null;
-        if (!fichier) return res.status(400).json({ error: 'Fichier requis' });
-        db.run('UPDATE groupes SET photo = ? WHERE id = ?', [fichier, req.body.groupe_id], (err) => {
-            if (err) return res.status(500).json({ error: 'Erreur' });
-            res.json({ success: true, message: 'Photo mise à jour', fichier: fichier });
-        });
-    },
-
-    getNotifications: (req, res) => {
-        const db = getDb();
-        db.all('SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 50', [req.session.user.id], (err, rows) => res.json(rows || []));
-    },
-
-    markNotificationRead: (req, res) => {
-        const db = getDb();
-        db.run('UPDATE notifications SET lu = 1 WHERE id = ? AND user_id = ?', [req.params.id, req.session.user.id], (err) => res.json({ success: true }));
-    },
-
-    viderNotifications: (req, res) => {
-        const db = getDb();
-        db.run('DELETE FROM notifications WHERE user_id = ?', [req.session.user.id], (err) => {
-            if (err) return res.status(500).json({ error: 'Erreur' });
-            res.json({ success: true, message: 'Notifications vidées' });
-        });
-    }
+    getNotifications: (req, res) => { const db = getDb(); db.all('SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 50', [req.session.user.id], (err, rows) => res.json(rows || [])); },
+    markNotificationRead: (req, res) => { const db = getDb(); db.run('UPDATE notifications SET lu = 1 WHERE id = ? AND user_id = ?', [req.params.id, req.session.user.id], (err) => res.json({ success: true })); },
+    viderNotifications: (req, res) => { const db = getDb(); db.run('DELETE FROM notifications WHERE user_id = ?', [req.session.user.id], (err) => { if (err) return res.status(500).json({ error: 'Erreur' }); res.json({ success: true, message: 'Notifications vidées' }); }); }
 };
 
 module.exports = eleveController;

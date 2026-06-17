@@ -1,4 +1,5 @@
 const { globalDb, getEtablissementDb } = require('../config/database');
+const bcrypt = require('bcryptjs');
 
 function getDb() {
     return getEtablissementDb() || globalDb;
@@ -60,7 +61,6 @@ const parentController = {
             globalDb.run('UPDATE users SET classes_assignees = ? WHERE id = ?', [JSON.stringify(enfants), parentId], (err) => {
                 if (err) return res.status(500).json({ error: 'Erreur lors de l\'inscription' });
                 
-                const bcrypt = require('bcryptjs');
                 globalDb.get("SELECT id FROM users WHERE nom = ? AND prenom = ? AND role = 'eleve'", [nom, prenom], (err, row) => {
                     if (!row) {
                         bcrypt.hash('educos2024', 10, (err, hash) => {
@@ -79,7 +79,8 @@ const parentController = {
         const { eleve_nom, eleve_prenom } = req.query;
         if (!eleve_nom || !eleve_prenom) return res.json({ matieres: [], moyenneGenerale: 0 });
 
-        globalDb.get("SELECT id FROM users WHERE nom = ? AND prenom = ? AND role = 'eleve'", [eleve_nom, eleve_prenom], (err, row) => {
+        globalDb.get("SELECT id FROM users WHERE LOWER(nom) = LOWER(?) AND LOWER(prenom) = LOWER(?) AND role = 'eleve'", 
+            [eleve_nom.trim(), eleve_prenom.trim()], (err, row) => {
             if (err || !row) return res.json({ matieres: [], moyenneGenerale: 0 });
             const eleveId = row.id;
             const db = getDb();
@@ -131,7 +132,8 @@ const parentController = {
     getAbsences: (req, res) => {
         const { eleve_nom, eleve_prenom } = req.query;
         if (!eleve_nom || !eleve_prenom) return res.json([]);
-        globalDb.get("SELECT id FROM users WHERE nom = ? AND prenom = ? AND role = 'eleve'", [eleve_nom, eleve_prenom], (err, row) => {
+        globalDb.get("SELECT id FROM users WHERE LOWER(nom) = LOWER(?) AND LOWER(prenom) = LOWER(?) AND role = 'eleve'", 
+            [eleve_nom.trim(), eleve_prenom.trim()], (err, row) => {
             if (err || !row) return res.json([]);
             const db = getDb();
             db.all("SELECT * FROM absences WHERE eleve_id = ? ORDER BY date_absence DESC LIMIT 50", [row.id], (err, absences) => res.json(absences || []));
@@ -141,7 +143,8 @@ const parentController = {
     getSanctions: (req, res) => {
         const { eleve_nom, eleve_prenom } = req.query;
         if (!eleve_nom || !eleve_prenom) return res.json([]);
-        globalDb.get("SELECT id FROM users WHERE nom = ? AND prenom = ? AND role = 'eleve'", [eleve_nom, eleve_prenom], (err, row) => {
+        globalDb.get("SELECT id FROM users WHERE LOWER(nom) = LOWER(?) AND LOWER(prenom) = LOWER(?) AND role = 'eleve'", 
+            [eleve_nom.trim(), eleve_prenom.trim()], (err, row) => {
             if (err || !row) return res.json([]);
             const db = getDb();
             db.all("SELECT * FROM sanctions WHERE eleve_id = ? ORDER BY date_sanction DESC", [row.id], (err, sanctions) => res.json(sanctions || []));
@@ -207,11 +210,10 @@ const parentController = {
 
     rendreDevoir: (req, res) => {
         const db = getDb();
-        const { ressource_id } = req.body;
+        const { ressource_id, enfant_nom, enfant_prenom } = req.body;
         const fichier = req.file ? req.file.filename : null;
-        const enfantNom = req.body.enfant_nom;
-        const enfantPrenom = req.body.enfant_prenom;
-        globalDb.get("SELECT id FROM users WHERE nom = ? AND prenom = ? AND role = 'eleve'", [enfantNom, enfantPrenom], (err, row) => {
+        globalDb.get("SELECT id FROM users WHERE LOWER(nom) = LOWER(?) AND LOWER(prenom) = LOWER(?) AND role = 'eleve'", 
+            [enfant_nom.trim(), enfant_prenom.trim()], (err, row) => {
             if (err || !row) return res.status(404).json({ error: 'Élève non trouvé' });
             db.run('INSERT INTO devoirs_rendus (ressource_id, eleve_id, fichier) VALUES (?, ?, ?)', [ressource_id, row.id, fichier], function(err) {
                 if (err) return res.status(500).json({ error: 'Erreur' });
