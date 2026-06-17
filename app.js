@@ -8,7 +8,7 @@ const passport = require('./config/passport');
 require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 
 // Configuration upload
 const uploadsDir = path.join(__dirname, 'public', 'uploads');
@@ -268,4 +268,4 @@ app.use((req, res, next) => {
     }
     next();
 });
-app.listen(PORT, () => { console.log(`🚀 Serveur démarré sur http://localhost:${PORT}`); });
+app.listen(PORT, '0.0.0.0', () => { console.log(`🚀 Serveur démarré sur http://localhost:${PORT}`); });
