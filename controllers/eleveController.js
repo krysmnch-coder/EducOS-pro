@@ -78,10 +78,12 @@ const eleveController = {
     },
 
     getAmis: (req, res) => {
-        const userId = req.session.user.id;
+    const userId = req.session.user.id;
+    db.get('SELECT chat_eleves_active FROM settings WHERE id=1', [], (err, row) => {
+        if (row && row.chat_eleves_active == 0) return res.json([]);
         db.all("SELECT DISTINCT u.id, u.nom, u.prenom, u.classes_assignees as classe FROM users u WHERE u.id IN (SELECT ami_id FROM amis WHERE eleve_id = ? AND statut = 'accepte') OR u.id IN (SELECT eleve_id FROM amis WHERE ami_id = ? AND statut = 'accepte') ORDER BY u.nom", [userId, userId], (err, rows) => res.json(rows || []));
-    },
-
+    });
+},
     getDemandesAmis: (req, res) => {
         const userId = req.session.user.id;
         db.all("SELECT a.id as demande_id, u.id, u.nom, u.prenom, u.classes_assignees as classe FROM amis a JOIN users u ON a.eleve_id = u.id WHERE a.ami_id = ? AND a.statut = 'en_attente' ORDER BY a.created_at DESC", [userId], (err, rows) => res.json(rows || []));
@@ -145,6 +147,8 @@ const eleveController = {
     },
 
     envoyerMessageAmi: (req, res) => {
+    db.get('SELECT chat_eleves_active FROM settings WHERE id=1', [], (err, row) => {
+        if (row && row.chat_eleves_active == 0) return res.status(403).json({ error: 'Chat désactivé' });
         const { ami_id, contenu } = req.body;
         if (!contenu || !contenu.trim()) return res.status(400).json({ error: 'Message vide' });
         const fichier = req.file ? req.file.filename : null;
@@ -154,7 +158,8 @@ const eleveController = {
             db.run("INSERT INTO notifications (user_id, type, titre, message, lien) VALUES (?, 'message_ami', '💬 ' || ?, ?, '/dashboard/eleve')", [ami_id, req.session.user.prenom, contenu.trim().substring(0, 60)]);
             res.json({ success: true, message: 'Envoyé' });
         });
-    },
+    });
+},
 
     getGroupes: (req, res) => {
         const userId = req.session.user.id;
@@ -292,5 +297,10 @@ const eleveController = {
         });
     }
 };
-
+// Vérifier si le chat élèves est activé
+checkChatEnabled: (callback) => {
+    db.get('SELECT chat_eleves_active FROM settings WHERE id=1', [], (err, row) => {
+        callback(row ? row.chat_eleves_active == 1 : true);
+    });
+},
 module.exports = eleveController;

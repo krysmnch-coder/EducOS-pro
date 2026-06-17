@@ -240,4 +240,21 @@ app.use((req, res) => { res.status(404).send('Page non trouvée'); });
 // ============================================
 // DÉMARRAGE
 // ============================================
+// Middleware mode maintenance
+app.use((req, res, next) => {
+    if (req.path.startsWith('/auth') || req.path.startsWith('/css') || req.path.startsWith('/js') || req.path.startsWith('/uploads')) {
+        return next();
+    }
+    const db = require('./config/database');
+    db.get('SELECT maintenance_mode FROM settings WHERE id=1', [], (err, row) => {
+        if (row && row.maintenance_mode == 1 && (!req.session.user || req.session.user.role !== 'admin')) {
+            return res.status(503).send(`
+                <!DOCTYPE html><html><head><meta charset="UTF-8"><title>Maintenance</title>
+                <style>body{font-family:Inter,sans-serif;text-align:center;padding:100px 20px;background:#f5f5f5;}
+                h1{color:#002FA7;font-size:2rem;}p{color:#666;margin-top:10px;}</style></head>
+                <body><h1>🚧 Maintenance en cours</h1><p>L'application est temporairement indisponible.<br>Veuillez réessayer plus tard.</p></body></html>`);
+        }
+        next();
+    });
+});
 app.listen(PORT, () => { console.log(`🚀 Serveur démarré sur http://localhost:${PORT}`); });

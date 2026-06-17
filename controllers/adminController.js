@@ -108,23 +108,34 @@ const adminController = {
         });
     },
 
-    getSettings: (req, res) => db.get('SELECT * FROM settings WHERE id=1', [], (err, row) => res.json(row || {})),
-    updateSettings: (req, res) => {
+    getSettings: (req, res) => {
+    db.get('SELECT * FROM settings WHERE id=1', [], (err, row) => {
+        if (!row) {
+            // Créer les paramètres par défaut
+            db.run(`INSERT INTO settings (id, max_users, default_role, maintenance_mode, allow_registration, notifications_active, messagerie_active, chat_eleves_active, paiements_online_active, email_verification, session_duration) VALUES (1,500,'eleve',0,1,1,1,1,0,0,24)`, [], (err) => {
+                if (err) return res.status(500).json({ error: 'Erreur création paramètres' });
+                db.get('SELECT * FROM settings WHERE id=1', [], (err, newRow) => res.json(newRow || {}));
+            });
+        } else {
+            res.json(row);
+        }
+    });
+},
+
+updateSettings: (req, res) => {
     const { max_users, default_role, maintenance_mode, allow_registration, notifications_active, messagerie_active, chat_eleves_active, paiements_online_active, email_verification, session_duration } = req.body;
-    
-    // Vérifier la limite max_users
     const maxUsers = Math.min(parseInt(max_users) || 500, 1500);
     
     db.get('SELECT id FROM settings WHERE id=1', [], (err, row) => {
         if (row) {
             db.run('UPDATE settings SET max_users=?, default_role=?, maintenance_mode=?, allow_registration=?, notifications_active=?, messagerie_active=?, chat_eleves_active=?, paiements_online_active=?, email_verification=?, session_duration=?, updated_at=CURRENT_TIMESTAMP WHERE id=1',
-                [maxUsers, default_role, maintenance_mode||0, allow_registration||1, notifications_active!=0?1:0, messagerie_active!=0?1:0, chat_eleves_active!=0?1:0, paiements_online_active!=0?1:0, email_verification||0, session_duration||24], (err) => {
+                [maxUsers, default_role||'eleve', maintenance_mode||0, allow_registration!=0?1:0, notifications_active!=0?1:0, messagerie_active!=0?1:0, chat_eleves_active!=0?1:0, paiements_online_active!=0?1:0, email_verification||0, session_duration||24], (err) => {
                 if (err) return res.status(500).json({ error: 'Erreur' });
                 res.json({ success: true, message: '✅ Paramètres enregistrés avec succès' });
             });
         } else {
             db.run('INSERT INTO settings (id, max_users, default_role, maintenance_mode, allow_registration, notifications_active, messagerie_active, chat_eleves_active, paiements_online_active, email_verification, session_duration) VALUES (1,?,?,?,?,?,?,?,?,?,?)',
-                [maxUsers, default_role, maintenance_mode||0, allow_registration||1, notifications_active!=0?1:0, messagerie_active!=0?1:0, chat_eleves_active!=0?1:0, paiements_online_active!=0?1:0, email_verification||0, session_duration||24], (err) => {
+                [maxUsers, default_role||'eleve', maintenance_mode||0, allow_registration!=0?1:0, notifications_active!=0?1:0, messagerie_active!=0?1:0, chat_eleves_active!=0?1:0, paiements_online_active!=0?1:0, email_verification||0, session_duration||24], (err) => {
                 if (err) return res.status(500).json({ error: 'Erreur' });
                 res.json({ success: true, message: '✅ Paramètres créés avec succès' });
             });
