@@ -51,31 +51,60 @@ const adminController = {
     },
 
     createUser: (req, res) => {
-        const { nom, prenom, email, password, role } = req.body;
-        if (!nom || !prenom || !email || !password || !role) return res.status(400).json({ error: 'Tous les champs obligatoires' });
+    const { nom, prenom, email, password, role, telephone, matiere_principale, classes_assignees, date_naissance, enfants } = req.body;
+    
+    if (!nom || !prenom || !email || !password || !role) {
+        return res.status(400).json({ error: 'Tous les champs obligatoires sont requis' });
+    }
+
+    globalDb.get('SELECT id FROM users WHERE email = ?', [email], (err, user) => {
+        if (user) return res.status(400).json({ error: 'Email déjà utilisé' });
         
-        globalDb.get('SELECT id FROM users WHERE email = ?', [email], (err, user) => {
-            if (user) return res.status(400).json({ error: 'Email déjà utilisé' });
-            bcrypt.hash(password, 10, (err, hash) => {
-                if (err) return res.status(500).json({ error: 'Erreur' });
-                const etablissementCode = req.session.user.etablissement_code || '';
-                globalDb.run('INSERT INTO users (nom, prenom, email, password, role, etablissement_code) VALUES (?,?,?,?,?,?)',
-                    [nom, prenom, email, hash, role, etablissementCode], function(err) {
-                        if (err) return res.status(500).json({ error: 'Erreur création' });
-                        res.json({ success: true, message: 'Utilisateur créé' });
-                    });
-            });
+        bcrypt.hash(password, 10, (err, hash) => {
+            if (err) return res.status(500).json({ error: 'Erreur serveur' });
+            
+            const etablissementCode = req.session.user.etablissement_code || '';
+            const classesData = classes_assignees || (enfants ? JSON.stringify(enfants) : '');
+            
+            globalDb.run(
+                'INSERT INTO users (nom, prenom, email, password, role, telephone, matiere_principale, classes_assignees, date_naissance, etablissement_code) VALUES (?,?,?,?,?,?,?,?,?,?)',
+                [nom, prenom, email, hash, role, telephone || '', matiere_principale || '', classesData, date_naissance || '', etablissementCode],
+                function(err) {
+                    if (err) return res.status(500).json({ error: 'Erreur création: ' + err.message });
+                    
+                    // Si parent, créer aussi les comptes enfants
+                    if (role === 'parent' && enfants && enfants.length > 0) {
+                        enfants.forEach(enfant => {
+                            globalDb.get("SELECT id FROM users WHERE nom = ? AND prenom = ? AND role = 'eleve'", [enfant.nom, enfant.prenom], (err, row) => {
+                                if (!row) {
+                                    bcrypt.hash('educos2024', 10, (err, hash) => {
+                                        globalDb.run("INSERT INTO users (nom, prenom, email, password, role, classes_assignees, etablissement_code) VALUES (?,?,?,?,?,?,?)",
+                                            [enfant.nom, enfant.prenom, enfant.prenom.toLowerCase()+'.'+enfant.nom.toLowerCase()+'@eleve.educos.com', hash, 'eleve', enfant.classe || '', etablissementCode]);
+                                    });
+                                }
+                            });
+                        });
+                    }
+                    
+                    res.json({ success: true, message: 'Utilisateur créé avec succès' });
+                }
+            );
         });
-    },
+    });
+},
 
     updateUser: (req, res) => {
-        const { nom, prenom, email, role, compte_actif } = req.body;
-        globalDb.run('UPDATE users SET nom=?, prenom=?, email=?, role=?, compte_actif=? WHERE id=?',
-            [nom, prenom, email, role, compte_actif, req.params.id], (err) => {
-                if (err) return res.status(500).json({ error: 'Erreur' });
-                res.json({ success: true, message: 'Modifié' });
-            });
-    },
+    const { nom, prenom, email, role, compte_actif, telephone, matiere_principale, classes_assignees, date_naissance } = req.body;
+    
+    globalDb.run(
+        'UPDATE users SET nom=?, prenom=?, email=?, role=?, compte_actif=?, telephone=?, matiere_principale=?, classes_assignees=?, date_naissance=?, updated_at=CURRENT_TIMESTAMP WHERE id=?',
+        [nom, prenom, email, role, compte_actif != 0 ? 1 : 0, telephone || '', matiere_principale || '', classes_assignees || '', date_naissance || '', req.params.id],
+        (err) => {
+            if (err) return res.status(500).json({ error: 'Erreur modification' });
+            res.json({ success: true, message: 'Utilisateur modifié avec succès' });
+        }
+    );
+},
 
     deleteUser: (req, res) => {
         if (req.params.id == req.session.user.id) return res.status(400).json({ error: 'Action impossible' });

@@ -2,26 +2,46 @@ const db = require('../config/database');
 
 const parentController = {
     getEnfants: (req, res) => {
-        const parentId = req.session.user.id;
-        db.get('SELECT classes_assignees FROM users WHERE id = ?', [parentId], (err, row) => {
-            let enfantsDeclares = [];
-            if (row && row.classes_assignees) {
-                try { const parsed = JSON.parse(row.classes_assignees); if (Array.isArray(parsed)) enfantsDeclares = parsed; } catch(e) {}
+    const parentId = req.session.user.id;
+    
+    globalDb.get('SELECT classes_assignees FROM users WHERE id = ?', [parentId], (err, row) => {
+        let enfantsDeclares = [];
+        if (row && row.classes_assignees) {
+            try { 
+                const parsed = JSON.parse(row.classes_assignees);
+                if (Array.isArray(parsed)) enfantsDeclares = parsed;
+            } catch(e) { enfantsDeclares = []; }
+        }
+
+        // Récupérer aussi les élèves qui ont un compte
+        const etablissementCode = req.session.user.etablissement_code || '';
+        globalDb.all("SELECT nom, prenom, classes_assignees as classe, date_naissance, telephone FROM users WHERE role = 'eleve' AND compte_actif = 1 AND etablissement_code = ? ORDER BY nom, prenom", 
+            [etablissementCode], (err, eleves) => {
+            
+            const tousLesEnfants = [...enfantsDeclares];
+            if (eleves && eleves.length > 0) {
+                eleves.forEach(eleve => {
+                    const existeDeja = tousLesEnfants.find(e => 
+                        e.nom.toLowerCase() === eleve.nom.toLowerCase() && 
+                        e.prenom.toLowerCase() === eleve.prenom.toLowerCase()
+                    );
+                    if (!existeDeja) {
+                        tousLesEnfants.push({
+                            nom: eleve.nom,
+                            prenom: eleve.prenom,
+                            classe: eleve.classe || 'Non assignée',
+                            date_naissance: eleve.date_naissance || '',
+                            telephone: eleve.telephone || '',
+                            source: 'compte_eleve'
+                        });
+                    }
+                });
             }
-            db.all("SELECT nom, prenom, classes_assignees as classe, date_naissance FROM users WHERE role = 'eleve' AND compte_actif = 1 ORDER BY nom, prenom", [], (err, eleves) => {
-                const tousLesEnfants = [...enfantsDeclares];
-                if (eleves && eleves.length > 0) {
-                    eleves.forEach(eleve => {
-                        const existeDeja = tousLesEnfants.find(e => e.nom.toLowerCase() === eleve.nom.toLowerCase() && e.prenom.toLowerCase() === eleve.prenom.toLowerCase());
-                        if (!existeDeja) tousLesEnfants.push({ nom: eleve.nom, prenom: eleve.prenom, classe: eleve.classe || 'Non assignée', date_naissance: eleve.date_naissance || '', source: 'compte_eleve' });
-                        else if (eleve.classe && !existeDeja.classe) existeDeja.classe = eleve.classe;
-                    });
-                }
-                tousLesEnfants.sort((a, b) => a.nom.localeCompare(b.nom) || a.prenom.localeCompare(b.prenom));
-                res.json(tousLesEnfants);
-            });
+            tousLesEnfants.sort((a, b) => a.nom.localeCompare(b.nom) || a.prenom.localeCompare(b.prenom));
+            res.json(tousLesEnfants);
         });
-    },
+    });
+},
 
     inscrireEnfant: (req, res) => {
         const parentId = req.session.user.id;

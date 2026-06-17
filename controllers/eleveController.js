@@ -2,11 +2,12 @@ const db = require('../config/database');
 
 const eleveController = {
     getProfil: (req, res) => {
-        db.get('SELECT nom, prenom, email, classes_assignees as classe, date_naissance, telephone FROM users WHERE id = ?', [req.session.user.id], (err, user) => {
-            if (err || !user) return res.status(404).json({ error: 'Non trouvé' });
-            res.json(user);
-        });
-    },
+    globalDb.get('SELECT nom, prenom, email, classes_assignees as classe, date_naissance, telephone FROM users WHERE id = ?', 
+        [req.session.user.id], (err, user) => {
+        if (err || !user) return res.status(404).json({ error: 'Non trouvé' });
+        res.json(user);
+    });
+},
 
     getNotes: (req, res) => {
         const eleveId = req.session.user.id;

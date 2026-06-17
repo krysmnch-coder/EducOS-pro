@@ -33,12 +33,13 @@ const profController = {
         });
     },
 
-    getProfil: (req, res) => {
-        db.get('SELECT * FROM users WHERE id = ?', [req.session.user.id], (err, user) => {
-            if (err || !user) return res.status(404).json({ error: 'Non trouvé' });
-            res.json({ nom: user.nom, prenom: user.prenom, email: user.email, matiere_principale: user.matiere_principale, classes_assignees: user.classes_assignees, telephone: user.telephone });
-        });
-    },
+   getProfil: (req, res) => {
+    globalDb.get('SELECT nom, prenom, email, matiere_principale, classes_assignees, telephone FROM users WHERE id = ?', 
+        [req.session.user.id], (err, user) => {
+        if (err || !user) return res.status(404).json({ error: 'Non trouvé' });
+        res.json(user);
+    });
+},
     updateProfil: (req, res) => {
         const { matiere_principale, classes_assignees, telephone } = req.body;
         db.run('UPDATE users SET matiere_principale=?, classes_assignees=?, telephone=? WHERE id=?', [matiere_principale, classes_assignees, telephone, req.session.user.id], (err) => {
