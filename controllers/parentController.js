@@ -298,14 +298,15 @@ getFicheEleve: (req, res) => {
 // Récupérer TOUTES les fiches élèves (pour Vie Scolaire)
 getAllFiches: (req, res) => {
     const db = require('../config/database').getEtablissementDb();
+    if (!db) return res.json([]);
     db.all('SELECT * FROM fiches_eleves ORDER BY nom, prenom', [], (err, rows) => {
         res.json(rows || []);
     });
 },
 
-// Récupérer une fiche par ID (pour Vie Scolaire)
 getFicheById: (req, res) => {
     const db = require('../config/database').getEtablissementDb();
+    if (!db) return res.status(404).json({ error: 'Base non disponible' });
     db.get('SELECT * FROM fiches_eleves WHERE id = ?', [req.params.id], (err, row) => {
         if (err || !row) return res.status(404).json({ error: 'Fiche non trouvée' });
         res.json(row);
