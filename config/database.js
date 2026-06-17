@@ -66,6 +66,7 @@ function createTables() {
         console.log('✅ Base de données initialisée');
     });
 }
+// Table settings
 db.run(`CREATE TABLE IF NOT EXISTS settings (
     id INTEGER PRIMARY KEY DEFAULT 1,
     app_name TEXT DEFAULT 'EducOS-pro',
@@ -82,4 +83,11 @@ db.run(`CREATE TABLE IF NOT EXISTS settings (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 )`);
+
+// Insérer les valeurs par défaut si la table est vide
+db.get('SELECT COUNT(*) as count FROM settings', [], (err, row) => {
+    if (row && row.count === 0) {
+        db.run(`INSERT INTO settings (id, app_name, max_users, default_role, maintenance_mode, allow_registration, notifications_active, messagerie_active, chat_eleves_active, paiements_online_active, email_verification, session_duration) VALUES (1, 'EducOS-pro', 500, 'eleve', 0, 1, 1, 1, 1, 0, 0, 24)`);
+    }
+});
 module.exports = db;
