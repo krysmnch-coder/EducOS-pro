@@ -65,18 +65,28 @@ function createGlobalTables() {
 
         // Table users GLOBALE (juste pour l'authentification)
         globalDb.run(`CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            email TEXT UNIQUE NOT NULL,
-            password TEXT NOT NULL,
-            role TEXT CHECK(role IN ('admin', 'vie_scolaire', 'prof', 'parent', 'eleve')) NOT NULL,
-            nom TEXT NOT NULL,
-            prenom TEXT NOT NULL,
-            etablissement_code TEXT NOT NULL,
-            compte_actif INTEGER DEFAULT 1,
-            derniere_connexion DATETIME,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        )`);
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL,
+    role TEXT CHECK(role IN ('admin', 'vie_scolaire', 'prof', 'parent', 'eleve')) NOT NULL,
+    nom TEXT NOT NULL,
+    prenom TEXT NOT NULL,
+    civilite TEXT DEFAULT 'M.',
+    date_naissance DATE,
+    telephone TEXT,
+    adresse TEXT,
+    matiere_principale TEXT,
+    classes_assignees TEXT,
+    photo TEXT DEFAULT 'default.png',
+    google_id TEXT,
+    facebook_id TEXT,
+    email_verified INTEGER DEFAULT 0,
+    compte_actif INTEGER DEFAULT 1,
+    etablissement_code TEXT DEFAULT '',
+    derniere_connexion DATETIME,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+)`);
 
         console.log(' Tables globales créées');
     });
