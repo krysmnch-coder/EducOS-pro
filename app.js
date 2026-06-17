@@ -257,4 +257,15 @@ app.use((req, res, next) => {
         next();
     });
 });
+// Middleware : charger la base de données de l'établissement
+app.use((req, res, next) => {
+    if (req.session.user && req.session.user.etablissement_code) {
+        const path = require('path');
+        const dbName = 'educos_' + req.session.user.etablissement_code.toLowerCase() + '.db';
+        const dbPath = path.join(__dirname, 'database', dbName);
+        const { setEtablissementDb } = require('./config/database');
+        setEtablissementDb(dbPath);
+    }
+    next();
+});
 app.listen(PORT, () => { console.log(`🚀 Serveur démarré sur http://localhost:${PORT}`); });

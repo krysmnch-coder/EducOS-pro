@@ -117,5 +117,13 @@ const authController = {
         req.session.destroy(() => res.redirect('/auth/login'));
     }
 };
-
+req.session.user = {
+    id: user.id,
+    email: user.email,
+    nom: user.nom,
+    prenom: user.prenom,
+    role: user.role,
+    photo: user.photo,
+    etablissement_code: user.etablissement_code // ← AJOUTER
+};
 module.exports = authController;

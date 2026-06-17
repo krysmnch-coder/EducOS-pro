@@ -1,13 +1,19 @@
 <%- include('../../partials/header-admin') %>
 
-<h2 style="display:flex;align-items:center;gap:10px;margin-bottom:24px;">
+<h2 style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
     <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#002FA7" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
     Établissement
 </h2>
 
+<div class="info-banner">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#002FA7" stroke-width="2" width="20" height="20"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+    <span>Ces informations identifient votre établissement. Une base de données dédiée sera créée pour stocker vos données en toute sécurité, sans interférence avec d'autres établissements.</span>
+</div>
+
 <div class="section">
     <form onsubmit="saveEtablissement(event)" style="max-width:600px;">
         <div class="form-group"><label>Nom de l'établissement *</label><input type="text" id="nom" class="form-control" required></div>
+        <div class="form-group"><label>Code établissement</label><input type="text" id="code" class="form-control" disabled><div class="help-text">Code unique généré automatiquement</div></div>
         <div class="form-group"><label>Adresse</label><input type="text" id="adresse" class="form-control"></div>
         <div class="form-row">
             <div class="form-group"><label>Téléphone</label><input type="text" id="telephone" class="form-control"></div>
@@ -16,9 +22,9 @@
         <div class="form-group"><label>Site web</label><input type="text" id="site_web" class="form-control"></div>
         <div class="form-group"><label>Directeur / Principal</label><input type="text" id="directeur" class="form-control"></div>
         <div class="form-group"><label>Année scolaire</label><input type="text" id="annee_scolaire" class="form-control" placeholder="2024-2025"></div>
-        <button type="submit" class="btn btn-primary" style="padding:10px 20px;">
+        <button type="submit" class="btn btn-primary">
             <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="16" height="16"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
-            Enregistrer
+            Enregistrer l'établissement
         </button>
     </form>
 </div>
@@ -28,6 +34,7 @@
 <script>
     fetch('/admin/api/etablissement').then(r => r.json()).then(d => {
         document.getElementById('nom').value = d.nom || '';
+        document.getElementById('code').value = d.code || '(généré automatiquement)';
         document.getElementById('adresse').value = d.adresse || '';
         document.getElementById('telephone').value = d.telephone || '';
         document.getElementById('email_etab').value = d.email || '';
@@ -35,14 +42,31 @@
         document.getElementById('directeur').value = d.directeur || '';
         document.getElementById('annee_scolaire').value = d.annee_scolaire || '';
     });
-    function saveEtablissement(e) {
+
+    async function saveEtablissement(e) {
         e.preventDefault();
-        const data = {nom:document.getElementById('nom').value, adresse:document.getElementById('adresse').value, telephone:document.getElementById('telephone').value, email:document.getElementById('email_etab').value, site_web:document.getElementById('site_web').value, directeur:document.getElementById('directeur').value, annee_scolaire:document.getElementById('annee_scolaire').value};
-        fetch('/admin/api/etablissement', {method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)}).then(r=>r.json()).then(j => {
-            const t = document.getElementById('toast');
-            t.textContent = j.message||j.error; t.className = 'toast ' + (j.success?'success':'error'); t.style.display = 'block';
-            setTimeout(() => t.style.display = 'none', 3000);
-        });
+        const data = {
+            nom: document.getElementById('nom').value,
+            adresse: document.getElementById('adresse').value,
+            telephone: document.getElementById('telephone').value,
+            email: document.getElementById('email_etab').value,
+            site_web: document.getElementById('site_web').value,
+            directeur: document.getElementById('directeur').value,
+            annee_scolaire: document.getElementById('annee_scolaire').value
+        };
+        const r = await fetch('/admin/api/etablissement', { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) });
+        const j = await r.json();
+        showToast(j.message || j.error, j.success ? 'success' : 'error');
+        if (j.success && j.code) {
+            document.getElementById('code').value = j.code;
+            showToast(' Base de données créée : ' + j.dbName, 'success');
+        }
+    }
+
+    function showToast(msg, type) {
+        const t = document.getElementById('toast');
+        t.textContent = msg; t.className = 'toast ' + (type || 'success'); t.style.display = 'block';
+        setTimeout(() => t.style.display = 'none', 4000);
     }
 </script>
 

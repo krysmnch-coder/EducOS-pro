@@ -90,23 +90,60 @@ const adminController = {
         });
     },
 
-    getEtablissement: (req, res) => db.get('SELECT * FROM etablissement WHERE id=1', [], (err, row) => res.json(row || {})),
-    updateEtablissement: (req, res) => {
-        const { nom, adresse, telephone, email, site_web, directeur, annee_scolaire } = req.body;
-        db.get('SELECT id FROM etablissement WHERE id=1', [], (err, row) => {
-            if (row) {
-                db.run('UPDATE etablissement SET nom=?,adresse=?,telephone=?,email=?,site_web=?,directeur=?,annee_scolaire=? WHERE id=1', [nom, adresse, telephone, email, site_web, directeur, annee_scolaire], (err) => {
-                    if (err) return res.status(500).json({ error: 'Erreur' });
-                    res.json({ success: true, message: 'Enregistré' });
-                });
-            } else {
-                db.run('INSERT INTO etablissement (id,nom,adresse,telephone,email,site_web,directeur,annee_scolaire) VALUES (1,?,?,?,?,?,?,?)', [nom, adresse, telephone, email, site_web, directeur, annee_scolaire], (err) => {
-                    if (err) return res.status(500).json({ error: 'Erreur' });
-                    res.json({ success: true, message: 'Créé' });
-                });
-            }
-        });
-    },
+   updateEtablissement: (req, res) => {
+    const { nom, adresse, telephone, email, site_web, directeur, annee_scolaire } = req.body;
+    const etablissementCode = req.session.user.etablissement_code;
+    
+    if (!nom) return res.status(400).json({ error: 'Le nom est obligatoire' });
+
+    // Générer un code unique pour l'établissement s'il n'existe pas
+    const code = etablissementCode || 'ETAB_' + Date.now().toString(36).toUpperCase();
+    const dbName = 'educos_' + code.toLowerCase() + '.db';
+    
+    const { globalDb, setEtablissementDb } = require('../config/database');
+    
+    // Vérifier si l'établissement existe déjà dans la base globale
+    globalDb.get('SELECT * FROM etablissements WHERE code = ?', [code], (err, row) => {
+        if (row) {
+            // Mettre à jour
+            globalDb.run('UPDATE etablissements SET nom=?, adresse=?, telephone=?, email=?, site_web=?, directeur=?, annee_scolaire=?, updated_at=CURRENT_TIMESTAMP WHERE code=?',
+                [nom, adresse, telephone, email, site_web, directeur, annee_scolaire, code], (err) => {
+                if (err) return res.status(500).json({ error: 'Erreur mise à jour' });
+                
+                // Initialiser la base de l'établissement
+                const dbPath = path.join(__dirname, '..', 'database', dbName);
+                setEtablissementDb(dbPath);
+                
+                res.json({ success: true, message: ' Établissement enregistré avec succès', code: code, dbName: dbName });
+            });
+        } else {
+            // Créer un nouvel établissement
+            globalDb.run('INSERT INTO etablissements (code, nom, adresse, telephone, email, site_web, directeur, annee_scolaire, db_name) VALUES (?,?,?,?,?,?,?,?,?)',
+                [code, nom, adresse, telephone, email, site_web, directeur, annee_scolaire, dbName], function(err) {
+                if (err) return res.status(500).json({ error: 'Erreur création établissement' });
+                
+                // Créer la base de données de l'établissement
+                const dbPath = path.join(__dirname, '..', 'database', dbName);
+                setEtablissementDb(dbPath);
+                
+                // Mettre à jour le code dans la session
+                req.session.user.etablissement_code = code;
+                
+                res.json({ success: true, message: ' Établissement créé avec succès', code: code, dbName: dbName });
+            });
+        }
+    });
+},
+
+getEtablissement: (req, res) => {
+    const etablissementCode = req.session.user.etablissement_code;
+    if (!etablissementCode) return res.json({});
+    
+    const { globalDb } = require('../config/database');
+    globalDb.get('SELECT * FROM etablissements WHERE code = ?', [etablissementCode], (err, row) => {
+        res.json(row || {});
+    });
+},
 
    getSettings: (req, res) => {
     db.get('SELECT * FROM settings WHERE id = 1', [], (err, row) => {
@@ -172,7 +209,7 @@ updateSettings: (req, res) => {
                             console.error('Erreur update settings:', err);
                             return res.status(500).json({ success: false, error: 'Erreur lors de la sauvegarde' });
                         }
-                        res.json({ success: true, message: '✅ Paramètres enregistrés avec succès' });
+                        res.json({ success: true, message: ' Paramètres enregistrés avec succès' });
                     });
             } else {
                 // INSERT
@@ -186,7 +223,7 @@ updateSettings: (req, res) => {
                             console.error('Erreur insert settings:', err);
                             return res.status(500).json({ success: false, error: 'Erreur lors de la sauvegarde' });
                         }
-                        res.json({ success: true, message: '✅ Paramètres créés avec succès' });
+                        res.json({ success: true, message: ' Paramètres créés avec succès' });
                     });
             }
         });
