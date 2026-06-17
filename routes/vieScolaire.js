@@ -20,6 +20,7 @@ module.exports = function(upload) {
     router.post('/api/pointer-arrivee', vs.pointerArrivee);
     router.post('/api/pointer-depart', vs.pointerDepart);
     router.get('/api/cumul-pointages', vs.getCumulPointages);
+    router.get('/api/avertissements', vs.getAvertissements);
     router.get('/api/profs', vs.getProfs);
     router.get('/api/sanctions', vs.getSanctions);
     router.post('/api/sanctions', vs.createSanction);

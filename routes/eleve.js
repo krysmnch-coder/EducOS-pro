@@ -41,7 +41,6 @@ module.exports = function(upload) {
     router.get('/api/notifications', eleve.getNotifications);
     router.put('/api/notifications/:id/read', eleve.markNotificationRead);
     router.delete('/api/notifications', eleve.viderNotifications);
-    router.put('/api/notifications/:type/read', eleve.marquerNotifsLues);
 
     return router;
 };
