@@ -65,31 +65,38 @@ const authController = {
     },
 
     login: (req, res) => {
-        const { email, password } = req.body;
-        if (!email || !password) return res.redirect('/auth/login?error=Email et mot de passe requis');
+    const { email, password } = req.body;
+    if (!email || !password) return res.redirect('/auth/login?error=Email et mot de passe requis');
 
-        globalDb.get('SELECT * FROM users WHERE email = ? AND compte_actif = 1', [email], (err, user) => {
-            if (err || !user) return res.redirect('/auth/login?error=Email ou mot de passe incorrect');
+    globalDb.get('SELECT * FROM users WHERE email = ? AND compte_actif = 1', [email], (err, user) => {
+        if (err || !user) return res.redirect('/auth/login?error=Email ou mot de passe incorrect');
 
-            bcrypt.compare(password, user.password, (err, isMatch) => {
-                if (err || !isMatch) return res.redirect('/auth/login?error=Email ou mot de passe incorrect');
+        bcrypt.compare(password, user.password, (err, isMatch) => {
+            if (err || !isMatch) return res.redirect('/auth/login?error=Email ou mot de passe incorrect');
 
-                globalDb.run('UPDATE users SET derniere_connexion = CURRENT_TIMESTAMP WHERE id = ?', [user.id]);
-                // Middleware : initialiser la base établissement pour chaque requête
-app.use((req, res, next) => {
-    if (req.session.user && req.session.user.etablissement_code) {
-        const path = require('path');
-        const dbName = 'educos_' + req.session.user.etablissement_code.toLowerCase() + '.db';
-        const dbPath = path.join(__dirname, 'database', dbName);
-        const { setEtablissementDb } = require('./config/database');
-        setEtablissementDb(dbPath);
-    }
-    next();
-});
-                res.redirect('/dashboard');
-            });
+            globalDb.run('UPDATE users SET derniere_connexion = CURRENT_TIMESTAMP WHERE id = ?', [user.id]);
+            
+            // Si pas de code établissement, en générer un
+            const etablissementCode = user.etablissement_code || 'ETAB_' + Date.now().toString(36).toUpperCase();
+            
+            // Mettre à jour le code si nouveau
+            if (!user.etablissement_code) {
+                globalDb.run('UPDATE users SET etablissement_code = ? WHERE id = ?', [etablissementCode, user.id]);
+            }
+            
+            req.session.user = {
+                id: user.id,
+                email: user.email,
+                nom: user.nom,
+                prenom: user.prenom,
+                role: user.role,
+                photo: user.photo,
+                etablissement_code: etablissementCode
+            };
+            res.redirect('/dashboard');
         });
-    },
+    });
+},
 
     logout: (req, res) => {
         req.session.destroy(() => res.redirect('/auth/login'));

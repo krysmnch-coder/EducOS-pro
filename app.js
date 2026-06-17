@@ -272,14 +272,26 @@ app.get('/dashboard/vie-scolaire/fiches', (req, res) => {
     if (!req.session.user || req.session.user.role !== 'vie_scolaire') return res.redirect('/auth/login');
     res.render('dashboard/vie-scolaire/fiches', { title: 'Fiches élèves | EducOS-pro', user: req.session.user });
 });
-// Middleware : initialiser la base établissement pour chaque requête
+// Middleware : initialiser la base établissement
 app.use((req, res, next) => {
     if (req.session.user && req.session.user.etablissement_code) {
-        const path = require('path');
-        const dbName = 'educos_' + req.session.user.etablissement_code.toLowerCase() + '.db';
-        const dbPath = path.join(__dirname, 'database', dbName);
-        const { setEtablissementDb } = require('./config/database');
-        setEtablissementDb(dbPath);
+        try {
+            const path = require('path');
+            const fs = require('fs');
+            const dbName = 'educos_' + req.session.user.etablissement_code.toLowerCase() + '.db';
+            const dbPath = path.join(__dirname, 'database', dbName);
+            
+            // Créer le dossier database s'il n'existe pas
+            const dbDir = path.join(__dirname, 'database');
+            if (!fs.existsSync(dbDir)) {
+                fs.mkdirSync(dbDir, { recursive: true });
+            }
+            
+            const { setEtablissementDb } = require('./config/database');
+            setEtablissementDb(dbPath);
+        } catch(e) {
+            console.error('Erreur initialisation base établissement:', e.message);
+        }
     }
     next();
 });
