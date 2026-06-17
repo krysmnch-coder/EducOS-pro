@@ -3,6 +3,7 @@ const express = require('express');
 module.exports = function(upload) {
     const router = express.Router();
     const vs = require('../controllers/vieScolaireController');
+    const parentController = require('../controllers/parentController'); // ← AJOUTER
     const { isAuthenticated, hasRole } = require('../middleware/auth');
 
     router.use(isAuthenticated);
@@ -34,8 +35,10 @@ module.exports = function(upload) {
     router.get('/api/eleves', vs.getEleves);
     router.get('/api/users-by-role', vs.getUsersByRole);
     router.put('/api/users/:id/telephone', vs.updateUserTelephone);
-    router.get('/api/fiches-eleves', parent.getAllFiches);
-router.get('/api/fiches-eleves/:id', parent.getFicheById);
+    
+    // Fiches élèves (utilise le contrôleur parent)
+    router.get('/api/fiches-eleves', parentController.getAllFiches);
+    router.get('/api/fiches-eleves/:id', parentController.getFicheById);
 
     return router;
 };
