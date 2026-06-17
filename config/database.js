@@ -66,5 +66,20 @@ function createTables() {
         console.log('✅ Base de données initialisée');
     });
 }
-
+db.run(`CREATE TABLE IF NOT EXISTS settings (
+    id INTEGER PRIMARY KEY DEFAULT 1,
+    app_name TEXT DEFAULT 'EducOS-pro',
+    max_users INTEGER DEFAULT 500,
+    default_role TEXT DEFAULT 'eleve',
+    maintenance_mode INTEGER DEFAULT 0,
+    allow_registration INTEGER DEFAULT 1,
+    notifications_active INTEGER DEFAULT 1,
+    messagerie_active INTEGER DEFAULT 1,
+    chat_eleves_active INTEGER DEFAULT 1,
+    paiements_online_active INTEGER DEFAULT 0,
+    email_verification INTEGER DEFAULT 0,
+    session_duration INTEGER DEFAULT 24,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+)`);
 module.exports = db;
