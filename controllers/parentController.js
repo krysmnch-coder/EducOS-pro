@@ -312,6 +312,93 @@ getFicheById: (req, res) => {
         res.json(row);
     });
 },
+saveFicheEleve: (req, res) => {
+    const parentId = req.session.user.id;
+    const data = req.body;
+    const db = require('../config/database').getEtablissementDb();
+    
+    if (!db) return res.status(500).json({ error: 'Base de données non disponible' });
+    
+    if (data.fiche_id) {
+        db.run(`UPDATE fiches_eleves SET 
+            nom=?, prenom=?, date_naissance=?, lieu_naissance=?, adresse=?, 
+            classe_actuelle=?, numero_matricule=?, ecole_precedente=?, annee_inscription=?, reinscription=?,
+            pere_nom=?, pere_prenom=?, pere_profession=?, pere_lieu_travail=?, pere_email=?, pere_telephone=?,
+            mere_nom=?, mere_prenom=?, mere_profession=?, mere_lieu_travail=?, mere_email=?, mere_telephone=?,
+            allergie=?, allergie_detail=?, asthme=?, diabete=?, convulsion=?, autres_maladies=?, mesure_crise=?,
+            contact1_nom=?, contact1_telephone=?, contact2_nom=?, contact2_telephone=?, antecedent_personnel=?,
+            updated_at=CURRENT_TIMESTAMP WHERE id=? AND parent_id=?`,
+            [data.nom, data.prenom, data.date_naissance, data.lieu_naissance, data.adresse,
+             data.classe_actuelle, data.numero_matricule, data.ecole_precedente, data.annee_inscription, data.reinscription||0,
+             data.pere_nom, data.pere_prenom, data.pere_profession, data.pere_lieu_travail, data.pere_email, data.pere_telephone,
+             data.mere_nom, data.mere_prenom, data.mere_profession, data.mere_lieu_travail, data.mere_email, data.mere_telephone,
+             data.allergie||0, data.allergie_detail, data.asthme||0, data.diabete||0, data.convulsion||0, data.autres_maladies, data.mesure_crise,
+             data.contact1_nom, data.contact1_telephone, data.contact2_nom, data.contact2_telephone, data.antecedent_personnel,
+             data.fiche_id, parentId],
+            function(err) {
+                if (err) return res.status(500).json({ error: 'Erreur: ' + err.message });
+                res.json({ success: true, message: '✅ Fiche mise à jour' });
+            });
+    } else {
+        db.run(`INSERT INTO fiches_eleves (
+            parent_id, nom, prenom, date_naissance, lieu_naissance, adresse,
+            classe_actuelle, numero_matricule, ecole_precedente, annee_inscription, reinscription,
+            pere_nom, pere_prenom, pere_profession, pere_lieu_travail, pere_email, pere_telephone,
+            mere_nom, mere_prenom, mere_profession, mere_lieu_travail, mere_email, mere_telephone,
+            allergie, allergie_detail, asthme, diabete, convulsion, autres_maladies, mesure_crise,
+            contact1_nom, contact1_telephone, contact2_nom, contact2_telephone, antecedent_personnel
+        ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+            [parentId, data.nom, data.prenom, data.date_naissance, data.lieu_naissance, data.adresse,
+             data.classe_actuelle, data.numero_matricule, data.ecole_precedente, data.annee_inscription, data.reinscription||0,
+             data.pere_nom, data.pere_prenom, data.pere_profession, data.pere_lieu_travail, data.pere_email, data.pere_telephone,
+             data.mere_nom, data.mere_prenom, data.mere_profession, data.mere_lieu_travail, data.mere_email, data.mere_telephone,
+             data.allergie||0, data.allergie_detail, data.asthme||0, data.diabete||0, data.convulsion||0, data.autres_maladies, data.mesure_crise,
+             data.contact1_nom, data.contact1_telephone, data.contact2_nom, data.contact2_telephone, data.antecedent_personnel],
+            function(err) {
+                if (err) return res.status(500).json({ error: 'Erreur: ' + err.message });
+                res.json({ success: true, message: '✅ Fiche enregistrée avec succès', fiche_id: this.lastID });
+            });
+    }
+},
+
+getFicheEleve: (req, res) => {
+    const parentId = req.session.user.id;
+    const db = require('../config/database').getEtablissementDb();
+    if (!db) return res.json(null);
+    db.get('SELECT * FROM fiches_eleves WHERE parent_id = ? AND nom = ? AND prenom = ? ORDER BY created_at DESC LIMIT 1',
+        [parentId, req.query.nom || '', req.query.prenom || ''], (err, row) => {
+        res.json(row || null);
+    });
+},
+
+getAllFiches: (req, res) => {
+    const db = require('../config/database').getEtablissementDb();
+    if (!db) return res.json([]);
+    db.all('SELECT * FROM fiches_eleves ORDER BY nom, prenom', [], (err, rows) => {
+        res.json(rows || []);
+    });
+},
+
+getFicheById: (req, res) => {
+    const db = require('../config/database').getEtablissementDb();
+    if (!db) return res.status(404).json({ error: 'Base non disponible' });
+    db.get('SELECT * FROM fiches_eleves WHERE id = ?', [req.params.id], (err, row) => {
+        if (err || !row) return res.status(404).json({ error: 'Fiche non trouvée' });
+        res.json(row);
+    });
+},
+
+rendreDevoir: (req, res) => {
+    const { ressource_id } = req.body;
+    const fichier = req.file ? req.file.filename : null;
+    const parentId = req.session.user.id;
+    const db = require('../config/database').getEtablissementDb();
+    if (!db) return res.status(500).json({ error: 'Base non disponible' });
+    db.run('INSERT INTO devoirs_rendus (ressource_id, eleve_id, fichier) VALUES (?, ?, ?)', [ressource_id, parentId, fichier], function(err) {
+        if (err) return res.status(500).json({ error: 'Erreur' });
+        res.json({ success: true, message: 'Devoir rendu !' });
+    });
+},
     viderNotificationsGeneral: (req, res) => {
         const db = getDb();
         db.run('DELETE FROM notifications WHERE user_id = ?', [req.session.user.id], (err) => {

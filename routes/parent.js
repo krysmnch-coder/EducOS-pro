@@ -23,9 +23,11 @@ module.exports = function(upload) {
     router.get('/api/profs', parent.getProfsList);
     router.get('/api/frais', parent.getFrais);
     router.post('/api/payer', parent.payer);
-    router.post('/api/rendre-devoir', upload.single('fichier'), parent.rendreDevoir);
+    
+    // Fiches élèves
     router.post('/api/fiche-eleve', parent.saveFicheEleve);
     router.get('/api/fiche-eleve', parent.getFicheEleve);
+    router.get('/api/rendre-devoir', parent.rendreDevoir);
 
     return router;
 };
