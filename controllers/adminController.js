@@ -1,6 +1,6 @@
 const db = require('../config/database');
 const bcrypt = require('bcryptjs');
-const path = require('path'); 
+const path = require('path'); // ← AJOUTER CECI
 const adminController = {
     getStats: (req, res) => {
         const stats = {};
@@ -92,57 +92,32 @@ const adminController = {
 
    updateEtablissement: (req, res) => {
     const { nom, adresse, telephone, email, site_web, directeur, annee_scolaire } = req.body;
-    const etablissementCode = req.session.user.etablissement_code;
     
     if (!nom) return res.status(400).json({ error: 'Le nom est obligatoire' });
 
-    // Générer un code unique pour l'établissement
-    const code = etablissementCode || 'ETAB_' + Date.now().toString(36).toUpperCase();
+    const code = req.session.user.etablissement_code || 'ETAB_' + Date.now().toString(36).toUpperCase();
     const dbName = 'educos_' + code.toLowerCase() + '.db';
-    const dbPath = path.join(__dirname, '..', 'database', dbName);
     
     const { globalDb, setEtablissementDb } = require('../config/database');
     
     globalDb.get('SELECT * FROM etablissements WHERE code = ?', [code], (err, row) => {
         if (row) {
-            // Mettre à jour
-            globalDb.run('UPDATE etablissements SET nom=?, adresse=?, telephone=?, email=?, site_web=?, directeur=?, annee_scolaire=?, updated_at=CURRENT_TIMESTAMP WHERE code=?',
+            globalDb.run('UPDATE etablissements SET nom=?, adresse=?, telephone=?, email=?, site_web=?, directeur=?, annee_scolaire=? WHERE code=?',
                 [nom, adresse||'', telephone||'', email||'', site_web||'', directeur||'', annee_scolaire||'', code], (err) => {
-                if (err) {
-                    console.error('Erreur update:', err);
-                    return res.json({ success: false, error: 'Erreur mise à jour' });
-                }
-                // Initialiser la base
-                setEtablissementDb(dbPath);
-                res.json({ 
-                    success: true, 
-                    message: '✅ Établissement enregistré ! Base : ' + dbName, 
-                    code: code, 
-                    dbName: dbName 
-                });
+                if (err) return res.json({ success: false, error: 'Erreur' });
+                setEtablissementDb(path.join(__dirname, '..', 'database', dbName));
+                res.json({ success: true, message: 'Établissement mis à jour - Base: ' + dbName });
             });
         } else {
-            // Créer un nouvel établissement
             globalDb.run('INSERT INTO etablissements (code, nom, adresse, telephone, email, site_web, directeur, annee_scolaire, db_name) VALUES (?,?,?,?,?,?,?,?,?)',
                 [code, nom, adresse||'', telephone||'', email||'', site_web||'', directeur||'', annee_scolaire||'', dbName], function(err) {
-                if (err) {
-                    console.error('Erreur insert:', err);
-                    return res.json({ success: false, error: 'Erreur création' });
-                }
+                if (err) return res.json({ success: false, error: 'Erreur' });
                 
-                // Créer la base de données de l'établissement
-                setEtablissementDb(dbPath);
-                
-                // Mettre à jour le code dans la session
                 req.session.user.etablissement_code = code;
                 req.session.save();
+                setEtablissementDb(path.join(__dirname, '..', 'database', dbName));
                 
-                res.json({ 
-                    success: true, 
-                    message: ' Base de données créée : ' + dbName, 
-                    code: code, 
-                    dbName: dbName 
-                });
+                res.json({ success: true, message: '✅ BASE DE DONNÉES CRÉÉE: ' + dbName + ' | Établissement enregistré' });
             });
         }
     });
