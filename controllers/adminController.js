@@ -271,6 +271,14 @@ const adminController = {
             [req.session.user.id, req.session.user.role], (err, messages) => res.json(messages || []));
     },
 
+    getMessageDetail: (req, res) => {
+    const etablissementDb = require('../config/database').getEtablissementDb();
+    const dbToUse = etablissementDb || db;
+    dbToUse.get('SELECT m.*, u.nom as exp_nom, u.prenom as exp_prenom FROM messages m LEFT JOIN users u ON m.expediteur_id = u.id WHERE m.id = ?', [req.params.id], (err, msg) => {
+        if (err || !msg) return res.status(404).json({ error: 'Message non trouvé' });
+        res.json(msg);
+    });
+},
     sendMessage: (req, res) => {
         const { destinataire_id, destinataire_role, sujet, contenu } = req.body;
         if (!sujet || !contenu) return res.status(400).json({ error: 'Sujet et contenu requis' });
