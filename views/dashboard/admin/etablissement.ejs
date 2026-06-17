@@ -44,24 +44,37 @@
     });
 
     async function saveEtablissement(e) {
-        e.preventDefault();
-        const data = {
-            nom: document.getElementById('nom').value,
-            adresse: document.getElementById('adresse').value,
-            telephone: document.getElementById('telephone').value,
-            email: document.getElementById('email_etab').value,
-            site_web: document.getElementById('site_web').value,
-            directeur: document.getElementById('directeur').value,
-            annee_scolaire: document.getElementById('annee_scolaire').value
-        };
-        const r = await fetch('/admin/api/etablissement', { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) });
-        const j = await r.json();
-        showToast(j.message || j.error, j.success ? 'success' : 'error');
-        if (j.success && j.code) {
-            document.getElementById('code').value = j.code;
-            showToast(' Base de données créée : ' + j.dbName, 'success');
-        }
+    e.preventDefault();
+    const data = {
+        nom: document.getElementById('nom').value,
+        adresse: document.getElementById('adresse').value,
+        telephone: document.getElementById('telephone').value,
+        email: document.getElementById('email_etab').value,
+        site_web: document.getElementById('site_web').value,
+        directeur: document.getElementById('directeur').value,
+        annee_scolaire: document.getElementById('annee_scolaire').value
+    };
+    
+    showToast('⏳ Création de la base de données en cours...', 'info');
+    
+    const r = await fetch('/admin/api/etablissement', { 
+        method: 'PUT', 
+        headers: { 'Content-Type': 'application/json' }, 
+        body: JSON.stringify(data) 
+    });
+    const j = await r.json();
+    
+    if (j.success) {
+        document.getElementById('code').value = j.code || '';
+        document.getElementById('dbStatus').style.display = 'block';
+        document.getElementById('dbStatus').style.background = '#d4edda';
+        document.getElementById('dbStatus').style.color = '#155724';
+        document.getElementById('dbStatus').innerHTML = '✅ ' + j.message;
+        showToast(j.message, 'success');
+    } else {
+        showToast(j.error || 'Erreur', 'error');
     }
+}
     async function checkDbStatus() {
     const r = await fetch('/admin/api/etablissement');
     const d = await r.json();
@@ -70,12 +83,12 @@
         statusDiv.style.display = 'block';
         statusDiv.style.background = '#d4edda';
         statusDiv.style.color = '#155724';
-        statusDiv.innerHTML = '✅ Base de données active : <strong>' + d.db_name + '</strong> (Code : ' + d.code + ')';
+        statusDiv.innerHTML = ' Base de données active : <strong>' + d.db_name + '</strong> (Code : ' + d.code + ')';
     } else {
         statusDiv.style.display = 'block';
         statusDiv.style.background = '#fff3cd';
         statusDiv.style.color = '#856404';
-        statusDiv.innerHTML = '⚠️ Aucune base de données configurée. Veuillez enregistrer votre établissement.';
+        statusDiv.innerHTML = ' Aucune base de données configurée. Veuillez enregistrer votre établissement.';
     }
 }
 
