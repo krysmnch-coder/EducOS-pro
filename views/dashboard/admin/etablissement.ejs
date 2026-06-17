@@ -62,12 +62,31 @@
             showToast(' Base de données créée : ' + j.dbName, 'success');
         }
     }
+    async function checkDbStatus() {
+    const r = await fetch('/admin/api/etablissement');
+    const d = await r.json();
+    const statusDiv = document.getElementById('dbStatus');
+    if (d.code && d.db_name) {
+        statusDiv.style.display = 'block';
+        statusDiv.style.background = '#d4edda';
+        statusDiv.style.color = '#155724';
+        statusDiv.innerHTML = '✅ Base de données active : <strong>' + d.db_name + '</strong> (Code : ' + d.code + ')';
+    } else {
+        statusDiv.style.display = 'block';
+        statusDiv.style.background = '#fff3cd';
+        statusDiv.style.color = '#856404';
+        statusDiv.innerHTML = '⚠️ Aucune base de données configurée. Veuillez enregistrer votre établissement.';
+    }
+}
 
+// Appeler au chargement
+checkDbStatus();
     function showToast(msg, type) {
         const t = document.getElementById('toast');
         t.textContent = msg; t.className = 'toast ' + (type || 'success'); t.style.display = 'block';
         setTimeout(() => t.style.display = 'none', 4000);
     }
+    <div id="dbStatus" style="margin-top:16px;padding:12px;border-radius:8px;display:none;"></div>
 </script>
 
 <%- include('../../partials/footer-admin') %>
