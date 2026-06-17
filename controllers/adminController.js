@@ -93,31 +93,44 @@ const adminController = {
    updateEtablissement: (req, res) => {
     const { nom, adresse, telephone, email, site_web, directeur, annee_scolaire } = req.body;
     
-    if (!nom) return res.status(400).json({ error: 'Le nom est obligatoire' });
+    if (!nom) {
+        return res.json({ success: false, error: 'Le nom est obligatoire' });
+    }
 
     const code = req.session.user.etablissement_code || 'ETAB_' + Date.now().toString(36).toUpperCase();
     const dbName = 'educos_' + code.toLowerCase() + '.db';
+    const dbPath = require('path').join(__dirname, '..', 'database', dbName);
     
     const { globalDb, setEtablissementDb } = require('../config/database');
     
-    globalDb.get('SELECT * FROM etablissements WHERE code = ?', [code], (err, row) => {
+    // Forcer la création de la base
+    setEtablissementDb(dbPath);
+    
+    globalDb.get('SELECT id FROM etablissements WHERE code = ?', [code], (err, row) => {
         if (row) {
             globalDb.run('UPDATE etablissements SET nom=?, adresse=?, telephone=?, email=?, site_web=?, directeur=?, annee_scolaire=? WHERE code=?',
-                [nom, adresse||'', telephone||'', email||'', site_web||'', directeur||'', annee_scolaire||'', code], (err) => {
-                if (err) return res.json({ success: false, error: 'Erreur' });
-                setEtablissementDb(path.join(__dirname, '..', 'database', dbName));
-                res.json({ success: true, message: 'Établissement mis à jour - Base: ' + dbName });
+                [nom, adresse||'', telephone||'', email||'', site_web||'', directeur||'', annee_scolaire||'', code], function(err) {
+                
+                let message = 'Établissement mis à jour. ';
+                message += ' Base de données : ' + dbName;
+                message += ' | Tables créées : ' + (err ? 'NON' : 'OUI');
+                
+                console.log(message);
+                res.json({ success: true, message: message, dbName: dbName, code: code });
             });
         } else {
             globalDb.run('INSERT INTO etablissements (code, nom, adresse, telephone, email, site_web, directeur, annee_scolaire, db_name) VALUES (?,?,?,?,?,?,?,?,?)',
                 [code, nom, adresse||'', telephone||'', email||'', site_web||'', directeur||'', annee_scolaire||'', dbName], function(err) {
-                if (err) return res.json({ success: false, error: 'Erreur' });
                 
                 req.session.user.etablissement_code = code;
                 req.session.save();
-                setEtablissementDb(path.join(__dirname, '..', 'database', dbName));
                 
-                res.json({ success: true, message: '✅ BASE DE DONNÉES CRÉÉE: ' + dbName + ' | Établissement enregistré' });
+                let message = '✅ NOUVEL ÉTABLISSEMENT CRÉÉ ! ';
+                message += ' Base de données : ' + dbName;
+                message += ' | Tables : ' + (err ? 'ERREUR' : 'OK');
+                
+                console.log(message);
+                res.json({ success: true, message: message, dbName: dbName, code: code });
             });
         }
     });

@@ -55,8 +55,6 @@
         annee_scolaire: document.getElementById('annee_scolaire').value
     };
     
-    showToast('⏳ Création de la base de données en cours...', 'info');
-    
     const r = await fetch('/admin/api/etablissement', { 
         method: 'PUT', 
         headers: { 'Content-Type': 'application/json' }, 
@@ -64,12 +62,11 @@
     });
     const j = await r.json();
     
+    // Afficher le message COMPLET reçu du serveur
+    alert(j.message || j.error || 'Réponse reçue');
+    
     if (j.success) {
         document.getElementById('code').value = j.code || '';
-        document.getElementById('dbStatus').style.display = 'block';
-        document.getElementById('dbStatus').style.background = '#d4edda';
-        document.getElementById('dbStatus').style.color = '#155724';
-        document.getElementById('dbStatus').innerHTML = '✅ ' + j.message;
         showToast(j.message, 'success');
     } else {
         showToast(j.error || 'Erreur', 'error');
