@@ -75,15 +75,17 @@ const authController = {
                 if (err || !isMatch) return res.redirect('/auth/login?error=Email ou mot de passe incorrect');
 
                 globalDb.run('UPDATE users SET derniere_connexion = CURRENT_TIMESTAMP WHERE id = ?', [user.id]);
-                req.session.user = {
-                    id: user.id,
-                    email: user.email,
-                    nom: user.nom,
-                    prenom: user.prenom,
-                    role: user.role,
-                    photo: user.photo,
-                    etablissement_code: user.etablissement_code || ''
-                };
+                // Middleware : initialiser la base établissement pour chaque requête
+app.use((req, res, next) => {
+    if (req.session.user && req.session.user.etablissement_code) {
+        const path = require('path');
+        const dbName = 'educos_' + req.session.user.etablissement_code.toLowerCase() + '.db';
+        const dbPath = path.join(__dirname, 'database', dbName);
+        const { setEtablissementDb } = require('./config/database');
+        setEtablissementDb(dbPath);
+    }
+    next();
+});
                 res.redirect('/dashboard');
             });
         });
