@@ -292,6 +292,53 @@ function createEtablissementTables() {
         etablissementDb.run(`INSERT OR IGNORE INTO settings (id) VALUES (1)`);
         console.log(' Tables établissement créées');
     });
+    etablissementDb.run(`CREATE TABLE IF NOT EXISTS fiches_eleves (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    eleve_id INTEGER,
+    parent_id INTEGER,
+    nom TEXT NOT NULL,
+    prenom TEXT NOT NULL,
+    date_naissance TEXT,
+    lieu_naissance TEXT,
+    adresse TEXT,
+    classe_actuelle TEXT,
+    numero_matricule TEXT,
+    ecole_precedente TEXT,
+    annee_inscription TEXT,
+    reinscription INTEGER DEFAULT 0,
+    -- Père
+    pere_nom TEXT,
+    pere_prenom TEXT,
+    pere_profession TEXT,
+    pere_lieu_travail TEXT,
+    pere_email TEXT,
+    pere_telephone TEXT,
+    -- Mère
+    mere_nom TEXT,
+    mere_prenom TEXT,
+    mere_profession TEXT,
+    mere_lieu_travail TEXT,
+    mere_email TEXT,
+    mere_telephone TEXT,
+    -- Médical
+    allergie INTEGER DEFAULT 0,
+    allergie_detail TEXT,
+    asthme INTEGER DEFAULT 0,
+    diabete INTEGER DEFAULT 0,
+    convulsion INTEGER DEFAULT 0,
+    autres_maladies TEXT,
+    mesure_crise TEXT,
+    -- Contacts urgence
+    contact1_nom TEXT,
+    contact1_telephone TEXT,
+    contact2_nom TEXT,
+    contact2_telephone TEXT,
+    antecedent_personnel TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (eleve_id) REFERENCES users(id),
+    FOREIGN KEY (parent_id) REFERENCES users(id)
+)`);
 }
 
 module.exports = { globalDb, getEtablissementDb, setEtablissementDb };

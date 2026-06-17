@@ -268,4 +268,8 @@ app.use((req, res, next) => {
     }
     next();
 });
+app.get('/dashboard/vie-scolaire/fiches', (req, res) => {
+    if (!req.session.user || req.session.user.role !== 'vie_scolaire') return res.redirect('/auth/login');
+    res.render('dashboard/vie-scolaire/fiches', { title: 'Fiches élèves | EducOS-pro', user: req.session.user });
+});
 app.listen(PORT, '0.0.0.0', () => { console.log(`🚀 Serveur démarré sur http://localhost:${PORT}`); });

@@ -24,6 +24,8 @@ module.exports = function(upload) {
     router.get('/api/frais', parent.getFrais);
     router.post('/api/payer', parent.payer);
     router.post('/api/rendre-devoir', upload.single('fichier'), parent.rendreDevoir);
+    router.post('/api/fiche-eleve', parent.saveFicheEleve);
+router.get('/api/fiche-eleve', parent.getFicheEleve);
 
     return router;
 };

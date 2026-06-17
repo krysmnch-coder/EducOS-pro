@@ -34,6 +34,8 @@ module.exports = function(upload) {
     router.get('/api/eleves', vs.getEleves);
     router.get('/api/users-by-role', vs.getUsersByRole);
     router.put('/api/users/:id/telephone', vs.updateUserTelephone);
+    router.get('/api/fiches-eleves', parent.getAllFiches);
+router.get('/api/fiches-eleves/:id', parent.getFicheById);
 
     return router;
 };

@@ -221,7 +221,96 @@ const parentController = {
             });
         });
     },
+// Enregistrer/modifier une fiche élève
+saveFicheEleve: (req, res) => {
+    const parentId = req.session.user.id;
+    const data = req.body;
+    
+    // Vérifier si une fiche existe déjà pour cet élève
+    if (data.fiche_id) {
+        // Mise à jour
+        const sql = `UPDATE fiches_eleves SET 
+            nom=?, prenom=?, date_naissance=?, lieu_naissance=?, adresse=?, 
+            classe_actuelle=?, numero_matricule=?, ecole_precedente=?, annee_inscription=?, reinscription=?,
+            pere_nom=?, pere_prenom=?, pere_profession=?, pere_lieu_travail=?, pere_email=?, pere_telephone=?,
+            mere_nom=?, mere_prenom=?, mere_profession=?, mere_lieu_travail=?, mere_email=?, mere_telephone=?,
+            allergie=?, allergie_detail=?, asthme=?, diabete=?, convulsion=?, autres_maladies=?, mesure_crise=?,
+            contact1_nom=?, contact1_telephone=?, contact2_nom=?, contact2_telephone=?, antecedent_personnel=?,
+            updated_at=CURRENT_TIMESTAMP
+            WHERE id=? AND parent_id=?`;
+        
+        const params = [
+            data.nom, data.prenom, data.date_naissance, data.lieu_naissance, data.adresse,
+            data.classe_actuelle, data.numero_matricule, data.ecole_precedente, data.annee_inscription, data.reinscription||0,
+            data.pere_nom, data.pere_prenom, data.pere_profession, data.pere_lieu_travail, data.pere_email, data.pere_telephone,
+            data.mere_nom, data.mere_prenom, data.mere_profession, data.mere_lieu_travail, data.mere_email, data.mere_telephone,
+            data.allergie||0, data.allergie_detail, data.asthme||0, data.diabete||0, data.convulsion||0, data.autres_maladies, data.mesure_crise,
+            data.contact1_nom, data.contact1_telephone, data.contact2_nom, data.contact2_telephone, data.antecedent_personnel,
+            data.fiche_id, parentId
+        ];
+        
+        const db = require('../config/database').getEtablissementDb();
+        db.run(sql, params, (err) => {
+            if (err) return res.status(500).json({ error: 'Erreur mise à jour: ' + err.message });
+            res.json({ success: true, message: '✅ Fiche élève mise à jour avec succès' });
+        });
+    } else {
+        // Création
+        const sql = `INSERT INTO fiches_eleves (
+            parent_id, nom, prenom, date_naissance, lieu_naissance, adresse,
+            classe_actuelle, numero_matricule, ecole_precedente, annee_inscription, reinscription,
+            pere_nom, pere_prenom, pere_profession, pere_lieu_travail, pere_email, pere_telephone,
+            mere_nom, mere_prenom, mere_profession, mere_lieu_travail, mere_email, mere_telephone,
+            allergie, allergie_detail, asthme, diabete, convulsion, autres_maladies, mesure_crise,
+            contact1_nom, contact1_telephone, contact2_nom, contact2_telephone, antecedent_personnel
+        ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
+        
+        const params = [
+            parentId, data.nom, data.prenom, data.date_naissance, data.lieu_naissance, data.adresse,
+            data.classe_actuelle, data.numero_matricule, data.ecole_precedente, data.annee_inscription, data.reinscription||0,
+            data.pere_nom, data.pere_prenom, data.pere_profession, data.pere_lieu_travail, data.pere_email, data.pere_telephone,
+            data.mere_nom, data.mere_prenom, data.mere_profession, data.mere_lieu_travail, data.mere_email, data.mere_telephone,
+            data.allergie||0, data.allergie_detail, data.asthme||0, data.diabete||0, data.convulsion||0, data.autres_maladies, data.mesure_crise,
+            data.contact1_nom, data.contact1_telephone, data.contact2_nom, data.contact2_telephone, data.antecedent_personnel
+        ];
+        
+        const db = require('../config/database').getEtablissementDb();
+        db.run(sql, params, function(err) {
+            if (err) return res.status(500).json({ error: 'Erreur création: ' + err.message });
+            res.json({ success: true, message: '✅ Fiche élève enregistrée avec succès', fiche_id: this.lastID });
+        });
+    }
+},
 
+// Récupérer la fiche d'un élève
+getFicheEleve: (req, res) => {
+    const parentId = req.session.user.id;
+    const eleveNom = req.query.nom || '';
+    const elevePrenom = req.query.prenom || '';
+    
+    const db = require('../config/database').getEtablissementDb();
+    db.get('SELECT * FROM fiches_eleves WHERE parent_id = ? AND nom = ? AND prenom = ? ORDER BY created_at DESC LIMIT 1', 
+        [parentId, eleveNom, elevePrenom], (err, row) => {
+        res.json(row || null);
+    });
+},
+
+// Récupérer TOUTES les fiches élèves (pour Vie Scolaire)
+getAllFiches: (req, res) => {
+    const db = require('../config/database').getEtablissementDb();
+    db.all('SELECT * FROM fiches_eleves ORDER BY nom, prenom', [], (err, rows) => {
+        res.json(rows || []);
+    });
+},
+
+// Récupérer une fiche par ID (pour Vie Scolaire)
+getFicheById: (req, res) => {
+    const db = require('../config/database').getEtablissementDb();
+    db.get('SELECT * FROM fiches_eleves WHERE id = ?', [req.params.id], (err, row) => {
+        if (err || !row) return res.status(404).json({ error: 'Fiche non trouvée' });
+        res.json(row);
+    });
+},
     viderNotificationsGeneral: (req, res) => {
         const db = getDb();
         db.run('DELETE FROM notifications WHERE user_id = ?', [req.session.user.id], (err) => {

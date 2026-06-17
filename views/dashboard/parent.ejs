@@ -161,20 +161,112 @@
 <!-- TAB: INSCRIPTION -->
 <div class="tab-content" id="tab-inscription">
     <div class="section">
-        <h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#002FA7" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg> Inscrire un enfant</h3>
-        <form onsubmit="inscrireEnfant(event)">
+        <h3 style="display:flex;align-items:center;gap:8px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#002FA7" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+            Fiche d'inscription élève
+        </h3>
+        
+        <form id="ficheEleveForm" onsubmit="return false;" style="max-width:800px;">
+            <input type="hidden" id="ficheId">
+            
+            <!-- CHOIX ENFANT -->
+            <div class="form-group">
+                <label>Enfant concerné *</label>
+                <select id="ficheEnfant" class="form-control" onchange="chargerFiche()">
+                    <option value="">Sélectionnez un enfant</option>
+                </select>
+            </div>
+            
+            <!-- INFORMATIONS ÉLÈVE -->
+            <h4 style="margin:20px 0 12px;color:#002FA7;">📋 INFORMATION DE L'ÉLÈVE</h4>
             <div class="form-row">
-                <div class="form-group"><label>Nom *</label><input type="text" id="inscNom" class="form-control" required></div>
-                <div class="form-group"><label>Prénom *</label><input type="text" id="inscPrenom" class="form-control" required></div>
+                <div class="form-group"><label>Classe actuelle</label><input type="text" id="ficheClasse" class="form-control"></div>
+                <div class="form-group"><label>N° Matricule</label><input type="text" id="ficheMatricule" class="form-control"></div>
             </div>
             <div class="form-row">
-                <div class="form-group"><label>Classe *</label><select id="inscClasse" class="form-control" required>
-                    <option value="">Choisir</option>
-                    <option>6ème A</option><option>6ème B</option><option>5ème A</option><option>5ème B</option><option>4ème A</option><option>4ème B</option><option>3ème A</option><option>3ème B</option><option>2nde A</option><option>2nde B</option><option>1ère A</option><option>1ère B</option><option>Tle A</option><option>Tle B</option>
-                </select></div>
-                <div class="form-group"><label>Date de naissance</label><input type="date" id="inscDateNaissance" class="form-control"></div>
+                <div class="form-group"><label>Nom *</label><input type="text" id="ficheNom" class="form-control" required></div>
+                <div class="form-group"><label>Prénom *</label><input type="text" id="fichePrenom" class="form-control" required></div>
             </div>
-            <button type="submit" class="btn btn-primary">Inscrire</button>
+            <div class="form-row">
+                <div class="form-group"><label>Date de naissance</label><input type="date" id="ficheDateNaissance" class="form-control"></div>
+                <div class="form-group"><label>Lieu de naissance</label><input type="text" id="ficheLieu" class="form-control"></div>
+            </div>
+            <div class="form-group"><label>Adresse actuelle</label><input type="text" id="ficheAdresse" class="form-control"></div>
+            <div class="form-row">
+                <div class="form-group"><label>École précédente</label><input type="text" id="ficheEcolePrecedente" class="form-control"></div>
+                <div class="form-group"><label>Année inscription</label><input type="text" id="ficheAnneeInscription" class="form-control" placeholder="2024-2025"></div>
+            </div>
+            <div class="form-group">
+                <label style="display:flex;align-items:center;gap:8px;">
+                    <input type="checkbox" id="ficheReinscription"> Réinscription
+                </label>
+            </div>
+            
+            <!-- PÈRE -->
+            <h4 style="margin:20px 0 12px;color:#002FA7;">👨 PÈRE</h4>
+            <div class="form-row">
+                <div class="form-group"><label>Nom</label><input type="text" id="fichePereNom" class="form-control"></div>
+                <div class="form-group"><label>Prénom</label><input type="text" id="fichePerePrenom" class="form-control"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Profession</label><input type="text" id="fichePereProfession" class="form-control"></div>
+                <div class="form-group"><label>Lieu de travail</label><input type="text" id="fichePereLieuTravail" class="form-control"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Email</label><input type="email" id="fichePereEmail" class="form-control"></div>
+                <div class="form-group"><label>Téléphone</label><input type="text" id="fichePereTelephone" class="form-control"></div>
+            </div>
+            
+            <!-- MÈRE -->
+            <h4 style="margin:20px 0 12px;color:#002FA7;">👩 MÈRE</h4>
+            <div class="form-row">
+                <div class="form-group"><label>Nom</label><input type="text" id="ficheMereNom" class="form-control"></div>
+                <div class="form-group"><label>Prénom</label><input type="text" id="ficheMerePrenom" class="form-control"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Profession</label><input type="text" id="ficheMereProfession" class="form-control"></div>
+                <div class="form-group"><label>Lieu de travail</label><input type="text" id="ficheMereLieuTravail" class="form-control"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Email</label><input type="email" id="ficheMereEmail" class="form-control"></div>
+                <div class="form-group"><label>Téléphone</label><input type="text" id="ficheMereTelephone" class="form-control"></div>
+            </div>
+            
+            <!-- MÉDICAL -->
+            <h4 style="margin:20px 0 12px;color:#002FA7;">🏥 INFORMATION MÉDICALE</h4>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Allergie</label>
+                    <select id="ficheAllergie" class="form-control" onchange="document.getElementById('allergieDetail').style.display=this.value==='1'?'block':'none'">
+                        <option value="0">NON</option><option value="1">OUI</option>
+                    </select>
+                    <input type="text" id="allergieDetail" class="form-control" placeholder="Détail allergie..." style="display:none;margin-top:6px;">
+                </div>
+                <div class="form-group"><label>Asthme</label><select id="ficheAsthme" class="form-control"><option value="0">NON</option><option value="1">OUI</option></select></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Diabète</label><select id="ficheDiabete" class="form-control"><option value="0">NON</option><option value="1">OUI</option></select></div>
+                <div class="form-group"><label>Convulsion</label><select id="ficheConvulsion" class="form-control"><option value="0">NON</option><option value="1">OUI</option></select></div>
+            </div>
+            <div class="form-group"><label>Autres maladies</label><input type="text" id="ficheAutresMaladies" class="form-control"></div>
+            <div class="form-group"><label>Mesure à prendre en cas de crise</label><textarea id="ficheMesureCrise" class="form-control" rows="2"></textarea></div>
+            
+            <!-- CONTACTS URGENCE -->
+            <h4 style="margin:20px 0 12px;color:#002FA7;">🆘 PERSONNES À PRÉVENIR EN CAS D'ACCIDENT</h4>
+            <div class="form-group"><label>Antécédent personnel</label><input type="text" id="ficheAntecedent" class="form-control"></div>
+            <div class="form-row">
+                <div class="form-group"><label>Contact 1 - Nom</label><input type="text" id="ficheContact1Nom" class="form-control"></div>
+                <div class="form-group"><label>Téléphone</label><input type="text" id="ficheContact1Tel" class="form-control"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Contact 2 - Nom</label><input type="text" id="ficheContact2Nom" class="form-control"></div>
+                <div class="form-group"><label>Téléphone</label><input type="text" id="ficheContact2Tel" class="form-control"></div>
+            </div>
+            
+            <button type="button" class="btn btn-primary" onclick="saveFicheEleve()" style="margin-top:16px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="16" height="16"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
+                Enregistrer la fiche
+            </button>
         </form>
     </div>
 </div>
@@ -545,6 +637,131 @@ async function renvoyerDevoir(e) {
         t.textContent = msg; t.className = 'toast ' + type; t.style.display = 'block';
         setTimeout(function() { t.style.display = 'none'; }, 3000);
     }
+    // ========== FICHE ÉLÈVE ==========
+async function loadEnfantsForFiche() {
+    var r = await fetch('/parent/api/enfants');
+    var enfants = await r.json();
+    var select = document.getElementById('ficheEnfant');
+    select.innerHTML = '<option value="">Sélectionnez un enfant</option>' + 
+        enfants.map(function(e, i) { return '<option value="' + i + '">' + e.nom + ' ' + e.prenom + '</option>'; }).join('');
+}
+
+async function chargerFiche() {
+    var index = document.getElementById('ficheEnfant').value;
+    if (index === '') return;
+    var r = await fetch('/parent/api/enfants');
+    var enfants = await r.json();
+    var enfant = enfants[parseInt(index)];
+    if (!enfant) return;
+    
+    // Remplir les champs de base
+    document.getElementById('ficheNom').value = enfant.nom;
+    document.getElementById('fichePrenom').value = enfant.prenom;
+    document.getElementById('ficheClasse').value = enfant.classe || '';
+    
+    // Chercher une fiche existante
+    var rFiche = await fetch('/parent/api/fiche-eleve?nom=' + encodeURIComponent(enfant.nom) + '&prenom=' + encodeURIComponent(enfant.prenom));
+    var fiche = await rFiche.json();
+    
+    if (fiche) {
+        document.getElementById('ficheId').value = fiche.id;
+        document.getElementById('ficheMatricule').value = fiche.numero_matricule || '';
+        document.getElementById('ficheDateNaissance').value = fiche.date_naissance || '';
+        document.getElementById('ficheLieu').value = fiche.lieu_naissance || '';
+        document.getElementById('ficheAdresse').value = fiche.adresse || '';
+        document.getElementById('ficheEcolePrecedente').value = fiche.ecole_precedente || '';
+        document.getElementById('ficheAnneeInscription').value = fiche.annee_inscription || '';
+        document.getElementById('ficheReinscription').checked = fiche.reinscription == 1;
+        document.getElementById('fichePereNom').value = fiche.pere_nom || '';
+        document.getElementById('fichePerePrenom').value = fiche.pere_prenom || '';
+        document.getElementById('fichePereProfession').value = fiche.pere_profession || '';
+        document.getElementById('fichePereLieuTravail').value = fiche.pere_lieu_travail || '';
+        document.getElementById('fichePereEmail').value = fiche.pere_email || '';
+        document.getElementById('fichePereTelephone').value = fiche.pere_telephone || '';
+        document.getElementById('ficheMereNom').value = fiche.mere_nom || '';
+        document.getElementById('ficheMerePrenom').value = fiche.mere_prenom || '';
+        document.getElementById('ficheMereProfession').value = fiche.mere_profession || '';
+        document.getElementById('ficheMereLieuTravail').value = fiche.mere_lieu_travail || '';
+        document.getElementById('ficheMereEmail').value = fiche.mere_email || '';
+        document.getElementById('ficheMereTelephone').value = fiche.mere_telephone || '';
+        document.getElementById('ficheAllergie').value = fiche.allergie || 0;
+        document.getElementById('allergieDetail').value = fiche.allergie_detail || '';
+        document.getElementById('allergieDetail').style.display = fiche.allergie == 1 ? 'block' : 'none';
+        document.getElementById('ficheAsthme').value = fiche.asthme || 0;
+        document.getElementById('ficheDiabete').value = fiche.diabete || 0;
+        document.getElementById('ficheConvulsion').value = fiche.convulsion || 0;
+        document.getElementById('ficheAutresMaladies').value = fiche.autres_maladies || '';
+        document.getElementById('ficheMesureCrise').value = fiche.mesure_crise || '';
+        document.getElementById('ficheAntecedent').value = fiche.antecedent_personnel || '';
+        document.getElementById('ficheContact1Nom').value = fiche.contact1_nom || '';
+        document.getElementById('ficheContact1Tel').value = fiche.contact1_telephone || '';
+        document.getElementById('ficheContact2Nom').value = fiche.contact2_nom || '';
+        document.getElementById('ficheContact2Tel').value = fiche.contact2_telephone || '';
+    } else {
+        document.getElementById('ficheId').value = '';
+        // Vider les autres champs
+        ['ficheMatricule','ficheDateNaissance','ficheLieu','ficheAdresse','ficheEcolePrecedente',
+         'ficheAnneeInscription','fichePereNom','fichePerePrenom','fichePereProfession','fichePereLieuTravail',
+         'fichePereEmail','fichePereTelephone','ficheMereNom','ficheMerePrenom','ficheMereProfession',
+         'ficheMereLieuTravail','ficheMereEmail','ficheMereTelephone','ficheAutresMaladies',
+         'ficheMesureCrise','ficheAntecedent','ficheContact1Nom','ficheContact1Tel','ficheContact2Nom',
+         'ficheContact2Tel'].forEach(function(id) { document.getElementById(id).value = ''; });
+        document.getElementById('ficheReinscription').checked = false;
+    }
+}
+
+async function saveFicheEleve() {
+    var data = {
+        fiche_id: document.getElementById('ficheId').value || null,
+        nom: document.getElementById('ficheNom').value,
+        prenom: document.getElementById('fichePrenom').value,
+        date_naissance: document.getElementById('ficheDateNaissance').value,
+        lieu_naissance: document.getElementById('ficheLieu').value,
+        adresse: document.getElementById('ficheAdresse').value,
+        classe_actuelle: document.getElementById('ficheClasse').value,
+        numero_matricule: document.getElementById('ficheMatricule').value,
+        ecole_precedente: document.getElementById('ficheEcolePrecedente').value,
+        annee_inscription: document.getElementById('ficheAnneeInscription').value,
+        reinscription: document.getElementById('ficheReinscription').checked ? 1 : 0,
+        pere_nom: document.getElementById('fichePereNom').value,
+        pere_prenom: document.getElementById('fichePerePrenom').value,
+        pere_profession: document.getElementById('fichePereProfession').value,
+        pere_lieu_travail: document.getElementById('fichePereLieuTravail').value,
+        pere_email: document.getElementById('fichePereEmail').value,
+        pere_telephone: document.getElementById('fichePereTelephone').value,
+        mere_nom: document.getElementById('ficheMereNom').value,
+        mere_prenom: document.getElementById('ficheMerePrenom').value,
+        mere_profession: document.getElementById('ficheMereProfession').value,
+        mere_lieu_travail: document.getElementById('ficheMereLieuTravail').value,
+        mere_email: document.getElementById('ficheMereEmail').value,
+        mere_telephone: document.getElementById('ficheMereTelephone').value,
+        allergie: parseInt(document.getElementById('ficheAllergie').value) || 0,
+        allergie_detail: document.getElementById('allergieDetail').value,
+        asthme: parseInt(document.getElementById('ficheAsthme').value) || 0,
+        diabete: parseInt(document.getElementById('ficheDiabete').value) || 0,
+        convulsion: parseInt(document.getElementById('ficheConvulsion').value) || 0,
+        autres_maladies: document.getElementById('ficheAutresMaladies').value,
+        mesure_crise: document.getElementById('ficheMesureCrise').value,
+        contact1_nom: document.getElementById('ficheContact1Nom').value,
+        contact1_telephone: document.getElementById('ficheContact1Tel').value,
+        contact2_nom: document.getElementById('ficheContact2Nom').value,
+        contact2_telephone: document.getElementById('ficheContact2Tel').value,
+        antecedent_personnel: document.getElementById('ficheAntecedent').value
+    };
+    
+    if (!data.nom || !data.prenom) {
+        showToast('Nom et prénom obligatoires', 'error');
+        return;
+    }
+    
+    var r = await fetch('/parent/api/fiche-eleve', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) });
+    var j = await r.json();
+    showToast(j.message || j.error, r.ok ? 'success' : 'error');
+    if (r.ok && j.fiche_id) document.getElementById('ficheId').value = j.fiche_id;
+}
+
+// Appeler au chargement
+loadEnfantsForFiche();
 </script>
 
 <%- include('../partials/footer-parent') %>
