@@ -1,19 +1,10 @@
-const bcrypt = require('bcryptjs');
 const path = require('path');
-
-// Importer la base de données CORRECTEMENT
-const databaseModule = require('../config/database');
-const { globalDb } = databaseModule;
-
-// Fonction helper pour obtenir la bonne base
-function getDb() {
-    const etablissementDb = databaseModule.getEtablissementDb();
-    return etablissementDb || globalDb;
-}
+const bcrypt = require('bcryptjs');
+const { globalDb, getEtablissementDb, setEtablissementDb } = require('../config/database');
 
 const adminController = {
     getStats: (req, res) => {
-        const db = getDb();
+        const db = getEtablissementDb() || globalDb;
         const stats = {};
         db.get('SELECT COUNT(*) as total FROM users', [], (err, row) => {
             stats.totalUsers = row?.total || 0;
@@ -21,8 +12,8 @@ const adminController = {
                 stats.totalEleves = row?.total || 0;
                 db.get("SELECT COUNT(*) as total FROM users WHERE role = 'prof'", [], (err, row) => {
                     stats.totalProfs = row?.total || 0;
-                    db.get("SELECT COUNT(*) as total FROM users WHERE role = 'admin'", [], (err, row) => {
-                        stats.totalAdmins = row?.total || 0;
+                    db.get("SELECT COUNT(*) as total FROM users WHERE role = 'vie_scolaire'", [], (err, row) => {
+                        stats.totalVieScolaire = row?.total || 0;
                         db.get("SELECT COUNT(*) as total FROM notifications WHERE user_id = ? AND lu = 0", [req.session.user.id], (err, row) => {
                             stats.notificationsNonLues = row?.total || 0;
                             res.json(stats);
@@ -43,82 +34,84 @@ const adminController = {
         if (role) { where.push('role = ?'); params.push(role); }
         const wc = where.length ? 'WHERE ' + where.join(' AND ') : '';
         
-        globalDb.get(`SELECT COUNT(*) as total FROM users ${wc}`, params, (err, row) => {
-            globalDb.all(`SELECT * FROM users ${wc} ORDER BY created_at DESC LIMIT ? OFFSET ?`, [...params, limit, offset], (err, users) => {
+        const db = getEtablissementDb() || globalDb;
+        db.get(`SELECT COUNT(*) as total FROM users ${wc}`, params, (err, row) => {
+            db.all(`SELECT * FROM users ${wc} ORDER BY created_at DESC LIMIT ? OFFSET ?`, [...params, limit, offset], (err, users) => {
                 res.json({ users, pagination: { currentPage: page, totalPages: Math.ceil((row?.total||0)/limit), total: row?.total||0 } });
             });
         });
     },
 
     createUser: (req, res) => {
-    const { nom, prenom, email, password, role, telephone, matiere_principale, classes_assignees, date_naissance, enfants } = req.body;
-    
-    if (!nom || !prenom || !email || !password || !role) {
-        return res.status(400).json({ error: 'Tous les champs obligatoires sont requis' });
-    }
-
-    globalDb.get('SELECT id FROM users WHERE email = ?', [email], (err, user) => {
-        if (user) return res.status(400).json({ error: 'Email déjà utilisé' });
+        const { nom, prenom, email, password, role, telephone, matiere_principale, classes_assignees, date_naissance, enfants } = req.body;
         
-        bcrypt.hash(password, 10, (err, hash) => {
-            if (err) return res.status(500).json({ error: 'Erreur serveur' });
+        if (!nom || !prenom || !email || !password || !role) {
+            return res.status(400).json({ error: 'Tous les champs obligatoires sont requis' });
+        }
+
+        const db = getEtablissementDb() || globalDb;
+        db.get('SELECT id FROM users WHERE email = ?', [email], (err, user) => {
+            if (user) return res.status(400).json({ error: 'Email déjà utilisé' });
             
-            const etablissementCode = req.session.user.etablissement_code || '';
-            const classesData = classes_assignees || (enfants ? JSON.stringify(enfants) : '');
-            
-            globalDb.run(
-                'INSERT INTO users (nom, prenom, email, password, role, telephone, matiere_principale, classes_assignees, date_naissance, etablissement_code) VALUES (?,?,?,?,?,?,?,?,?,?)',
-                [nom, prenom, email, hash, role, telephone || '', matiere_principale || '', classesData, date_naissance || '', etablissementCode],
-                function(err) {
-                    if (err) return res.status(500).json({ error: 'Erreur création: ' + err.message });
-                    
-                    // Si parent, créer aussi les comptes enfants
-                    if (role === 'parent' && enfants && enfants.length > 0) {
-                        enfants.forEach(enfant => {
-                            globalDb.get("SELECT id FROM users WHERE nom = ? AND prenom = ? AND role = 'eleve'", [enfant.nom, enfant.prenom], (err, row) => {
-                                if (!row) {
-                                    bcrypt.hash('educos2024', 10, (err, hash) => {
-                                        globalDb.run("INSERT INTO users (nom, prenom, email, password, role, classes_assignees, etablissement_code) VALUES (?,?,?,?,?,?,?)",
-                                            [enfant.nom, enfant.prenom, enfant.prenom.toLowerCase()+'.'+enfant.nom.toLowerCase()+'@eleve.educos.com', hash, 'eleve', enfant.classe || '', etablissementCode]);
-                                    });
-                                }
+            bcrypt.hash(password, 10, (err, hash) => {
+                if (err) return res.status(500).json({ error: 'Erreur serveur' });
+                
+                const classesData = classes_assignees || (enfants ? JSON.stringify(enfants) : '');
+                
+                db.run(
+                    'INSERT INTO users (nom, prenom, email, password, role, telephone, matiere_principale, classes_assignees, date_naissance) VALUES (?,?,?,?,?,?,?,?,?)',
+                    [nom, prenom, email, hash, role, telephone || '', matiere_principale || '', classesData, date_naissance || ''],
+                    function(err) {
+                        if (err) return res.status(500).json({ error: 'Erreur création: ' + err.message });
+                        
+                        if (role === 'parent' && enfants && enfants.length > 0) {
+                            enfants.forEach(enfant => {
+                                db.get("SELECT id FROM users WHERE nom = ? AND prenom = ? AND role = 'eleve'", [enfant.nom, enfant.prenom], (err, row) => {
+                                    if (!row) {
+                                        bcrypt.hash('educos2024', 10, (err, hash) => {
+                                            db.run("INSERT INTO users (nom, prenom, email, password, role, classes_assignees) VALUES (?,?,?,?,?,?)",
+                                                [enfant.nom, enfant.prenom, enfant.prenom.toLowerCase()+'.'+enfant.nom.toLowerCase()+'@eleve.educos.com', hash, 'eleve', enfant.classe || '']);
+                                        });
+                                    }
+                                });
                             });
-                        });
+                        }
+                        
+                        res.json({ success: true, message: 'Utilisateur créé avec succès' });
                     }
-                    
-                    res.json({ success: true, message: 'Utilisateur créé avec succès' });
-                }
-            );
+                );
+            });
         });
-    });
-},
+    },
 
     updateUser: (req, res) => {
-    const { nom, prenom, email, role, compte_actif, telephone, matiere_principale, classes_assignees, date_naissance } = req.body;
-    
-    globalDb.run(
-        'UPDATE users SET nom=?, prenom=?, email=?, role=?, compte_actif=?, telephone=?, matiere_principale=?, classes_assignees=?, date_naissance=?, updated_at=CURRENT_TIMESTAMP WHERE id=?',
-        [nom, prenom, email, role, compte_actif != 0 ? 1 : 0, telephone || '', matiere_principale || '', classes_assignees || '', date_naissance || '', req.params.id],
-        (err) => {
-            if (err) return res.status(500).json({ error: 'Erreur modification' });
-            res.json({ success: true, message: 'Utilisateur modifié avec succès' });
-        }
-    );
-},
+        const { nom, prenom, email, role, compte_actif, telephone, matiere_principale, classes_assignees, date_naissance } = req.body;
+        const db = getEtablissementDb() || globalDb;
+        db.run(
+            'UPDATE users SET nom=?, prenom=?, email=?, role=?, compte_actif=?, telephone=?, matiere_principale=?, classes_assignees=?, date_naissance=?, updated_at=CURRENT_TIMESTAMP WHERE id=?',
+            [nom, prenom, email, role, compte_actif != 0 ? 1 : 0, telephone || '', matiere_principale || '', classes_assignees || '', date_naissance || '', req.params.id],
+            (err) => {
+                if (err) return res.status(500).json({ error: 'Erreur modification' });
+                res.json({ success: true, message: 'Utilisateur modifié avec succès' });
+            }
+        );
+    },
 
     deleteUser: (req, res) => {
         if (req.params.id == req.session.user.id) return res.status(400).json({ error: 'Action impossible' });
-        globalDb.run('DELETE FROM users WHERE id=?', [req.params.id], (err) => {
+        const db = getEtablissementDb() || globalDb;
+        db.run('DELETE FROM users WHERE id=?', [req.params.id], (err) => {
             if (err) return res.status(500).json({ error: 'Erreur' });
             res.json({ success: true, message: 'Supprimé' });
         });
     },
 
     toggleUserStatus: (req, res) => {
-        globalDb.get('SELECT compte_actif FROM users WHERE id=?', [req.params.id], (err, user) => {
+        const db = getEtablissementDb() || globalDb;
+        db.get('SELECT compte_actif FROM users WHERE id=?', [req.params.id], (err, user) => {
             if (err || !user) return res.status(404).json({ error: 'Non trouvé' });
             const ns = user.compte_actif ? 0 : 1;
-            globalDb.run('UPDATE users SET compte_actif=? WHERE id=?', [ns, req.params.id], (err) => {
+            db.run('UPDATE users SET compte_actif=? WHERE id=?', [ns, req.params.id], (err) => {
                 if (err) return res.status(500).json({ error: 'Erreur' });
                 res.json({ success: true, message: ns ? 'Activé' : 'Désactivé' });
             });
@@ -128,7 +121,8 @@ const adminController = {
     resetPassword: (req, res) => {
         const np = 'EducOS2024!';
         bcrypt.hash(np, 10, (err, hash) => {
-            globalDb.run('UPDATE users SET password=? WHERE id=?', [hash, req.params.id], (err) => {
+            const db = getEtablissementDb() || globalDb;
+            db.run('UPDATE users SET password=? WHERE id=?', [hash, req.params.id], (err) => {
                 if (err) return res.status(500).json({ error: 'Erreur' });
                 res.json({ success: true, message: 'MDP réinitialisé', tempPassword: np });
             });
@@ -147,33 +141,33 @@ const adminController = {
         const { nom, adresse, telephone, email, site_web, directeur, annee_scolaire } = req.body;
         if (!nom) return res.json({ success: false, error: 'Le nom est obligatoire' });
 
-        const code = req.session.user.etablissement_code || 'ETAB_' + Date.now().toString(36).toUpperCase();
+        // Générer le code à partir du nom
+        const codeBase = nom.toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 10);
+        const code = 'ETAB_' + codeBase.toUpperCase();
         const dbName = 'educos_' + code.toLowerCase() + '.db';
         const dbPath = path.join(__dirname, '..', 'database', dbName);
         
-        databaseModule.setEtablissementDb(dbPath);
+        setEtablissementDb(dbPath);
         
         globalDb.get('SELECT id FROM etablissements WHERE code = ?', [code], (err, row) => {
             if (row) {
                 globalDb.run('UPDATE etablissements SET nom=?, adresse=?, telephone=?, email=?, site_web=?, directeur=?, annee_scolaire=?, updated_at=CURRENT_TIMESTAMP WHERE code=?',
                     [nom, adresse||'', telephone||'', email||'', site_web||'', directeur||'', annee_scolaire||'', code], function(err) {
-                    const message = '✅ ÉTABLISSEMENT MIS À JOUR !\n\nNom : ' + nom + '\nBase : ' + dbName + '\nCode : ' + code;
-                    res.json({ success: true, message: message, code: code, dbName: dbName });
+                    res.json({ success: true, message: '✅ ÉTABLISSEMENT MIS À JOUR ! Code: ' + code + ' | Base: ' + dbName, code: code, dbName: dbName });
                 });
             } else {
                 globalDb.run('INSERT INTO etablissements (code, nom, adresse, telephone, email, site_web, directeur, annee_scolaire, db_name) VALUES (?,?,?,?,?,?,?,?,?)',
                     [code, nom, adresse||'', telephone||'', email||'', site_web||'', directeur||'', annee_scolaire||'', dbName], function(err) {
                     req.session.user.etablissement_code = code;
                     req.session.save();
-                    const message = '✅ NOUVEL ÉTABLISSEMENT CRÉÉ !\n\nNom : ' + nom + '\nBase : ' + dbName + '\nCode : ' + code;
-                    res.json({ success: true, message: message, code: code, dbName: dbName });
+                    res.json({ success: true, message: '✅ ÉTABLISSEMENT CRÉÉ ! Code: ' + code + ' | Base: ' + dbName, code: code, dbName: dbName });
                 });
             }
         });
     },
 
     getSettings: (req, res) => {
-        const db = getDb();
+        const db = getEtablissementDb() || globalDb;
         db.get('SELECT * FROM settings WHERE id=1', [], (err, row) => {
             if (!row) {
                 db.run('INSERT INTO settings (id) VALUES (1)');
@@ -184,7 +178,7 @@ const adminController = {
     },
 
     updateSettings: (req, res) => {
-        const db = getDb();
+        const db = getEtablissementDb() || globalDb;
         const { max_users, default_role, maintenance_mode, allow_registration } = req.body;
         const maxUsers = Math.min(parseInt(max_users) || 500, 1500);
         
@@ -206,7 +200,7 @@ const adminController = {
     },
 
     getPaiements: (req, res) => {
-        const db = getDb();
+        const db = getEtablissementDb() || globalDb;
         const page = parseInt(req.query.page) || 1, limit = 15, offset = (page - 1) * limit;
         db.get('SELECT COUNT(*) as total FROM paiements', [], (err, row) => {
             db.all('SELECT p.*, u.nom, u.prenom FROM paiements p LEFT JOIN users u ON p.user_id = u.id ORDER BY p.date_paiement DESC LIMIT ? OFFSET ?', [limit, offset], (err, paiements) => {
@@ -216,7 +210,7 @@ const adminController = {
     },
 
     getPaiementStats: (req, res) => {
-        const db = getDb();
+        const db = getEtablissementDb() || globalDb;
         db.get("SELECT SUM(montant) as total FROM paiements WHERE type='recette'", [], (err, row) => {
             const recettes = row?.total || 0;
             db.get("SELECT SUM(montant) as total FROM paiements WHERE type='depense'", [], (err, row) => {
@@ -226,7 +220,7 @@ const adminController = {
     },
 
     createPaiement: (req, res) => {
-        const db = getDb();
+        const db = getEtablissementDb() || globalDb;
         const { type, categorie, montant, description, date_paiement, beneficiaire, mode_paiement, reference, user_id } = req.body;
         db.run('INSERT INTO paiements (type,categorie,montant,description,date_paiement,beneficiaire,mode_paiement,reference,user_id) VALUES (?,?,?,?,?,?,?,?,?)',
             [type, categorie, montant, description, date_paiement, beneficiaire, mode_paiement||'especes', reference, user_id||null], function(err) {
@@ -236,7 +230,7 @@ const adminController = {
     },
 
     updatePaiement: (req, res) => {
-        const db = getDb();
+        const db = getEtablissementDb() || globalDb;
         const { type, categorie, montant, description, date_paiement, beneficiaire, mode_paiement, reference } = req.body;
         db.run('UPDATE paiements SET type=?,categorie=?,montant=?,description=?,date_paiement=?,beneficiaire=?,mode_paiement=?,reference=? WHERE id=?',
             [type, categorie, montant, description, date_paiement, beneficiaire, mode_paiement, reference, req.params.id], (err) => {
@@ -246,7 +240,7 @@ const adminController = {
     },
 
     deletePaiement: (req, res) => {
-        const db = getDb();
+        const db = getEtablissementDb() || globalDb;
         db.run('DELETE FROM paiements WHERE id=?', [req.params.id], (err) => {
             if (err) return res.status(500).json({ error: 'Erreur' });
             res.json({ success: true, message: 'Supprimé' });
@@ -254,13 +248,13 @@ const adminController = {
     },
 
     getMessages: (req, res) => {
-        const db = getDb();
+        const db = getEtablissementDb() || globalDb;
         db.all(`SELECT m.*, u.nom as exp_nom, u.prenom as exp_prenom FROM messages m LEFT JOIN users u ON m.expediteur_id = u.id WHERE m.destinataire_id = ? OR m.destinataire_role = 'all' OR m.destinataire_role = ? ORDER BY m.created_at DESC LIMIT 30`,
             [req.session.user.id, req.session.user.role], (err, messages) => res.json(messages || []));
     },
 
     getMessageDetail: (req, res) => {
-        const db = getDb();
+        const db = getEtablissementDb() || globalDb;
         db.get('SELECT m.*, u.nom as exp_nom, u.prenom as exp_prenom FROM messages m LEFT JOIN users u ON m.expediteur_id = u.id WHERE m.id = ?', [req.params.id], (err, msg) => {
             if (err || !msg) return res.status(404).json({ error: 'Message non trouvé' });
             res.json(msg);
@@ -268,7 +262,7 @@ const adminController = {
     },
 
     sendMessage: (req, res) => {
-        const db = getDb();
+        const db = getEtablissementDb() || globalDb;
         const { destinataire_id, destinataire_role, sujet, contenu } = req.body;
         if (!sujet || !contenu) return res.status(400).json({ error: 'Sujet et contenu requis' });
         const fichier = req.file ? req.file.filename : null;
@@ -280,21 +274,22 @@ const adminController = {
     },
 
     getUsersList: (req, res) => {
-        globalDb.all('SELECT id, nom, prenom, email, role FROM users WHERE compte_actif=1 ORDER BY nom', [], (err, users) => res.json(users || []));
+        const db = getEtablissementDb() || globalDb;
+        db.all('SELECT id, nom, prenom, email, role FROM users WHERE compte_actif=1 ORDER BY nom', [], (err, users) => res.json(users || []));
     },
 
     getNotifications: (req, res) => {
-        const db = getDb();
+        const db = getEtablissementDb() || globalDb;
         db.all('SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 20', [req.session.user.id], (err, rows) => res.json(rows || []));
     },
 
     markNotificationRead: (req, res) => {
-        const db = getDb();
+        const db = getEtablissementDb() || globalDb;
         db.run('UPDATE notifications SET lu = 1 WHERE id = ? AND user_id = ?', [req.params.id, req.session.user.id], (err) => res.json({ success: true }));
     },
 
     viderNotificationsGeneral: (req, res) => {
-        const db = getDb();
+        const db = getEtablissementDb() || globalDb;
         db.run('DELETE FROM notifications WHERE user_id = ?', [req.session.user.id], (err) => {
             if (err) return res.status(500).json({ error: 'Erreur' });
             res.json({ success: true, message: 'Notifications vidées' });

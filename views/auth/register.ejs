@@ -9,11 +9,7 @@
     <style>
         :root {
             --bleu-klein: #002FA7;
-            --bleu-klein-light: #003fd6;
-            --bleu-klein-dark: #001f70;
-            --bleu-klein-glow: rgba(0, 47, 167, 0.15);
             --noir: #1a1a1a;
-            --gris-fonce: #333333;
             --gris: #666666;
             --gris-clair: #999999;
             --gris-tres-clair: #e0e0e0;
@@ -23,66 +19,19 @@
             --rouge-clair: #fee;
             --vert: #27ae60;
             --vert-clair: #efe;
-            --border-radius: 14px;
+            --border-radius: 12px;
             --border-radius-sm: 8px;
-            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
-            --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.1);
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --shadow: 0 4px 24px rgba(0,0,0,0.08);
+            --transition: all 0.3s ease;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--blanc);
+            background-color: #f0f2f5;
             color: var(--noir);
             line-height: 1.5;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-
-        .theme-toggle {
-            position: fixed;
-            top: 16px;
-            right: 16px;
-            z-index: 1000;
-        }
-
-        .toggle-switch {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            background: var(--gris-background);
-            padding: 5px 10px;
-            border-radius: 30px;
-            border: 1.5px solid var(--gris-tres-clair);
-            cursor: pointer;
-            transition: var(--transition);
-            user-select: none;
-        }
-
-        .toggle-switch:hover {
-            border-color: var(--bleu-klein);
-            box-shadow: var(--shadow-sm);
-        }
-
-        .toggle-icon {
-            width: 16px;
-            height: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .toggle-icon svg { width: 100%; height: 100%; }
-        .sun-icon { color: #f59e0b; }
-        .moon-icon { color: #6366f1; }
-
-        .toggle-label {
-            font-size: 0.7rem;
-            font-weight: 600;
-            color: var(--gris);
-            white-space: nowrap;
         }
 
         .auth-wrapper {
@@ -90,148 +39,47 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background-color: var(--blanc);
-            background-image:
-                radial-gradient(circle at 15% 25%, rgba(0, 47, 167, 0.02) 0%, transparent 50%),
-                radial-gradient(circle at 85% 75%, rgba(0, 47, 167, 0.02) 0%, transparent 50%);
-            padding: 16px;
+            padding: 20px;
         }
 
         .auth-container {
             background: var(--blanc);
             border-radius: 20px;
-            box-shadow: var(--shadow-lg);
+            box-shadow: var(--shadow);
             width: 100%;
-            max-width: 900px;
-            min-height: 500px;
-            overflow: hidden;
-            display: flex;
-            border: 1px solid var(--gris-tres-clair);
+            max-width: 500px;
+            padding: 40px;
         }
 
-        .auth-left {
-            flex: 0.9;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            padding: 30px 25px;
-            background: var(--bleu-klein);
-        }
-
-        .auth-left::before {
-            content: '';
-            position: absolute;
-            width: 200px;
-            height: 200px;
-            background: rgba(255, 255, 255, 0.06);
-            border-radius: 50%;
-            top: -60px;
-            right: -60px;
-        }
-
-        .auth-left::after {
-            content: '';
-            position: absolute;
-            width: 150px;
-            height: 150px;
-            background: rgba(255, 255, 255, 0.04);
-            border-radius: 50%;
-            bottom: -40px;
-            left: -40px;
-        }
-
-        .auth-left-content {
-            position: relative;
-            z-index: 2;
+        .auth-logo {
             text-align: center;
-            color: var(--blanc);
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-radius: 18px;
-            padding: 30px 22px;
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
-            width: 100%;
-            max-width: 280px;
+            margin-bottom: 24px;
         }
 
-        .logo-container { margin-bottom: 14px; }
-
-        .logo-icon {
-            width: 45px;
-            height: 45px;
-            color: white;
-            filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.15));
-            animation: float 3s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-6px); }
-        }
-
-        .auth-left-content h1 {
+        .auth-logo h1 {
             font-size: 2rem;
             font-weight: 700;
-            margin-bottom: 4px;
-            letter-spacing: -0.5px;
-            line-height: 1.2;
+            color: var(--bleu-klein);
         }
 
-        .text-highlight { color: #8ab4ff; font-weight: 300; }
-
-        .tagline {
-            font-size: 0.85rem;
-            opacity: 0.85;
-            margin-bottom: 22px;
-            line-height: 1.5;
-            font-weight: 400;
+        .auth-logo h1 span {
+            font-weight: 300;
+            color: var(--gris-clair);
         }
-
-        .features { display: flex; flex-direction: column; gap: 8px; }
-
-        .feature-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px 12px;
-            background: rgba(255, 255, 255, 0.06);
-            border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: var(--transition);
-            cursor: default;
-        }
-
-        .feature-item:hover {
-            background: rgba(255, 255, 255, 0.14);
-            transform: translateX(4px);
-        }
-
-        .feature-item svg { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.9; }
-        .feature-item span { font-size: 0.78rem; font-weight: 500; opacity: 0.9; }
-
-        .auth-right {
-            flex: 1.2;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 25px 30px;
-            background: var(--blanc);
-        }
-
-        .auth-form-container { width: 100%; max-width: 400px; }
 
         .auth-form-container h2 {
-            color: var(--noir);
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             font-weight: 700;
-            margin-bottom: 2px;
+            margin-bottom: 4px;
+            text-align: center;
         }
 
-        .subtitle { color: var(--gris); margin-bottom: 18px; font-size: 0.82rem; }
+        .subtitle {
+            color: var(--gris);
+            margin-bottom: 20px;
+            font-size: 0.85rem;
+            text-align: center;
+        }
 
         .alert {
             display: flex;
@@ -239,81 +87,32 @@
             gap: 8px;
             padding: 10px 12px;
             border-radius: var(--border-radius-sm);
-            margin-bottom: 14px;
-            font-size: 0.8rem;
-            font-weight: 500;
-            animation: slideDown 0.3s ease;
-        }
-
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .alert svg { width: 16px; height: 16px; flex-shrink: 0; }
-        .alert-danger { background-color: var(--rouge-clair); color: var(--rouge); border: 1px solid #fcc; }
-        .alert-success { background-color: var(--vert-clair); color: var(--vert); border: 1px solid #cfc; }
-
-        .social-buttons { display: flex; flex-direction: column; gap: 8px; margin-bottom: 4px; }
-
-        .btn-social {
-            width: 100%;
-            padding: 10px 16px;
-            border-radius: var(--border-radius-sm);
-            font-weight: 500;
+            margin-bottom: 16px;
             font-size: 0.82rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            border: 1.5px solid var(--gris-tres-clair);
-            background: var(--blanc);
-            color: var(--noir);
-            cursor: pointer;
-            transition: var(--transition);
-            font-family: 'Inter', sans-serif;
-            text-decoration: none;
+            font-weight: 500;
         }
 
-        .btn-social:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); }
-        .btn-google:hover { border-color: #4285F4; background: #fafbff; }
-        .btn-facebook:hover { border-color: #1877F2; background: #f5f7ff; }
-        .social-icon { width: 18px; height: 18px; flex-shrink: 0; }
-        .btn-social span { color: var(--gris-fonce); font-weight: 500; }
+        .alert-danger { background-color: var(--rouge-clair); color: var(--rouge); border: 1px solid #fcc; }
 
-        .separator {
-            display: flex;
-            align-items: center;
-            text-align: center;
-            margin: 14px 0;
+        .form-group {
+            margin-bottom: 14px;
         }
-
-        .separator::before, .separator::after {
-            content: '';
-            flex: 1;
-            border-bottom: 1px solid var(--gris-tres-clair);
-        }
-
-        .separator span { padding: 0 12px; font-size: 0.75rem; color: var(--gris); font-weight: 500; }
-
-        .auth-form { display: flex; flex-direction: column; gap: 10px; }
-
-        .form-group { display: flex; flex-direction: column; gap: 5px; }
 
         .form-group label {
-            color: var(--gris-fonce);
+            display: block;
+            margin-bottom: 5px;
             font-weight: 600;
-            font-size: 0.78rem;
+            font-size: 0.82rem;
+            color: #333;
         }
 
         .form-control {
             width: 100%;
-            padding: 10px 12px;
-            border: 1.5px solid var(--gris-tres-clair);
+            padding: 10px 14px;
+            border: 2px solid var(--gris-tres-clair);
             border-radius: var(--border-radius-sm);
-            font-size: 0.85rem;
+            font-size: 0.88rem;
             font-family: 'Inter', sans-serif;
-            color: var(--noir);
             background: var(--gris-background);
             transition: var(--transition);
             outline: none;
@@ -322,374 +121,298 @@
         .form-control:focus {
             border-color: var(--bleu-klein);
             background: var(--blanc);
-            box-shadow: 0 0 0 3px var(--bleu-klein-glow);
+            box-shadow: 0 0 0 3px rgba(0,47,167,0.1);
         }
-
-        .form-control::placeholder { color: var(--gris-clair); font-size: 0.8rem; }
 
         select.form-control {
             appearance: none;
             background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23999999' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
             background-repeat: no-repeat;
-            background-position: right 10px center;
+            background-position: right 12px center;
             background-size: 16px;
-            padding-right: 32px;
+            padding-right: 36px;
             cursor: pointer;
         }
 
-        .form-row { display: flex; gap: 10px; }
-        .form-row .form-group { flex: 1; }
+        .form-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        .dynamic-fields {
+            background: var(--gris-background);
+            border-radius: var(--border-radius-sm);
+            padding: 14px;
+            margin-top: 6px;
+            border: 1px dashed #d0d0d0;
+        }
+
+        .help-text {
+            font-size: 0.72rem;
+            color: var(--gris-clair);
+            margin-top: 4px;
+        }
 
         .btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
-            padding: 11px 22px;
+            padding: 12px 24px;
             border: none;
             border-radius: var(--border-radius-sm);
-            font-size: 0.88rem;
+            font-size: 0.9rem;
             font-weight: 600;
             cursor: pointer;
             transition: var(--transition);
-            text-decoration: none;
             font-family: 'Inter', sans-serif;
-            position: relative;
-            overflow: hidden;
+            width: 100%;
         }
 
-        .btn-primary { background-color: var(--bleu-klein); color: var(--blanc); }
+        .btn-primary {
+            background-color: var(--bleu-klein);
+            color: var(--blanc);
+        }
 
         .btn-primary:hover {
-            background-color: var(--bleu-klein-light);
-            transform: translateY(-1px);
-            box-shadow: 0 6px 20px var(--bleu-klein-glow);
+            background-color: #003fd6;
+            box-shadow: 0 4px 16px rgba(0,47,167,0.2);
         }
-
-        .btn-block { width: 100%; }
-        .btn-arrow { width: 15px; height: 15px; transition: transform 0.3s ease; }
-        .btn-primary:hover .btn-arrow { transform: translateX(3px); }
-
-        .auth-link { text-align: center; margin-top: 16px; color: var(--gris); font-size: 0.8rem; }
-        .auth-link a { color: var(--bleu-klein); text-decoration: none; font-weight: 700; }
-        .auth-link a:hover { text-decoration: underline; }
-
-        .dynamic-fields {
-            background: var(--gris-background);
-            border-radius: var(--border-radius-sm);
-            padding: 12px;
-            margin-top: 4px;
-            border: 1px dashed var(--gris-tres-clair);
-        }
-
-        .child-row {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 8px;
-            align-items: center;
-        }
-
-        .child-row .form-control { flex: 1; }
 
         .btn-add-child {
             background: none;
             border: 1px dashed var(--bleu-klein);
             color: var(--bleu-klein);
-            padding: 6px 12px;
+            padding: 6px 14px;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             font-weight: 600;
             font-family: 'Inter', sans-serif;
-            margin-top: 6px;
+            margin-top: 8px;
         }
 
-        .btn-remove-child {
-            background: none;
-            border: none;
-            color: var(--rouge);
-            cursor: pointer;
-            font-size: 1.2rem;
-            padding: 0 4px;
+        .auth-link {
+            text-align: center;
+            margin-top: 20px;
+            color: var(--gris);
+            font-size: 0.85rem;
         }
 
-        body.dark-mode { background-color: #121212; }
-        body.dark-mode .auth-wrapper { background-color: #121212; background-image: none; }
-        body.dark-mode .auth-container { background-color: #1e1e1e; border-color: #333; }
-        body.dark-mode .auth-right { background-color: #1e1e1e; }
-        body.dark-mode .auth-form-container h2 { color: #f0f0f0; }
-        body.dark-mode .subtitle { color: #aaa; }
-        body.dark-mode .form-control { background-color: #2a2a2a; color: #e0e0e0; border-color: #444; }
-        body.dark-mode .form-control:focus { border-color: #4a7dff; background-color: #333; }
-        body.dark-mode .form-group label { color: #bbb; }
-        body.dark-mode .dynamic-fields { background: #2a2a2a; border-color: #444; }
-        body.dark-mode .btn-social { background-color: #2a2a2a; border-color: #444; }
-        body.dark-mode .btn-social span { color: #ccc; }
-        body.dark-mode .toggle-switch { background: #2a2a2a; border-color: #444; }
-        body.dark-mode .toggle-label { color: #aaa; }
+        .auth-link a {
+            color: var(--bleu-klein);
+            text-decoration: none;
+            font-weight: 700;
+        }
 
-        @media (max-width: 768px) {
-            .auth-container { flex-direction: column; max-width: 450px; }
-            .auth-left { padding: 22px 18px; }
-            .auth-left-content { padding: 22px 18px; max-width: 100%; }
-            .auth-left-content h1 { font-size: 1.6rem; }
-            .auth-right { padding: 20px 18px; }
+        .auth-link a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 500px) {
+            .auth-container { padding: 24px 18px; }
             .form-row { flex-direction: column; gap: 0; }
         }
     </style>
 </head>
 <body>
-    <!-- Toggle Mode Sombre/Clair -->
-    <div class="theme-toggle">
-        <div class="toggle-switch" onclick="toggleDarkMode()">
-            <div class="toggle-icon sun-icon" id="sunIcon">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                    <circle cx="12" cy="12" r="5"/>
-                    <line x1="12" y1="1" x2="12" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                    <line x1="12" y1="21" x2="12" y2="23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                    <line x1="1" y1="12" x2="3" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                    <line x1="21" y1="12" x2="23" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                </svg>
-            </div>
-            <div class="toggle-icon moon-icon" id="moonIcon" style="display: none;">
-                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-            </div>
-            <span class="toggle-label" id="toggleLabel">Sombre</span>
-        </div>
-    </div>
-
     <div class="auth-wrapper">
         <div class="auth-container">
-            <!-- Partie gauche -->
-            <div class="auth-left">
-                <div class="auth-left-content">
-                    <div class="logo-container">
-                        <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 2 4 3 6 3s6-1 6-3v-5"/>
-                        </svg>
-                    </div>
-                    <h1>EducOS<span class="text-highlight">-pro</span></h1>
-                    <p class="tagline">Rejoignez la communauté<br>éducative</p>
-                    <div class="features">
-                        <div class="feature-item">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
-                            <span>5 profils disponibles</span>
-                        </div>
-                        <div class="feature-item">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                            <span>Inscription sécurisée</span>
-                        </div>
-                        <div class="feature-item">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-                            <span>Gratuit et rapide</span>
-                        </div>
-                    </div>
-                </div>
+            <div class="auth-logo">
+                <h1>EducOS<span>-pro</span></h1>
             </div>
 
-            <!-- Partie droite : Formulaire inscription -->
-            <div class="auth-right">
-                <div class="auth-form-container">
-                    <h2>Inscription</h2>
-                    <p class="subtitle">Créez votre compte EducOS-pro</p>
+            <div class="auth-form-container">
+                <h2>Inscription</h2>
+                <p class="subtitle">Créez votre compte</p>
 
-                    <% if (locals.error) { %>
-                        <div class="alert alert-danger">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                            <span><%= error %></span>
-                        </div>
-                    <% } %>
+                <% if (locals.error) { %>
+                    <div class="alert alert-danger">
+                        <span>⚠️ <%= error %></span>
+                    </div>
+                <% } %>
 
-                    <% if (false) { %>
-<div class="social-buttons">
-    <a href="/auth/google" class="btn-social btn-google">...</a>
-    <a href="/auth/facebook" class="btn-social btn-facebook">...</a>
-</div>
-<div class="separator"><span>ou</span></div>
-<% } %>
-                    <!-- Formulaire inscription -->
-                    <form action="/auth/register" method="POST" class="auth-form" id="registerForm">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="nom">Nom *</label>
-                                <input type="text" id="nom" name="nom" class="form-control" required placeholder="Dupont">
-                            </div>
-                            <div class="form-group">
-                                <label for="prenom">Prénom *</label>
-                                <input type="text" id="prenom" name="prenom" class="form-control" required placeholder="Jean">
-                            </div>
-                        </div>
-
+                <form action="/auth/register" method="POST" id="registerForm">
+                    <div class="form-row">
                         <div class="form-group">
-                            <label for="email">Email *</label>
-                            <input type="email" id="email" name="email" class="form-control" required placeholder="votre@email.com">
+                            <label for="nom">Nom *</label>
+                            <input type="text" id="nom" name="nom" class="form-control" required placeholder="Dupont">
                         </div>
-
                         <div class="form-group">
-                            <label for="role">Rôle *</label>
-                            <select id="role" name="role" class="form-control" required onchange="showDynamicFields()">
-                                <option value="">Choisissez votre profil</option>
-                                <option value="admin"> Administrateur</option>
-                                <option value="vie_scolaire"> Responsable Vie Scolaire</option>
-                                <option value="prof"> Professeur</option>
-                                <option value="parent"> Parent</option>
-                                <option value="eleve"> Élève</option>
-                            </select>
+                            <label for="prenom">Prénom *</label>
+                            <input type="text" id="prenom" name="prenom" class="form-control" required placeholder="Jean">
                         </div>
+                    </div>
 
-                        <!-- Champs dynamiques selon le rôle -->
-                        <div id="dynamicFields" style="display:none;"></div>
+                    <div class="form-group">
+                        <label for="email">Email *</label>
+                        <input type="email" id="email" name="email" class="form-control" required placeholder="votre@email.com">
+                    </div>
 
+                    <div class="form-group">
+                        <label for="role">Rôle *</label>
+                        <select id="role" name="role" class="form-control" required onchange="showDynamicFields()">
+                            <option value="">Choisissez votre profil</option>
+                            <option value="admin">👑 Administrateur</option>
+                            <option value="vie_scolaire">📋 Vie Scolaire</option>
+                            <option value="prof">👨‍🏫 Professeur</option>
+                            <option value="parent">👪 Parent</option>
+                            <option value="eleve">🎓 Élève</option>
+                        </select>
+                    </div>
+
+                    <!-- Champs école -->
+                    <div id="ecoleFields" style="display:none;">
                         <div class="form-group">
-                            <label for="password">Mot de passe *</label>
-                            <input type="password" id="password" name="password" class="form-control" required placeholder="Min. 8 caractères" minlength="8">
+                            <label for="nom_ecole">Nom de l'école *</label>
+                            <input type="text" id="nom_ecole" name="nom_ecole" class="form-control" placeholder="Ex: JeanDupont (sans Collège/Lycée)">
                         </div>
-
-                        <div class="form-group">
-                            <label for="confirm_password">Confirmer le mot de passe *</label>
-                            <input type="password" id="confirm_password" name="confirm_password" class="form-control" required placeholder="Répétez le mot de passe" minlength="8">
+                        <div class="form-group" id="codeField" style="display:none;">
+                            <label for="code_etablissement">Code établissement *</label>
+                            <input type="text" id="code_etablissement" name="code_etablissement" class="form-control" placeholder="ETAB_XXXXX" readonly>
+                            <div class="help-text">Code généré automatiquement à partir du nom de l'école</div>
                         </div>
+                    </div>
 
-                        <button type="submit" class="btn btn-primary btn-block">
-                            <span>Créer mon compte</span>
-                            <svg class="btn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-                        </button>
-                    </form>
-                    <p class="auth-link">Déjà un compte ? <a href="/auth/login">Se connecter</a></p>
-                </div>
+                    <!-- Champs dynamiques -->
+                    <div id="dynamicFields" style="display:none;"></div>
+
+                    <div class="form-group">
+                        <label for="password">Mot de passe *</label>
+                        <input type="password" id="password" name="password" class="form-control" required placeholder="Minimum 8 caractères" minlength="8">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirm_password">Confirmer le mot de passe *</label>
+                        <input type="password" id="confirm_password" name="confirm_password" class="form-control" required placeholder="Répétez le mot de passe" minlength="8">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Créer mon compte</button>
+                </form>
+
+                <p class="auth-link">Déjà un compte ? <a href="/auth/login">Se connecter</a></p>
             </div>
         </div>
     </div>
 
     <script>
-        function toggleDarkMode() {
-            document.body.classList.toggle('dark-mode');
-            const isDark = document.body.classList.contains('dark-mode');
-            localStorage.setItem('darkMode', isDark);
-            document.getElementById('sunIcon').style.display = isDark ? 'none' : 'flex';
-            document.getElementById('moonIcon').style.display = isDark ? 'flex' : 'none';
-            document.getElementById('toggleLabel').textContent = isDark ? 'Clair' : 'Sombre';
-        }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            if (localStorage.getItem('darkMode') === 'true') {
-                document.body.classList.add('dark-mode');
-                document.getElementById('sunIcon').style.display = 'none';
-                document.getElementById('moonIcon').style.display = 'flex';
-                document.getElementById('toggleLabel').textContent = 'Clair';
-            }
-        });
-
         function showDynamicFields() {
-            const role = document.getElementById('role').value;
-            const container = document.getElementById('dynamicFields');
-            let html = '';
+            var role = document.getElementById('role').value;
+            var container = document.getElementById('dynamicFields');
+            var ecoleFields = document.getElementById('ecoleFields');
+            var codeField = document.getElementById('codeField');
+            var nomEcole = document.getElementById('nom_ecole');
+            var html = '';
 
-            if (role === 'prof') {
+            // Afficher les champs école
+            ecoleFields.style.display = 'block';
+
+            if (role === 'admin') {
+                codeField.style.display = 'none';
+                nomEcole.required = true;
+                container.style.display = 'none';
+            } else if (role === 'prof') {
+                codeField.style.display = 'block';
+                document.getElementById('code_etablissement').required = true;
+                nomEcole.required = true;
                 html = '<div class="dynamic-fields">' +
-                    '<div class="form-group">' +
-                    '<label for="matiere_principale">Matière principale *</label>' +
+                    '<div class="form-group"><label>Matière principale *</label>' +
                     '<select id="matiere_principale" name="matiere_principale" class="form-control" required>' +
-                    '<option value="">Choisissez votre matière</option>' +
-                    '<option value="Mathématiques">Mathématiques</option>' +
-                    '<option value="Français">Français</option>' +
-                    '<option value="Histoire-Géographie">Histoire-Géographie</option>' +
-                    '<option value="SVT">SVT</option>' +
-                    '<option value="Physique-Chimie">Physique-Chimie</option>' +
-                    '<option value="Anglais">Anglais</option>' +
-                    '<option value="Espagnol">Espagnol</option>' +
-                    '<option value="Allemand">Allemand</option>' +
-                    '<option value="Philosophie">Philosophie</option>' +
-                    '<option value="EPS">EPS</option>' +
-                    '<option value="Arts Plastiques">Arts Plastiques</option>' +
-                    '<option value="Musique">Musique</option>' +
-                    '<option value="Informatique">Informatique</option>' +
-                    '<option value="Économie">Économie</option>' +
-                    '<option value="Autre">Autre</option>' +
+                    '<option value="">Choisissez</option>' +
+                    '<option>Mathématiques</option><option>Français</option><option>Histoire-Géographie</option>' +
+                    '<option>SVT</option><option>Physique-Chimie</option><option>Anglais</option>' +
+                    '<option>Espagnol</option><option>Allemand</option><option>Philosophie</option>' +
+                    '<option>EPS</option><option>Arts Plastiques</option><option>Musique</option>' +
+                    '<option>Informatique</option><option>Économie</option><option>Autre</option>' +
                     '</select></div>' +
-                    '<div class="form-group">' +
-                    '<label for="classes_assignees">Classes assignées</label>' +
-                    '<input type="text" id="classes_assignees" name="classes_assignees" class="form-control" placeholder="ex: 6ème A, 5ème B, 4ème C">' +
-                    '</div></div>';
+                    '<div class="form-group"><label>Classes assignées</label>' +
+                    '<input type="text" name="classes_assignees" class="form-control" placeholder="ex: 6ème A, 5ème B"></div>' +
+                    '</div>';
                 container.style.display = 'block';
             } else if (role === 'eleve') {
+                codeField.style.display = 'block';
+                document.getElementById('code_etablissement').required = true;
+                nomEcole.required = true;
                 html = '<div class="dynamic-fields">' +
-                    '<div class="form-group">' +
-                    '<label for="classe_eleve">Classe *</label>' +
-                    '<select id="classe_eleve" name="classe_eleve" class="form-control" required>' +
-                    '<option value="">Choisissez votre classe</option>' +
-                    '<option value="6ème A">6ème A</option><option value="6ème B">6ème B</option>' +
-                    '<option value="5ème A">5ème A</option><option value="5ème B">5ème B</option>' +
-                    '<option value="4ème A">4ème A</option><option value="4ème B">4ème B</option>' +
-                    '<option value="3ème A">3ème A</option><option value="3ème B">3ème B</option>' +
-                    '<option value="2nde A">2nde A</option><option value="2nde B">2nde B</option>' +
-                    '<option value="1ère A">1ère A</option><option value="1ère B">1ère B</option>' +
-                    '<option value="Tle A">Tle A</option><option value="Tle B">Tle B</option>' +
+                    '<div class="form-group"><label>Classe *</label>' +
+                    '<select name="classe_eleve" class="form-control" required>' +
+                    '<option value="">Choisissez</option>' +
+                    '<option>6ème A</option><option>6ème B</option><option>5ème A</option><option>5ème B</option>' +
+                    '<option>4ème A</option><option>4ème B</option><option>3ème A</option><option>3ème B</option>' +
+                    '<option>2nde A</option><option>2nde B</option><option>1ère A</option><option>1ère B</option>' +
+                    '<option>Tle A</option><option>Tle B</option>' +
                     '</select></div>' +
-                    '<div class="form-group">' +
-                    '<label for="date_naissance">Date de naissance</label>' +
-                    '<input type="date" id="date_naissance" name="date_naissance" class="form-control">' +
-                    '</div></div>';
+                    '<div class="form-group"><label>Date de naissance</label>' +
+                    '<input type="date" name="date_naissance" class="form-control"></div>' +
+                    '</div>';
                 container.style.display = 'block';
             } else if (role === 'parent') {
+                codeField.style.display = 'block';
+                document.getElementById('code_etablissement').required = true;
+                nomEcole.required = true;
                 html = '<div class="dynamic-fields">' +
-                    '<label style="font-weight:600;font-size:0.78rem;margin-bottom:8px;display:block;">Enfant(s) inscrit(s) dans l\'établissement</label>' +
+                    '<label style="font-weight:600;font-size:0.82rem;margin-bottom:8px;display:block;">Enfant(s)</label>' +
                     '<div id="childrenContainer">' +
-                    '<div class="child-row">' +
-                    '<input type="text" name="enfant_nom[]" class="form-control" placeholder="Nom de l\'enfant" required>' +
-                    '<input type="text" name="enfant_prenom[]" class="form-control" placeholder="Prénom de l\'enfant" required>' +
+                    '<div class="form-row" style="margin-bottom:8px;">' +
+                    '<input type="text" name="enfant_nom[]" class="form-control" placeholder="Nom" required>' +
+                    '<input type="text" name="enfant_prenom[]" class="form-control" placeholder="Prénom" required>' +
                     '<select name="enfant_classe[]" class="form-control" required>' +
                     '<option value="">Classe</option>' +
-                    '<option value="6ème A">6ème A</option><option value="6ème B">6ème B</option>' +
-                    '<option value="5ème A">5ème A</option><option value="5ème B">5ème B</option>' +
-                    '<option value="4ème A">4ème A</option><option value="4ème B">4ème B</option>' +
-                    '<option value="3ème A">3ème A</option><option value="3ème B">3ème B</option>' +
-                    '<option value="2nde A">2nde A</option><option value="2nde B">2nde B</option>' +
-                    '<option value="1ère A">1ère A</option><option value="1ère B">1ère B</option>' +
-                    '<option value="Tle A">Tle A</option><option value="Tle B">Tle B</option>' +
-                    '</select>' +
-                    '</div></div>' +
+                    '<option>6ème A</option><option>6ème B</option><option>5ème A</option><option>5ème B</option>' +
+                    '<option>4ème A</option><option>4ème B</option><option>3ème A</option><option>3ème B</option>' +
+                    '<option>2nde A</option><option>2nde B</option><option>1ère A</option><option>1ère B</option>' +
+                    '<option>Tle A</option><option>Tle B</option>' +
+                    '</select></div></div>' +
                     '<button type="button" class="btn-add-child" onclick="addChild()">+ Ajouter un autre enfant</button>' +
                     '</div>';
                 container.style.display = 'block';
-            } else if (role === 'admin' || role === 'vie_scolaire') {
+            } else if (role === 'vie_scolaire') {
+                codeField.style.display = 'block';
+                document.getElementById('code_etablissement').required = true;
+                nomEcole.required = true;
                 container.style.display = 'none';
             } else {
                 container.style.display = 'none';
             }
 
             container.innerHTML = html;
+
+            // Auto-générer le code établissement
+            if (nomEcole) {
+                nomEcole.onkeyup = function() {
+                    var nom = this.value.toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 10);
+                    document.getElementById('code_etablissement').value = nom ? 'ETAB_' + nom.toUpperCase() : '';
+                };
+            }
         }
 
         function addChild() {
-            const container = document.getElementById('childrenContainer');
-            const row = document.createElement('div');
-            row.className = 'child-row';
+            var container = document.getElementById('childrenContainer');
+            var row = document.createElement('div');
+            row.className = 'form-row';
+            row.style.marginBottom = '8px';
             row.innerHTML = `
-                <input type="text" name="enfant_nom[]" class="form-control" placeholder="Nom de l'enfant" required>
-                <input type="text" name="enfant_prenom[]" class="form-control" placeholder="Prénom de l'enfant" required>
+                <input type="text" name="enfant_nom[]" class="form-control" placeholder="Nom" required>
+                <input type="text" name="enfant_prenom[]" class="form-control" placeholder="Prénom" required>
                 <select name="enfant_classe[]" class="form-control" required>
                     <option value="">Classe</option>
-                    <option value="6ème A">6ème A</option><option value="6ème B">6ème B</option>
-                    <option value="5ème A">5ème A</option><option value="5ème B">5ème B</option>
-                    <option value="4ème A">4ème A</option><option value="4ème B">4ème B</option>
-                    <option value="3ème A">3ème A</option><option value="3ème B">3ème B</option>
-                    <option value="2nde A">2nde A</option><option value="2nde B">2nde B</option>
-                    <option value="1ère A">1ère A</option><option value="1ère B">1ère B</option>
-                    <option value="Tle A">Tle A</option><option value="Tle B">Tle B</option>
+                    <option>6ème A</option><option>6ème B</option><option>5ème A</option><option>5ème B</option>
+                    <option>4ème A</option><option>4ème B</option><option>3ème A</option><option>3ème B</option>
+                    <option>2nde A</option><option>2nde B</option><option>1ère A</option><option>1ère B</option>
+                    <option>Tle A</option><option>Tle B</option>
                 </select>
-                <button type="button" class="btn-remove-child" onclick="this.parentElement.remove()">✕</button>
+                <button type="button" onclick="this.parentElement.remove()" style="background:none;border:none;color:#e74c3c;cursor:pointer;font-size:1.2rem;">✕</button>
             `;
             container.appendChild(row);
         }
 
         document.getElementById('registerForm').addEventListener('submit', function(e) {
-            const p1 = document.getElementById('password').value;
-            const p2 = document.getElementById('confirm_password').value;
+            var p1 = document.getElementById('password').value;
+            var p2 = document.getElementById('confirm_password').value;
             if (p1 !== p2) {
                 e.preventDefault();
                 alert('❌ Les mots de passe ne correspondent pas !');
