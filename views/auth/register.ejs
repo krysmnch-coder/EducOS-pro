@@ -439,14 +439,31 @@
                             <label for="role">Rôle *</label>
                             <select id="role" name="role" class="form-control" required onchange="showDynamicFields()">
                                 <option value="">Choisissez votre profil</option>
-                                <option value="admin">👑 Administrateur</option>
-                                <option value="vie_scolaire">📋 Vie Scolaire</option>
-                                <option value="prof">👨‍🏫 Professeur</option>
-                                <option value="parent">👪 Parent</option>
-                                <option value="eleve">🎓 Élève</option>
+                                <option value="admin"> Administrateur</option>
+                                <option value="vie_scolaire"> Vie Scolaire</option>
+                                <option value="prof"> Professeur</option>
+                                <option value="parent" Parent</option>
+                                <option value="eleve"> Élève</option>
                             </select>
                         </div>
-
+                        <div id="adminFields" style="display:none;">
+                            <div class="dynamic-fields">
+                                <h4 style="margin-bottom:12px;"> Informations de l'établissement</h4>
+                                <div class="form-group">
+                                    <label>Nom de l'établissement *</label>
+                                    <input type="text" name="etablissement_nom" class="form-control" placeholder="Ex: Jean Dupont">
+                                </div>
+                                <div class="form-group">
+                                    <label>Adresse</label>
+                                    <input type="text" name="adresse" class="form-control" placeholder="Adresse de l'école">
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group"><label>Téléphone</label><input type="text" name="telephone" class="form-control"></div>
+                                    <div class="form-group"><label>Année scolaire</label><input type="text" name="annee_scolaire" class="form-control" value="2024-2025"></div>
+                                </div>
+                                <div class="form-group"><label>Directeur / Principal</label><input type="text" name="directeur" class="form-control"></div>
+                            </div>
+                        </div>
                         <div id="ecoleFields" style="display:none;">
                             <div class="form-group">
                                 <label for="nom_ecole">Nom de l'école *</label>
@@ -492,9 +509,11 @@
             ecoleFields.style.display = 'block';
 
             if (role === 'admin') {
-                codeField.style.display = 'none';
-                nomEcole.required = true;
-                container.style.display = 'none';
+                document.getElementById('adminFields').style.display = 'block';
+                document.getElementById('ecoleFields').style.display = 'none';
+            } else if (role) {
+                document.getElementById('adminFields').style.display = 'none';
+                document.getElementById('ecoleFields').style.display = 'block';
             } else if (role === 'prof') {
                 codeField.style.display = 'block';
                 document.getElementById('code_etablissement').required = true;
@@ -545,6 +564,7 @@
             if (p1 !== p2) { e.preventDefault(); alert('❌ Les mots de passe ne correspondent pas !'); }
             if (p1.length < 8) { e.preventDefault(); alert('❌ Le mot de passe doit contenir au moins 8 caractères !'); }
         });
+        
     </script>
 </body>
 </html>

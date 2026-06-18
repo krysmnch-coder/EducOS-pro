@@ -1,83 +1,93 @@
 const bcrypt = require('bcryptjs');
+const { globalDb, setEtablissementDb } = require('../config/database');
 const path = require('path');
-const { globalDb, setEtablissementDb, getEtablissementDb } = require('../config/database');
 
 const authController = {
-    // Afficher la page d'inscription
-    registerPage: (req, res) => {
-        res.render('auth/register', { title: 'Inscription | EducOS-pro', error: req.query.error || null });
-    },
-
-    // Traiter l'inscription
-    register: (req, res) => {
-        const { nom, prenom, email, password, confirm_password, role, nom_ecole, code_etablissement } = req.body;
-
-        if (!nom || !prenom || !email || !password || !role) {
-            return res.redirect('/auth/register?error=Tous les champs sont obligatoires');
+    // Inscription admin : crée le compte admin + l'établissement + la base en une seule étape
+    registerAdmin: (req, res) => {
+        const { nom, prenom, email, password, confirm_password, etablissement_nom, adresse, telephone, directeur, annee_scolaire } = req.body;
+        
+        if (!nom || !prenom || !email || !password || !etablissement_nom) {
+            return res.redirect('/auth/register?error=Tous les champs obligatoires (nom, prénom, email, mot de passe, nom établissement)');
         }
         if (password !== confirm_password) return res.redirect('/auth/register?error=Mots de passe différents');
         if (password.length < 8) return res.redirect('/auth/register?error=Minimum 8 caractères');
 
-        // Pour l'admin : inscription dans la base globale
-        if (role === 'admin') {
-            if (!nom_ecole) return res.redirect('/auth/register?error=Nom de l\'école obligatoire');
-            
-            const code = 'ETAB_' + nom_ecole.toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 10);
+        // Vérifier si l'email existe déjà
+        globalDb.get('SELECT id FROM admins WHERE email = ?', [email], (err, user) => {
+            if (user) return res.redirect('/auth/register?error=Email déjà utilisé');
+
+            // Générer le code établissement
+            const nomCode = etablissement_nom.replace(/[^a-zA-Z0-9]/g, '').substring(0, 4).toUpperCase();
+            const code = 'ETAB_' + nomCode + '_' + Date.now().toString(36).toUpperCase().substring(0, 4);
             const dbName = 'educos_' + code.toLowerCase() + '.db';
             
-            globalDb.get('SELECT id FROM admins WHERE email = ?', [email], (err, user) => {
-                if (user) return res.redirect('/auth/register?error=Email déjà utilisé');
+            const dbDir = process.env.RENDER ? '/opt/render/project/src/database' : path.join(__dirname, '..', 'database');
+            const dbPath = path.join(dbDir, dbName);
+
+            // Créer l'établissement dans la base globale
+            globalDb.run('INSERT INTO etablissements (code, nom, adresse, telephone, directeur, annee_scolaire, db_name) VALUES (?,?,?,?,?,?,?)',
+                [code, etablissement_nom, adresse||'', telephone||'', directeur||'', annee_scolaire||'2024-2025', dbName], function(err) {
                 
+                if (err) return res.redirect('/auth/register?error=Erreur création établissement');
+
+                // Créer la base de données de l'établissement
+                setEtablissementDb(dbPath);
+
+                // Créer le compte admin dans la base globale
                 bcrypt.hash(password, 10, (err, hash) => {
-                    if (err) return res.redirect('/auth/register?error=Erreur');
-                    
+                    if (err) return res.redirect('/auth/register?error=Erreur serveur');
+
                     globalDb.run('INSERT INTO admins (nom, prenom, email, password, etablissement_code) VALUES (?,?,?,?,?)',
                         [nom, prenom, email, hash, code], function(err) {
-                            if (err) return res.redirect('/auth/register?error=Erreur inscription admin');
+                            if (err) return res.redirect('/auth/register?error=Erreur création compte admin');
+
+                            // Message de succès avec le code
+                            const message = '✅ COMPTE ADMIN ET ÉTABLISSEMENT CRÉÉS !\n\n' +
+                                '🏫 Établissement : ' + etablissement_nom + '\n' +
+                                '🔑 Code établissement : ' + code + '\n' +
+                                '📁 Base de données : ' + dbName + '\n\n' +
+                                '⚠️ Gardez ce code précieusement ! Il sera demandé à vos utilisateurs pour s\'inscrire.';
                             
-                            // Créer l'établissement dans la table globale
-                            globalDb.run('INSERT OR IGNORE INTO etablissements (code, nom, db_name) VALUES (?,?,?)',
-                                [code, nom_ecole, dbName]);
-                            
-                            // Créer la base établissement
-                            setEtablissementDb(dbName);
-                            
-                            res.redirect('/auth/login?success=Compte admin créé ! Votre code établissement : ' + code);
+                            res.redirect('/auth/login?success=' + encodeURIComponent(message));
                         });
                 });
             });
-            return;
-        }
+        });
+    },
 
-        // Pour les autres rôles : vérifier le code établissement
-        if (!code_etablissement || !nom_ecole) {
-            return res.redirect('/auth/register?error=Nom d\'école et code établissement obligatoires');
-        }
+    // Inscription utilisateur standard (dans la base établissement)
+    register: (req, res) => {
+        const { nom, prenom, email, password, confirm_password, role, etablissement_nom, etablissement_code } = req.body;
 
-        // Vérifier que le code correspond bien au nom d'école
-        const codeAttendu = 'ETAB_' + nom_ecole.toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 10);
-        if (code_etablissement.toUpperCase() !== codeAttendu) {
-            return res.redirect('/auth/register?error=Code établissement invalide pour cette école');
-        }
+        if (!nom || !prenom || !email || !password || !role) return res.redirect('/auth/register?error=Tous les champs obligatoires');
+        if (password !== confirm_password) return res.redirect('/auth/register?error=Mots de passe différents');
+        if (password.length < 8) return res.redirect('/auth/register?error=Minimum 8 caractères');
+        if (role !== 'admin' && (!etablissement_nom || !etablissement_code)) return res.redirect('/auth/register?error=Nom de l\'école et code établissement obligatoires');
 
-        // Vérifier que l'établissement existe
-        globalDb.get('SELECT * FROM etablissements WHERE code = ?', [code_etablissement.toUpperCase()], (err, etab) => {
-            if (!etab) return res.redirect('/auth/register?error=Établissement non trouvé');
-
-            const dbName = etab.db_name;
-            const etabDb = setEtablissementDb(dbName);
+        const code = etablissement_code ? etablissement_code.trim().toUpperCase() : '';
+        
+        // Vérifier le code établissement
+        globalDb.get('SELECT * FROM etablissements WHERE code = ?', [code], (err, etab) => {
+            if (!etab) return res.redirect('/auth/register?error=Code établissement invalide. Contactez votre administration.');
             
-            if (!etabDb) return res.redirect('/auth/register?error=Erreur base de données établissement');
+            // Vérifier que le nom correspond
+            if (!etab.nom.toLowerCase().includes(etablissement_nom.toLowerCase().trim())) {
+                return res.redirect('/auth/register?error=Le nom de l\'école ne correspond pas au code.');
+            }
 
-            // Vérifier si l'email existe déjà dans cet établissement
-            etabDb.get('SELECT id FROM users WHERE email = ?', [email], (err, user) => {
-                if (user) return res.redirect('/auth/register?error=Email déjà utilisé dans cet établissement');
+            const dbDir = process.env.RENDER ? '/opt/render/project/src/database' : path.join(__dirname, '..', 'database');
+            const dbPath = path.join(dbDir, etab.db_name);
+            const db = setEtablissementDb(dbPath);
+            if (!db) return res.redirect('/auth/register?error=Erreur base de données');
+
+            db.get('SELECT id FROM users WHERE email = ?', [email], (err, user) => {
+                if (user) return res.redirect('/auth/register?error=Email déjà utilisé');
 
                 bcrypt.hash(password, 10, (err, hash) => {
-                    if (err) return res.redirect('/auth/register?error=Erreur');
-
                     const matiere_principale = req.body.matiere_principale || null;
-                    const classes_assignees = req.body.classes_assignees || req.body.classe_eleve || null;
+                    const classes_assignees = req.body.classes_assignees || null;
+                    const classe_eleve = req.body.classe_eleve || null;
                     const date_naissance = req.body.date_naissance || null;
 
                     if (role === 'parent') {
@@ -86,28 +96,34 @@ const authController = {
                         const enfantsClasses = req.body.enfant_classe ? (Array.isArray(req.body.enfant_classe) ? req.body.enfant_classe : [req.body.enfant_classe]) : [];
                         const enfants = [];
                         for (let i = 0; i < enfantsNoms.length; i++) {
-                            if (enfantsNoms[i] && enfantsPrenoms[i]) {
-                                enfants.push({ nom: enfantsNoms[i], prenom: enfantsPrenoms[i], classe: enfantsClasses[i] || '' });
-                            }
+                            if (enfantsNoms[i] && enfantsPrenoms[i]) enfants.push({ nom: enfantsNoms[i], prenom: enfantsPrenoms[i], classe: enfantsClasses[i] || '' });
                         }
-                        etabDb.run('INSERT INTO users (nom, prenom, email, password, role, classes_assignees) VALUES (?,?,?,?,?,?)',
-                            [nom, prenom, email, hash, role, JSON.stringify(enfants)], function(err) {
-                                if (err) return res.redirect('/auth/register?error=Erreur inscription');
-                                res.redirect('/auth/login?success=Compte parent créé !');
-                            });
+                        db.run('INSERT INTO users (nom, prenom, email, password, role, classes_assignees) VALUES (?,?,?,?,?,?)', [nom, prenom, email, hash, role, JSON.stringify(enfants)], function(err) {
+                            if (err) return res.redirect('/auth/register?error=Erreur inscription');
+                            res.redirect('/auth/login?success=Compte créé avec succès !');
+                        });
+                    } else if (role === 'eleve') {
+                        db.run('INSERT INTO users (nom, prenom, email, password, role, classes_assignees, date_naissance) VALUES (?,?,?,?,?,?,?)', [nom, prenom, email, hash, role, classe_eleve, date_naissance], function(err) {
+                            if (err) return res.redirect('/auth/register?error=Erreur inscription');
+                            res.redirect('/auth/login?success=Compte créé avec succès !');
+                        });
+                    } else if (role === 'prof') {
+                        db.run('INSERT INTO users (nom, prenom, email, password, role, matiere_principale, classes_assignees) VALUES (?,?,?,?,?,?,?)', [nom, prenom, email, hash, role, matiere_principale, classes_assignees], function(err) {
+                            if (err) return res.redirect('/auth/register?error=Erreur inscription');
+                            res.redirect('/auth/login?success=Compte créé avec succès !');
+                        });
                     } else {
-                        etabDb.run('INSERT INTO users (nom, prenom, email, password, role, matiere_principale, classes_assignees, date_naissance) VALUES (?,?,?,?,?,?,?,?)',
-                            [nom, prenom, email, hash, role, matiere_principale, classes_assignees, date_naissance], function(err) {
-                                if (err) return res.redirect('/auth/register?error=Erreur inscription');
-                                res.redirect('/auth/login?success=Compte créé !');
-                            });
+                        db.run('INSERT INTO users (nom, prenom, email, password, role) VALUES (?,?,?,?,?)', [nom, prenom, email, hash, role], function(err) {
+                            if (err) return res.redirect('/auth/register?error=Erreur inscription');
+                            res.redirect('/auth/login?success=Compte créé avec succès !');
+                        });
                     }
                 });
             });
         });
     },
 
-    // Connexion
+    // Login
     login: (req, res) => {
         const { email, password, role } = req.body;
         if (!email || !password) return res.redirect('/auth/login?error=Email et mot de passe requis');
@@ -120,36 +136,57 @@ const authController = {
                     if (err || !isMatch) return res.redirect('/auth/login?error=Email ou mot de passe incorrect');
                     globalDb.run('UPDATE admins SET derniere_connexion = CURRENT_TIMESTAMP WHERE id = ?', [user.id]);
                     
-                    // Charger la base établissement
-                    const dbName = 'educos_' + user.etablissement_code.toLowerCase() + '.db';
-                    setEtablissementDb(dbName);
+                    // Charger la base établissement de l'admin
+                    if (user.etablissement_code) {
+                        globalDb.get('SELECT db_name FROM etablissements WHERE code = ?', [user.etablissement_code], (err, etab) => {
+                            if (etab) {
+                                const dbDir = process.env.RENDER ? '/opt/render/project/src/database' : path.join(__dirname, '..', 'database');
+                                setEtablissementDb(path.join(dbDir, etab.db_name));
+                            }
+                        });
+                    }
                     
-                    req.session.user = {
-                        id: user.id, email: user.email, nom: user.nom, prenom: user.prenom,
-                        role: 'admin', etablissement_code: user.etablissement_code
-                    };
+                    req.session.user = { id: user.id, email: user.email, nom: user.nom, prenom: user.prenom, role: 'admin', etablissement_code: user.etablissement_code || '' };
                     res.redirect('/dashboard');
                 });
             });
-            return;
-        }
+        } else {
+            // Autres utilisateurs : chercher dans toutes les bases établissements
+            globalDb.all('SELECT code, db_name FROM etablissements WHERE actif = 1', [], (err, etabs) => {
+                if (err || !etabs.length) return res.redirect('/auth/login?error=Aucun établissement trouvé');
+                
+                const dbDir = process.env.RENDER ? '/opt/render/project/src/database' : path.join(__dirname, '..', 'database');
+                let found = false;
+                let checkedCount = 0;
 
-        // Autres rôles : chercher dans la base établissement
-        const etablissementDb = getEtablissementDb();
-        if (!etablissementDb) return res.redirect('/auth/login?error=Base établissement non initialisée');
-
-        etablissementDb.get('SELECT * FROM users WHERE email = ? AND role = ? AND compte_actif = 1', [email, role], (err, user) => {
-            if (err || !user) return res.redirect('/auth/login?error=Email ou mot de passe incorrect');
-            bcrypt.compare(password, user.password, (err, isMatch) => {
-                if (err || !isMatch) return res.redirect('/auth/login?error=Email ou mot de passe incorrect');
-                etablissementDb.run('UPDATE users SET derniere_connexion = CURRENT_TIMESTAMP WHERE id = ?', [user.id]);
-                req.session.user = {
-                    id: user.id, email: user.email, nom: user.nom, prenom: user.prenom,
-                    role: user.role, etablissement_code: req.session.etablissement_code || ''
-                };
-                res.redirect('/dashboard');
+                etabs.forEach((etab) => {
+                    const dbPath = path.join(dbDir, etab.db_name);
+                    const etabDb = new (require('sqlite3').verbose()).Database(dbPath);
+                    
+                    etabDb.get('SELECT * FROM users WHERE email = ? AND compte_actif = 1', [email], (err, user) => {
+                        checkedCount++;
+                        if (user && !found) {
+                            found = true;
+                            bcrypt.compare(password, user.password, (err, isMatch) => {
+                                if (err || !isMatch) {
+                                    etabDb.close();
+                                    return res.redirect('/auth/login?error=Email ou mot de passe incorrect');
+                                }
+                                etabDb.close();
+                                setEtablissementDb(dbPath);
+                                req.session.user = { id: user.id, email: user.email, nom: user.nom, prenom: user.prenom, role: user.role, etablissement_code: etab.code, etablissement_db: etab.db_name };
+                                res.redirect('/dashboard');
+                            });
+                        } else {
+                            etabDb.close();
+                            if (checkedCount === etabs.length && !found) {
+                                res.redirect('/auth/login?error=Email ou mot de passe incorrect');
+                            }
+                        }
+                    });
+                });
             });
-        });
+        }
     },
 
     logout: (req, res) => {

@@ -34,4 +34,6 @@ router.get('/facebook/callback', passport.authenticate('facebook', { failureRedi
 // Logout
 router.get('/logout', authController.logout);
 
+router.post('/register-admin', authController.registerAdmin);
+
 module.exports = router;
