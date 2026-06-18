@@ -9,7 +9,6 @@ module.exports = function(upload) {
     router.use(hasRole('admin'));
 
     router.get('/api/stats', adminController.getStats);
-    router.get('/api/chart-data', adminController.getChartData);
     router.get('/api/users', adminController.getUsers);
     router.post('/api/users', adminController.createUser);
     router.put('/api/users/:id', adminController.updateUser);
@@ -26,7 +25,6 @@ module.exports = function(upload) {
     router.put('/api/paiements/:id', adminController.updatePaiement);
     router.delete('/api/paiements/:id', adminController.deletePaiement);
     router.get('/api/messages', adminController.getMessages);
-    router.get('/api/messages/:id', adminController.getMessageDetail);
     router.post('/api/messages', upload.single('fichier'), adminController.sendMessage);
     router.get('/api/users-list', adminController.getUsersList);
     router.get('/api/notifications', adminController.getNotifications);
