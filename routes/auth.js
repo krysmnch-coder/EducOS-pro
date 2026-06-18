@@ -46,5 +46,5 @@ router.get('/facebook/callback', passport.authenticate('facebook', { failureRedi
 
 // Déconnexion
 router.get('/logout', authController.logout);
-
+router.get('/api/ecoles', authController.getEcoles);
 module.exports = router;

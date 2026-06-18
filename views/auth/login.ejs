@@ -6,149 +6,121 @@
     <title><%= title %></title>
     <link rel="stylesheet" href="/css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --bleu-klein: #002FA7; --blanc: #ffffff; --noir: #1a1a1a; --gris: #666666; --gris-clair: #999999; --gris-tres-clair: #e0e0e0; --gris-background: #f8f9fa; --rouge: #e74c3c; --rouge-clair: #fee; --vert: #27ae60; --vert-clair: #efe; --border-radius: 14px; --border-radius-sm: 8px; --shadow-lg: 0 8px 40px rgba(0,0,0,0.1); }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; background-color:var(--blanc); color:var(--noir); line-height:1.5; }
+        .theme-toggle { position:fixed; top:16px; right:16px; z-index:1000; }
+        .toggle-switch { display:flex; align-items:center; gap:6px; background:var(--gris-background); padding:5px 10px; border-radius:30px; border:1.5px solid var(--gris-tres-clair); cursor:pointer; }
+        .toggle-icon { width:16px; height:16px; }
+        .toggle-label { font-size:0.7rem; font-weight:600; color:var(--gris); }
+        .auth-wrapper { min-height:100vh; display:flex; align-items:center; justify-content:center; background-color:var(--blanc); background-image:radial-gradient(circle at 15% 25%, rgba(0,47,167,0.02) 0%, transparent 50%), radial-gradient(circle at 85% 75%, rgba(0,47,167,0.02) 0%, transparent 50%); padding:16px; }
+        .auth-container { background:var(--blanc); border-radius:20px; box-shadow:var(--shadow-lg); width:100%; max-width:900px; min-height:480px; overflow:hidden; display:flex; border:1px solid var(--gris-tres-clair); }
+        .auth-left { flex:0.9; display:flex; align-items:center; justify-content:center; padding:30px 25px; background:var(--bleu-klein); position:relative; overflow:hidden; }
+        .auth-left-content { position:relative; z-index:2; text-align:center; color:var(--blanc); background:rgba(255,255,255,0.08); backdrop-filter:blur(12px); border-radius:18px; padding:30px 22px; border:1px solid rgba(255,255,255,0.18); max-width:280px; }
+        .logo-icon { width:45px; height:45px; color:white; animation:float 3s ease-in-out infinite; }
+        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+        .auth-left-content h1 { font-size:2rem; font-weight:700; }
+        .text-highlight { color:#8ab4ff; font-weight:300; }
+        .tagline { font-size:0.85rem; opacity:0.85; margin-bottom:22px; }
+        .features { display:flex; flex-direction:column; gap:8px; }
+        .feature-item { display:flex; align-items:center; gap:10px; padding:8px 12px; background:rgba(255,255,255,0.06); border-radius:10px; border:1px solid rgba(255,255,255,0.1); }
+        .feature-item svg { width:16px; height:16px; }
+        .feature-item span { font-size:0.78rem; }
+        .auth-right { flex:1.2; display:flex; align-items:center; justify-content:center; padding:25px 30px; }
+        .auth-form-container { width:100%; max-width:380px; }
+        .auth-form-container h2 { font-size:1.5rem; font-weight:700; margin-bottom:2px; }
+        .subtitle { color:var(--gris); margin-bottom:18px; font-size:0.82rem; }
+        .alert { display:flex; align-items:center; gap:8px; padding:10px 12px; border-radius:var(--border-radius-sm); margin-bottom:14px; font-size:0.8rem; font-weight:500; }
+        .alert-danger { background:var(--rouge-clair); color:var(--rouge); }
+        .alert-success { background:var(--vert-clair); color:var(--vert); }
+        .alert svg { width:16px; height:16px; }
+        .social-buttons { display:flex; flex-direction:column; gap:8px; margin-bottom:4px; }
+        .btn-social { width:100%; padding:10px 16px; border-radius:var(--border-radius-sm); font-weight:500; font-size:0.82rem; display:flex; align-items:center; justify-content:center; gap:10px; border:1.5px solid var(--gris-tres-clair); background:var(--blanc); color:var(--noir); cursor:pointer; text-decoration:none; }
+        .btn-social:hover { transform:translateY(-1px); }
+        .social-icon { width:18px; height:18px; }
+        .separator { display:flex; align-items:center; text-align:center; margin:14px 0; }
+        .separator::before, .separator::after { content:''; flex:1; border-bottom:1px solid var(--gris-tres-clair); }
+        .separator span { padding:0 12px; font-size:0.75rem; color:var(--gris); }
+        .auth-form { display:flex; flex-direction:column; gap:12px; }
+        .form-group { display:flex; flex-direction:column; gap:5px; }
+        .form-group label { font-weight:600; font-size:0.78rem; color:#333; }
+        .form-control { width:100%; padding:10px 12px; border:1.5px solid var(--gris-tres-clair); border-radius:var(--border-radius-sm); font-size:0.85rem; font-family:'Inter',sans-serif; background:var(--gris-background); outline:none; }
+        .form-control:focus { border-color:var(--bleu-klein); background:var(--blanc); }
+        select.form-control { appearance:none; background-image:url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23999999' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat:no-repeat; background-position:right 10px center; background-size:16px; padding-right:32px; cursor:pointer; }
+        .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:12px 24px; border:none; border-radius:var(--border-radius-sm); font-size:0.9rem; font-weight:600; cursor:pointer; font-family:'Inter',sans-serif; }
+        .btn-primary { background:var(--bleu-klein); color:var(--blanc); }
+        .btn-primary:hover { background:#003fd6; }
+        .btn-block { width:100%; }
+        .auth-link { text-align:center; margin-top:16px; font-size:0.8rem; color:var(--gris); }
+        .auth-link a { color:var(--bleu-klein); text-decoration:none; font-weight:700; }
+        .info-banner { background:#fff3cd; border:1px solid #ffc107; border-radius:8px; padding:10px 14px; margin-bottom:12px; font-size:0.75rem; color:#856404; }
+        @media (max-width:768px) { .auth-container { flex-direction:column; } .auth-left { padding:22px 18px; } .auth-right { padding:20px 18px; } }
+    </style>
 </head>
 <body>
-    <!-- Toggle Mode Sombre/Clair -->
     <div class="theme-toggle">
         <div class="toggle-switch" onclick="toggleDarkMode()">
-            <div class="toggle-icon sun-icon" id="sunIcon">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                    <circle cx="12" cy="12" r="5"/>
-                    <line x1="12" y1="1" x2="12" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                    <line x1="12" y1="21" x2="12" y2="23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                    <line x1="1" y1="12" x2="3" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                    <line x1="21" y1="12" x2="23" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                </svg>
-            </div>
-            <div class="toggle-icon moon-icon" id="moonIcon" style="display: none;">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-                </svg>
-            </div>
+            <div class="toggle-icon sun-icon" id="sunIcon"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="5"/></svg></div>
+            <div class="toggle-icon moon-icon" id="moonIcon" style="display:none;"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></div>
             <span class="toggle-label" id="toggleLabel">Sombre</span>
         </div>
     </div>
 
     <div class="auth-wrapper">
         <div class="auth-container">
-            <!-- Partie gauche : Bleu Klein glassmorphism -->
             <div class="auth-left">
                 <div class="auth-left-content">
-                    <div class="logo-container">
-                        <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
-                            <path d="M6 12v5c0 2 4 3 6 3s6-1 6-3v-5"/>
-                        </svg>
-                    </div>
+                    <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 2 4 3 6 3s6-1 6-3v-5"/></svg>
                     <h1>EducOS<span class="text-highlight">-pro</span></h1>
                     <p class="tagline">Gestion scolaire<br>nouvelle génération</p>
                     <div class="features">
-                        <div class="feature-item">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                            </svg>
-                            <span>Multi-plateforme</span>
-                        </div>
-                        <div class="feature-item">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                            </svg>
-                            <span>Sécurisé</span>
-                        </div>
-                        <div class="feature-item">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <circle cx="12" cy="12" r="10"/>
-                                <polyline points="12 6 12 12 16 14"/>
-                            </svg>
-                            <span>24/7</span>
-                        </div>
+                        <div class="feature-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/></svg><span>Multi-plateforme</span></div>
+                        <div class="feature-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/></svg><span>Sécurisé</span></div>
+                        <div class="feature-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg><span>24/7</span></div>
                     </div>
                 </div>
             </div>
-            
-            <!-- Partie droite : Formulaire connexion -->
             <div class="auth-right">
                 <div class="auth-form-container">
                     <h2>Connexion</h2>
                     <p class="subtitle">Accédez à votre espace</p>
-                    
-                    <% if (locals.error) { %>
-                        <div class="alert alert-danger">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <circle cx="12" cy="12" r="10"/>
-                                <line x1="12" y1="8" x2="12" y2="12"/>
-                                <line x1="12" y1="16" x2="12.01" y2="16"/>
-                            </svg>
-                            <span><%= error %></span>
-                        </div>
-                    <% } %>
-                    <% if (locals.success) { %>
-                        <div class="alert alert-success">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                                <polyline points="22 4 12 14.01 9 11.01"/>
-                            </svg>
-                            <span><%= success %></span>
-                        </div>
-                    <% } %>
 
-                    <!-- Boutons sociaux -->
-                    <% if (false) { %>
-<div class="social-buttons">
-    <a href="/auth/google" class="btn-social btn-google">...</a>
-    <a href="/auth/facebook" class="btn-social btn-facebook">...</a>
-</div>
-<div class="separator"><span>ou</span></div>
-<% } %>
+                    <% if (locals.error) { %><div class="alert alert-danger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg><span><%= error %></span></div><% } %>
+                    <% if (locals.success) { %><div class="alert alert-success"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span><%= success %></span></div><% } %>
 
-                    <!-- Formulaire connexion classique -->
+                    <div class="social-buttons">
+                        <a href="/auth/google" class="btn-social btn-google"><svg class="social-icon" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg><span>Google</span></a>
+                        <a href="/auth/facebook" class="btn-social btn-facebook"><svg class="social-icon" viewBox="0 0 24 24"><path fill="#1877F2" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg><span>Facebook</span></a>
+                    </div>
+                    <div class="separator"><span>ou</span></div>
+
                     <form action="/auth/login" method="POST" class="auth-form">
                         <div class="form-group">
-                            <label for="email">Email</label>
-                            <div class="input-wrapper">
-                                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                                    <polyline points="22,6 12,13 2,6"/>
-                                </svg>
-                                <input type="email" id="email" name="email" class="form-control" required placeholder="votre@email.com">
+                            <label>Rôle *</label>
+                            <select name="role" class="form-control" required onchange="toggleEcoleLogin()">
+                                <option value="">Sélectionnez votre profil</option>
+                                <option value="admin">👑 Administrateur</option>
+                                <option value="vie_scolaire">📋 Vie Scolaire</option>
+                                <option value="prof">👨‍🏫 Professeur</option>
+                                <option value="parent">👪 Parent</option>
+                                <option value="eleve">🎓 Élève</option>
+                            </select>
+                        </div>
+
+                        <div id="ecoleLogin" style="display:none;">
+                            <div class="form-group">
+                                <label>Sélectionnez votre école *</label>
+                                <select id="etablissement_id_login" name="etablissement_id" class="form-control">
+                                    <option value="">Choisissez une école...</option>
+                                </select>
                             </div>
                         </div>
-                        <div class="form-group">
-                            <label for="password">Mot de passe</label>
-                            <div class="input-wrapper">
-                                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                                </svg>
-                                <input type="password" id="password" name="password" class="form-control" required placeholder="••••••••">
-                                <button type="button" class="toggle-password" onclick="togglePassword()">
-                                    <svg id="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                                        <circle cx="12" cy="12" r="3"/>
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="form-options">
-                            <label class="remember-me">
-                                <input type="checkbox" name="remember">
-                                <span class="checkmark"></span>
-                                Se souvenir
-                            </label>
-                            <a href="#" class="forgot-password">Oublié ?</a>
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-block">
-                            <span>Se connecter</span>
-                            <svg class="btn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <line x1="5" y1="12" x2="19" y2="12"/>
-                                <polyline points="12 5 19 12 12 19"/>
-                            </svg>
-                        </button>
+
+                        <div class="form-group"><label>Email *</label><input type="email" name="email" class="form-control" required placeholder="votre@email.com"></div>
+                        <div class="form-group"><label>Mot de passe *</label><input type="password" name="password" class="form-control" required placeholder="••••••••"></div>
+
+                        <button type="submit" class="btn btn-primary btn-block">Se connecter</button>
                     </form>
                     <p class="auth-link">Pas de compte ? <a href="/auth/register">S'inscrire</a></p>
                 </div>
@@ -159,31 +131,27 @@
     <script>
         function toggleDarkMode() {
             document.body.classList.toggle('dark-mode');
-            const isDark = document.body.classList.contains('dark-mode');
+            var isDark = document.body.classList.contains('dark-mode');
             localStorage.setItem('darkMode', isDark);
             document.getElementById('sunIcon').style.display = isDark ? 'none' : 'flex';
             document.getElementById('moonIcon').style.display = isDark ? 'flex' : 'none';
             document.getElementById('toggleLabel').textContent = isDark ? 'Clair' : 'Sombre';
         }
-        window.addEventListener('DOMContentLoaded', () => {
-            if (localStorage.getItem('darkMode') === 'true') {
-                document.body.classList.add('dark-mode');
-                document.getElementById('sunIcon').style.display = 'none';
-                document.getElementById('moonIcon').style.display = 'flex';
-                document.getElementById('toggleLabel').textContent = 'Clair';
-            }
-        });
-        function togglePassword() {
-            const p = document.getElementById('password');
-            const e = document.getElementById('eye-icon');
-            if (p.type === 'password') {
-                p.type = 'text';
-                e.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
-            } else {
-                p.type = 'password';
-                e.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
-            }
+        if (localStorage.getItem('darkMode') === 'true') { document.body.classList.add('dark-mode'); document.getElementById('sunIcon').style.display = 'none'; document.getElementById('moonIcon').style.display = 'flex'; }
+
+        function toggleEcoleLogin() {
+            var role = document.querySelector('select[name="role"]').value;
+            document.getElementById('ecoleLogin').style.display = (role && role !== 'admin') ? 'block' : 'none';
         }
+
+        async function loadEcolesLogin() {
+            var r = await fetch('/auth/api/ecoles');
+            var ecoles = await r.json();
+            var select = document.getElementById('etablissement_id_login');
+            select.innerHTML = '<option value="">Choisissez une école...</option>' + ecoles.map(function(e) { return '<option value="' + e.id + '">' + e.nom + ' (' + e.code + ')</option>'; }).join('');
+        }
+
+        loadEcolesLogin();
     </script>
 </body>
 </html>
