@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= title %></title>
-    <link rel="stylesheet" href="/css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bleu-klein: #002FA7;
+            --bleu-klein-light: #003fd6;
             --noir: #1a1a1a;
             --gris: #666666;
             --gris-clair: #999999;
@@ -19,10 +19,10 @@
             --rouge-clair: #fee;
             --vert: #27ae60;
             --vert-clair: #efe;
-            --border-radius: 12px;
+            --border-radius: 14px;
             --border-radius-sm: 8px;
-            --shadow: 0 4px 24px rgba(0,0,0,0.08);
-            --transition: all 0.3s ease;
+            --shadow: 0 8px 32px rgba(0,0,0,0.08);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -32,60 +32,177 @@
             background-color: #f0f2f5;
             color: var(--noir);
             line-height: 1.5;
+            min-height: 100vh;
         }
 
         .auth-wrapper {
+            display: flex;
             min-height: 100vh;
+        }
+
+        /* Partie gauche - Bleu Klein */
+        .auth-left {
+            flex: 1;
+            background: linear-gradient(135deg, var(--bleu-klein) 0%, #1a3a8a 100%);
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
-        }
-
-        .auth-container {
-            background: var(--blanc);
-            border-radius: 20px;
-            box-shadow: var(--shadow);
-            width: 100%;
-            max-width: 500px;
             padding: 40px;
+            position: relative;
+            overflow: hidden;
         }
 
-        .auth-logo {
+        .auth-left::before {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+            top: -100px;
+            right: -100px;
+            animation: float1 8s ease-in-out infinite;
+        }
+
+        .auth-left::after {
+            content: '';
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 50%;
+            bottom: -50px;
+            left: -50px;
+            animation: float2 6s ease-in-out infinite;
+        }
+
+        @keyframes float1 {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(30px, -30px); }
+        }
+
+        @keyframes float2 {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(-20px, 20px); }
+        }
+
+        .auth-left-content {
             text-align: center;
-            margin-bottom: 24px;
+            color: white;
+            position: relative;
+            z-index: 1;
         }
 
-        .auth-logo h1 {
-            font-size: 2rem;
+        .auth-logo-animated {
+            animation: fadeInDown 0.8s ease;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .auth-left-content h1 {
+            font-size: 3rem;
             font-weight: 700;
-            color: var(--bleu-klein);
+            letter-spacing: -1px;
+            animation: fadeInDown 0.8s ease 0.2s both;
         }
 
-        .auth-logo h1 span {
+        .auth-left-content h1 span {
             font-weight: 300;
-            color: var(--gris-clair);
+            color: #8ab4ff;
+        }
+
+        .auth-left-content .tagline {
+            font-size: 1.1rem;
+            opacity: 0.85;
+            margin-top: 12px;
+            animation: fadeInDown 0.8s ease 0.4s both;
+        }
+
+        .features {
+            margin-top: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 16px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: var(--transition);
+            animation: fadeInUp 0.6s ease both;
+        }
+
+        .feature-item:nth-child(1) { animation-delay: 0.6s; }
+        .feature-item:nth-child(2) { animation-delay: 0.7s; }
+        .feature-item:nth-child(3) { animation-delay: 0.8s; }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .feature-item:hover {
+            background: rgba(255,255,255,0.15);
+            transform: translateX(6px);
+        }
+
+        .feature-item svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+
+        .feature-item span {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        /* Partie droite - Formulaire */
+        .auth-right {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            background: var(--blanc);
+        }
+
+        .auth-form-container {
+            width: 100%;
+            max-width: 440px;
+            animation: fadeIn 0.6s ease 0.3s both;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         .auth-form-container h2 {
-            font-size: 1.4rem;
+            font-size: 1.5rem;
             font-weight: 700;
             margin-bottom: 4px;
-            text-align: center;
         }
 
         .subtitle {
             color: var(--gris);
-            margin-bottom: 20px;
-            font-size: 0.85rem;
-            text-align: center;
+            margin-bottom: 24px;
+            font-size: 0.88rem;
         }
 
         .alert {
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 10px 12px;
+            padding: 10px 14px;
             border-radius: var(--border-radius-sm);
             margin-bottom: 16px;
             font-size: 0.82rem;
@@ -108,10 +225,10 @@
 
         .form-control {
             width: 100%;
-            padding: 10px 14px;
+            padding: 11px 14px;
             border: 2px solid var(--gris-tres-clair);
             border-radius: var(--border-radius-sm);
-            font-size: 0.88rem;
+            font-size: 0.9rem;
             font-family: 'Inter', sans-serif;
             background: var(--gris-background);
             transition: var(--transition);
@@ -122,6 +239,7 @@
             border-color: var(--bleu-klein);
             background: var(--blanc);
             box-shadow: 0 0 0 3px rgba(0,47,167,0.1);
+            transform: translateY(-1px);
         }
 
         select.form-control {
@@ -134,14 +252,8 @@
             cursor: pointer;
         }
 
-        .form-row {
-            display: flex;
-            gap: 10px;
-        }
-
-        .form-row .form-group {
-            flex: 1;
-        }
+        .form-row { display: flex; gap: 10px; }
+        .form-row .form-group { flex: 1; }
 
         .dynamic-fields {
             background: var(--gris-background);
@@ -149,28 +261,32 @@
             padding: 14px;
             margin-top: 6px;
             border: 1px dashed #d0d0d0;
+            animation: slideDown 0.3s ease;
         }
 
-        .help-text {
-            font-size: 0.72rem;
-            color: var(--gris-clair);
-            margin-top: 4px;
+        @keyframes slideDown {
+            from { opacity: 0; max-height: 0; }
+            to { opacity: 1; max-height: 500px; }
         }
+
+        .help-text { font-size: 0.72rem; color: var(--gris-clair); margin-top: 4px; }
 
         .btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
-            padding: 12px 24px;
+            padding: 13px 24px;
             border: none;
             border-radius: var(--border-radius-sm);
-            font-size: 0.9rem;
+            font-size: 0.92rem;
             font-weight: 600;
             cursor: pointer;
             transition: var(--transition);
             font-family: 'Inter', sans-serif;
             width: 100%;
+            position: relative;
+            overflow: hidden;
         }
 
         .btn-primary {
@@ -178,10 +294,20 @@
             color: var(--blanc);
         }
 
-        .btn-primary:hover {
-            background-color: #003fd6;
-            box-shadow: 0 4px 16px rgba(0,47,167,0.2);
+        .btn-primary::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
         }
+
+        .btn-primary:hover::after { left: 100%; }
+        .btn-primary:hover { background-color: #003fd6; box-shadow: 0 6px 20px rgba(0,47,167,0.25); transform: translateY(-1px); }
+        .btn-primary:active { transform: translateY(0); }
 
         .btn-add-child {
             background: none;
@@ -194,7 +320,10 @@
             font-weight: 600;
             font-family: 'Inter', sans-serif;
             margin-top: 8px;
+            transition: var(--transition);
         }
+
+        .btn-add-child:hover { background: #f0f4ff; }
 
         .auth-link {
             text-align: center;
@@ -203,98 +332,150 @@
             font-size: 0.85rem;
         }
 
-        .auth-link a {
-            color: var(--bleu-klein);
-            text-decoration: none;
-            font-weight: 700;
+        .auth-link a { color: var(--bleu-klein); text-decoration: none; font-weight: 700; }
+        .auth-link a:hover { text-decoration: underline; }
+
+        /* Mobile header logo */
+        .mobile-logo {
+            display: none;
+            text-align: center;
+            padding: 20px 0 10px;
         }
 
-        .auth-link a:hover {
-            text-decoration: underline;
+        .mobile-logo h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--bleu-klein);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+
+        .mobile-logo h1 span { font-weight: 300; color: var(--gris-clair); }
+
+        /* RESPONSIVE */
+        @media (max-width: 900px) {
+            .auth-left { display: none; }
+            .auth-right { flex: 1; padding: 30px 24px; }
+            .mobile-logo { display: block; }
+            .auth-wrapper { flex-direction: column; }
         }
 
         @media (max-width: 500px) {
-            .auth-container { padding: 24px 18px; }
+            .auth-right { padding: 20px 14px; }
             .form-row { flex-direction: column; gap: 0; }
+            .auth-form-container h2 { font-size: 1.3rem; }
+            .btn { padding: 12px 20px; font-size: 0.88rem; }
         }
     </style>
 </head>
 <body>
     <div class="auth-wrapper">
-        <div class="auth-container">
-            <div class="auth-logo">
+        <!-- Partie gauche - Desktop -->
+        <div class="auth-left">
+            <div class="auth-left-content">
+                <div class="auth-logo-animated">
+                    <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5">
+                        <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+                        <path d="M6 12v5c0 2 4 3 6 3s6-1 6-3v-5"/>
+                    </svg>
+                </div>
                 <h1>EducOS<span>-pro</span></h1>
+                <p class="tagline">La gestion scolaire<br>nouvelle génération</p>
+                <div class="features">
+                    <div class="feature-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                        <span>Multi-plateforme</span>
+                    </div>
+                    <div class="feature-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        <span>Sécurisé</span>
+                    </div>
+                    <div class="feature-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        <span>Accessible 24/7</span>
+                    </div>
+                </div>
             </div>
+        </div>
 
-            <div class="auth-form-container">
-                <h2>Inscription</h2>
-                <p class="subtitle">Créez votre compte</p>
+        <!-- Partie droite - Formulaire -->
+        <div class="auth-right">
+            <div style="width:100%; max-width:440px;">
+                <!-- Logo mobile -->
+                <div class="mobile-logo">
+                    <h1>EducOS<span>-pro</span></h1>
+                </div>
 
-                <% if (locals.error) { %>
-                    <div class="alert alert-danger">
-                        <span>⚠️ <%= error %></span>
-                    </div>
-                <% } %>
+                <div class="auth-form-container">
+                    <h2>Inscription</h2>
+                    <p class="subtitle">Créez votre compte</p>
 
-                <form action="/auth/register" method="POST" id="registerForm">
-                    <div class="form-row">
+                    <% if (locals.error) { %>
+                        <div class="alert alert-danger"><span>⚠️ <%= error %></span></div>
+                    <% } %>
+
+                    <form action="/auth/register" method="POST" id="registerForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="nom">Nom *</label>
+                                <input type="text" id="nom" name="nom" class="form-control" required placeholder="Dupont">
+                            </div>
+                            <div class="form-group">
+                                <label for="prenom">Prénom *</label>
+                                <input type="text" id="prenom" name="prenom" class="form-control" required placeholder="Jean">
+                            </div>
+                        </div>
+
                         <div class="form-group">
-                            <label for="nom">Nom *</label>
-                            <input type="text" id="nom" name="nom" class="form-control" required placeholder="Dupont">
+                            <label for="email">Email *</label>
+                            <input type="email" id="email" name="email" class="form-control" required placeholder="votre@email.com">
                         </div>
+
                         <div class="form-group">
-                            <label for="prenom">Prénom *</label>
-                            <input type="text" id="prenom" name="prenom" class="form-control" required placeholder="Jean">
+                            <label for="role">Rôle *</label>
+                            <select id="role" name="role" class="form-control" required onchange="showDynamicFields()">
+                                <option value="">Choisissez votre profil</option>
+                                <option value="admin">👑 Administrateur</option>
+                                <option value="vie_scolaire">📋 Vie Scolaire</option>
+                                <option value="prof">👨‍🏫 Professeur</option>
+                                <option value="parent">👪 Parent</option>
+                                <option value="eleve">🎓 Élève</option>
+                            </select>
                         </div>
-                    </div>
 
-                    <div class="form-group">
-                        <label for="email">Email *</label>
-                        <input type="email" id="email" name="email" class="form-control" required placeholder="votre@email.com">
-                    </div>
+                        <div id="ecoleFields" style="display:none;">
+                            <div class="form-group">
+                                <label for="nom_ecole">Nom de l'école *</label>
+                                <input type="text" id="nom_ecole" name="nom_ecole" class="form-control" placeholder="Ex: JeanDupont (sans Collège/Lycée)">
+                            </div>
+                            <div class="form-group" id="codeField" style="display:none;">
+                                <label for="code_etablissement">Code établissement *</label>
+                                <input type="text" id="code_etablissement" name="code_etablissement" class="form-control" placeholder="ETAB_XXXXX" readonly>
+                                <div class="help-text">Code généré automatiquement</div>
+                            </div>
+                        </div>
 
-                    <div class="form-group">
-                        <label for="role">Rôle *</label>
-                        <select id="role" name="role" class="form-control" required onchange="showDynamicFields()">
-                            <option value="">Choisissez votre profil</option>
-                            <option value="admin">👑 Administrateur</option>
-                            <option value="vie_scolaire">📋 Vie Scolaire</option>
-                            <option value="prof">👨‍🏫 Professeur</option>
-                            <option value="parent">👪 Parent</option>
-                            <option value="eleve">🎓 Élève</option>
-                        </select>
-                    </div>
+                        <div id="dynamicFields" style="display:none;"></div>
 
-                    <!-- Champs école -->
-                    <div id="ecoleFields" style="display:none;">
                         <div class="form-group">
-                            <label for="nom_ecole">Nom de l'école *</label>
-                            <input type="text" id="nom_ecole" name="nom_ecole" class="form-control" placeholder="Ex: JeanDupont (sans Collège/Lycée)">
+                            <label for="password">Mot de passe *</label>
+                            <input type="password" id="password" name="password" class="form-control" required placeholder="Minimum 8 caractères" minlength="8">
                         </div>
-                        <div class="form-group" id="codeField" style="display:none;">
-                            <label for="code_etablissement">Code établissement *</label>
-                            <input type="text" id="code_etablissement" name="code_etablissement" class="form-control" placeholder="ETAB_XXXXX" readonly>
-                            <div class="help-text">Code généré automatiquement à partir du nom de l'école</div>
+
+                        <div class="form-group">
+                            <label for="confirm_password">Confirmer *</label>
+                            <input type="password" id="confirm_password" name="confirm_password" class="form-control" required placeholder="Répétez le mot de passe" minlength="8">
                         </div>
-                    </div>
 
-                    <!-- Champs dynamiques -->
-                    <div id="dynamicFields" style="display:none;"></div>
+                        <button type="submit" class="btn btn-primary">Créer mon compte</button>
+                    </form>
 
-                    <div class="form-group">
-                        <label for="password">Mot de passe *</label>
-                        <input type="password" id="password" name="password" class="form-control" required placeholder="Minimum 8 caractères" minlength="8">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="confirm_password">Confirmer le mot de passe *</label>
-                        <input type="password" id="confirm_password" name="confirm_password" class="form-control" required placeholder="Répétez le mot de passe" minlength="8">
-                    </div>
-
-                    <button type="submit" class="btn btn-primary">Créer mon compte</button>
-                </form>
-
-                <p class="auth-link">Déjà un compte ? <a href="/auth/login">Se connecter</a></p>
+                    <p class="auth-link">Déjà un compte ? <a href="/auth/login">Se connecter</a></p>
+                </div>
             </div>
         </div>
     </div>
@@ -308,7 +489,6 @@
             var nomEcole = document.getElementById('nom_ecole');
             var html = '';
 
-            // Afficher les champs école
             ecoleFields.style.display = 'block';
 
             if (role === 'admin') {
@@ -319,56 +499,19 @@
                 codeField.style.display = 'block';
                 document.getElementById('code_etablissement').required = true;
                 nomEcole.required = true;
-                html = '<div class="dynamic-fields">' +
-                    '<div class="form-group"><label>Matière principale *</label>' +
-                    '<select id="matiere_principale" name="matiere_principale" class="form-control" required>' +
-                    '<option value="">Choisissez</option>' +
-                    '<option>Mathématiques</option><option>Français</option><option>Histoire-Géographie</option>' +
-                    '<option>SVT</option><option>Physique-Chimie</option><option>Anglais</option>' +
-                    '<option>Espagnol</option><option>Allemand</option><option>Philosophie</option>' +
-                    '<option>EPS</option><option>Arts Plastiques</option><option>Musique</option>' +
-                    '<option>Informatique</option><option>Économie</option><option>Autre</option>' +
-                    '</select></div>' +
-                    '<div class="form-group"><label>Classes assignées</label>' +
-                    '<input type="text" name="classes_assignees" class="form-control" placeholder="ex: 6ème A, 5ème B"></div>' +
-                    '</div>';
+                html = '<div class="dynamic-fields"><div class="form-group"><label>Matière principale *</label><select name="matiere_principale" class="form-control" required><option value="">Choisissez</option><option>Mathématiques</option><option>Français</option><option>Histoire-Géographie</option><option>SVT</option><option>Physique-Chimie</option><option>Anglais</option><option>Espagnol</option><option>Allemand</option><option>Philosophie</option><option>EPS</option><option>Arts Plastiques</option><option>Musique</option><option>Informatique</option><option>Économie</option><option>Autre</option></select></div><div class="form-group"><label>Classes assignées</label><input type="text" name="classes_assignees" class="form-control" placeholder="ex: 6ème A, 5ème B"></div></div>';
                 container.style.display = 'block';
             } else if (role === 'eleve') {
                 codeField.style.display = 'block';
                 document.getElementById('code_etablissement').required = true;
                 nomEcole.required = true;
-                html = '<div class="dynamic-fields">' +
-                    '<div class="form-group"><label>Classe *</label>' +
-                    '<select name="classe_eleve" class="form-control" required>' +
-                    '<option value="">Choisissez</option>' +
-                    '<option>6ème A</option><option>6ème B</option><option>5ème A</option><option>5ème B</option>' +
-                    '<option>4ème A</option><option>4ème B</option><option>3ème A</option><option>3ème B</option>' +
-                    '<option>2nde A</option><option>2nde B</option><option>1ère A</option><option>1ère B</option>' +
-                    '<option>Tle A</option><option>Tle B</option>' +
-                    '</select></div>' +
-                    '<div class="form-group"><label>Date de naissance</label>' +
-                    '<input type="date" name="date_naissance" class="form-control"></div>' +
-                    '</div>';
+                html = '<div class="dynamic-fields"><div class="form-group"><label>Classe *</label><select name="classe_eleve" class="form-control" required><option value="">Choisissez</option><option>6ème A</option><option>6ème B</option><option>5ème A</option><option>5ème B</option><option>4ème A</option><option>4ème B</option><option>3ème A</option><option>3ème B</option><option>2nde A</option><option>2nde B</option><option>1ère A</option><option>1ère B</option><option>Tle A</option><option>Tle B</option></select></div><div class="form-group"><label>Date de naissance</label><input type="date" name="date_naissance" class="form-control"></div></div>';
                 container.style.display = 'block';
             } else if (role === 'parent') {
                 codeField.style.display = 'block';
                 document.getElementById('code_etablissement').required = true;
                 nomEcole.required = true;
-                html = '<div class="dynamic-fields">' +
-                    '<label style="font-weight:600;font-size:0.82rem;margin-bottom:8px;display:block;">Enfant(s)</label>' +
-                    '<div id="childrenContainer">' +
-                    '<div class="form-row" style="margin-bottom:8px;">' +
-                    '<input type="text" name="enfant_nom[]" class="form-control" placeholder="Nom" required>' +
-                    '<input type="text" name="enfant_prenom[]" class="form-control" placeholder="Prénom" required>' +
-                    '<select name="enfant_classe[]" class="form-control" required>' +
-                    '<option value="">Classe</option>' +
-                    '<option>6ème A</option><option>6ème B</option><option>5ème A</option><option>5ème B</option>' +
-                    '<option>4ème A</option><option>4ème B</option><option>3ème A</option><option>3ème B</option>' +
-                    '<option>2nde A</option><option>2nde B</option><option>1ère A</option><option>1ère B</option>' +
-                    '<option>Tle A</option><option>Tle B</option>' +
-                    '</select></div></div>' +
-                    '<button type="button" class="btn-add-child" onclick="addChild()">+ Ajouter un autre enfant</button>' +
-                    '</div>';
+                html = '<div class="dynamic-fields"><label style="font-weight:600;font-size:0.82rem;margin-bottom:8px;display:block;">Enfant(s)</label><div id="childrenContainer"><div class="form-row" style="margin-bottom:8px;"><input type="text" name="enfant_nom[]" class="form-control" placeholder="Nom" required><input type="text" name="enfant_prenom[]" class="form-control" placeholder="Prénom" required><select name="enfant_classe[]" class="form-control" required><option value="">Classe</option><option>6ème A</option><option>6ème B</option><option>5ème A</option><option>5ème B</option><option>4ème A</option><option>4ème B</option><option>3ème A</option><option>3ème B</option><option>2nde A</option><option>2nde B</option><option>1ère A</option><option>1ère B</option><option>Tle A</option><option>Tle B</option></select></div></div><button type="button" class="btn-add-child" onclick="addChild()">+ Ajouter un autre enfant</button></div>';
                 container.style.display = 'block';
             } else if (role === 'vie_scolaire') {
                 codeField.style.display = 'block';
@@ -378,10 +521,7 @@
             } else {
                 container.style.display = 'none';
             }
-
             container.innerHTML = html;
-
-            // Auto-générer le code établissement
             if (nomEcole) {
                 nomEcole.onkeyup = function() {
                     var nom = this.value.toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 10);
@@ -395,32 +535,15 @@
             var row = document.createElement('div');
             row.className = 'form-row';
             row.style.marginBottom = '8px';
-            row.innerHTML = `
-                <input type="text" name="enfant_nom[]" class="form-control" placeholder="Nom" required>
-                <input type="text" name="enfant_prenom[]" class="form-control" placeholder="Prénom" required>
-                <select name="enfant_classe[]" class="form-control" required>
-                    <option value="">Classe</option>
-                    <option>6ème A</option><option>6ème B</option><option>5ème A</option><option>5ème B</option>
-                    <option>4ème A</option><option>4ème B</option><option>3ème A</option><option>3ème B</option>
-                    <option>2nde A</option><option>2nde B</option><option>1ère A</option><option>1ère B</option>
-                    <option>Tle A</option><option>Tle B</option>
-                </select>
-                <button type="button" onclick="this.parentElement.remove()" style="background:none;border:none;color:#e74c3c;cursor:pointer;font-size:1.2rem;">✕</button>
-            `;
+            row.innerHTML = '<input type="text" name="enfant_nom[]" class="form-control" placeholder="Nom" required><input type="text" name="enfant_prenom[]" class="form-control" placeholder="Prénom" required><select name="enfant_classe[]" class="form-control" required><option value="">Classe</option><option>6ème A</option><option>6ème B</option><option>5ème A</option><option>5ème B</option><option>4ème A</option><option>4ème B</option><option>3ème A</option><option>3ème B</option><option>2nde A</option><option>2nde B</option><option>1ère A</option><option>1ère B</option><option>Tle A</option><option>Tle B</option></select><button type="button" onclick="this.parentElement.remove()" style="background:none;border:none;color:#e74c3c;cursor:pointer;font-size:1.2rem;">✕</button>';
             container.appendChild(row);
         }
 
         document.getElementById('registerForm').addEventListener('submit', function(e) {
             var p1 = document.getElementById('password').value;
             var p2 = document.getElementById('confirm_password').value;
-            if (p1 !== p2) {
-                e.preventDefault();
-                alert('❌ Les mots de passe ne correspondent pas !');
-            }
-            if (p1.length < 8) {
-                e.preventDefault();
-                alert('❌ Le mot de passe doit contenir au moins 8 caractères !');
-            }
+            if (p1 !== p2) { e.preventDefault(); alert('❌ Les mots de passe ne correspondent pas !'); }
+            if (p1.length < 8) { e.preventDefault(); alert('❌ Le mot de passe doit contenir au moins 8 caractères !'); }
         });
     </script>
 </body>
