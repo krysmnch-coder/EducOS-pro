@@ -56,10 +56,21 @@ const authController = {
     }
     if (password !== confirm_password) return res.redirect('/auth/register?error=Mots de passe différents');
     if (password.length < 8) return res.redirect('/auth/register?error=Minimum 8 caractères');
-    
+
+    // Si c'est un admin avec etablissement_nom
+    if (role === 'admin' && req.body.etablissement_nom) {
+        // Rediriger vers registerAdmin
+        return authController.registerAdmin(req, res);
+    }
+
     // Pour les non-admin, l'établissement est obligatoire
     if (role !== 'admin' && !etablissement_id) {
         return res.redirect('/auth/register?error=Veuillez sélectionner votre école');
+    }
+
+    // Si c'est un admin sans établissement (ne devrait pas arriver)
+    if (role === 'admin' && !req.body.etablissement_nom) {
+        return res.redirect('/auth/register?error=Veuillez remplir les informations de l\'établissement');
     }
 
     globalDb.get('SELECT * FROM etablissements WHERE id = ?', [etablissement_id], (err, etab) => {
