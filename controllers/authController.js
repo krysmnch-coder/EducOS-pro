@@ -49,65 +49,64 @@ const authController = {
 
     // Inscription utilisateur (profs, parents, élèves)
     register: (req, res) => {
-        const { nom, prenom, email, password, confirm_password, role, etablissement_id } = req.body;
+    const { nom, prenom, email, password, confirm_password, role, etablissement_id } = req.body;
 
-        if (!nom || !prenom || !email || !password || !role) {
-            return res.redirect('/auth/register?error=Tous les champs obligatoires');
-        }
-        if (password !== confirm_password) return res.redirect('/auth/register?error=Mots de passe différents');
-        if (password.length < 8) return res.redirect('/auth/register?error=Minimum 8 caractères');
-        if (!etablissement_id) return res.redirect('/auth/register?error=Veuillez sélectionner votre école');
+    if (!nom || !prenom || !email || !password || !role) {
+        return res.redirect('/auth/register?error=Tous les champs obligatoires');
+    }
+    if (password !== confirm_password) return res.redirect('/auth/register?error=Mots de passe différents');
+    if (password.length < 8) return res.redirect('/auth/register?error=Minimum 8 caractères');
+    
+    // Pour les non-admin, l'établissement est obligatoire
+    if (role !== 'admin' && !etablissement_id) {
+        return res.redirect('/auth/register?error=Veuillez sélectionner votre école');
+    }
 
-        // Récupérer l'établissement choisi
-        globalDb.get('SELECT * FROM etablissements WHERE id = ?', [etablissement_id], (err, etab) => {
-            if (err || !etab) return res.redirect('/auth/register?error=École non trouvée');
+    globalDb.get('SELECT * FROM etablissements WHERE id = ?', [etablissement_id], (err, etab) => {
+        if (err || !etab) return res.redirect('/auth/register?error=École non trouvée');
 
-            const dbDir = process.env.RENDER ? '/opt/render/project/src/database' : path.join(__dirname, '..', 'database');
-            const dbPath = path.join(dbDir, etab.db_name);
-            const db = setEtablissementDb(dbPath);
-            if (!db) return res.redirect('/auth/register?error=Erreur base de données');
+        const dbDir = process.env.RENDER ? '/opt/render/project/src/database' : path.join(__dirname, '..', 'database');
+        const dbPath = path.join(dbDir, etab.db_name);
+        const db = setEtablissementDb(dbPath);
+        if (!db) return res.redirect('/auth/register?error=Erreur base de données');
 
-            db.get('SELECT id FROM users WHERE email = ?', [email], (err, user) => {
-                if (user) return res.redirect('/auth/register?error=Email déjà utilisé');
+        db.get('SELECT id FROM users WHERE email = ?', [email], (err, user) => {
+            if (user) return res.redirect('/auth/register?error=Email déjà utilisé');
 
-                bcrypt.hash(password, 10, (err, hash) => {
-                    const matiere_principale = req.body.matiere_principale || null;
-                    const classes_assignees = req.body.classes_assignees || null;
-                    const classe_eleve = req.body.classe_eleve || null;
-                    const date_naissance = req.body.date_naissance || null;
+            bcrypt.hash(password, 10, (err, hash) => {
+                const matiere_principale = req.body.matiere_principale || null;
+                const classes_assignees = req.body.classes_assignees || null;
+                const classe_eleve = req.body.classe_eleve || null;
+                const date_naissance = req.body.date_naissance || null;
 
-                    if (role === 'parent') {
-                        const enfantsNoms = req.body.enfant_nom ? (Array.isArray(req.body.enfant_nom) ? req.body.enfant_nom : [req.body.enfant_nom]) : [];
-                        const enfantsPrenoms = req.body.enfant_prenom ? (Array.isArray(req.body.enfant_prenom) ? req.body.enfant_prenom : [req.body.enfant_prenom]) : [];
-                        const enfantsClasses = req.body.enfant_classe ? (Array.isArray(req.body.enfant_classe) ? req.body.enfant_classe : [req.body.enfant_classe]) : [];
-                        const enfants = [];
-                        for (let i = 0; i < enfantsNoms.length; i++) {
-                            if (enfantsNoms[i] && enfantsPrenoms[i]) enfants.push({ nom: enfantsNoms[i], prenom: enfantsPrenoms[i], classe: enfantsClasses[i] || '' });
-                        }
-                        db.run('INSERT INTO users (nom, prenom, email, password, role, classes_assignees) VALUES (?,?,?,?,?,?)', [nom, prenom, email, hash, role, JSON.stringify(enfants)], function(err) {
+                const insert = (fields, values) => {
+                    db.run('INSERT INTO users (nom, prenom, email, password, role' + fields + ') VALUES (?,?,?,?,?' + ',?'.repeat(values.length) + ')',
+                        [nom, prenom, email, hash, role, ...values], function(err) {
                             if (err) return res.redirect('/auth/register?error=Erreur inscription');
-                            res.redirect('/auth/login?success=Compte créé ! École : ' + etab.nom);
+                            res.redirect('/auth/login?success=Compte créé !');
                         });
-                    } else if (role === 'eleve') {
-                        db.run('INSERT INTO users (nom, prenom, email, password, role, classes_assignees, date_naissance) VALUES (?,?,?,?,?,?,?)', [nom, prenom, email, hash, role, classe_eleve, date_naissance], function(err) {
-                            if (err) return res.redirect('/auth/register?error=Erreur inscription');
-                            res.redirect('/auth/login?success=Compte créé ! École : ' + etab.nom);
-                        });
-                    } else if (role === 'prof') {
-                        db.run('INSERT INTO users (nom, prenom, email, password, role, matiere_principale, classes_assignees) VALUES (?,?,?,?,?,?,?)', [nom, prenom, email, hash, role, matiere_principale, classes_assignees], function(err) {
-                            if (err) return res.redirect('/auth/register?error=Erreur inscription');
-                            res.redirect('/auth/login?success=Compte créé ! École : ' + etab.nom);
-                        });
-                    } else {
-                        db.run('INSERT INTO users (nom, prenom, email, password, role) VALUES (?,?,?,?,?)', [nom, prenom, email, hash, role], function(err) {
-                            if (err) return res.redirect('/auth/register?error=Erreur inscription');
-                            res.redirect('/auth/login?success=Compte créé ! École : ' + etab.nom);
-                        });
+                };
+
+                if (role === 'parent') {
+                    const noms = req.body.enfant_nom ? (Array.isArray(req.body.enfant_nom) ? req.body.enfant_nom : [req.body.enfant_nom]) : [];
+                    const prenoms = req.body.enfant_prenom ? (Array.isArray(req.body.enfant_prenom) ? req.body.enfant_prenom : [req.body.enfant_prenom]) : [];
+                    const classes = req.body.enfant_classe ? (Array.isArray(req.body.enfant_classe) ? req.body.enfant_classe : [req.body.enfant_classe]) : [];
+                    const enfants = [];
+                    for (let i = 0; i < noms.length; i++) {
+                        if (noms[i] && prenoms[i]) enfants.push({ nom: noms[i], prenom: prenoms[i], classe: classes[i] || '' });
                     }
-                });
+                    insert(', classes_assignees', [JSON.stringify(enfants)]);
+                } else if (role === 'eleve') {
+                    insert(', classes_assignees, date_naissance', [classe_eleve || '', date_naissance || '']);
+                } else if (role === 'prof') {
+                    insert(', matiere_principale, classes_assignees', [matiere_principale || '', classes_assignees || '']);
+                } else {
+                    insert('', []);
+                }
             });
         });
-    },
+    });
+},
 
     // Récupérer la liste des écoles pour le formulaire
     getEcoles: (req, res) => {
