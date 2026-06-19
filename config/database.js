@@ -38,9 +38,17 @@ function getEtablissementDb() { return etablissementDb; }
 
 function setEtablissementDb(dbPath) {
     if (etablissementDb) try { etablissementDb.close(); } catch(e) {}
+    
+    console.log('📁 Création base:', dbPath); // ← AJOUTER CE LOG
+    
     etablissementDb = new sqlite3.Database(dbPath, (err) => {
-        if (err) { console.error('❌ Erreur établissement:', err.message); etablissementDb = null; }
-        else { console.log('✅ Base établissement connectée'); createEtablissementTables(); }
+        if (err) { 
+            console.error('❌ Erreur:', err.message); 
+            etablissementDb = null; 
+        } else { 
+            console.log('✅ Base créée:', dbPath);
+            createEtablissementTables(); 
+        }
     });
     return etablissementDb;
 }

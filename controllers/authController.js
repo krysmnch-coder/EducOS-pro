@@ -28,7 +28,8 @@ const authController = {
                 const finalCode = exist ? code + '_' + Date.now().toString(36).toUpperCase().substring(0, 3) : code;
                 const finalDbName = 'educos_' + finalCode.toLowerCase() + '.db';
                 const finalDbPath = path.join(dbDir, finalDbName);
-
+                console.log(' Tentative création établissement:', etablissement_nom);
+                console.log(' Chemin base:', finalDbPath);
                 globalDb.run('INSERT INTO etablissements (code, nom, adresse, telephone, directeur, annee_scolaire, db_name) VALUES (?,?,?,?,?,?,?)',
                     [finalCode, etablissement_nom, adresse||'', telephone||'', directeur||'', annee_scolaire||'2024-2025', finalDbName], function(err) {
                     if (err) return res.redirect('/auth/register?error=Erreur création établissement');
