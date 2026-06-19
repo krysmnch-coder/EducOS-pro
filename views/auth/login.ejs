@@ -108,52 +108,21 @@
 
                     <!-- Formulaire connexion classique -->
                     <form action="/auth/login" method="POST" class="auth-form">
-                        <div class="form-group">
-                            <label for="email">Email</label>
-                            <div class="input-wrapper">
-                                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                                    <polyline points="22,6 12,13 2,6"/>
-                                </svg>
-                                <input type="email" id="email" name="email" class="form-control" required placeholder="votre@email.com">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="password">Mot de passe</label>
-                            <div class="input-wrapper">
-                                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                                </svg>
-                                <input type="password" id="password" name="password" class="form-control" required placeholder="••••••••">
-                                <button type="button" class="toggle-password" onclick="togglePassword()">
-                                    <svg id="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                                        <circle cx="12" cy="12" r="3"/>
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="form-group" id="codeEtabLogin" style="display:none;">
-    <label>Code établissement</label>
-    <input type="text" name="etablissement_code" class="form-control" placeholder="ETAB_XXXXXX" style="text-transform:uppercase;">
-</div>
-                        <div class="form-options">
-                            <label class="remember-me">
-                                <input type="checkbox" name="remember">
-                                <span class="checkmark"></span>
-                                Se souvenir
-                            </label>
-                            <a href="#" class="forgot-password">Oublié ?</a>
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-block">
-                            <span>Se connecter</span>
-                            <svg class="btn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <line x1="5" y1="12" x2="19" y2="12"/>
-                                <polyline points="12 5 19 12 12 19"/>
-                            </svg>
-                        </button>
-                    </form>
+    <div class="form-group">
+        <label>Rôle *</label>
+        <select name="role" class="form-control" required>
+            <option value="">Sélectionnez votre profil</option>
+            <option value="admin"> Administrateur</option>
+            <option value="vie_scolaire"> Vie Scolaire</option>
+            <option value="prof"> Professeur</option>
+            <option value="parent"> Parent</option>
+            <option value="eleve"> Élève</option>
+        </select>
+    </div>
+    <div class="form-group"><label>Email *</label><input type="email" name="email" class="form-control" required></div>
+    <div class="form-group"><label>Mot de passe *</label><input type="password" name="password" class="form-control" required></div>
+    <button type="submit" class="btn btn-primary btn-block">Se connecter</button>
+</form>
                     <p class="auth-link">Pas de compte ? <a href="/auth/register">S'inscrire</a></p>
                 </div>
             </div>
@@ -188,6 +157,7 @@
                 e.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
             }
         }
+        
     </script>
 </body>
 </html>
