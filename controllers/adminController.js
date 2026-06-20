@@ -17,18 +17,25 @@ const adminController = {
     },
 
     createUser: (req, res) => {
-        const { nom, prenom, email, password, role } = req.body;
-        if (!nom || !prenom || !email || !password || !role) return res.status(400).json({ error: 'Champs obligatoires' });
-        db.get('SELECT id FROM users WHERE email = ?', [email], (err, user) => {
-            if (user) return res.status(400).json({ error: 'Email déjà utilisé' });
-            bcrypt.hash(password, 10, (err, hash) => {
-                db.run('INSERT INTO users (nom, prenom, email, password, role) VALUES (?,?,?,?,?)', [nom, prenom, email, hash, role], function(err) {
-                    if (err) return res.status(500).json({ error: 'Erreur' });
-                    res.json({ success: true, message: 'Utilisateur créé' });
+    const { nom, prenom, email, password, role, telephone, matiere_principale, classes_assignees, date_naissance } = req.body;
+    if (!nom || !prenom || !email || !password || !role) return res.status(400).json({ error: 'Champs obligatoires' });
+
+    // Utiliser la base établissement de l'admin connecté
+    const db = require('../config/database').getEtablissementDb();
+    if (!db) return res.status(500).json({ error: 'Base établissement non disponible. Créez d\'abord votre établissement.' });
+
+    db.get('SELECT id FROM users WHERE email = ?', [email], (err, user) => {
+        if (user) return res.status(400).json({ error: 'Email déjà utilisé' });
+        bcrypt.hash(password, 10, (err, hash) => {
+            if (err) return res.status(500).json({ error: 'Erreur' });
+            db.run('INSERT INTO users (nom, prenom, email, password, role, telephone, matiere_principale, classes_assignees, date_naissance) VALUES (?,?,?,?,?,?,?,?,?)',
+                [nom, prenom, email, hash, role, telephone||null, matiere_principale||null, classes_assignees||null, date_naissance||null], function(err) {
+                    if (err) return res.status(500).json({ error: 'Erreur création: ' + err.message });
+                    res.json({ success: true, message: '✅ Utilisateur créé avec succès' });
                 });
-            });
         });
-    },
+    });
+},
 
     updateUser: (req, res) => { res.json({ success: true, message: 'Modifié' }); },
     deleteUser: (req, res) => { res.json({ success: true, message: 'Supprimé' }); },

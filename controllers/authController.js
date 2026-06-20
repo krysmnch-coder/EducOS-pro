@@ -129,47 +129,77 @@ const authController = {
 
     // Login
     login: (req, res) => {
-        const { email, password, role } = req.body;
-        if (!email || !password) return res.redirect('/auth/login?error=Email et mot de passe requis');
+    const { email, password, role } = req.body;
+    if (!email || !password) return res.redirect('/auth/login?error=Email et mot de passe requis');
 
-        if (role === 'admin') {
-            globalDb.get('SELECT * FROM admins WHERE email = ? AND compte_actif = 1', [email], (err, user) => {
-                if (err || !user) return res.redirect('/auth/login?error=Email ou mot de passe incorrect');
-                bcrypt.compare(password, user.password, (err, isMatch) => {
-                    if (err || !isMatch) return res.redirect('/auth/login?error=Email ou mot de passe incorrect');
-                    if (user.etablissement_code) {
-                        globalDb.get('SELECT db_name FROM etablissements WHERE code = ?', [user.etablissement_code], (err, etab) => {
-                            if (etab) setEtablissementDb(path.join(process.env.RENDER ? '/opt/render/project/src/database' : path.join(__dirname, '..', 'database'), etab.db_name));
-                        });
-                    }
-                    req.session.user = { id: user.id, email: user.email, nom: user.nom, prenom: user.prenom, role: 'admin', etablissement_code: user.etablissement_code || '' };
-                    res.redirect('/dashboard');
-                });
-            });
-        } else {
-            const etablissement_id = req.body.etablissement_id;
-            if (!etablissement_id) return res.redirect('/auth/login?error=Sélectionnez votre école');
-
-            globalDb.get('SELECT * FROM etablissements WHERE id = ?', [etablissement_id], (err, etab) => {
-                if (err || !etab) return res.redirect('/auth/login?error=École non trouvée');
-
-                const dbDir = process.env.RENDER ? '/opt/render/project/src/database' : path.join(__dirname, '..', 'database');
-                const dbPath = path.join(dbDir, etab.db_name);
-                const etabDb = new (require('sqlite3').verbose()).Database(dbPath);
-
-                etabDb.get('SELECT * FROM users WHERE email = ? AND compte_actif = 1', [email], (err, user) => {
-                    if (err || !user) { etabDb.close(); return res.redirect('/auth/login?error=Email ou mot de passe incorrect'); }
-                    bcrypt.compare(password, user.password, (err, isMatch) => {
-                        if (err || !isMatch) { etabDb.close(); return res.redirect('/auth/login?error=Email ou mot de passe incorrect'); }
-                        etabDb.close();
-                        setEtablissementDb(dbPath);
-                        req.session.user = { id: user.id, email: user.email, nom: user.nom, prenom: user.prenom, role: user.role, etablissement_code: etab.code, etablissement_db: etab.db_name };
-                        res.redirect('/dashboard');
+    // ADMIN : chercher dans la base globale
+    if (role === 'admin') {
+        globalDb.get('SELECT * FROM admins WHERE email = ? AND compte_actif = 1', [email], (err, user) => {
+            if (err || !user) return res.redirect('/auth/login?error=Email ou mot de passe incorrect');
+            bcrypt.compare(password, user.password, (err, isMatch) => {
+                if (err || !isMatch) return res.redirect('/auth/login?error=Email ou mot de passe incorrect');
+                if (user.etablissement_code) {
+                    globalDb.get('SELECT db_name FROM etablissements WHERE code = ?', [user.etablissement_code], (err, etab) => {
+                        if (etab) {
+                            const dbDir = process.env.RENDER ? '/opt/render/project/src/database' : path.join(__dirname, '..', 'database');
+                            setEtablissementDb(path.join(dbDir, etab.db_name));
+                        }
                     });
+                }
+                req.session.user = { id: user.id, email: user.email, nom: user.nom, prenom: user.prenom, role: 'admin', etablissement_code: user.etablissement_code || '' };
+                res.redirect('/dashboard');
+            });
+        });
+    } else {
+        // NON-ADMIN : chercher dans TOUTES les bases établissements
+        const dbDir = process.env.RENDER ? '/opt/render/project/src/database' : path.join(__dirname, '..', 'database');
+        
+        globalDb.all('SELECT code, db_name FROM etablissements WHERE actif = 1', [], (err, etabs) => {
+            if (err || !etabs.length) return res.redirect('/auth/login?error=Aucun établissement trouvé');
+
+            let found = false;
+            let checked = 0;
+
+            etabs.forEach((etab) => {
+                if (found) return;
+                const dbPath = path.join(dbDir, etab.db_name);
+                
+                // Vérifier si le fichier existe
+                const fs = require('fs');
+                if (!fs.existsSync(dbPath)) {
+                    checked++;
+                    if (checked === etabs.length) return res.redirect('/auth/login?error=Base de données non trouvée');
+                    return;
+                }
+
+                const etabDb = new (require('sqlite3').verbose()).Database(dbPath);
+                
+                etabDb.get('SELECT * FROM users WHERE email = ? AND compte_actif = 1', [email], (err, user) => {
+                    checked++;
+                    if (user && !found) {
+                        found = true;
+                        bcrypt.compare(password, user.password, (err, isMatch) => {
+                            etabDb.close();
+                            if (err || !isMatch) return res.redirect('/auth/login?error=Email ou mot de passe incorrect');
+                            
+                            setEtablissementDb(dbPath);
+                            req.session.user = { 
+                                id: user.id, email: user.email, nom: user.nom, prenom: user.prenom, 
+                                role: user.role, etablissement_code: etab.code, etablissement_db: etab.db_name 
+                            };
+                            res.redirect('/dashboard');
+                        });
+                    } else {
+                        etabDb.close();
+                        if (checked === etabs.length && !found) {
+                            res.redirect('/auth/login?error=Email ou mot de passe incorrect');
+                        }
+                    }
                 });
             });
-        }
-    },
+        });
+    }
+},
 
     logout: (req, res) => { req.session.destroy(() => res.redirect('/auth/login')); }
 };

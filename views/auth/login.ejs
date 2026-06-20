@@ -107,22 +107,22 @@
 <% } %>
 
                     <!-- Formulaire connexion classique -->
-                    <form action="/auth/login" method="POST" class="auth-form">
-    <div class="form-group">
-        <label>Rôle *</label>
-        <select name="role" class="form-control" required>
-            <option value="">Sélectionnez votre profil</option>
-            <option value="admin"> Administrateur</option>
-            <option value="vie_scolaire"> Vie Scolaire</option>
-            <option value="prof"> Professeur</option>
-            <option value="parent"> Parent</option>
-            <option value="eleve"> Élève</option>
-        </select>
-    </div>
-    <div class="form-group"><label>Email *</label><input type="email" name="email" class="form-control" required></div>
-    <div class="form-group"><label>Mot de passe *</label><input type="password" name="password" class="form-control" required></div>
-    <button type="submit" class="btn btn-primary btn-block">Se connecter</button>
-</form>
+                   <form action="/auth/login" method="POST" class="auth-form">
+                    <div class="form-group">
+                        <label>Rôle *</label>
+                        <select name="role" class="form-control" required>
+                            <option value="">Sélectionnez votre profil</option>
+                            <option value="admin"> Administrateur</option>
+                            <option value="vie_scolaire"> Vie Scolaire</option>
+                            <option value="prof"> Professeur</option>
+                            <option value="parent"> Parent</option>
+                            <option value="eleve"> Élève</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Email *</label><input type="email" name="email" class="form-control" required></div>
+                    <div class="form-group"><label>Mot de passe *</label><input type="password" name="password" class="form-control" required></div>
+                    <button type="submit" class="btn btn-primary btn-block">Se connecter</button>
+                </form>
                     <p class="auth-link">Pas de compte ? <a href="/auth/register">S'inscrire</a></p>
                 </div>
             </div>
