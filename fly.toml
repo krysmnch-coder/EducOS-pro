@@ -1,26 +1,26 @@
-app = "educos-pro"
-primary_region = "jnb"
+app = \"educos-pro\"
+primary_region = \"jnb\"
 
 [build]
-  dockerfile = "Dockerfile"
+  dockerfile = \"Dockerfile\"
 
 [env]
-  PORT = "3000"
+  PORT = \"3000\"
 
 [[services]]
-  protocol = "tcp"
+  protocol = \"tcp\"
   internal_port = 3000
-  processes = ["app"]
+  processes = [\"app\"]
 
   [[services.ports]]
     port = 80
-    handlers = ["http"]
+    handlers = [\"http\"]
     force_https = true
 
   [[services.ports]]
     port = 443
-    handlers = ["tls", "http"]
+    handlers = [\"tls\", \"http\"]
 
 [mounts]
-  source = "educos_data"
-  destination = "/data"
+  source = \"educos_data\"
+  destination = \"/data\"
