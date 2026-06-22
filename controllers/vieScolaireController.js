@@ -233,38 +233,56 @@ const vsController = {
     },
 
     getMessages: (req, res) => {
-        const db = getDb();
-        db.all(`SELECT m.*, u.nom as exp_nom, u.prenom as exp_prenom FROM messages m LEFT JOIN users u ON m.expediteur_id = u.id WHERE m.destinataire_id = ? OR m.destinataire_role = 'all' OR m.destinataire_role = ? ORDER BY m.created_at DESC LIMIT 30`,
-            [req.session.user.id, req.session.user.role], (err, messages) => res.json(messages || []));
-    },
+    const db = require('../config/database').getEtablissementDb() || require('../config/database').globalDb;
+    if (!db) return res.json([]);
+    const userId = req.session.user.id;
+    db.all(`SELECT m.*, u.nom as exp_nom, u.prenom as exp_prenom FROM messages m LEFT JOIN users u ON m.expediteur_id = u.id WHERE m.destinataire_id = ? OR m.destinataire_role = 'all' OR m.destinataire_role = 'vie_scolaire' ORDER BY m.created_at DESC LIMIT 30`,
+        [userId], (err, messages) => res.json(messages || []));
+},
 
-    sendMessage: (req, res) => {
-        const db = getDb();
-        const { destinataire_id, destinataire_role, sujet, contenu } = req.body;
-        if (!sujet || !contenu) return res.status(400).json({ error: 'Sujet et contenu requis' });
-        const expediteur_id = req.session.user.id;
-        const fichier = req.file ? req.file.filename : null;
-        db.run('INSERT INTO messages (expediteur_id, destinataire_id, destinataire_role, sujet, contenu, fichier) VALUES (?,?,?,?,?,?)',
-            [expediteur_id, destinataire_id||null, destinataire_role||'all', sujet, contenu, fichier], function(err) {
-                if (err) return res.status(500).json({ error: err.message });
-                const messageId = this.lastID;
-                if (destinataire_id) {
-                    db.run("INSERT INTO notifications (user_id, type, titre, message, message_id) VALUES (?, 'message', ?, ?, ?)", [destinataire_id, sujet, contenu.substring(0, 100), messageId]);
-                }
-                res.json({ success: true, message: 'Message envoyé' });
-            });
-    },
+sendMessage: (req, res) => {
+    const db = require('../config/database').getEtablissementDb() || require('../config/database').globalDb;
+    if (!db) return res.status(500).json({ error: 'Base non disponible' });
+    const { destinataire_id, destinataire_role, sujet, contenu } = req.body;
+    if (!sujet || !contenu) return res.status(400).json({ error: 'Sujet et contenu requis' });
+    const expediteur_id = req.session.user.id;
+    const fichier = req.file ? req.file.filename : null;
+    db.run('INSERT INTO messages (expediteur_id, destinataire_id, destinataire_role, sujet, contenu, fichier) VALUES (?,?,?,?,?,?)',
+        [expediteur_id, destinataire_id||null, destinataire_role||'all', sujet, contenu, fichier], function(err) {
+            if (err) return res.status(500).json({ error: err.message });
+            const messageId = this.lastID;
+            if (destinataire_id) {
+                db.run("INSERT INTO notifications (user_id, type, titre, message, message_id) VALUES (?, 'message', ?, ?, ?)", [destinataire_id, sujet, contenu.substring(0, 100), messageId]);
+            } else if (destinataire_role && destinataire_role !== 'all') {
+                db.all("SELECT id FROM users WHERE role = ? AND compte_actif = 1", [destinataire_role], (err, users) => {
+                    if (users) users.forEach(u => db.run("INSERT INTO notifications (user_id, type, titre, message, message_id) VALUES (?, 'message', ?, ?, ?)", [u.id, sujet, contenu.substring(0, 100), messageId]));
+                });
+            } else {
+                db.all("SELECT id FROM users WHERE id != ? AND compte_actif = 1", [expediteur_id], (err, users) => {
+                    if (users) users.forEach(u => db.run("INSERT INTO notifications (user_id, type, titre, message, message_id) VALUES (?, 'message', ?, ?, ?)", [u.id, sujet, contenu.substring(0, 100), messageId]));
+                });
+            }
+            res.json({ success: true, message: 'Message envoyé' });
+        });
+},
 
-    getNotifications: (req, res) => {
-        const db = getDb();
-        db.all('SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 20', [req.session.user.id], (err, rows) => res.json(rows || []));
-    },
+getNotifications: (req, res) => {
+    const db = require('../config/database').getEtablissementDb() || require('../config/database').globalDb;
+    if (!db) return res.json([]);
+    db.all('SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 20', [req.session.user.id], (err, rows) => res.json(rows || []));
+},
 
-    markNotificationRead: (req, res) => {
-        const db = getDb();
-        db.run('UPDATE notifications SET lu = 1 WHERE id = ? AND user_id = ?', [req.params.id, req.session.user.id], (err) => res.json({ success: true }));
-    },
+markNotificationRead: (req, res) => {
+    const db = require('../config/database').getEtablissementDb() || require('../config/database').globalDb;
+    if (!db) return res.json({ success: false });
+    db.run('UPDATE notifications SET lu = 1 WHERE id = ? AND user_id = ?', [req.params.id, req.session.user.id], (err) => res.json({ success: true }));
+},
 
+viderNotificationsGeneral: (req, res) => {
+    const db = require('../config/database').getEtablissementDb() || require('../config/database').globalDb;
+    if (!db) return res.json({ success: false });
+    db.run('DELETE FROM notifications WHERE user_id = ?', [req.session.user.id], (err) => res.json({ success: true, message: 'Notifications vidées' }));
+},
     getMessageDetail: (req, res) => {
         const db = getDb();
         db.get('SELECT m.*, u.nom as exp_nom, u.prenom as exp_prenom FROM messages m LEFT JOIN users u ON m.expediteur_id = u.id WHERE m.id = ?', [req.params.id], (err, msg) => {
@@ -287,14 +305,6 @@ const vsController = {
             res.json({ success: true, message: 'Téléphone mis à jour' });
         });
     },
-
-    viderNotificationsGeneral: (req, res) => {
-        const db = getDb();
-        db.run('DELETE FROM notifications WHERE user_id = ?', [req.session.user.id], (err) => {
-            if (err) return res.status(500).json({ error: 'Erreur' });
-            res.json({ success: true, message: 'Notifications vidées' });
-        });
-    }
 };
 
 module.exports = vsController;
