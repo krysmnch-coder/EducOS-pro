@@ -39,7 +39,14 @@
         Nouvelle sanction
     </button>
 </div>
-
+<input type="text" id="searchSanction" placeholder=" Nom élève..." onkeyup="loadSanctions()" class="form-control" style="width:200px;">
+<select id="filtreClasseSanction" onchange="loadSanctions()" class="form-control" style="width:150px;">
+    <option value="">Toutes classes</option>
+    <option>6ème A</option><option>6ème B</option><option>5ème A</option><option>5ème B</option>
+    <option>4ème A</option><option>4ème B</option><option>3ème A</option><option>3ème B</option>
+    <option>2nde A</option><option>2nde B</option><option>1ère A</option><option>1ère B</option>
+    <option>Tle A</option><option>Tle B</option>
+</select>
 <div class="table-container">
     <table class="data-table">
         <thead><tr><th>Date</th><th>Élève</th><th>Type</th><th>Motif</th><th>Gravité</th><th>Parents</th><th>Action</th></tr></thead>
@@ -77,6 +84,10 @@
                 <div class="form-group"><label>Durée</label><input type="text" id="sancDuree" class="form-control" placeholder="ex: 2 heures, 3 jours"></div>
                 <div class="form-group"><label style="display:flex;align-items:center;gap:8px;margin-top:28px;"><input type="checkbox" id="sancNotifie"> Parents notifiés</label></div>
             </div>
+            <div class="form-group">
+    <label>Date *</label>
+    <input type="date" id="sancDate" class="form-control" required>
+</div>
             <button type="submit" class="btn btn-primary" style="width:100%;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
                 Enregistrer
@@ -111,6 +122,13 @@
             pag += '<button class="' + (i === p ? 'active' : '') + '" onclick="loadSanctions(' + i + ')">' + i + '</button>';
         }
         document.getElementById('paginationSanctions').innerHTML = pag;
+        async function loadSanctions() {
+    var search = document.getElementById('searchSanction').value;
+    var classe = document.getElementById('filtreClasseSanction').value;
+    var r = await fetch('/vie-scolaire/api/sanctions?search=' + encodeURIComponent(search) + '&classe=' + encodeURIComponent(classe));
+    var data = await r.json();
+    // ... afficher les résultats
+}
     }
 
     async function saveSanction(e) {
@@ -120,6 +138,7 @@
             type_sanction: document.getElementById('sancType').value,
             motif: document.getElementById('sancMotif').value,
             gravite: document.getElementById('sancGravite').value,
+            date_sanction: document.getElementById('sancDate').value,
             duree: document.getElementById('sancDuree').value,
             notifie_parent: document.getElementById('sancNotifie').checked ? 1 : 0
         };
@@ -133,6 +152,7 @@
         if (!confirm('Supprimer cette sanction ?')) return;
         await fetch('/vie-scolaire/api/sanctions/' + id, { method: 'DELETE' });
         loadSanctions();
+        v   
     }
 
     function openModal(id) { document.getElementById(id).classList.add('active'); }

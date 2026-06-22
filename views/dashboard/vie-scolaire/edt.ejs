@@ -66,6 +66,9 @@
             <div class="form-row">
                 <div class="form-group"><label>Classe *</label><input type="text" id="edtClasse" class="form-control" required placeholder="ex: 6ème A"></div>
                 <div class="form-group"><label>Jour *</label><select id="edtJour" class="form-control"><option>Lundi</option><option>Mardi</option><option>Mercredi</option><option>Jeudi</option><option>Vendredi</option><option>Samedi</option></select></div>
+                <button type="button" class="btn btn-sm btn-info" onclick="remplirTouteClasse()" style="margin-top:8px;">
+                 Remplir pour tous les jours de la semaine
+                </button>
             </div>
             <div class="form-row">
                 <div class="form-group"><label>Heure début *</label><input type="time" id="edtDebut" class="form-control" required></div>
@@ -114,6 +117,40 @@
         document.getElementById('edtGrid').innerHTML = html;
     }
 
+    function remplirTouteClasse() {
+    var classe = document.getElementById('edtClasse').value;
+    var debut = document.getElementById('edtDebut').value;
+    var fin = document.getElementById('edtFin').value;
+    var matiere = document.getElementById('edtMatiere').value;
+    var prof = document.getElementById('edtProfId').value;
+    var salle = document.getElementById('edtSalle').value;
+    
+    if (!classe || !debut || !fin || !matiere) {
+        alert('Remplissez classe, horaires et matière');
+        return;
+    }
+    
+    if (confirm('Ajouter ce cours pour Lundi, Mardi, Mercredi, Jeudi, Vendredi, Samedi ?')) {
+        fetch('/vie-scolaire/api/edt-bulk', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                classe: classe,
+                jours: ['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'],
+                heure_debut: debut,
+                heure_fin: fin,
+                matiere: matiere,
+                prof_id: prof || null,
+                salle: salle
+            })
+        }).then(r => r.json()).then(j => {
+            alert(j.message);
+            closeModal('edtModal');
+            loadEDT();
+        });
+    }
+    }
+    
     function quickAddEDT(jour, debut, classe) {
         document.getElementById('edtClasse').value = classe || '';
         document.getElementById('edtJour').value = jour;

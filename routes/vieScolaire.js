@@ -32,6 +32,7 @@ module.exports = function(upload) {
     router.get('/api/eleves', vs.getEleves);
     router.get('/api/users-by-role', vs.getUsersByRole);
     router.put('/api/users/:id/telephone', vs.updateUserTelephone);
+    router.post('/api/edt-bulk', vs.createEDTBulk);
 
     return router;
 };
