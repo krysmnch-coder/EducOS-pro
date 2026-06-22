@@ -120,7 +120,7 @@ markNotificationRead: (req, res) => {
     db.run('UPDATE notifications SET lu = 1 WHERE id = ? AND user_id = ?', [req.params.id, req.session.user.id], (err) => res.json({ success: true }));
 },
 
-viderNotificationsGeneral: (req, res) => {
+viderNotifications: (req, res) => {
     const db = require('../config/database').getEtablissementDb() || require('../config/database').globalDb;
     if (!db) return res.json({ success: false });
     db.run('DELETE FROM notifications WHERE user_id = ?', [req.session.user.id], (err) => res.json({ success: true, message: 'Notifications vidées' }));
@@ -269,6 +269,9 @@ viderNotificationsGeneral: (req, res) => {
     updateGroupeNom: (req, res) => { const db = getDb(); db.run('UPDATE groupes SET nom = ? WHERE id = ?', [req.body.nom.trim(), req.body.groupe_id], (err) => { if (err) return res.status(500).json({ error: 'Erreur' }); res.json({ success: true, message: 'Nom mis à jour' }); }); },
     updateGroupePhoto: (req, res) => { const db = getDb(); const fichier = req.file ? req.file.filename : null; if (!fichier) return res.status(400).json({ error: 'Fichier requis' }); db.run('UPDATE groupes SET photo = ? WHERE id = ?', [fichier, req.body.groupe_id], (err) => { if (err) return res.status(500).json({ error: 'Erreur' }); res.json({ success: true, message: 'Photo mise à jour', fichier: fichier }); }); },
 
+    getNotifications: (req, res) => { const db = getDb(); db.all('SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 50', [req.session.user.id], (err, rows) => res.json(rows || [])); },
+    markNotificationRead: (req, res) => { const db = getDb(); db.run('UPDATE notifications SET lu = 1 WHERE id = ? AND user_id = ?', [req.params.id, req.session.user.id], (err) => res.json({ success: true })); },
+    viderNotifications: (req, res) => { const db = getDb(); db.run('DELETE FROM notifications WHERE user_id = ?', [req.session.user.id], (err) => { if (err) return res.status(500).json({ error: 'Erreur' }); res.json({ success: true, message: 'Notifications vidées' }); }); }
 };
 
 module.exports = eleveController;
