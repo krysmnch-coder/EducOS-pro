@@ -1,8 +1,10 @@
 const { globalDb, getEtablissementDb } = require('../config/database');
 const bcrypt = require('bcryptjs');
 
+const databaseModule = require('../config/database');
+
 function getDb() {
-    return getEtablissementDb() || globalDb;
+    return databaseModule.getEtablissementDb() || databaseModule.globalDb;
 }
 
 const parentController = {

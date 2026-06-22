@@ -1,7 +1,7 @@
-const { globalDb, getEtablissementDb } = require('../config/database');
+const databaseModule = require('../config/database');
 
 function getDb() {
-    return getEtablissementDb() || globalDb;
+    return databaseModule.getEtablissementDb() || databaseModule.globalDb;
 }
 
 const profController = {
