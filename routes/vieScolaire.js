@@ -3,7 +3,6 @@ const express = require('express');
 module.exports = function(upload) {
     const router = express.Router();
     const vs = require('../controllers/vieScolaireController');
-    const parentController = require('../controllers/parentController'); // ← AJOUTER
     const { isAuthenticated, hasRole } = require('../middleware/auth');
 
     router.use(isAuthenticated);
@@ -21,13 +20,11 @@ module.exports = function(upload) {
     router.post('/api/pointer-arrivee', vs.pointerArrivee);
     router.post('/api/pointer-depart', vs.pointerDepart);
     router.get('/api/cumul-pointages', vs.getCumulPointages);
-    router.get('/api/avertissements', vs.getAvertissements);
     router.get('/api/profs', vs.getProfs);
     router.get('/api/sanctions', vs.getSanctions);
     router.post('/api/sanctions', vs.createSanction);
     router.delete('/api/sanctions/:id', vs.deleteSanction);
     router.get('/api/messages', vs.getMessages);
-    router.get('/api/messages/:id', vs.getMessageDetail);
     router.post('/api/messages', upload.single('fichier'), vs.sendMessage);
     router.get('/api/notifications', vs.getNotifications);
     router.put('/api/notifications/:id/read', vs.markNotificationRead);
@@ -35,10 +32,6 @@ module.exports = function(upload) {
     router.get('/api/eleves', vs.getEleves);
     router.get('/api/users-by-role', vs.getUsersByRole);
     router.put('/api/users/:id/telephone', vs.updateUserTelephone);
-    
-    // Fiches élèves (utilise le contrôleur parent)
-    router.get('/api/fiches-eleves', parentController.getAllFiches);
-    router.get('/api/fiches-eleves/:id', parentController.getFicheById);
 
     return router;
 };
