@@ -37,8 +37,14 @@ const authController = {
                     setEtablissementDb(finalDbPath);
 
                     bcrypt.hash(password, 10, (err, hash) => {
+                        console.log(' Tentative création admin:', email, finalCode);
                         globalDb.run('INSERT INTO admins (nom, prenom, email, password, etablissement_code) VALUES (?,?,?,?,?)',
                             [nom, prenom, email, hash, finalCode], function(err) {
+                                if (err) {
+                            console.error('❌ Erreur création admin:', err.message);
+                            return res.redirect('/auth/register?error=Erreur création compte');
+                        }
+                        console.log('✅ Admin créé avec succès');
                                 if (err) return res.redirect('/auth/register?error=Erreur création compte');
                                 res.redirect('/auth/login?success=' + encodeURIComponent('✅ Compte créé ! Code établissement : ' + finalCode));
                             });
