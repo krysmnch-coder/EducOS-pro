@@ -62,7 +62,7 @@
     
     <div class="toggle-row">
         <div class="toggle-info"><div class="title">Autoriser les inscriptions</div><div class="desc">Permet aux nouveaux utilisateurs de créer un compte.</div></div>
-        <label class="toggle-switch"><input type="checkbox" id="allow_registration" checked><span class="toggle-slider"></span></label>
+        <label class="toggle-switch"><input type="checkbox" id="allow_registration"><span class="toggle-slider"></span></label>
     </div>
     <div class="toggle-row">
         <div class="toggle-info"><div class="title">Mode maintenance</div><div class="desc">Bloque l'accès pour tous sauf les administrateurs.</div></div>
@@ -70,15 +70,15 @@
     </div>
     <div class="toggle-row">
         <div class="toggle-info"><div class="title">Notifications</div><div class="desc">Active les notifications pour tous les utilisateurs.</div></div>
-        <label class="toggle-switch"><input type="checkbox" id="notifications_active" checked><span class="toggle-slider"></span></label>
+        <label class="toggle-switch"><input type="checkbox" id="notifications_active"><span class="toggle-slider"></span></label>
     </div>
     <div class="toggle-row">
         <div class="toggle-info"><div class="title">Messagerie interne</div><div class="desc">Permet l'envoi de messages entre utilisateurs.</div></div>
-        <label class="toggle-switch"><input type="checkbox" id="messagerie_active" checked><span class="toggle-slider"></span></label>
+        <label class="toggle-switch"><input type="checkbox" id="messagerie_active"><span class="toggle-slider"></span></label>
     </div>
     <div class="toggle-row">
         <div class="toggle-info"><div class="title">Chat entre élèves</div><div class="desc">Active le système d'amis et groupes.</div></div>
-        <label class="toggle-switch"><input type="checkbox" id="chat_eleves_active" checked><span class="toggle-slider"></span></label>
+        <label class="toggle-switch"><input type="checkbox" id="chat_eleves_active"><span class="toggle-slider"></span></label>
     </div>
     <div class="toggle-row">
         <div class="toggle-info"><div class="title">Paiements en ligne</div><div class="desc">Permet aux parents de payer via Mobile Money.</div></div>
@@ -100,13 +100,13 @@
 <div class="toast" id="toast"></div>
 
 <script>
+    // Charger les paramètres
     async function loadSettings() {
         try {
             var r = await fetch('/admin/api/settings');
-            if (!r.ok) {
-                throw new Error('Erreur de chargement des paramètres');
-            }
             var s = await r.json();
+            console.log('Paramètres chargés:', s);
+            
             document.getElementById('max_users').value = s.max_users || 500;
             document.getElementById('default_role').value = s.default_role || 'eleve';
             document.getElementById('allow_registration').checked = s.allow_registration == 1;
@@ -115,64 +115,58 @@
             document.getElementById('messagerie_active').checked = s.messagerie_active == 1;
             document.getElementById('chat_eleves_active').checked = s.chat_eleves_active == 1;
             document.getElementById('paiements_online_active').checked = s.paiements_online_active == 1;
-        } catch (error) {
-            showToast('Erreur de chargement: ' + error.message, 'error');
+        } catch(e) {
+            console.error('Erreur chargement:', e);
+            showToast('Erreur de chargement des paramètres', 'error');
         }
     }
 
+    // Sauvegarder
     async function sauvegarderParametres() {
+        var maxUsers = parseInt(document.getElementById('max_users').value);
+        if (maxUsers > 1500) {
+            showToast('Maximum 1500 utilisateurs autorisés', 'error');
+            return;
+        }
+        
+        var data = {
+            max_users: maxUsers,
+            default_role: document.getElementById('default_role').value,
+            allow_registration: document.getElementById('allow_registration').checked ? 1 : 0,
+            maintenance_mode: document.getElementById('maintenance_mode').checked ? 1 : 0,
+            notifications_active: document.getElementById('notifications_active').checked ? 1 : 0,
+            messagerie_active: document.getElementById('messagerie_active').checked ? 1 : 0,
+            chat_eleves_active: document.getElementById('chat_eleves_active').checked ? 1 : 0,
+            paiements_online_active: document.getElementById('paiements_online_active').checked ? 1 : 0
+        };
+        
+        console.log('Envoi paramètres:', data);
+        
         try {
-            var maxUsers = parseInt(document.getElementById('max_users').value);
-            if (isNaN(maxUsers) || maxUsers < 1) {
-                showToast('Veuillez entrer un nombre valide', 'error');
-                return;
-            }
-            if (maxUsers > 1500) {
-                showToast('Maximum 1500 utilisateurs', 'error');
-                return;
-            }
-            
-            var data = {
-                max_users: maxUsers,
-                default_role: document.getElementById('default_role').value,
-                allow_registration: document.getElementById('allow_registration').checked ? 1 : 0,
-                maintenance_mode: document.getElementById('maintenance_mode').checked ? 1 : 0,
-                notifications_active: document.getElementById('notifications_active').checked ? 1 : 0,
-                messagerie_active: document.getElementById('messagerie_active').checked ? 1 : 0,
-                chat_eleves_active: document.getElementById('chat_eleves_active').checked ? 1 : 0,
-                paiements_online_active: document.getElementById('paiements_online_active').checked ? 1 : 0
-            };
-            
-            var r = await fetch('/admin/api/settings', { 
-                method: 'PUT', 
-                headers: { 'Content-Type': 'application/json' }, 
-                body: JSON.stringify(data) 
+            var r = await fetch('/admin/api/settings', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
             });
-            
-            if (!r.ok) {
-                var errorData = await r.json();
-                throw new Error(errorData.error || 'Erreur lors de la sauvegarde');
-            }
-            
             var j = await r.json();
-            showToast(j.message || 'Paramètres sauvegardés avec succès', 'success');
-        } catch (error) {
-            showToast('Erreur: ' + error.message, 'error');
+            console.log('Réponse:', j);
+            showToast(j.message || 'Paramètres enregistrés', j.success ? 'success' : 'error');
+        } catch(e) {
+            console.error('Erreur sauvegarde:', e);
+            showToast('Erreur lors de la sauvegarde', 'error');
         }
     }
 
     function showToast(msg, type) {
         var t = document.getElementById('toast');
-        t.textContent = msg; 
-        t.className = 'toast ' + (type || 'success'); 
+        t.textContent = msg;
+        t.className = 'toast ' + (type || 'success');
         t.style.display = 'block';
-        setTimeout(function() { 
-            t.style.display = 'none'; 
-        }, 5000);
+        setTimeout(function() { t.style.display = 'none'; }, 4000);
     }
 
-    // Charger les paramètres au chargement de la page
-    document.addEventListener('DOMContentLoaded', loadSettings);
+    // Charger au démarrage
+    loadSettings();
 </script>
 
 <%- include('../../partials/footer-admin') %>

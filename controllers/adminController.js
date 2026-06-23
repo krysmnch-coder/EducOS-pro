@@ -68,7 +68,7 @@ const adminController = {
                 db.run('INSERT INTO users (nom, prenom, email, password, role, telephone, matiere_principale, classes_assignees, date_naissance) VALUES (?,?,?,?,?,?,?,?,?)',
                     [nom, prenom, email, hash, role, telephone || null, matiere_principale || null, classes_assignees || null, date_naissance || null], function (err) {
                         if (err) return res.status(500).json({ error: 'Erreur création: ' + err.message });
-                        res.json({ success: true, message: '✅ Utilisateur créé avec succès', userId: this.lastID });
+                        res.json({ success: true, message: 'Utilisateur créé avec succès', userId: this.lastID });
                     });
             });
         });
@@ -81,7 +81,7 @@ const adminController = {
         db.run('UPDATE users SET nom=?, prenom=?, email=?, role=?, telephone=?, matiere_principale=?, classes_assignees=?, date_naissance=?, compte_actif=? WHERE id=?',
             [nom, prenom, email, role, telephone || null, matiere_principale || null, classes_assignees || null, date_naissance || null, compte_actif !== undefined ? compte_actif : 1, req.params.id], (err) => {
                 if (err) return res.status(500).json({ error: 'Erreur modification: ' + err.message });
-                res.json({ success: true, message: '✅ Utilisateur modifié avec succès' });
+                res.json({ success: true, message: 'Utilisateur modifié avec succès' });
             });
     },
 
@@ -91,7 +91,7 @@ const adminController = {
         if (req.params.id == req.session.user.id) return res.status(400).json({ error: 'Vous ne pouvez pas supprimer votre propre compte' });
         db.run('DELETE FROM users WHERE id = ?', [req.params.id], (err) => {
             if (err) return res.status(500).json({ error: 'Erreur suppression' });
-            res.json({ success: true, message: '✅ Utilisateur supprimé' });
+            res.json({ success: true, message: 'Utilisateur supprimé' });
         });
     },
 
@@ -118,7 +118,7 @@ const adminController = {
                 if (err) return res.status(500).json({ error: 'Erreur' });
                 // Récupérer l'email pour l'envoyer (simulation)
                 db.get('SELECT email FROM users WHERE id = ?', [req.params.id], (err, user) => {
-                    const message = '✅ Mot de passe réinitialisé';
+                    const message = 'Mot de passe réinitialisé';
                     console.log('📧 Nouveau MDP pour ' + (user?.email || 'inconnu') + ' : ' + newPassword);
                     res.json({ success: true, message: message, tempPassword: newPassword, email: user?.email });
                 });
@@ -142,7 +142,7 @@ const adminController = {
             if (row) {
                 databaseModule.globalDb.run('UPDATE etablissements SET adresse=?, telephone=?, email=?, site_web=?, directeur=?, annee_scolaire=? WHERE code=?',
                     [adresse || '', telephone || '', email || '', site_web || '', directeur || '', annee_scolaire || '', code], (err) => {
-                        res.json({ success: true, message: '✅ Mis à jour !', code: code });
+                        res.json({ success: true, message: 'Mis à jour !', code: code });
                     });
             } else {
                 databaseModule.globalDb.run('INSERT INTO etablissements (code, nom, adresse, telephone, email, site_web, directeur, annee_scolaire, db_name) VALUES (?,?,?,?,?,?,?,?,?)',
@@ -150,45 +150,56 @@ const adminController = {
                         req.session.user.etablissement_code = code;
                         req.session.save();
                         databaseModule.setEtablissementDb(dbPath);
-                        res.json({ success: true, message: '✅ Base créée ! Code : ' + code, code: code, dbName: dbName });
+                        res.json({ success: true, message: 'Base créée ! Code : ' + code, code: code, dbName: dbName });
                     });
             }
         });
     },
 
     getSettings: (req, res) => {
-        const db = getDb();
-        if (!db) return res.json({});
-        db.get('SELECT * FROM settings WHERE id=1', [], (err, row) => {
-            if (!row) {
-                db.run('INSERT INTO settings (id) VALUES (1)');
-                return res.json({ max_users: 500, default_role: 'eleve', maintenance_mode: 0, allow_registration: 1, notifications_active: 1, messagerie_active: 1, chat_eleves_active: 1, paiements_online_active: 0 });
-            }
-            res.json(row);
-        });
-    },
+    const db = require('../config/database').getEtablissementDb();
+    if (!db) return res.status(500).json({ error: 'Base de données non connectée' });
+    
+    db.get('SELECT * FROM settings WHERE id = 1', [], (err, row) => {
+        if (err) {
+            console.error('❌ Erreur getSettings:', err);
+            return res.status(500).json({ error: 'Erreur serveur' });
+        }
+        if (!row) {
+            return res.json({
+                max_users: 500, default_role: 'eleve', maintenance_mode: 0,
+                allow_registration: 1, notifications_active: 1, messagerie_active: 1,
+                chat_eleves_active: 1, paiements_online_active: 0
+            });
+        }
+        res.json(row);
+    });
+},
 
-    updateSettings: (req, res) => {
-        const db = getDb();
-        if (!db) return res.json({ success: false, error: 'Base non disponible' });
-        const { max_users, default_role, maintenance_mode, allow_registration, notifications_active, messagerie_active, chat_eleves_active, paiements_online_active } = req.body;
-        const maxUsers = Math.min(parseInt(max_users) || 500, 1500);
-        db.get('SELECT id FROM settings WHERE id=1', [], (err, row) => {
-            if (row) {
-                db.run('UPDATE settings SET max_users=?, default_role=?, maintenance_mode=?, allow_registration=?, notifications_active=?, messagerie_active=?, chat_eleves_active=?, paiements_online_active=? WHERE id=1',
-                    [maxUsers, default_role || 'eleve', maintenance_mode || 0, allow_registration ? 1 : 0, notifications_active ? 1 : 0, messagerie_active ? 1 : 0, chat_eleves_active ? 1 : 0, paiements_online_active ? 1 : 0], (err) => {
-                        if (err) return res.json({ success: false, error: 'Erreur' });
-                        res.json({ success: true, message: '✅ Paramètres enregistrés avec succès' });
-                    });
-            } else {
-                db.run('INSERT INTO settings (id, max_users, default_role, maintenance_mode, allow_registration, notifications_active, messagerie_active, chat_eleves_active, paiements_online_active) VALUES (1,?,?,?,?,?,?,?,?)',
-                    [maxUsers, default_role || 'eleve', maintenance_mode || 0, allow_registration ? 1 : 0, notifications_active ? 1 : 0, messagerie_active ? 1 : 0, chat_eleves_active ? 1 : 0, paiements_online_active ? 1 : 0], (err) => {
-                        if (err) return res.json({ success: false, error: 'Erreur' });
-                        res.json({ success: true, message: '✅ Paramètres créés avec succès' });
-                    });
-            }
+updateSettings: (req, res) => {
+    const db = require('../config/database').getEtablissementDb();
+    if (!db) return res.status(500).json({ error: 'Base de données non connectée' });
+    
+    const { max_users, default_role, maintenance_mode, allow_registration,
+            notifications_active, messagerie_active, chat_eleves_active, paiements_online_active } = req.body;
+    
+    const maxUsers = Math.min(parseInt(max_users) || 500, 1500);
+    
+    db.get('SELECT id FROM settings WHERE id = 1', [], (err, row) => {
+        if (err) return res.status(500).json({ error: 'Erreur serveur' });
+        
+        const sql = row ? 
+            `UPDATE settings SET max_users=?, default_role=?, maintenance_mode=?, allow_registration=?, notifications_active=?, messagerie_active=?, chat_eleves_active=?, paiements_online_active=?, updated_at=CURRENT_TIMESTAMP WHERE id=1` :
+            `INSERT INTO settings (id, max_users, default_role, maintenance_mode, allow_registration, notifications_active, messagerie_active, chat_eleves_active, paiements_online_active) VALUES (1,?,?,?,?,?,?,?,?)`;
+        
+        const params = [maxUsers, default_role||'eleve', maintenance_mode||0, allow_registration||0, notifications_active||0, messagerie_active||0, chat_eleves_active||0, paiements_online_active||0];
+        
+        db.run(sql, params, (err) => {
+            if (err) { console.error('❌ Erreur updateSettings:', err); return res.status(500).json({ error: 'Erreur' }); }
+            res.json({ success: true, message: 'Paramètres enregistrés' });
         });
-    },
+    });
+},
 
     getPaiements: (req, res) => {
         const db = getDb();
@@ -230,7 +241,7 @@ const adminController = {
         db.run('INSERT INTO paiements (type, categorie, montant, description, date_paiement, beneficiaire, mode_paiement, reference, user_id) VALUES (?,?,?,?,?,?,?,?,?)',
             [type, categorie, montant, description, date_paiement || new Date().toISOString().split('T')[0], beneficiaire || '', mode_paiement || 'especes', reference || '', user_id || null], function (err) {
                 if (err) return res.status(500).json({ error: 'Erreur: ' + err.message });
-                res.json({ success: true, message: '✅ Paiement enregistré' });
+                res.json({ success: true, message: 'Paiement enregistré' });
             });
     },
 
@@ -241,7 +252,7 @@ const adminController = {
         db.run('UPDATE paiements SET type=?, categorie=?, montant=?, description=?, date_paiement=?, beneficiaire=?, mode_paiement=?, reference=? WHERE id=?',
             [type, categorie, montant, description, date_paiement, beneficiaire, mode_paiement, reference, req.params.id], (err) => {
                 if (err) return res.status(500).json({ error: 'Erreur' });
-                res.json({ success: true, message: '✅ Paiement modifié' });
+                res.json({ success: true, message: 'Paiement modifié' });
             });
     },
 
@@ -250,7 +261,7 @@ const adminController = {
         if (!db) return res.status(500).json({ error: 'Base non disponible' });
         db.run('DELETE FROM paiements WHERE id = ?', [req.params.id], (err) => {
             if (err) return res.status(500).json({ error: 'Erreur' });
-            res.json({ success: true, message: '✅ Paiement supprimé' });
+            res.json({ success: true, message: 'Paiement supprimé' });
         });
     },
 
