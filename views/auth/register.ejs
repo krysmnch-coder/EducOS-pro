@@ -280,11 +280,11 @@
                             <label for="role">Rôle *</label>
                             <select id="role" name="role" class="form-control" required onchange="showDynamicFields()">
                                 <option value="">Choisissez votre profil</option>
-                                <option value="admin">👑 Administrateur</option>
-                                <option value="vie_scolaire">📋 Responsable Vie Scolaire</option>
-                                <option value="prof">👨‍🏫 Professeur</option>
-                                <option value="parent">👪 Parent</option>
-                                <option value="eleve">🎓 Élève</option>
+                                <option value="admin"> Administrateur</option>
+                                <option value="vie_scolaire"> Responsable Vie Scolaire</option>
+                                <option value="prof"> Professeur</option>
+                                <option value="parent"> Parent</option>
+                                <option value="eleve"> Élève</option>
                             </select>
                         </div>
 
@@ -385,36 +385,20 @@ async function loadEtablissements() {
     
     // ========== ADMIN : Créer son établissement ==========
     if (role === 'admin') {
-        // L'admin n'a pas besoin de choisir un établissement existant
-        etabField.innerHTML = '<option value="__new__">🏫 Créer mon établissement</option>';
-        etabField.disabled = false;
-        etabInfo.innerHTML = '✅ Vous allez créer votre établissement en tant qu\'administrateur.';
-        etabInfo.className = 'etab-info ok';
-        
-        html = '<div class="dynamic-fields">' +
-            '<div class="form-group">' +
-            '<label>🏫 Nom de l\'établissement *</label>' +
-            '<input type="text" name="etablissement_nom" class="form-control" required placeholder="Ex: Collège Jean Dupont">' +
-            '</div>' +
-            '<div class="form-group">' +
-            '<label>📧 Email de l\'établissement</label>' +
-            '<input type="email" name="etablissement_email" class="form-control" placeholder="contact@ecole.com">' +
-            '</div>' +
-            '<div class="form-group">' +
-            '<label>📞 Téléphone</label>' +
-            '<input type="text" name="etablissement_telephone" class="form-control" placeholder="+261 ...">' +
-            '</div>' +
-            '<div class="form-group">' +
-            '<label>📍 Adresse</label>' +
-            '<input type="text" name="etablissement_adresse" class="form-control" placeholder="Adresse de l\'établissement">' +
-            '</div>' +
-            '<div class="form-group">' +
-            '<label>👨‍💼 Directeur / Principal</label>' +
-            '<input type="text" name="etablissement_directeur" class="form-control" placeholder="Nom du directeur">' +
-            '</div>' +
-            '</div>';
-        container.style.display = 'block';
-    }
+    etabField.innerHTML = '<option value="__new__"> Je crée mon établissement</option>';
+    etabField.value = '__new__';
+    etabInfo.innerHTML = '✅ Vous allez créer votre établissement en tant qu\'administrateur.';
+    etabInfo.className = 'etab-info ok';
+    
+    html = '<div class="dynamic-fields">' +
+        '<div class="form-group"><label> Nom de l\'établissement *</label><input type="text" name="etablissement_nom" class="form-control" required placeholder="Ex: Collège Jean Dupont"></div>' +
+        '<div class="form-group"><label> Email</label><input type="email" name="etablissement_email" class="form-control" placeholder="contact@ecole.com"></div>' +
+        '<div class="form-group"><label> Téléphone</label><input type="text" name="etablissement_telephone" class="form-control" placeholder="+261 ..."></div>' +
+        '<div class="form-group"><label> Adresse</label><input type="text" name="etablissement_adresse" class="form-control" placeholder="Adresse"></div>' +
+        '<div class="form-group"><label> Directeur</label><input type="text" name="etablissement_directeur" class="form-control" placeholder="Nom du directeur"></div>' +
+        '</div>';
+    container.style.display = 'block';
+}
     
     // ========== PROFESSEUR ==========
     else if (role === 'prof') {
