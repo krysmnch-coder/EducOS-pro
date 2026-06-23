@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs');
 const { globalDb, setEtablissementDb, getEtablissementDb } = require('../config/database');
 const path = require('path');
 const fs = require('fs');
-const db = require('../config/database');
+
 const authController = {
     // Inscription ADMIN
     registerAdmin: (req, res) => {
@@ -65,168 +65,67 @@ const authController = {
 
     // Inscription utilisateur (profs, parents, élèves)
     register: (req, res) => {
-    const { nom, prenom, email, password, confirm_password, role, etablissement_code } = req.body;
+        const { nom, prenom, email, password, confirm_password, role, etablissement_id } = req.body;
 
-    if (!nom || !prenom || !email || !password || !role) {
-        return res.redirect('/auth/register?error=Tous les champs sont obligatoires');
-    }
-    if (password !== confirm_password) return res.redirect('/auth/register?error=Les mots de passe ne correspondent pas');
-    if (password.length < 8) return res.redirect('/auth/register?error=Minimum 8 caractères');
-
-    const { globalDb, setEtablissementDb } = require('../config/database');
-    const bcrypt = require('bcryptjs');
-    const path = require('path');
-    
-    // ============================================================
-    // CAS 1 : ADMIN - Créer l'établissement ET le compte admin
-    // ============================================================
-    if (role === 'admin') {
-        const etablissement_nom = req.body.etablissement_nom;
-        if (!etablissement_nom || !etablissement_nom.trim()) {
-            return res.redirect('/auth/register?error=Nom de l\'établissement requis');
+        if (!nom || !prenom || !email || !password || !role) {
+            return res.redirect('/auth/register?error=Tous les champs obligatoires');
         }
-        
-        // Générer un code unique pour l'établissement
-        const code = 'ETAB-' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substring(2, 5).toUpperCase();
-        const dbName = 'educos_' + code.toLowerCase() + '.db';
-        
-        console.log('🏫 Création établissement:', etablissement_nom, 'Code:', code);
-        
-        // 1. Insérer l'établissement dans la base globale
-        globalDb.run(
-            'INSERT INTO etablissements (code, nom, email, telephone, adresse, directeur, db_name) VALUES (?,?,?,?,?,?,?)',
-            [code, etablissement_nom.trim(), req.body.etablissement_email || '', req.body.etablissement_telephone || '', req.body.etablissement_adresse || '', req.body.etablissement_directeur || '', dbName],
-            function(err) {
-                if (err) {
-                    console.error('❌ Erreur création établissement:', err);
-                    return res.redirect('/auth/register?error=Erreur création établissement: ' + err.message);
-                }
-                
-                console.log('✅ Établissement créé, ID:', this.lastID);
-                
-                // 2. Créer la base de données de l'établissement
-                const dbPath = path.join(__dirname, '..', 'database', dbName);
-                const db = setEtablissementDb(dbPath);
-                
-                if (!db) {
-                    return res.redirect('/auth/register?error=Erreur création base de données');
-                }
-                
-                // 3. Attendre que les tables soient créées, puis insérer l'admin
-                setTimeout(() => {
-                    bcrypt.hash(password, 10, (err, hash) => {
-                        if (err) return res.redirect('/auth/register?error=Erreur serveur');
-                        
-                        db.run('INSERT INTO users (nom, prenom, email, password, role) VALUES (?,?,?,?,?)',
-                            [nom, prenom, email, hash, 'admin'], function(err) {
-                                if (err) {
-                                    console.error('❌ Erreur création admin:', err);
-                                    return res.redirect('/auth/register?error=Erreur création compte admin');
-                                }
-                                console.log('✅ Admin créé dans l\'établissement:', etablissement_nom);
-                                res.redirect('/auth/login?success=🏫 Établissement "' + etablissement_nom + '" créé avec succès ! Connectez-vous.');
+        if (password !== confirm_password) return res.redirect('/auth/register?error=Mots de passe différents');
+        if (password.length < 8) return res.redirect('/auth/register?error=Minimum 8 caractères');
+
+        if (role === 'admin' && req.body.etablissement_nom) {
+            return authController.registerAdmin(req, res);
+        }
+
+        if (role !== 'admin' && !etablissement_id) {
+            return res.redirect('/auth/register?error=Veuillez sélectionner votre école');
+        }
+
+        globalDb.get('SELECT * FROM etablissements WHERE id = ?', [etablissement_id], (err, etab) => {
+            if (err || !etab) return res.redirect('/auth/register?error=École non trouvée');
+
+            const dbDir = process.env.RENDER ? '/opt/render/project/src/database' : path.join(__dirname, '..', 'database');
+            const dbPath = path.join(dbDir, etab.db_name);
+            const db = setEtablissementDb(dbPath);
+            if (!db) return res.redirect('/auth/register?error=Erreur base de données');
+
+            db.get('SELECT id FROM users WHERE email = ?', [email], (err, user) => {
+                if (user) return res.redirect('/auth/register?error=Email déjà utilisé');
+
+                bcrypt.hash(password, 10, (err, hash) => {
+                    const matiere_principale = req.body.matiere_principale || null;
+                    const classes_assignees = req.body.classes_assignees || null;
+                    const classe_eleve = req.body.classe_eleve || null;
+                    const date_naissance = req.body.date_naissance || null;
+
+                    const insert = (fields, values) => {
+                        db.run('INSERT INTO users (nom, prenom, email, password, role' + fields + ') VALUES (?,?,?,?,?' + ',?'.repeat(values.length) + ')',
+                            [nom, prenom, email, hash, role, ...values], function(err) {
+                                if (err) return res.redirect('/auth/register?error=Erreur inscription');
+                                res.redirect('/auth/login?success=Compte créé !');
                             });
-                    });
-                }, 500); // Petit délai pour laisser les tables se créer
-            }
-        );
-        return;
-    }
-    
-    // ============================================================
-    // CAS 2 : AUTRES RÔLES - Choisir un établissement existant
-    // ============================================================
-    if (!etablissement_code || etablissement_code === '__new__') {
-        return res.redirect('/auth/register?error=Veuillez choisir un établissement');
-    }
-    
-    // Trouver l'établissement dans la base globale
-    globalDb.get("SELECT * FROM etablissements WHERE code = ? AND actif = 1", [etablissement_code], (err, etab) => {
-        if (err || !etab) {
-            console.error('❌ Établissement non trouvé:', etablissement_code);
-            return res.redirect('/auth/register?error=Établissement non trouvé. Veuillez en choisir un autre.');
-        }
-        
-        console.log('✅ Établissement trouvé:', etab.nom);
-        
-        // Connecter la base de l'établissement
-        const dbPath = path.join(__dirname, '..', 'database', etab.db_name);
-        const db = setEtablissementDb(dbPath);
-        
-        if (!db) {
-            return res.redirect('/auth/register?error=Erreur connexion établissement');
-        }
-        
-        // Vérifier si les inscriptions sont autorisées
-        db.get("SELECT allow_registration, max_users FROM settings WHERE id = 1", [], (err, settings) => {
-            if (err) return res.redirect('/auth/register?error=Erreur serveur');
-            
-            // Vérifier si inscriptions autorisées
-            if (settings && settings.allow_registration == 0) {
-                return res.redirect('/auth/register?error=⛔ Les inscriptions sont désactivées pour cet établissement');
-            }
-            
-            // Vérifier limite utilisateurs
-            db.get("SELECT COUNT(*) as total FROM users", [], (err, row) => {
-                if (err) return res.redirect('/auth/register?error=Erreur serveur');
-                
-                if (settings && settings.max_users && row && row.total >= settings.max_users) {
-                    return res.redirect('/auth/register?error=⛔ Nombre maximum d\'utilisateurs atteint (' + settings.max_users + ')');
-                }
-                
-                // Vérifier email déjà utilisé
-                db.get('SELECT id FROM users WHERE email = ?', [email], (err, user) => {
-                    if (user) return res.redirect('/auth/register?error=Email déjà utilisé dans cet établissement');
-                    
-                    bcrypt.hash(password, 10, (err, hash) => {
-                        if (err) return res.redirect('/auth/register?error=Erreur serveur');
-                        
-                        const matiere_principale = req.body.matiere_principale || null;
-                        const classes_assignees = req.body.classes_assignees || null;
-                        const classe_eleve = req.body.classe_eleve || null;
-                        const date_naissance = req.body.date_naissance || null;
+                    };
 
-                        // Insérer selon le rôle
-                        if (role === 'parent') {
-                            const enfantsNoms = [].concat(req.body.enfant_nom || []).filter(Boolean);
-                            const enfantsPrenoms = [].concat(req.body.enfant_prenom || []).filter(Boolean);
-                            const enfantsClasses = [].concat(req.body.enfant_classe || []).filter(Boolean);
-                            const enfants = [];
-                            for (let i = 0; i < enfantsNoms.length; i++) {
-                                if (enfantsNoms[i] && enfantsPrenoms[i]) {
-                                    enfants.push({ nom: enfantsNoms[i], prenom: enfantsPrenoms[i], classe: enfantsClasses[i] || '' });
-                                }
-                            }
-                            db.run('INSERT INTO users (nom, prenom, email, password, role, classes_assignees) VALUES (?,?,?,?,?,?)',
-                                [nom, prenom, email, hash, role, JSON.stringify(enfants)], (err) => {
-                                    if (err) return res.redirect('/auth/register?error=Erreur inscription');
-                                    res.redirect('/auth/login?success=Compte créé !');
-                                });
-                        } else if (role === 'eleve') {
-                            db.run('INSERT INTO users (nom, prenom, email, password, role, classes_assignees, date_naissance) VALUES (?,?,?,?,?,?,?)',
-                                [nom, prenom, email, hash, role, classe_eleve, date_naissance], (err) => {
-                                    if (err) return res.redirect('/auth/register?error=Erreur inscription');
-                                    res.redirect('/auth/login?success=Compte créé !');
-                                });
-                        } else if (role === 'prof') {
-                            db.run('INSERT INTO users (nom, prenom, email, password, role, matiere_principale, classes_assignees) VALUES (?,?,?,?,?,?,?)',
-                                [nom, prenom, email, hash, role, matiere_principale, classes_assignees], (err) => {
-                                    if (err) return res.redirect('/auth/register?error=Erreur inscription');
-                                    res.redirect('/auth/login?success=Compte créé !');
-                                });
-                        } else {
-                            db.run('INSERT INTO users (nom, prenom, email, password, role) VALUES (?,?,?,?,?)',
-                                [nom, prenom, email, hash, role], (err) => {
-                                    if (err) return res.redirect('/auth/register?error=Erreur inscription');
-                                    res.redirect('/auth/login?success=Compte créé !');
-                                });
+                    if (role === 'parent') {
+                        const noms = req.body.enfant_nom ? (Array.isArray(req.body.enfant_nom) ? req.body.enfant_nom : [req.body.enfant_nom]) : [];
+                        const prenoms = req.body.enfant_prenom ? (Array.isArray(req.body.enfant_prenom) ? req.body.enfant_prenom : [req.body.enfant_prenom]) : [];
+                        const classes = req.body.enfant_classe ? (Array.isArray(req.body.enfant_classe) ? req.body.enfant_classe : [req.body.enfant_classe]) : [];
+                        const enfants = [];
+                        for (let i = 0; i < noms.length; i++) {
+                            if (noms[i] && prenoms[i]) enfants.push({ nom: noms[i], prenom: prenoms[i], classe: classes[i] || '' });
                         }
-                    });
+                        insert(', classes_assignees', [JSON.stringify(enfants)]);
+                    } else if (role === 'eleve') {
+                        insert(', classes_assignees, date_naissance', [classe_eleve || '', date_naissance || '']);
+                    } else if (role === 'prof') {
+                        insert(', matiere_principale, classes_assignees', [matiere_principale || '', classes_assignees || '']);
+                    } else {
+                        insert('', []);
+                    }
                 });
             });
         });
-    });
-},
+    },
 
     getEcoles: (req, res) => {
         globalDb.all('SELECT id, nom, code FROM etablissements WHERE actif = 1 ORDER BY nom', [], (err, rows) => {

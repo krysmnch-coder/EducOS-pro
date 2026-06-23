@@ -32,29 +32,11 @@ function setEtablissementDb(dbPath) {
         else {
             console.log('✅ Base établissement connectée');
             etablissementDb.serialize(() => {
-                etablissementDb.run(`CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT UNIQUE NOT NULL, password TEXT NOT NULL, role TEXT NOT NULL, nom TEXT NOT NULL, prenom TEXT NOT NULL, civilite TEXT DEFAULT 'M.', telephone TEXT, matiere_principale TEXT, classes_assignees TEXT, date_naissance DATE, photo TEXT DEFAULT 'default.png', google_id TEXT, facebook_id TEXT, email_verified INTEGER DEFAULT 0, compte_actif INTEGER DEFAULT 1, derniere_connexion DATETIME, created_at DATETIME DEFAULT CURRENT_TIMESTAMP, updated_at DATETIME DEFAULT CURRENT_TIMESTAMP)`);
-                
-                etablissementDb.run(`CREATE TABLE IF NOT EXISTS settings (
-                    id INTEGER PRIMARY KEY DEFAULT 1,
-                    app_name TEXT DEFAULT 'EducOS-pro',
-                    max_users INTEGER DEFAULT 500,
-                    default_role TEXT DEFAULT 'eleve',
-                    maintenance_mode INTEGER DEFAULT 0,
-                    allow_registration INTEGER DEFAULT 1,
-                    notifications_active INTEGER DEFAULT 1,
-                    messagerie_active INTEGER DEFAULT 1,
-                    chat_eleves_active INTEGER DEFAULT 1,
-                    paiements_online_active INTEGER DEFAULT 0,
-                    email_verification INTEGER DEFAULT 0,
-                    session_duration INTEGER DEFAULT 24,
-                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-                )`);
-                
+                etablissementDb.run(`CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT UNIQUE NOT NULL, password TEXT NOT NULL, role TEXT NOT NULL, nom TEXT NOT NULL, prenom TEXT NOT NULL, telephone TEXT, matiere_principale TEXT, classes_assignees TEXT, date_naissance DATE, compte_actif INTEGER DEFAULT 1, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)`);
+                etablissementDb.run(`CREATE TABLE IF NOT EXISTS settings (id INTEGER PRIMARY KEY DEFAULT 1)`);
                 etablissementDb.run(`CREATE TABLE IF NOT EXISTS absences (id INTEGER PRIMARY KEY AUTOINCREMENT, eleve_id INTEGER NOT NULL, date_absence DATE NOT NULL, type TEXT NOT NULL, motif TEXT DEFAULT 'Non justifié', justifie INTEGER DEFAULT 0, duree_minutes INTEGER DEFAULT 0, signale_par TEXT, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)`);
                 etablissementDb.run(`CREATE TABLE IF NOT EXISTS emploi_du_temps (id INTEGER PRIMARY KEY AUTOINCREMENT, classe TEXT NOT NULL, jour TEXT NOT NULL, heure_debut TIME NOT NULL, heure_fin TIME NOT NULL, matiere TEXT NOT NULL, prof_id INTEGER, salle TEXT, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)`);
                 etablissementDb.run(`CREATE TABLE IF NOT EXISTS pointage (id INTEGER PRIMARY KEY AUTOINCREMENT, prof_id INTEGER NOT NULL, date_pointage DATE NOT NULL, heure_arrivee TIME, heure_depart TIME, statut TEXT, type_contrat TEXT, minutes_retard INTEGER DEFAULT 0, commentaire TEXT, modifie_par TEXT, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)`);
-                etablissementDb.run(`CREATE TABLE IF NOT EXISTS avertissements (id INTEGER PRIMARY KEY AUTOINCREMENT, prof_id INTEGER NOT NULL, mois TEXT NOT NULL, total_minutes_retard INTEGER DEFAULT 0, avertissement_active INTEGER DEFAULT 0, message_avertissement TEXT, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)`);
                 etablissementDb.run(`CREATE TABLE IF NOT EXISTS sanctions (id INTEGER PRIMARY KEY AUTOINCREMENT, eleve_id INTEGER NOT NULL, type_sanction TEXT NOT NULL, motif TEXT NOT NULL, gravite TEXT NOT NULL, date_sanction DATE NOT NULL, duree TEXT, notifie_parent INTEGER DEFAULT 0, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)`);
                 etablissementDb.run(`CREATE TABLE IF NOT EXISTS messages (id INTEGER PRIMARY KEY AUTOINCREMENT, expediteur_id INTEGER NOT NULL, destinataire_id INTEGER, destinataire_role TEXT DEFAULT 'all', sujet TEXT NOT NULL, contenu TEXT NOT NULL, fichier TEXT, lu INTEGER DEFAULT 0, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)`);
                 etablissementDb.run(`CREATE TABLE IF NOT EXISTS notifications (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, type TEXT DEFAULT 'message', titre TEXT NOT NULL, message TEXT NOT NULL, lu INTEGER DEFAULT 0, message_id INTEGER, lien TEXT, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)`);
@@ -68,10 +50,7 @@ function setEtablissementDb(dbPath) {
                 etablissementDb.run(`CREATE TABLE IF NOT EXISTS membres_groupes (id INTEGER PRIMARY KEY AUTOINCREMENT, groupe_id INTEGER NOT NULL, eleve_id INTEGER NOT NULL)`);
                 etablissementDb.run(`CREATE TABLE IF NOT EXISTS messages_groupes (id INTEGER PRIMARY KEY AUTOINCREMENT, groupe_id INTEGER NOT NULL, expediteur_id INTEGER NOT NULL, contenu TEXT NOT NULL, fichier TEXT, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)`);
                 etablissementDb.run(`CREATE TABLE IF NOT EXISTS messages_amis (id INTEGER PRIMARY KEY AUTOINCREMENT, expediteur_id INTEGER NOT NULL, destinataire_id INTEGER NOT NULL, contenu TEXT NOT NULL, fichier TEXT, lu INTEGER DEFAULT 0, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)`);
-                
-                // Insérer les valeurs par défaut
                 etablissementDb.run(`INSERT OR IGNORE INTO settings (id) VALUES (1)`);
-                
                 console.log('✅ Tables établissement créées');
             });
         }
