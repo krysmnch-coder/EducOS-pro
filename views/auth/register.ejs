@@ -330,19 +330,20 @@
             loadEtablissements();
         });
 
-        // Charger la liste des établissements
-        async function loadEtablissements() {
-            try {
-                var r = await fetch('/api/etablissements');
-                var etabs = await r.json();
-                var sel = document.getElementById('etablissement_code');
-                etabs.forEach(function(e) {
-                    sel.innerHTML += '<option value="' + e.code + '">' + e.nom + '</option>';
-                });
-            } catch(e) {
-                console.error('Erreur chargement établissements:', e);
-            }
-        }
+        // Charger la liste des établissements (sauf pour admin)
+async function loadEtablissements() {
+    try {
+        var r = await fetch('/api/etablissements');
+        var etabs = await r.json();
+        var sel = document.getElementById('etablissement_code');
+        sel.innerHTML = '<option value="">Choisissez votre établissement</option>';
+        etabs.forEach(function(e) {
+            sel.innerHTML += '<option value="' + e.code + '">' + e.nom + '</option>';
+        });
+    } catch(e) {
+        console.error('Erreur chargement établissements:', e);
+    }
+}
 
         // Vérifier si l'établissement accepte les inscriptions
         var etablissementsData = {};
@@ -376,23 +377,93 @@
         }
 
         function showDynamicFields() {
-            var role = document.getElementById('role').value;
-            var container = document.getElementById('dynamicFields');
-            var html = '';
-            if (role === 'prof') {
-                html = '<div class="dynamic-fields"><div class="form-group"><label>Matière principale *</label><select name="matiere_principale" class="form-control" required><option value="">Choisissez</option><option>Mathématiques</option><option>Français</option><option>Histoire-Géographie</option><option>SVT</option><option>Physique-Chimie</option><option>Anglais</option><option>Espagnol</option><option>Philosophie</option><option>EPS</option><option>Informatique</option></select></div><div class="form-group"><label>Classes assignées</label><input type="text" name="classes_assignees" class="form-control" placeholder="ex: 6ème A, 5ème B"></div></div>';
-                container.style.display = 'block';
-            } else if (role === 'eleve') {
-                html = '<div class="dynamic-fields"><div class="form-group"><label>Classe *</label><select name="classe_eleve" class="form-control" required><option value="">Choisissez</option><option>6ème A</option><option>6ème B</option><option>5ème A</option><option>5ème B</option><option>4ème A</option><option>4ème B</option><option>3ème A</option><option>3ème B</option><option>2nde A</option><option>2nde B</option><option>1ère A</option><option>1ère B</option><option>Tle A</option><option>Tle B</option></select></div><div class="form-group"><label>Date de naissance</label><input type="date" name="date_naissance" class="form-control"></div></div>';
-                container.style.display = 'block';
-            } else if (role === 'parent') {
-                html = '<div class="dynamic-fields"><label style="font-weight:600;font-size:0.78rem;margin-bottom:8px;display:block;">Enfant(s) inscrit(s)</label><div id="childrenContainer"><div class="child-row"><input type="text" name="enfant_nom[]" class="form-control" placeholder="Nom" required><input type="text" name="enfant_prenom[]" class="form-control" placeholder="Prénom" required><select name="enfant_classe[]" class="form-control" required><option value="">Classe</option><option>6ème A</option><option>6ème B</option><option>5ème A</option><option>5ème B</option><option>4ème A</option><option>4ème B</option><option>3ème A</option><option>3ème B</option><option>2nde A</option><option>2nde B</option><option>1ère A</option><option>1ère B</option><option>Tle A</option><option>Tle B</option></select></div></div><button type="button" class="btn-add-child" onclick="addChild()">+ Ajouter un autre enfant</button></div>';
-                container.style.display = 'block';
-            } else {
-                container.style.display = 'none';
-            }
-            container.innerHTML = html;
-        }
+    var role = document.getElementById('role').value;
+    var container = document.getElementById('dynamicFields');
+    var etabField = document.getElementById('etablissement_code');
+    var etabInfo = document.getElementById('etabInfo');
+    var html = '';
+    
+    // ========== ADMIN : Créer son établissement ==========
+    if (role === 'admin') {
+        // L'admin n'a pas besoin de choisir un établissement existant
+        etabField.innerHTML = '<option value="__new__">🏫 Créer mon établissement</option>';
+        etabField.disabled = false;
+        etabInfo.innerHTML = '✅ Vous allez créer votre établissement en tant qu\'administrateur.';
+        etabInfo.className = 'etab-info ok';
+        
+        html = '<div class="dynamic-fields">' +
+            '<div class="form-group">' +
+            '<label>🏫 Nom de l\'établissement *</label>' +
+            '<input type="text" name="etablissement_nom" class="form-control" required placeholder="Ex: Collège Jean Dupont">' +
+            '</div>' +
+            '<div class="form-group">' +
+            '<label>📧 Email de l\'établissement</label>' +
+            '<input type="email" name="etablissement_email" class="form-control" placeholder="contact@ecole.com">' +
+            '</div>' +
+            '<div class="form-group">' +
+            '<label>📞 Téléphone</label>' +
+            '<input type="text" name="etablissement_telephone" class="form-control" placeholder="+261 ...">' +
+            '</div>' +
+            '<div class="form-group">' +
+            '<label>📍 Adresse</label>' +
+            '<input type="text" name="etablissement_adresse" class="form-control" placeholder="Adresse de l\'établissement">' +
+            '</div>' +
+            '<div class="form-group">' +
+            '<label>👨‍💼 Directeur / Principal</label>' +
+            '<input type="text" name="etablissement_directeur" class="form-control" placeholder="Nom du directeur">' +
+            '</div>' +
+            '</div>';
+        container.style.display = 'block';
+    }
+    
+    // ========== PROFESSEUR ==========
+    else if (role === 'prof') {
+        etabField.disabled = false;
+        // Recharger la liste des établissements
+        loadEtablissements();
+        etabInfo.innerHTML = '';
+        
+        html = '<div class="dynamic-fields"><div class="form-group"><label>Matière principale *</label><select name="matiere_principale" class="form-control" required><option value="">Choisissez</option><option>Mathématiques</option><option>Français</option><option>Histoire-Géographie</option><option>SVT</option><option>Physique-Chimie</option><option>Anglais</option><option>Espagnol</option><option>Philosophie</option><option>EPS</option><option>Informatique</option></select></div><div class="form-group"><label>Classes assignées</label><input type="text" name="classes_assignees" class="form-control" placeholder="ex: 6ème A, 5ème B"></div></div>';
+        container.style.display = 'block';
+    }
+    
+    // ========== ÉLÈVE ==========
+    else if (role === 'eleve') {
+        etabField.disabled = false;
+        loadEtablissements();
+        etabInfo.innerHTML = '';
+        
+        html = '<div class="dynamic-fields"><div class="form-group"><label>Classe *</label><select name="classe_eleve" class="form-control" required><option value="">Choisissez</option><option>6ème A</option><option>6ème B</option><option>5ème A</option><option>5ème B</option><option>4ème A</option><option>4ème B</option><option>3ème A</option><option>3ème B</option><option>2nde A</option><option>2nde B</option><option>1ère A</option><option>1ère B</option><option>Tle A</option><option>Tle B</option></select></div><div class="form-group"><label>Date de naissance</label><input type="date" name="date_naissance" class="form-control"></div></div>';
+        container.style.display = 'block';
+    }
+    
+    // ========== PARENT ==========
+    else if (role === 'parent') {
+        etabField.disabled = false;
+        loadEtablissements();
+        etabInfo.innerHTML = '';
+        
+        html = '<div class="dynamic-fields"><label style="font-weight:600;font-size:0.78rem;margin-bottom:8px;display:block;">Enfant(s) inscrit(s)</label><div id="childrenContainer"><div class="child-row"><input type="text" name="enfant_nom[]" class="form-control" placeholder="Nom" required><input type="text" name="enfant_prenom[]" class="form-control" placeholder="Prénom" required><select name="enfant_classe[]" class="form-control" required><option value="">Classe</option><option>6ème A</option><option>6ème B</option><option>5ème A</option><option>5ème B</option><option>4ème A</option><option>4ème B</option><option>3ème A</option><option>3ème B</option><option>2nde A</option><option>2nde B</option><option>1ère A</option><option>1ère B</option><option>Tle A</option><option>Tle B</option></select></div></div><button type="button" class="btn-add-child" onclick="addChild()">+ Ajouter un autre enfant</button></div>';
+        container.style.display = 'block';
+    }
+    
+    // ========== VIE SCOLAIRE ==========
+    else if (role === 'vie_scolaire') {
+        etabField.disabled = false;
+        loadEtablissements();
+        etabInfo.innerHTML = '';
+        container.style.display = 'none';
+    }
+    
+    // ========== AUTRE ==========
+    else {
+        container.style.display = 'none';
+        etabField.disabled = false;
+        etabInfo.innerHTML = '';
+    }
+    
+    container.innerHTML = html;
+}
 
         function addChild() {
             var container = document.getElementById('childrenContainer');
@@ -410,6 +481,23 @@
             var etab = document.getElementById('etablissement_code').value;
             if (!etab) { e.preventDefault(); alert('❌ Veuillez choisir un établissement !'); }
         });
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+    var p1 = document.getElementById('password').value;
+    var p2 = document.getElementById('confirm_password').value;
+    if (p1 !== p2) { e.preventDefault(); alert('❌ Les mots de passe ne correspondent pas !'); return; }
+    if (p1.length < 8) { e.preventDefault(); alert('❌ Minimum 8 caractères !'); return; }
+    
+    var role = document.getElementById('role').value;
+    var etab = document.getElementById('etablissement_code').value;
+    
+    // L'admin crée son établissement, pas besoin de choisir
+    if (role === 'admin') {
+        var nomEtab = document.querySelector('[name="etablissement_nom"]');
+        if (!nomEtab || !nomEtab.value) { e.preventDefault(); alert('❌ Veuillez entrer le nom de l\'établissement !'); return; }
+    } else {
+        if (!etab) { e.preventDefault(); alert('❌ Veuillez choisir un établissement !'); return; }
+    }
+});
     </script>
 </body>
 </html>

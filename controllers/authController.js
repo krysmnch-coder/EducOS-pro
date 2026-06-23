@@ -145,6 +145,38 @@ const authController = {
                                     res.redirect('/auth/login?success=Compte créé !');
                                 });
                         }
+                        // Pour l'admin : créer l'établissement
+if (role === 'admin') {
+    const etablissement_nom = req.body.etablissement_nom;
+    if (!etablissement_nom) return res.redirect('/auth/register?error=Nom de l\'établissement requis');
+    
+    // Générer un code unique
+    const code = 'ETAB-' + Date.now().toString(36).toUpperCase();
+    const dbName = 'educos_' + code.toLowerCase() + '.db';
+    
+    // Insérer dans la base globale
+    globalDb.run(
+        'INSERT INTO etablissements (code, nom, email, telephone, adresse, directeur, db_name) VALUES (?,?,?,?,?,?,?)',
+        [code, etablissement_nom, req.body.etablissement_email || '', req.body.etablissement_telephone || '', req.body.etablissement_adresse || '', req.body.etablissement_directeur || '', dbName],
+        function(err) {
+            if (err) return res.redirect('/auth/register?error=Erreur création établissement');
+            
+            // Créer la base de l'établissement
+            const dbPath = path.join(__dirname, '..', 'database', dbName);
+            const db = setEtablissementDb(dbPath);
+            
+            // Créer le compte admin dans cette base
+            bcrypt.hash(password, 10, (err, hash) => {
+                db.run('INSERT INTO users (nom, prenom, email, password, role) VALUES (?,?,?,?,?)',
+                    [nom, prenom, email, hash, 'admin'], function(err) {
+                        if (err) return res.redirect('/auth/register?error=Erreur création admin');
+                        res.redirect('/auth/login?success=🏫 Établissement créé ! Connectez-vous.');
+                    });
+            });
+        }
+    );
+    return; // Important : sortir de la fonction
+}
                     });
                 });
             });
