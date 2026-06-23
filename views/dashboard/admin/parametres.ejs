@@ -101,43 +101,78 @@
 
 <script>
     async function loadSettings() {
-        var r = await fetch('/admin/api/settings');
-        var s = await r.json();
-        document.getElementById('max_users').value = s.max_users || 500;
-        document.getElementById('default_role').value = s.default_role || 'eleve';
-        document.getElementById('allow_registration').checked = s.allow_registration == 1;
-        document.getElementById('maintenance_mode').checked = s.maintenance_mode == 1;
-        document.getElementById('notifications_active').checked = s.notifications_active == 1;
-        document.getElementById('messagerie_active').checked = s.messagerie_active == 1;
-        document.getElementById('chat_eleves_active').checked = s.chat_eleves_active == 1;
-        document.getElementById('paiements_online_active').checked = s.paiements_online_active == 1;
+        try {
+            var r = await fetch('/admin/api/settings');
+            if (!r.ok) {
+                throw new Error('Erreur de chargement des paramètres');
+            }
+            var s = await r.json();
+            document.getElementById('max_users').value = s.max_users || 500;
+            document.getElementById('default_role').value = s.default_role || 'eleve';
+            document.getElementById('allow_registration').checked = s.allow_registration == 1;
+            document.getElementById('maintenance_mode').checked = s.maintenance_mode == 1;
+            document.getElementById('notifications_active').checked = s.notifications_active == 1;
+            document.getElementById('messagerie_active').checked = s.messagerie_active == 1;
+            document.getElementById('chat_eleves_active').checked = s.chat_eleves_active == 1;
+            document.getElementById('paiements_online_active').checked = s.paiements_online_active == 1;
+        } catch (error) {
+            showToast('Erreur de chargement: ' + error.message, 'error');
+        }
     }
 
     async function sauvegarderParametres() {
-        var maxUsers = parseInt(document.getElementById('max_users').value);
-        if (maxUsers > 1500) { showToast('Maximum 1500 utilisateurs', 'error'); return; }
-        var data = {
-            max_users: maxUsers,
-            default_role: document.getElementById('default_role').value,
-            allow_registration: document.getElementById('allow_registration').checked ? 1 : 0,
-            maintenance_mode: document.getElementById('maintenance_mode').checked ? 1 : 0,
-            notifications_active: document.getElementById('notifications_active').checked ? 1 : 0,
-            messagerie_active: document.getElementById('messagerie_active').checked ? 1 : 0,
-            chat_eleves_active: document.getElementById('chat_eleves_active').checked ? 1 : 0,
-            paiements_online_active: document.getElementById('paiements_online_active').checked ? 1 : 0
-        };
-        var r = await fetch('/admin/api/settings', { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) });
-        var j = await r.json();
-        showToast(j.message || j.error, j.success ? 'success' : 'error');
+        try {
+            var maxUsers = parseInt(document.getElementById('max_users').value);
+            if (isNaN(maxUsers) || maxUsers < 1) {
+                showToast('Veuillez entrer un nombre valide', 'error');
+                return;
+            }
+            if (maxUsers > 1500) {
+                showToast('Maximum 1500 utilisateurs', 'error');
+                return;
+            }
+            
+            var data = {
+                max_users: maxUsers,
+                default_role: document.getElementById('default_role').value,
+                allow_registration: document.getElementById('allow_registration').checked ? 1 : 0,
+                maintenance_mode: document.getElementById('maintenance_mode').checked ? 1 : 0,
+                notifications_active: document.getElementById('notifications_active').checked ? 1 : 0,
+                messagerie_active: document.getElementById('messagerie_active').checked ? 1 : 0,
+                chat_eleves_active: document.getElementById('chat_eleves_active').checked ? 1 : 0,
+                paiements_online_active: document.getElementById('paiements_online_active').checked ? 1 : 0
+            };
+            
+            var r = await fetch('/admin/api/settings', { 
+                method: 'PUT', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify(data) 
+            });
+            
+            if (!r.ok) {
+                var errorData = await r.json();
+                throw new Error(errorData.error || 'Erreur lors de la sauvegarde');
+            }
+            
+            var j = await r.json();
+            showToast(j.message || 'Paramètres sauvegardés avec succès', 'success');
+        } catch (error) {
+            showToast('Erreur: ' + error.message, 'error');
+        }
     }
 
     function showToast(msg, type) {
         var t = document.getElementById('toast');
-        t.textContent = msg; t.className = 'toast ' + (type || 'success'); t.style.display = 'block';
-        setTimeout(function() { t.style.display = 'none'; }, 3000);
+        t.textContent = msg; 
+        t.className = 'toast ' + (type || 'success'); 
+        t.style.display = 'block';
+        setTimeout(function() { 
+            t.style.display = 'none'; 
+        }, 5000);
     }
 
-    loadSettings();
+    // Charger les paramètres au chargement de la page
+    document.addEventListener('DOMContentLoaded', loadSettings);
 </script>
 
 <%- include('../../partials/footer-admin') %>
