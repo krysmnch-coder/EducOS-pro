@@ -3,190 +3,271 @@
 <style>
     .section { background: white; border-radius: 14px; padding: 24px; margin-bottom: 20px; box-shadow: 0 1px 6px rgba(0,0,0,0.04); }
     .section h3 { font-size: 1rem; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
-    .toggle-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
-    .toggle-row:last-child { border-bottom: none; }
-    .toggle-info { flex: 1; }
-    .toggle-info .title { font-weight: 600; font-size: 0.9rem; }
-    .toggle-info .desc { font-size: 0.78rem; color: #888; }
+    .form-group { margin-bottom: 18px; }
+    .form-group label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 0.85rem; color: #333; }
+    .form-control { width: 100%; padding: 10px 14px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 0.88rem; font-family: 'Inter', sans-serif; background: #f8f9fa; }
+    .form-control:focus { border-color: #002FA7; outline: none; background: white; }
+    .form-control:disabled { background: #f0f0f0; color: #888; cursor: not-allowed; }
+    .form-row { display: flex; gap: 16px; }
+    .form-row .form-group { flex: 1; }
+    .help-text { font-size: 0.75rem; color: #888; margin-top: 4px; }
     .toggle-switch { position: relative; display: inline-block; width: 50px; height: 26px; }
     .toggle-switch input { opacity: 0; width: 0; height: 0; }
     .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: #ccc; border-radius: 26px; transition: 0.3s; }
     .toggle-slider:before { content: ""; position: absolute; height: 20px; width: 20px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.3s; }
     input:checked + .toggle-slider { background: #002FA7; }
     input:checked + .toggle-slider:before { transform: translateX(24px); }
-    .form-group { margin-bottom: 16px; }
-    .form-group label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 0.85rem; }
-    .form-control { width: 100%; padding: 10px 14px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 0.88rem; font-family: 'Inter', sans-serif; background: white; }
-    .form-control:focus { border-color: #002FA7; outline: none; }
-    select.form-control { cursor: pointer; }
-    .help-text { font-size: 0.75rem; color: #888; margin-top: 4px; }
+    .toggle-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
+    .toggle-row:last-child { border-bottom: none; }
+    .toggle-info { flex: 1; }
+    .toggle-info .title { font-weight: 600; font-size: 0.9rem; }
+    .toggle-info .desc { font-size: 0.78rem; color: #888; }
     .btn { padding: 10px 22px; border: none; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; font-family: 'Inter', sans-serif; transition: all 0.2s; }
     .btn-primary { background: #002FA7; color: white; }
-    .btn-primary:hover { background: #003fd6; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,47,167,0.2); }
+    .btn-primary:hover { background: #003fd6; }
+    .btn-danger { background: #e74c3c; color: white; }
+    .btn-danger:hover { background: #c0392b; }
     .btn svg { width: 16px; height: 16px; stroke: currentColor; }
     .btn-primary svg { stroke: white; }
+    .info-banner { background: #f0f4ff; border: 1px solid #d0d8ff; border-radius: 10px; padding: 14px 18px; margin-bottom: 20px; font-size: 0.85rem; color: #002FA7; display: flex; align-items: center; gap: 10px; }
     .toast { position: fixed; top: 20px; right: 20px; padding: 14px 20px; border-radius: 10px; color: white; font-weight: 600; z-index: 3000; display: none; }
     .toast.success { background: #27ae60; }
     .toast.error { background: #e74c3c; }
-    .info-banner { background: #f0f4ff; border: 1px solid #d0d8ff; border-radius: 10px; padding: 14px 18px; margin-bottom: 20px; font-size: 0.85rem; color: #002FA7; display: flex; align-items: center; gap: 10px; }
-    .copyright { text-align: center; padding: 24px 20px; color: #888; font-size: 0.8rem; margin-top: 20px; border-top: 1px solid #f0f0f0; }
-    .copyright .logo-text { font-weight: 700; }
-    .copyright .logo-blue { color: #002FA7; }
-    .copyright .logo-gray { color: #888; font-weight: 400; }
-    .saved-indicator { display: inline-flex; align-items: center; gap: 6px; color: #27ae60; font-size: 0.8rem; font-weight: 600; margin-left: 12px; opacity: 0; transition: opacity 0.3s; }
-    .saved-indicator.show { opacity: 1; }
+    @media (max-width: 768px) { .form-row { flex-direction: column; } }
 </style>
 
 <h2 style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
     <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#002FA7" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-    Paramètres de l'établissement
+    Paramètres généraux
 </h2>
 
 <div class="info-banner">
     <svg viewBox="0 0 24 24" fill="none" stroke="#002FA7" stroke-width="2" width="20" height="20" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-    <span>Ces paramètres s'appliquent uniquement à <strong>votre établissement</strong>. Ils sont conservés jusqu'à votre prochaine modification.</span>
+    <span>Ces paramètres affectent l'ensemble de l'établissement. Les modifications sont appliquées immédiatement à tous les utilisateurs.</span>
 </div>
 
+<!-- SECTION 1 : IDENTITÉ -->
+<div class="section">
+    <h3>
+        <svg viewBox="0 0 24 24" fill="none" stroke="#002FA7" stroke-width="2" width="20" height="20"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+        Identité de l'application
+    </h3>
+    <div class="form-group">
+        <label>Nom de l'application</label>
+        <!-- Nom fixe = EducOS-pro, non modifiable -->
+        <input type="text" class="form-control" value="EducOS-pro" disabled>
+        <div class="help-text">⚠️ Le nom de l'application est fixe et ne peut pas être modifié.</div>
+    </div>
+    <div class="form-group">
+        <label>Version</label>
+        <input type="text" class="form-control" value="1.0.0" disabled>
+    </div>
+</div>
+
+<!-- SECTION 2 : LIMITES -->
 <div class="section">
     <h3>
         <svg viewBox="0 0 24 24" fill="none" stroke="#002FA7" stroke-width="2" width="20" height="20"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-        Capacité d'accueil
+        Limites et capacités
     </h3>
     <div class="form-group">
         <label>Nombre maximum d'utilisateurs</label>
-        <select id="max_users" class="form-control">
-            <option value="500">500 utilisateurs</option>
-            <option value="1000">1 000 utilisateurs</option>
-            <option value="1500">1 500 utilisateurs</option>
-            <option value="2000">2 000 utilisateurs</option>
-            <option value="2500">2 500 utilisateurs (maximum)</option>
-        </select>
-        <div class="help-text">🔒 Maximum : 2 500 utilisateurs par établissement.</div>
+        <!-- Max 1500, pas plus -->
+        <input type="number" id="max_users" class="form-control" min="1" max="1500" value="500">
+        <div class="help-text">🔒 Maximum : 1 500 utilisateurs par établissement. Au-delà, veuillez contacter le support.</div>
     </div>
     <div class="form-group">
         <label>Rôle par défaut pour les nouveaux inscrits</label>
         <select id="default_role" class="form-control">
-            <option value="eleve">👨‍🎓 Élève</option>
-            <option value="parent">👪 Parent</option>
+            <option value="eleve">Élève</option>
+            <option value="parent">Parent</option>
         </select>
         <div class="help-text">Les rôles Admin, Vie Scolaire et Professeur nécessitent une validation manuelle.</div>
     </div>
 </div>
 
+<!-- SECTION 3 : FONCTIONNALITÉS -->
 <div class="section">
     <h3>
-        <svg viewBox="0 0 24 24" fill="none" stroke="#002FA7" stroke-width="2" width="20" height="20"><rect x="2" y="2" width="20" height="20" rx="5"/><line x1="12" y1="17" x2="12" y2="11"/></svg>
-        Fonctionnalités de l'établissement
+        <svg viewBox="0 0 24 24" fill="none" stroke="#002FA7" stroke-width="2" width="20" height="20"><rect x="2" y="2" width="20" height="20" rx="5"/><line x1="12" y1="17" x2="12" y2="11"/><circle cx="12" cy="7" r="1"/></svg>
+        Fonctionnalités
     </h3>
     
+    <!-- Autoriser les inscriptions -->
     <div class="toggle-row">
         <div class="toggle-info">
-            <div class="title">✅ Autoriser les inscriptions</div>
-            <div class="desc">Coché = les nouveaux utilisateurs peuvent s'inscrire. Décoché = inscriptions bloquées.</div>
+            <div class="title">Autoriser les inscriptions</div>
+            <div class="desc">Permet aux nouveaux utilisateurs de créer un compte via la page d'inscription.</div>
         </div>
-        <label class="toggle-switch"><input type="checkbox" id="allow_registration"><span class="toggle-slider"></span></label>
+        <label class="toggle-switch">
+            <input type="checkbox" id="allow_registration" checked>
+            <span class="toggle-slider"></span>
+        </label>
     </div>
+    
+    <!-- Mode maintenance -->
     <div class="toggle-row">
         <div class="toggle-info">
-            <div class="title">🔧 Mode maintenance</div>
-            <div class="desc">Bloque l'accès à l'application pour tous sauf les administrateurs.</div>
+            <div class="title">Mode maintenance</div>
+            <div class="desc">Désactive l'accès à l'application pour tous les utilisateurs sauf les administrateurs.</div>
         </div>
-        <label class="toggle-switch"><input type="checkbox" id="maintenance_mode"><span class="toggle-slider"></span></label>
+        <label class="toggle-switch">
+            <input type="checkbox" id="maintenance_mode">
+            <span class="toggle-slider"></span>
+        </label>
     </div>
+    
+    <!-- Activer les notifications -->
     <div class="toggle-row">
         <div class="toggle-info">
-            <div class="title">🔔 Notifications</div>
+            <div class="title">Activer les notifications</div>
             <div class="desc">Active/désactive les notifications pour tous les utilisateurs.</div>
         </div>
-        <label class="toggle-switch"><input type="checkbox" id="notifications_active"><span class="toggle-slider"></span></label>
+        <label class="toggle-switch">
+            <input type="checkbox" id="notifications_active" checked>
+            <span class="toggle-slider"></span>
+        </label>
     </div>
+    
+    <!-- Activer la messagerie -->
     <div class="toggle-row">
         <div class="toggle-info">
-            <div class="title">💬 Messagerie interne</div>
-            <div class="desc">Permet l'envoi de messages entre utilisateurs de l'établissement.</div>
+            <div class="title">Activer la messagerie</div>
+            <div class="desc">Active/désactive la messagerie interne entre utilisateurs.</div>
         </div>
-        <label class="toggle-switch"><input type="checkbox" id="messagerie_active"><span class="toggle-slider"></span></label>
+        <label class="toggle-switch">
+            <input type="checkbox" id="messagerie_active" checked>
+            <span class="toggle-slider"></span>
+        </label>
     </div>
+    
+    <!-- Activer le chat entre élèves -->
     <div class="toggle-row">
         <div class="toggle-info">
-            <div class="title">👥 Chat entre élèves</div>
-            <div class="desc">Active le système d'amis et de groupes pour les élèves.</div>
+            <div class="title">Activer le chat entre élèves</div>
+            <div class="desc">Permet aux élèves de discuter entre eux via le système d'amis et de groupes.</div>
         </div>
-        <label class="toggle-switch"><input type="checkbox" id="chat_eleves_active"><span class="toggle-slider"></span></label>
+        <label class="toggle-switch">
+            <input type="checkbox" id="chat_eleves_active" checked>
+            <span class="toggle-slider"></span>
+        </label>
     </div>
+    
+    <!-- Activer les paiements en ligne -->
     <div class="toggle-row">
         <div class="toggle-info">
-            <div class="title">💳 Paiements en ligne</div>
-            <div class="desc">Permet aux parents de payer les frais via Mobile Money.</div>
+            <div class="title">Activer les paiements en ligne</div>
+            <div class="desc">Permet aux parents de payer les frais scolaires via Mobile Money.</div>
         </div>
-        <label class="toggle-switch"><input type="checkbox" id="paiements_online_active"><span class="toggle-slider"></span></label>
+        <label class="toggle-switch">
+            <input type="checkbox" id="paiements_online_active">
+            <span class="toggle-slider"></span>
+        </label>
     </div>
 </div>
 
-<div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
-    <button class="btn btn-primary" onclick="sauvegarderParametres()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
-        Enregistrer les paramètres
-    </button>
-    <span class="saved-indicator" id="savedIndicator">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#27ae60" stroke-width="2" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>
-        Enregistré
-    </span>
+<!-- SECTION 4 : SÉCURITÉ -->
+<div class="section">
+    <h3>
+        <svg viewBox="0 0 24 24" fill="none" stroke="#002FA7" stroke-width="2" width="20" height="20"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Sécurité
+    </h3>
+    
+    <!-- Vérification email obligatoire -->
+    <div class="toggle-row">
+        <div class="toggle-info">
+            <div class="title">Vérification email obligatoire</div>
+            <div class="desc">Exige la vérification de l'email avant d'accéder à l'application.</div>
+        </div>
+        <label class="toggle-switch">
+            <input type="checkbox" id="email_verification">
+            <span class="toggle-slider"></span>
+        </label>
+    </div>
+    
+    <!-- Durée de session (heures) -->
+    <div class="form-group" style="margin-top:16px;">
+        <label>Durée de session (heures)</label>
+        <input type="number" id="session_duration" class="form-control" min="1" max="72" value="24">
+        <div class="help-text">Après cette durée, l'utilisateur sera automatiquement déconnecté.</div>
+    </div>
 </div>
 
-<div class="copyright">
-    <span class="logo-text"><span class="logo-blue">EducOS</span><span class="logo-gray">-pro</span></span> v1.0.0 — © 2026 Tous droits réservés
+<!-- SECTION 5 : SAUVEGARDE -->
+<div class="section">
+    <h3>
+        <svg viewBox="0 0 24 24" fill="none" stroke="#002FA7" stroke-width="2" width="20" height="20"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Sauvegarde et données
+    </h3>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="sauvegarderParametres()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
+            Enregistrer tous les paramètres
+        </button>
+        <button class="btn btn-danger" onclick="reinitialiserParametres()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+            Réinitialiser par défaut
+        </button>
+    </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
     // ============================================
-    // CHARGER LES PARAMÈTRES DEPUIS LA BASE
+    // CHARGER LES PARAMÈTRES ACTUELS
     // ============================================
     async function loadSettings() {
         try {
             var r = await fetch('/admin/api/settings');
-            if (!r.ok) throw new Error('Erreur HTTP: ' + r.status);
             var s = await r.json();
-            console.log('✅ Paramètres chargés depuis la base:', s);
             
-            // Appliquer les valeurs sauvegardées
+            // Appliquer les valeurs aux champs
             document.getElementById('max_users').value = s.max_users || 500;
             document.getElementById('default_role').value = s.default_role || 'eleve';
-            
-            // IMPORTANT : Les checkboxes reflètent l'état SAUVEGARDÉ
             document.getElementById('allow_registration').checked = s.allow_registration == 1;
             document.getElementById('maintenance_mode').checked = s.maintenance_mode == 1;
-            document.getElementById('notifications_active').checked = s.notifications_active == 1;
-            document.getElementById('messagerie_active').checked = s.messagerie_active == 1;
-            document.getElementById('chat_eleves_active').checked = s.chat_eleves_active == 1;
-            document.getElementById('paiements_online_active').checked = s.paiements_online_active == 1;
-            
+            document.getElementById('notifications_active').checked = s.notifications_active != 0;
+            document.getElementById('messagerie_active').checked = s.messagerie_active != 0;
+            document.getElementById('chat_eleves_active').checked = s.chat_eleves_active != 0;
+            document.getElementById('paiements_online_active').checked = s.paiements_online_active != 0;
+            document.getElementById('email_verification').checked = s.email_verification == 1;
+            document.getElementById('session_duration').value = s.session_duration || 24;
         } catch(e) {
-            console.error('❌ Erreur chargement:', e);
-            showToast('Erreur de chargement des paramètres', 'error');
+            console.error('Erreur chargement paramètres:', e);
         }
     }
 
     // ============================================
-    // SAUVEGARDER LES PARAMÈTRES DANS LA BASE
+    // SAUVEGARDER LES PARAMÈTRES
     // ============================================
     async function sauvegarderParametres() {
+        // Vérifier la limite max_users
+        var maxUsers = parseInt(document.getElementById('max_users').value);
+        if (maxUsers > 1500) {
+            showToast('⚠️ Le nombre maximum d\'utilisateurs est limité à 1500', 'error');
+            document.getElementById('max_users').value = 1500;
+            return;
+        }
+        if (maxUsers < 1) {
+            document.getElementById('max_users').value = 1;
+            return;
+        }
+
+        // Récupérer toutes les valeurs
         var data = {
-            max_users: parseInt(document.getElementById('max_users').value),
+            max_users: maxUsers,
             default_role: document.getElementById('default_role').value,
-            // COCHÉ = 1 (bloqué), DÉCOCHÉ = 0 (autorisé)
             allow_registration: document.getElementById('allow_registration').checked ? 1 : 0,
             maintenance_mode: document.getElementById('maintenance_mode').checked ? 1 : 0,
             notifications_active: document.getElementById('notifications_active').checked ? 1 : 0,
             messagerie_active: document.getElementById('messagerie_active').checked ? 1 : 0,
             chat_eleves_active: document.getElementById('chat_eleves_active').checked ? 1 : 0,
-            paiements_online_active: document.getElementById('paiements_online_active').checked ? 1 : 0
+            paiements_online_active: document.getElementById('paiements_online_active').checked ? 1 : 0,
+            email_verification: document.getElementById('email_verification').checked ? 1 : 0,
+            session_duration: parseInt(document.getElementById('session_duration').value) || 24
         };
-        
-        console.log('📤 Sauvegarde dans la base:', data);
-        
+
         try {
             var r = await fetch('/admin/api/settings', {
                 method: 'PUT',
@@ -194,34 +275,60 @@
                 body: JSON.stringify(data)
             });
             var j = await r.json();
-            console.log('📥 Réponse serveur:', j);
-            
-            if (j.success) {
-                // Afficher l'indicateur "Enregistré"
-                var indicator = document.getElementById('savedIndicator');
-                indicator.classList.add('show');
-                setTimeout(function() { indicator.classList.remove('show'); }, 2500);
-                
-                // Recharger pour confirmer que tout est bien en base
-                setTimeout(loadSettings, 500);
-            } else {
-                showToast(j.error || 'Erreur lors de l\'enregistrement', 'error');
-            }
+            showToast(j.message || '✅ Paramètres enregistrés avec succès', j.success ? 'success' : 'error');
         } catch(e) {
-            console.error('❌ Erreur sauvegarde:', e);
-            showToast('Erreur réseau lors de la sauvegarde', 'error');
+            showToast('❌ Erreur lors de la sauvegarde', 'error');
         }
     }
 
+    // ============================================
+    // RÉINITIALISER LES PARAMÈTRES
+    // ============================================
+    async function reinitialiserParametres() {
+        if (!confirm('⚠️ Réinitialiser tous les paramètres à leurs valeurs par défaut ?\nCette action est irréversible.')) return;
+        
+        var data = {
+            app_name: 'EducOS-pro',
+            max_users: 500,
+            default_role: 'eleve',
+            maintenance_mode: 0,
+            allow_registration: 1,
+            notifications_active: 1,
+            messagerie_active: 1,
+            chat_eleves_active: 1,
+            paiements_online_active: 0,
+            email_verification: 0,
+            session_duration: 24
+        };
+
+        try {
+            var r = await fetch('/admin/api/settings', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            var j = await r.json();
+            if (j.success) {
+                loadSettings(); // Recharger les valeurs
+                showToast('✅ Paramètres réinitialisés avec succès', 'success');
+            }
+        } catch(e) {
+            showToast('❌ Erreur lors de la réinitialisation', 'error');
+        }
+    }
+
+    // ============================================
+    // TOAST NOTIFICATION
+    // ============================================
     function showToast(msg, type) {
         var t = document.getElementById('toast');
         t.textContent = msg;
         t.className = 'toast ' + (type || 'success');
         t.style.display = 'block';
-        setTimeout(function() { t.style.display = 'none'; }, 4000);
+        setTimeout(function() { t.style.display = 'none'; }, 3000);
     }
 
-    // Charger au démarrage
+    // Charger les paramètres au démarrage
     loadSettings();
 </script>
 

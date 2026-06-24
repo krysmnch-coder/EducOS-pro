@@ -4,16 +4,13 @@ const session = require('express-session');
 const SQLiteStore = require('connect-sqlite3')(session);
 const multer = require('multer');
 const fs = require('fs');
-const sqlite3 = require('sqlite3').verbose();
 const passport = require('./config/passport');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-// ============================================
-// 1. CONFIGURATION UPLOAD
-// ============================================
+// Configuration upload
 const uploadsDir = path.join(__dirname, 'public', 'uploads');
 if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir, { recursive: true });
@@ -29,22 +26,16 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage, limits: { fileSize: 10 * 1024 * 1024 } });
 
-// ============================================
-// 2. CONFIGURATION EJS
-// ============================================
+// Configuration EJS
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// ============================================
-// 3. MIDDLEWARE GÉNÉRAUX
-// ============================================
+// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ============================================
-// 4. SESSION
-// ============================================
+// Session
 app.use(session({
     store: new SQLiteStore({ db: 'sessions.sqlite', dir: path.join(__dirname, 'database') }),
     secret: process.env.SESSION_SECRET || 'educos_secret_key',
@@ -53,108 +44,26 @@ app.use(session({
     cookie: { maxAge: 24 * 60 * 60 * 1000, httpOnly: true }
 }));
 
-// ============================================
-// 5. PASSPORT
-// ============================================
+// Passport
 app.use(passport.initialize());
 app.use(passport.session());
 
-// ============================================
-// 6. VARIABLES GLOBALES POUR LES VUES
-// ============================================
 app.use((req, res, next) => {
     res.locals.user = req.session.user || null;
     next();
 });
 
 // ============================================
-// 7. MIDDLEWARE : CONNECTER LA BASE ÉTABLISSEMENT
-// ============================================
-app.use((req, res, next) => {
-    if (req.session.user && req.session.user.etablissement_code) {
-        try {
-            const dbName = 'educos_' + req.session.user.etablissement_code.toLowerCase() + '.db';
-            const dbPath = path.join(__dirname, 'database', dbName);
-            const { setEtablissementDb } = require('./config/database');
-            setEtablissementDb(dbPath);
-        } catch(e) {
-            console.error('Erreur initialisation base établissement:', e.message);
-        }
-    }
-    next();
-});
-
-// ============================================
-// 8. API PUBLIQUE (SANS AUTHENTIFICATION)
-// ============================================
-app.get('/api/etablissements', (req, res) => {
-    const { globalDb } = require('./config/database');
-    globalDb.all("SELECT code, nom FROM etablissements WHERE actif = 1 ORDER BY nom", [], (err, rows) => {
-        if (err) return res.json([]);
-        res.json(rows || []);
-    });
-});
-
-app.get('/api/check-etablissement/:code', (req, res) => {
-    const { globalDb } = require('./config/database');
-    const code = req.params.code;
-    
-    globalDb.get("SELECT * FROM etablissements WHERE code = ? AND actif = 1", [code], (err, etab) => {
-        if (err || !etab) return res.json({ error: 'Établissement non trouvé', allow_registration: 1, max_users: 500, current_users: 0 });
-        
-        const dbPath = path.join(__dirname, 'database', etab.db_name);
-        const checkDb = new sqlite3.Database(dbPath, (err) => {
-            if (err) return res.json({ error: 'Erreur base', allow_registration: 1, max_users: 500, current_users: 0 });
-            
-            checkDb.get("SELECT allow_registration, max_users FROM settings WHERE id = 1", [], (err, settings) => {
-                checkDb.get("SELECT COUNT(*) as total FROM users", [], (err, row) => {
-                    checkDb.close();
-                    res.json({
-                        code: etab.code,
-                        nom: etab.nom,
-                        allow_registration: settings ? settings.allow_registration : 1,
-                        max_users: settings ? settings.max_users : 500,
-                        current_users: row ? row.total : 0
-                    });
-                });
-            });
-        });
-    });
-});
-
-// ============================================
-// 9. Middleware : S'assurer que la base établissement est connectée
-app.use((req, res, next) => {
-    if (req.session.user && req.session.user.etablissement_code) {
-        const { getEtablissementDb, setEtablissementDb } = require('./config/database');
-        const currentDb = getEtablissementDb();
-        
-        // Si pas de base connectée ou si le code a changé
-        if (!currentDb) {
-            const dbName = 'educos_' + req.session.user.etablissement_code.toLowerCase() + '.db';
-            const dbPath = path.join(__dirname, 'database', dbName);
-            if (fs.existsSync(dbPath)) {
-                setEtablissementDb(dbPath);
-                console.log('✅ Base établissement reconnectée:', dbName);
-            }
-        }
-    }
-    next();
-});
-// ============================================
-
-// ============================================
-// 10. ROUTES API (AVEC AUTHENTIFICATION)
+// ROUTES API
 // ============================================
 app.use('/auth', require('./routes/auth'));
 app.use('/admin', require('./routes/admin')(upload));
 app.use('/vie-scolaire', require('./routes/vieScolaire')(upload));
 app.use('/prof', require('./routes/prof')(upload));
 app.use('/parent', require('./routes/parent')(upload));
-app.use('/eleve', require('./routes/eleve')(upload));
 
 // ============================================
-// 11. ACCUEIL
+// ACCUEIL
 // ============================================
 app.get('/', (req, res) => {
     if (req.session.user) return res.redirect('/dashboard');
@@ -162,7 +71,7 @@ app.get('/', (req, res) => {
 });
 
 // ============================================
-// 12. REDIRECTION DASHBOARD
+// REDIRECTION DASHBOARD
 // ============================================
 app.get('/dashboard', (req, res) => {
     if (!req.session.user) return res.redirect('/auth/login');
@@ -177,7 +86,7 @@ app.get('/dashboard', (req, res) => {
 });
 
 // ============================================
-// 13. DASHBOARD ADMIN
+// DASHBOARD ADMIN
 // ============================================
 app.get('/dashboard/admin', (req, res) => {
     if (!req.session.user || req.session.user.role !== 'admin') return res.redirect('/auth/login');
@@ -205,7 +114,7 @@ app.get('/dashboard/admin/parametres', (req, res) => {
 });
 
 // ============================================
-// 14. DASHBOARD VIE SCOLAIRE
+// DASHBOARD VIE SCOLAIRE
 // ============================================
 app.get('/dashboard/vie-scolaire', (req, res) => {
     if (!req.session.user || req.session.user.role !== 'vie_scolaire') return res.redirect('/auth/login');
@@ -237,7 +146,7 @@ app.get('/dashboard/vie-scolaire/annuaire', (req, res) => {
 });
 
 // ============================================
-// 15. DASHBOARD PROFESSEUR
+// DASHBOARD PROFESSEUR
 // ============================================
 app.get('/dashboard/prof', (req, res) => {
     if (!req.session.user || req.session.user.role !== 'prof') return res.redirect('/auth/login');
@@ -269,7 +178,7 @@ app.get('/dashboard/prof/sanctions', (req, res) => {
 });
 
 // ============================================
-// 16. DASHBOARD PARENT
+// DASHBOARD PARENT
 // ============================================
 app.get('/dashboard/parent', (req, res) => {
     if (!req.session.user || req.session.user.role !== 'parent') return res.redirect('/auth/login');
@@ -279,23 +188,113 @@ app.get('/dashboard/parent/messages', (req, res) => {
     if (!req.session.user || req.session.user.role !== 'parent') return res.redirect('/auth/login');
     res.render('dashboard/parent/messages', { title: 'Messages | EducOS-pro', user: req.session.user });
 });
-
+// Vérifier les dates limites chaque heure
+setInterval(() => {
+    const db = require('./config/database');
+    const demain = new Date();
+    demain.setDate(demain.getDate() + 1);
+    const dateLimite = demain.toISOString().split('T')[0];
+    
+    db.all("SELECT r.*, u.nom as prof_nom, u.prenom as prof_prenom FROM ressources r JOIN users u ON r.prof_id = u.id WHERE r.date_limite = ?", [dateLimite], (err, ressources) => {
+        if (err || !ressources) return;
+        ressources.forEach(rs => {
+            // Trouver les élèves qui n'ont pas rendu
+            db.all("SELECT u.id FROM users u WHERE u.role = 'eleve' AND u.compte_actif = 1 AND (u.classes_assignees LIKE ? OR u.classes_assignees = ?) AND u.id NOT IN (SELECT eleve_id FROM devoirs_rendus WHERE ressource_id = ?)",
+                ['%' + rs.classe + '%', rs.classe, rs.id], (err, eleves) => {
+                if (eleves) {
+                    eleves.forEach(e => {
+                        db.run("INSERT INTO notifications (user_id, type, titre, message) VALUES (?, 'alerte', ?, ?)",
+                            [e.id, '⚠️ Devoir à rendre', rs.titre + ' - Date limite: ' + rs.date_limite + ' (demain !)']);
+                    });
+                }
+            });
+            
+            // Notifier les parents aussi
+            db.all("SELECT id FROM users WHERE role = 'parent' AND compte_actif = 1", [], (err, parents) => {
+                if (parents) {
+                    parents.forEach(p => {
+                        db.run("INSERT INTO notifications (user_id, type, titre, message) VALUES (?, 'alerte', ?, ?)",
+                            [p.id, '⚠️ Devoir enfant', rs.titre + ' - Classe ' + rs.classe + ' - Date limite: ' + rs.date_limite]);
+                    });
+                }
+            });
+        });
+    });
+}, 3600000); // Toutes les heures
 // ============================================
-// 17. DASHBOARD ÉLÈVE
+// DASHBOARD ÉLÈVE
 // ============================================
 app.get('/dashboard/eleve', (req, res) => {
     if (!req.session.user || req.session.user.role !== 'eleve') return res.redirect('/auth/login');
     res.render('dashboard/eleve', { title: 'Élève | EducOS-pro', user: req.session.user });
 });
 
+const eleveRoutes = require('./routes/eleve')(upload);
+app.use('/eleve', eleveRoutes);
+
 // ============================================
-// 18. 404
+// 404
 // ============================================
 app.use((req, res) => { res.status(404).send('Page non trouvée'); });
 
 // ============================================
-// 19. DÉMARRAGE
+// DÉMARRAGE
 // ============================================
+// Middleware mode maintenance
+app.use((req, res, next) => {
+    if (req.path.startsWith('/auth') || req.path.startsWith('/css') || req.path.startsWith('/js') || req.path.startsWith('/uploads')) {
+        return next();
+    }
+    const db = require('./config/database');
+    db.get('SELECT maintenance_mode FROM settings WHERE id=1', [], (err, row) => {
+        if (row && row.maintenance_mode == 1 && (!req.session.user || req.session.user.role !== 'admin')) {
+            return res.status(503).send(`
+                <!DOCTYPE html><html><head><meta charset="UTF-8"><title>Maintenance</title>
+                <style>body{font-family:Inter,sans-serif;text-align:center;padding:100px 20px;background:#f5f5f5;}
+                h1{color:#002FA7;font-size:2rem;}p{color:#666;margin-top:10px;}</style></head>
+                <body><h1>🚧 Maintenance en cours</h1><p>L'application est temporairement indisponible.<br>Veuillez réessayer plus tard.</p></body></html>`);
+        }
+        next();
+    });
+});
+// Middleware : charger la base de données de l'établissement
+app.use((req, res, next) => {
+    if (req.session.user && req.session.user.etablissement_code) {
+        const path = require('path');
+        const dbName = 'educos_' + req.session.user.etablissement_code.toLowerCase() + '.db';
+        const dbPath = path.join(__dirname, 'database', dbName);
+        const { setEtablissementDb } = require('./config/database');
+        setEtablissementDb(dbPath);
+    }
+    next();
+});
+app.get('/dashboard/vie-scolaire/fiches', (req, res) => {
+    if (!req.session.user || req.session.user.role !== 'vie_scolaire') return res.redirect('/auth/login');
+    res.render('dashboard/vie-scolaire/fiches', { title: 'Fiches élèves | EducOS-pro', user: req.session.user });
+});
+// Middleware : initialiser la base établissement
+app.use((req, res, next) => {
+    if (req.session.user && req.session.user.etablissement_code) {
+        try {
+            const path = require('path');
+            const fs = require('fs');
+            const dbName = 'educos_' + req.session.user.etablissement_code.toLowerCase() + '.db';
+            const dbPath = path.join(__dirname, 'database', dbName);
+            
+            // Créer le dossier database s'il n'existe pas
+            const dbDir = path.join(__dirname, 'database');
+            if (!fs.existsSync(dbDir)) {
+                fs.mkdirSync(dbDir, { recursive: true });
+            }
+            
+            const { setEtablissementDb } = require('./config/database');
+            setEtablissementDb(dbPath);
+        } catch(e) {
+            console.error('Erreur initialisation base établissement:', e.message);
+        }
+    }
+    next();
+});
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Serveur démarré sur http://0.0.0.0:${PORT}`);
 });
