@@ -161,34 +161,44 @@ db.get("SELECT allow_registration, max_users FROM settings WHERE id = 1", [], (e
 
     // Login
     login: (req, res) => {
-        const { email, password, role } = req.body;
-        if (!email || !password) return res.redirect('/auth/login?error=Email et mot de passe requis');
+    const { email, password } = req.body;
+    if (!email || !password) return res.redirect('/auth/login?error=Email et mot de passe requis');
 
-        if (role === 'admin') {
-            globalDb.get('SELECT * FROM admins WHERE email = ? AND compte_actif = 1', [email], (err, user) => {
-                if (user) {
-                    bcrypt.compare(password, user.password, (err, isMatch) => {
-                        if (err || !isMatch) return res.redirect('/auth/login?error=Email ou mot de passe incorrect');
-                        if (user.etablissement_code) {
-                            globalDb.get('SELECT db_name FROM etablissements WHERE code = ?', [user.etablissement_code], (err, etab) => {
-                                if (etab) {
-                                    const dbDir = process.env.RENDER ? '/opt/render/project/src/database' : path.join(__dirname, '..', 'database');
-                                    setEtablissementDb(path.join(dbDir, etab.db_name));
-                                }
-                            });
-                        }
-                        req.session.user = { id: user.id, email: user.email, nom: user.nom, prenom: user.prenom, role: 'admin', etablissement_code: user.etablissement_code || '' };
-                        res.redirect('/dashboard');
-                    });
-                } else {
-                    // Chercher dans les bases établissements
-                    loginInEtablissements(req, res, email, password, 'admin');
-                }
-            });
-        } else {
-            loginInEtablissements(req, res, email, password, role);
-        }
-    },
+    const db = require('../config/database').getEtablissementDb();
+    if (!db) return res.redirect('/auth/login?error=Erreur serveur');
+
+    db.get('SELECT * FROM users WHERE email = ? AND compte_actif = 1', [email], (err, user) => {
+        if (err || !user) return res.redirect('/auth/login?error=Email ou mot de passe incorrect');
+
+        bcrypt.compare(password, user.password, (err, isMatch) => {
+            if (err || !isMatch) return res.redirect('/auth/login?error=Email ou mot de passe incorrect');
+
+            // Vérifier le mode maintenance (sauf pour admin)
+            if (user.role !== 'admin') {
+                db.get('SELECT maintenance_mode FROM settings WHERE id=1', [], (err, row) => {
+                    if (row && row.maintenance_mode == 1) {
+                        return res.redirect('/auth/login?error=🔧 Application en maintenance. Réessayez plus tard.');
+                    }
+                    // Continue login...
+                    db.run('UPDATE users SET derniere_connexion = CURRENT_TIMESTAMP WHERE id = ?', [user.id]);
+                    req.session.user = {
+                        id: user.id, email: user.email, nom: user.nom, prenom: user.prenom,
+                        role: user.role, etablissement_code: req.session.etablissement_code
+                    };
+                    res.redirect('/dashboard');
+                });
+            } else {
+                // Admin : pas de vérification maintenance
+                db.run('UPDATE users SET derniere_connexion = CURRENT_TIMESTAMP WHERE id = ?', [user.id]);
+                req.session.user = {
+                    id: user.id, email: user.email, nom: user.nom, prenom: user.prenom,
+                    role: user.role, etablissement_code: req.session.etablissement_code
+                };
+                res.redirect('/dashboard');
+            }
+        });
+    });
+},
 
     logout: (req, res) => { req.session.destroy(() => res.redirect('/auth/login')); }
 };

@@ -123,43 +123,9 @@ app.get('/api/check-etablissement/:code', (req, res) => {
 });
 
 // ============================================
-// 9. MIDDLEWARE MODE MAINTENANCE
+// 9. MIDDLEWARE MODE MAINTENANCE - SUPPRIMÉ
+// (géré directement dans authController)
 // ============================================
-app.use((req, res, next) => {
-    if (req.path.startsWith('/auth') || req.path.startsWith('/css') || 
-        req.path.startsWith('/js') || req.path.startsWith('/uploads') ||
-        req.path.startsWith('/api/etablissements') || req.path.startsWith('/api/check-etablissement') ||
-        req.path.startsWith('/favicon')) {
-        return next();
-    }
-    
-    if (req.session.user && req.session.user.role === 'admin') {
-        return next();
-    }
-    
-    try {
-        const { getEtablissementDb } = require('./config/database');
-        const db = getEtablissementDb();
-        if (db) {
-            db.get('SELECT maintenance_mode FROM settings WHERE id = 1', [], (err, row) => {
-                if (row && row.maintenance_mode == 1) {
-                    return res.status(503).send(`
-                        <!DOCTYPE html><html><head><title>Maintenance</title>
-                        <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-                        <style>body{font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;background:#f0f2f5;text-align:center;margin:0;}
-                        h1{color:#002FA7;font-size:2rem;}p{color:#666;font-size:1rem;}</style></head>
-                        <body><div><h1>🔧 Maintenance en cours</h1><p>L'application est temporairement indisponible.<br>Veuillez réessayer plus tard.</p><p style="margin-top:30px;"><strong style="color:#002FA7;">EducOS</strong><span style="color:#888;">-pro</span></p></div></body></html>
-                    `);
-                }
-                return next();
-            });
-        } else {
-            return next();
-        }
-    } catch(e) {
-        return next();
-    }
-});
 
 // ============================================
 // 10. ROUTES API (AVEC AUTHENTIFICATION)
