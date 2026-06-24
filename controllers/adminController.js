@@ -16,12 +16,51 @@ const adminController = {
     },
 
     getUsers: (req, res) => {
-        const db = getDb();
-        if (!db) return res.json({ users: [], pagination: { currentPage: 1, totalPages: 0 } });
-        db.all('SELECT * FROM users ORDER BY created_at DESC', [], (err, users) => {
-            res.json({ users: users || [], pagination: { currentPage: 1, totalPages: 1 } });
-        });
-    },
+    const db = require('../config/database').getEtablissementDb();
+    if (!db) return res.json({ users: [], pagination: { totalPages: 0, currentPage: 1, total: 0 } });
+    
+    const page = parseInt(req.query.page) || 1;
+    const limit = 10;
+    const offset = (page - 1) * limit;
+    const search = req.query.search || '';
+    const role = req.query.role || '';
+    
+    let where = [];
+    let params = [];
+    
+    if (search) {
+        where.push('(nom LIKE ? OR prenom LIKE ? OR email LIKE ?)');
+        params.push('%' + search + '%', '%' + search + '%', '%' + search + '%');
+    }
+    if (role) {
+        where.push('role = ?');
+        params.push(role);
+    }
+    
+    const whereClause = where.length > 0 ? 'WHERE ' + where.join(' AND ') : '';
+    
+    db.get('SELECT COUNT(*) as total FROM users ' + whereClause, params, (err, row) => {
+        if (err) {
+            console.error('❌ Erreur comptage users:', err);
+            return res.json({ users: [], pagination: { totalPages: 0, currentPage: 1, total: 0 } });
+        }
+        
+        const total = row ? row.total : 0;
+        const totalPages = Math.ceil(total / limit);
+        
+        db.all('SELECT id, nom, prenom, email, role, compte_actif, created_at FROM users ' + whereClause + ' ORDER BY created_at DESC LIMIT ? OFFSET ?',
+            [...params, limit, offset], (err, users) => {
+                if (err) {
+                    console.error('❌ Erreur récupération users:', err);
+                    return res.json({ users: [], pagination: { totalPages: 0, currentPage: 1, total: 0 } });
+                }
+                res.json({
+                    users: users || [],
+                    pagination: { currentPage: page, totalPages: totalPages, total: total, limit: limit }
+                });
+            });
+    });
+},
 
     createUser: (req, res) => {
         const db = getDb();
@@ -87,12 +126,92 @@ const adminController = {
     },
 
     getSettings: (req, res) => {
-        const db = getDb();
-        if (!db) return res.json({});
-        db.get('SELECT * FROM settings WHERE id=1', [], (err, row) => res.json(row || {}));
-    },
-    updateSettings: (req, res) => { res.json({ success: true, message: '✅ Paramètres enregistrés' }); },
-
+    const db = require('../config/database').getEtablissementDb();
+    if (!db) {
+        console.log('❌ Pas de base étabissement connectée');
+        return res.json({
+            max_users: 500, default_role: 'eleve', allow_registration: 1,
+            maintenance_mode: 0, notifications_active: 1, messagerie_active: 1,
+            chat_eleves_active: 1, paiements_online_active: 0
+        });
+    }
+    
+    db.get('SELECT * FROM settings WHERE id = 1', [], (err, row) => {
+        if (err) {
+            console.error('❌ Erreur getSettings:', err);
+            return res.json({
+                max_users: 500, default_role: 'eleve', allow_registration: 1,
+                maintenance_mode: 0, notifications_active: 1, messagerie_active: 1,
+                chat_eleves_active: 1, paiements_online_active: 0
+            });
+        }
+        
+        if (!row) {
+            // Créer la ligne par défaut
+            db.run(`INSERT INTO settings (id, max_users, default_role, allow_registration, maintenance_mode, notifications_active, messagerie_active, chat_eleves_active, paiements_online_active) 
+                VALUES (1, 500, 'eleve', 1, 0, 1, 1, 1, 0)`, [], (err) => {
+                if (err) console.error('❌ Erreur création settings:', err);
+                res.json({
+                    max_users: 500, default_role: 'eleve', allow_registration: 1,
+                    maintenance_mode: 0, notifications_active: 1, messagerie_active: 1,
+                    chat_eleves_active: 1, paiements_online_active: 0
+                });
+            });
+            return;
+        }
+        
+        console.log('✅ Settings chargés:', row);
+        res.json(row);
+    });
+},
+updateSettings: (req, res) => {
+    const db = require('../config/database').getEtablissementDb();
+    if (!db) return res.status(500).json({ error: 'Base de données non connectée' });
+    
+    const { max_users, default_role, maintenance_mode, allow_registration,
+            notifications_active, messagerie_active, chat_eleves_active, paiements_online_active } = req.body;
+    
+    const maxUsers = Math.min(parseInt(max_users) || 500, 2500);
+    
+    console.log('📝 Mise à jour settings:', req.body);
+    
+    // Vérifier si la ligne existe
+    db.get('SELECT id FROM settings WHERE id = 1', [], (err, row) => {
+        if (err) {
+            console.error('❌ Erreur vérification settings:', err);
+            return res.status(500).json({ error: 'Erreur serveur' });
+        }
+        
+        const sql = row ? 
+            `UPDATE settings SET max_users=?, default_role=?, maintenance_mode=?, allow_registration=?, notifications_active=?, messagerie_active=?, chat_eleves_active=?, paiements_online_active=?, updated_at=CURRENT_TIMESTAMP WHERE id=1` :
+            `INSERT INTO settings (id, max_users, default_role, maintenance_mode, allow_registration, notifications_active, messagerie_active, chat_eleves_active, paiements_online_active) VALUES (1,?,?,?,?,?,?,?,?)`;
+        
+        const params = [
+            maxUsers,
+            default_role || 'eleve',
+            maintenance_mode || 0,
+            allow_registration || 0,
+            notifications_active || 0,
+            messagerie_active || 0,
+            chat_eleves_active || 0,
+            paiements_online_active || 0
+        ];
+        
+        db.run(sql, params, function(err) {
+            if (err) {
+                console.error('❌ Erreur updateSettings:', err);
+                return res.status(500).json({ error: 'Erreur lors de la mise à jour: ' + err.message });
+            }
+            console.log('✅ Settings mis à jour, lignes affectées:', this.changes);
+            
+            // Vérifier que ça a bien été enregistré
+            db.get('SELECT * FROM settings WHERE id = 1', [], (err, saved) => {
+                console.log('🔍 Vérification après sauvegarde:', saved);
+                res.json({ success: true, message: '✅ Paramètres enregistrés avec succès', data: saved });
+            });
+        });
+    });
+},
     getPaiements: (req, res) => { res.json({ paiements: [], pagination: { currentPage: 1, totalPages: 0 } }); },
     getPaiementStats: (req, res) => { res.json({ totalRecettes: 0, totalDepenses: 0, solde: 0 }); },
     createPaiement: (req, res) => { res.json({ success: true }); },

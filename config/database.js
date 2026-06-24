@@ -31,9 +31,22 @@ function setEtablissementDb(dbPath) {
         if (err) { console.error('❌ Erreur:', err.message); etablissementDb = null; }
         else {
             console.log('✅ Base établissement connectée');
-            etablissementDb.serialize(() => {
+                etablissementDb.serialize(() => {
                 etablissementDb.run(`CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT UNIQUE NOT NULL, password TEXT NOT NULL, role TEXT NOT NULL, nom TEXT NOT NULL, prenom TEXT NOT NULL, telephone TEXT, matiere_principale TEXT, classes_assignees TEXT, date_naissance DATE, compte_actif INTEGER DEFAULT 1, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)`);
-                etablissementDb.run(`CREATE TABLE IF NOT EXISTS settings (id INTEGER PRIMARY KEY DEFAULT 1)`);
+                etablissementDb.run(`CREATE TABLE IF NOT EXISTS settings (
+                    id INTEGER PRIMARY KEY DEFAULT 1,
+                    app_name TEXT DEFAULT 'EducOS-pro',
+                    max_users INTEGER DEFAULT 500,
+                    default_role TEXT DEFAULT 'eleve',
+                    maintenance_mode INTEGER DEFAULT 0,
+                    allow_registration INTEGER DEFAULT 1,
+                    notifications_active INTEGER DEFAULT 1,
+                    messagerie_active INTEGER DEFAULT 1,
+                    chat_eleves_active INTEGER DEFAULT 1,
+                    paiements_online_active INTEGER DEFAULT 0,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                )`);                
                 etablissementDb.run(`CREATE TABLE IF NOT EXISTS absences (id INTEGER PRIMARY KEY AUTOINCREMENT, eleve_id INTEGER NOT NULL, date_absence DATE NOT NULL, type TEXT NOT NULL, motif TEXT DEFAULT 'Non justifié', justifie INTEGER DEFAULT 0, duree_minutes INTEGER DEFAULT 0, signale_par TEXT, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)`);
                 etablissementDb.run(`CREATE TABLE IF NOT EXISTS emploi_du_temps (id INTEGER PRIMARY KEY AUTOINCREMENT, classe TEXT NOT NULL, jour TEXT NOT NULL, heure_debut TIME NOT NULL, heure_fin TIME NOT NULL, matiere TEXT NOT NULL, prof_id INTEGER, salle TEXT, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)`);
                 etablissementDb.run(`CREATE TABLE IF NOT EXISTS pointage (id INTEGER PRIMARY KEY AUTOINCREMENT, prof_id INTEGER NOT NULL, date_pointage DATE NOT NULL, heure_arrivee TIME, heure_depart TIME, statut TEXT, type_contrat TEXT, minutes_retard INTEGER DEFAULT 0, commentaire TEXT, modifie_par TEXT, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)`);
@@ -55,6 +68,8 @@ function setEtablissementDb(dbPath) {
             });
         }
     });
+    etablissementDb.run(`INSERT OR IGNORE INTO settings (id, max_users, default_role, allow_registration, maintenance_mode, notifications_active, messagerie_active, chat_eleves_active, paiements_online_active) 
+    VALUES (1, 500, 'eleve', 1, 0, 1, 1, 1, 0)`);
     return etablissementDb;
 }
 
