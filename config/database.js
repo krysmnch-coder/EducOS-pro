@@ -1,39 +1,8 @@
-const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
-const fs = require('fs');
-
-const dbDir = path.join(__dirname, '..', 'database');
-if (!fs.existsSync(dbDir)) fs.mkdirSync(dbDir, { recursive: true });
-
-// Base GLOBALE
-const globalDbPath = path.join(dbDir, 'educos_global.db');
-const globalDb = new sqlite3.Database(globalDbPath, (err) => {
-    if (err) console.error('❌ Erreur globale:', err.message);
-    else {
-        console.log('✅ Base globale connectée');
-        globalDb.serialize(() => {
-            globalDb.run(`CREATE TABLE IF NOT EXISTS etablissements (id INTEGER PRIMARY KEY AUTOINCREMENT, code TEXT UNIQUE NOT NULL, nom TEXT NOT NULL, adresse TEXT DEFAULT '', telephone TEXT DEFAULT '', email TEXT DEFAULT '', site_web TEXT DEFAULT '', directeur TEXT DEFAULT '', annee_scolaire TEXT DEFAULT '2024-2025', db_name TEXT NOT NULL, max_users INTEGER DEFAULT 1500, actif INTEGER DEFAULT 1, created_at DATETIME DEFAULT CURRENT_TIMESTAMP, updated_at DATETIME DEFAULT CURRENT_TIMESTAMP)`);
-            globalDb.run(`CREATE TABLE IF NOT EXISTS admins (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT UNIQUE NOT NULL, password TEXT NOT NULL, nom TEXT NOT NULL, prenom TEXT NOT NULL, etablissement_code TEXT, compte_actif INTEGER DEFAULT 1, derniere_connexion DATETIME, created_at DATETIME DEFAULT CURRENT_TIMESTAMP, updated_at DATETIME DEFAULT CURRENT_TIMESTAMP)`);
-            console.log('✅ Tables globales créées');
-        });
-    }
-});
-// Remplacer le INSERT OR IGNORE par ceci :
-etablissementDb.get('SELECT COUNT(*) as count FROM settings', [], (err, row) => {
-    if (err || !row || row.count === 0) {
-        etablissementDb.run(`INSERT INTO settings (id, max_users, default_role, allow_registration, maintenance_mode, notifications_active, messagerie_active, chat_eleves_active, paiements_online_active) VALUES (1, 500, 'eleve', 1, 0, 1, 1, 1, 0)`);
-        console.log('✅ Valeurs par défaut settings insérées');
-    } else {
-        console.log('✅ Settings existants conservés');
-    }
-});
-// Base ÉTABLISSEMENT
-let etablissementDb = null;
-
-function getEtablissementDb() { return etablissementDb; }
-
 function setEtablissementDb(dbPath) {
-    if (etablissementDb) try { etablissementDb.close(); } catch(e) {}
+    if (etablissementDb) {
+        try { etablissementDb.close(); } catch(e) {}
+    }
+    
     console.log('📁 Ouverture base:', dbPath);
     
     etablissementDb = new sqlite3.Database(dbPath, (err) => {
@@ -65,8 +34,17 @@ function setEtablissementDb(dbPath) {
                 updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )`);
             
-            // Insérer les valeurs par défaut si la table est vide
-            etablissementDb.run(`INSERT OR IGNORE INTO settings (id, max_users, default_role, allow_registration, maintenance_mode, notifications_active, messagerie_active, chat_eleves_active, paiements_online_active) VALUES (1, 500, 'eleve', 1, 0, 1, 1, 1, 0)`);
+            // Insérer les valeurs par défaut SEULEMENT si la table est vide
+            etablissementDb.get('SELECT COUNT(*) as count FROM settings', [], (err, row) => {
+                if (err || !row || row.count === 0) {
+                    etablissementDb.run(`INSERT INTO settings (id, max_users, default_role, allow_registration, maintenance_mode, notifications_active, messagerie_active, chat_eleves_active, paiements_online_active) VALUES (1, 500, 'eleve', 1, 0, 1, 1, 1, 0)`, [], (err) => {
+                        if (err) console.error('❌ Erreur insertion settings:', err.message);
+                        else console.log('✅ Valeurs par défaut settings insérées');
+                    });
+                } else {
+                    console.log('✅ Settings existants conservés (' + row.count + ' ligne(s))');
+                }
+            });
             
             // Tables absences
             etablissementDb.run(`CREATE TABLE IF NOT EXISTS absences (id INTEGER PRIMARY KEY AUTOINCREMENT, eleve_id INTEGER NOT NULL, date_absence DATE NOT NULL, type TEXT NOT NULL, motif TEXT DEFAULT 'Non justifié', justifie INTEGER DEFAULT 0, duree_minutes INTEGER DEFAULT 0, signale_par TEXT, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)`);
@@ -125,5 +103,3 @@ function setEtablissementDb(dbPath) {
     
     return etablissementDb;
 }
-
-module.exports = { globalDb, getEtablissementDb, setEtablissementDb };
