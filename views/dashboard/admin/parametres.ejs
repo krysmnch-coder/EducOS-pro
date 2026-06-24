@@ -27,13 +27,20 @@
     .toast { position: fixed; top: 20px; right: 20px; padding: 14px 20px; border-radius: 10px; color: white; font-weight: 600; z-index: 3000; display: none; }
     .toast.success { background: #27ae60; }
     .toast.error { background: #e74c3c; }
-    .copyright { text-align: center; padding: 20px; color: #888; font-size: 0.8rem; margin-top: 20px; }
+    .info-banner { background: #f0f4ff; border: 1px solid #d0d8ff; border-radius: 10px; padding: 14px 18px; margin-bottom: 20px; font-size: 0.85rem; color: #002FA7; display: flex; align-items: center; gap: 10px; }
+    .copyright { text-align: center; padding: 20px; color: #888; font-size: 0.8rem; margin-top: 20px; border-top: 1px solid #f0f0f0; }
+    .copyright strong { color: #002FA7; }
 </style>
 
 <h2 style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
     <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#002FA7" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-    Paramètres
+    Paramètres de l'établissement
 </h2>
+
+<div class="info-banner">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#002FA7" stroke-width="2" width="20" height="20" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+    <span>Ces paramètres s'appliquent uniquement à <strong>votre établissement</strong>. Les autres établissements ont leurs propres paramètres.</span>
+</div>
 
 <div class="section">
     <h3>
@@ -43,7 +50,7 @@
     <div class="form-group">
         <label>Nombre maximum d'utilisateurs</label>
         <input type="number" id="max_users" class="form-control" min="1" max="1500" value="500">
-        <div class="help-text">🔒 Maximum : 1 500 utilisateurs par établissement.</div>
+        <div class="help-text">🔒 Maximum : 1 500 utilisateurs pour cet établissement.</div>
     </div>
     <div class="form-group">
         <label>Rôle par défaut pour les nouveaux inscrits</label>
@@ -51,6 +58,7 @@
             <option value="eleve">Élève</option>
             <option value="parent">Parent</option>
         </select>
+        <div class="help-text">Les rôles Admin, Vie Scolaire et Professeur nécessitent une validation.</div>
     </div>
 </div>
 
@@ -61,27 +69,45 @@
     </h3>
     
     <div class="toggle-row">
-        <div class="toggle-info"><div class="title">Autoriser les inscriptions</div><div class="desc">Permet aux nouveaux utilisateurs de créer un compte.</div></div>
+        <div class="toggle-info">
+            <div class="title">Autoriser les inscriptions</div>
+            <div class="desc">Permet aux nouveaux utilisateurs de créer un compte dans cet établissement.</div>
+        </div>
         <label class="toggle-switch"><input type="checkbox" id="allow_registration"><span class="toggle-slider"></span></label>
     </div>
     <div class="toggle-row">
-        <div class="toggle-info"><div class="title">Mode maintenance</div><div class="desc">Bloque l'accès pour tous sauf les administrateurs.</div></div>
+        <div class="toggle-info">
+            <div class="title">Mode maintenance</div>
+            <div class="desc">Bloque l'accès pour tous sauf les administrateurs de cet établissement.</div>
+        </div>
         <label class="toggle-switch"><input type="checkbox" id="maintenance_mode"><span class="toggle-slider"></span></label>
     </div>
     <div class="toggle-row">
-        <div class="toggle-info"><div class="title">Notifications</div><div class="desc">Active les notifications pour tous les utilisateurs.</div></div>
+        <div class="toggle-info">
+            <div class="title">Notifications</div>
+            <div class="desc">Active les notifications pour tous les utilisateurs de l'établissement.</div>
+        </div>
         <label class="toggle-switch"><input type="checkbox" id="notifications_active"><span class="toggle-slider"></span></label>
     </div>
     <div class="toggle-row">
-        <div class="toggle-info"><div class="title">Messagerie interne</div><div class="desc">Permet l'envoi de messages entre utilisateurs.</div></div>
+        <div class="toggle-info">
+            <div class="title">Messagerie interne</div>
+            <div class="desc">Permet l'envoi de messages entre utilisateurs de l'établissement.</div>
+        </div>
         <label class="toggle-switch"><input type="checkbox" id="messagerie_active"><span class="toggle-slider"></span></label>
     </div>
     <div class="toggle-row">
-        <div class="toggle-info"><div class="title">Chat entre élèves</div><div class="desc">Active le système d'amis et groupes.</div></div>
+        <div class="toggle-info">
+            <div class="title">Chat entre élèves</div>
+            <div class="desc">Active le système d'amis et de groupes pour les élèves.</div>
+        </div>
         <label class="toggle-switch"><input type="checkbox" id="chat_eleves_active"><span class="toggle-slider"></span></label>
     </div>
     <div class="toggle-row">
-        <div class="toggle-info"><div class="title">Paiements en ligne</div><div class="desc">Permet aux parents de payer via Mobile Money.</div></div>
+        <div class="toggle-info">
+            <div class="title">Paiements en ligne</div>
+            <div class="desc">Permet aux parents de payer les frais via Mobile Money.</div>
+        </div>
         <label class="toggle-switch"><input type="checkbox" id="paiements_online_active"><span class="toggle-slider"></span></label>
     </div>
 </div>
@@ -94,18 +120,21 @@
 </div>
 
 <div class="copyright">
-    © 2026 EducOS-pro - Tous droits réservés - Version 1.0.0
+    <strong>EducOS-pro</strong> v1.0.0 — © 2026 Tous droits réservés
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-    // Charger les paramètres
+    // ============================================
+    // CHARGER LES PARAMÈTRES DE CET ÉTABLISSEMENT
+    // ============================================
     async function loadSettings() {
         try {
             var r = await fetch('/admin/api/settings');
+            if (!r.ok) throw new Error('Erreur HTTP: ' + r.status);
             var s = await r.json();
-            console.log('Paramètres chargés:', s);
+            console.log('✅ Paramètres chargés:', s);
             
             document.getElementById('max_users').value = s.max_users || 500;
             document.getElementById('default_role').value = s.default_role || 'eleve';
@@ -116,16 +145,23 @@
             document.getElementById('chat_eleves_active').checked = s.chat_eleves_active == 1;
             document.getElementById('paiements_online_active').checked = s.paiements_online_active == 1;
         } catch(e) {
-            console.error('Erreur chargement:', e);
+            console.error('❌ Erreur chargement:', e);
             showToast('Erreur de chargement des paramètres', 'error');
         }
     }
 
-    // Sauvegarder
+    // ============================================
+    // SAUVEGARDER LES PARAMÈTRES
+    // ============================================
     async function sauvegarderParametres() {
         var maxUsers = parseInt(document.getElementById('max_users').value);
+        if (isNaN(maxUsers) || maxUsers < 1) {
+            showToast('Veuillez entrer un nombre valide', 'error');
+            return;
+        }
         if (maxUsers > 1500) {
-            showToast('Maximum 1500 utilisateurs autorisés', 'error');
+            showToast('⚠️ Maximum 1 500 utilisateurs autorisés par établissement', 'error');
+            document.getElementById('max_users').value = 1500;
             return;
         }
         
@@ -140,7 +176,7 @@
             paiements_online_active: document.getElementById('paiements_online_active').checked ? 1 : 0
         };
         
-        console.log('Envoi paramètres:', data);
+        console.log('📤 Envoi paramètres:', data);
         
         try {
             var r = await fetch('/admin/api/settings', {
@@ -149,11 +185,17 @@
                 body: JSON.stringify(data)
             });
             var j = await r.json();
-            console.log('Réponse:', j);
-            showToast(j.message || 'Paramètres enregistrés', j.success ? 'success' : 'error');
+            console.log('📥 Réponse:', j);
+            
+            if (j.success) {
+                showToast('✅ Paramètres enregistrés avec succès', 'success');
+                loadSettings(); // Recharger pour confirmer
+            } else {
+                showToast(j.error || 'Erreur lors de l\'enregistrement', 'error');
+            }
         } catch(e) {
-            console.error('Erreur sauvegarde:', e);
-            showToast('Erreur lors de la sauvegarde', 'error');
+            console.error('❌ Erreur sauvegarde:', e);
+            showToast('Erreur réseau lors de la sauvegarde', 'error');
         }
     }
 
