@@ -198,6 +198,10 @@ db.get("SELECT allow_registration, max_users FROM settings WHERE id = 1", [], (e
             }
         });
     });
+    // Après avoir créé l'établissement
+    req.session.etablissement_code = code; // Pour que le login le retrouve
+    // Après avoir trouvé l'établissement
+    req.session.etablissement_code = etablissement_code;
 },
 
     logout: (req, res) => { req.session.destroy(() => res.redirect('/auth/login')); }

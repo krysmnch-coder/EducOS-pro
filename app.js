@@ -123,8 +123,24 @@ app.get('/api/check-etablissement/:code', (req, res) => {
 });
 
 // ============================================
-// 9. MIDDLEWARE MODE MAINTENANCE - SUPPRIMÉ
-// (géré directement dans authController)
+// 9. Middleware : S'assurer que la base établissement est connectée
+app.use((req, res, next) => {
+    if (req.session.user && req.session.user.etablissement_code) {
+        const { getEtablissementDb, setEtablissementDb } = require('./config/database');
+        const currentDb = getEtablissementDb();
+        
+        // Si pas de base connectée ou si le code a changé
+        if (!currentDb) {
+            const dbName = 'educos_' + req.session.user.etablissement_code.toLowerCase() + '.db';
+            const dbPath = path.join(__dirname, 'database', dbName);
+            if (fs.existsSync(dbPath)) {
+                setEtablissementDb(dbPath);
+                console.log('✅ Base établissement reconnectée:', dbName);
+            }
+        }
+    }
+    next();
+});
 // ============================================
 
 // ============================================

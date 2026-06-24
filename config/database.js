@@ -18,7 +18,15 @@ const globalDb = new sqlite3.Database(globalDbPath, (err) => {
         });
     }
 });
-
+// Remplacer le INSERT OR IGNORE par ceci :
+etablissementDb.get('SELECT COUNT(*) as count FROM settings', [], (err, row) => {
+    if (err || !row || row.count === 0) {
+        etablissementDb.run(`INSERT INTO settings (id, max_users, default_role, allow_registration, maintenance_mode, notifications_active, messagerie_active, chat_eleves_active, paiements_online_active) VALUES (1, 500, 'eleve', 1, 0, 1, 1, 1, 0)`);
+        console.log('✅ Valeurs par défaut settings insérées');
+    } else {
+        console.log('✅ Settings existants conservés');
+    }
+});
 // Base ÉTABLISSEMENT
 let etablissementDb = null;
 
