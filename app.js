@@ -295,6 +295,72 @@ app.use((req, res, next) => {
     }
     next();
 });
+// Middleware : Vérifier le mode maintenance
+app.use((req, res, next) => {
+    // Ignorer les pages d'auth et statiques
+    if (req.path.startsWith('/auth') || req.path.startsWith('/css') || 
+        req.path.startsWith('/js') || req.path.startsWith('/uploads') ||
+        req.path.startsWith('/api/etablissements') || req.path.startsWith('/api/check-etablissement')) {
+        return next();
+    }
+    
+    // Si l'utilisateur est admin, il passe toujours
+    if (req.session.user && req.session.user.role === 'admin') {
+        return next();
+    }
+    
+    // Vérifier le mode maintenance
+    try {
+        const { getEtablissementDb } = require('./config/database');
+        const db = getEtablissementDb();
+        if (db) {
+            db.get('SELECT maintenance_mode FROM settings WHERE id = 1', [], (err, row) => {
+                if (row && row.maintenance_mode == 1) {
+                    return res.status(503).send(`
+                        <!DOCTYPE html><html><head><title>Maintenance</title>
+                        <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <style>body{font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;background:#f0f2f5;text-align:center;margin:0;}
+                        h1{color:#002FA7;font-size:2rem;}p{color:#666;font-size:1rem;}.logo{font-weight:700;}.logo-blue{color:#002FA7;}.logo-gray{color:#888;}</style></head>
+                        <body><div><h1>🔧 Maintenance en cours</h1><p>L'application est temporairement indisponible.<br>Veuillez réessayer plus tard.</p><p style="margin-top:30px;"><span class="logo"><span class="logo-blue">EducOS</span><span class="logo-gray">-pro</span></span></p></div></body></html>
+                    `);
+                }
+                next();
+            });
+        } else {
+            next();
+        }
+    } catch(e) {
+        next();
+    }
+});
+
+app.get('/api/check-etablissement/:code', (req, res) => {
+    const { globalDb } = require('./config/database');
+    const code = req.params.code;
+    
+    globalDb.get("SELECT * FROM etablissements WHERE code = ? AND actif = 1", [code], (err, etab) => {
+        if (err || !etab) return res.json({ error: 'Établissement non trouvé' });
+        
+        const dbPath = path.join(__dirname, 'database', etab.db_name);
+        const checkDb = new sqlite3.Database(dbPath, (err) => {
+            if (err) return res.json({ error: 'Erreur base' });
+            
+            checkDb.get("SELECT allow_registration, max_users FROM settings WHERE id = 1", [], (err, settings) => {
+                checkDb.get("SELECT COUNT(*) as total FROM users", [], (err, row) => {
+                    checkDb.close();
+                    res.json({
+                        code: etab.code,
+                        nom: etab.nom,
+                        allow_registration: settings ? settings.allow_registration : 1,
+                        max_users: settings ? settings.max_users : 500,
+                        current_users: row ? row.total : 0
+                    });
+                });
+            });
+        });
+    });
+});
+
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Serveur démarré sur http://0.0.0.0:${PORT}`);
 });

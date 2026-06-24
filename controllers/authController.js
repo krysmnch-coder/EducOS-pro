@@ -88,7 +88,33 @@ const authController = {
             const dbPath = path.join(dbDir, etab.db_name);
             const db = setEtablissementDb(dbPath);
             if (!db) return res.redirect('/auth/register?error=Erreur base de données');
-
+                // Vérifier si les inscriptions sont autorisées
+db.get("SELECT allow_registration, max_users FROM settings WHERE id = 1", [], (err, settings) => {
+    if (err) {
+        console.error('❌ Erreur lecture settings:', err);
+        return res.redirect('/auth/register?error=Erreur serveur');
+    }
+    
+    console.log('🔍 Settings trouvés:', settings);
+    
+    // Si allow_registration = 0, bloquer
+    if (settings && settings.allow_registration == 0) {
+        console.log('⛔ Inscriptions bloquées pour cet établissement');
+        return res.redirect('/auth/register?error=⛔ Les inscriptions sont désactivées pour cet établissement');
+    }
+    
+    // Si max_users atteint, bloquer
+    db.get("SELECT COUNT(*) as total FROM users", [], (err, row) => {
+        if (err) return res.redirect('/auth/register?error=Erreur serveur');
+        
+        if (settings && settings.max_users && row && row.total >= settings.max_users) {
+            console.log('⚠️ Limite utilisateurs atteinte:', row.total, '/', settings.max_users);
+            return res.redirect('/auth/register?error=⛔ Nombre maximum d\'utilisateurs atteint (' + settings.max_users + ')');
+        }
+        
+        // Continuer l'inscription...
+    });
+});
             db.get('SELECT id FROM users WHERE email = ?', [email], (err, user) => {
                 if (user) return res.redirect('/auth/register?error=Email déjà utilisé');
 
