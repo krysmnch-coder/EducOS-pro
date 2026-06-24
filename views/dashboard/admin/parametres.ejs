@@ -16,20 +16,25 @@
     input:checked + .toggle-slider:before { transform: translateX(24px); }
     .form-group { margin-bottom: 16px; }
     .form-group label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 0.85rem; }
-    .form-control { width: 100%; padding: 10px 14px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 0.88rem; font-family: 'Inter', sans-serif; }
+    .form-control { width: 100%; padding: 10px 14px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 0.88rem; font-family: 'Inter', sans-serif; background: white; }
     .form-control:focus { border-color: #002FA7; outline: none; }
+    select.form-control { cursor: pointer; }
     .help-text { font-size: 0.75rem; color: #888; margin-top: 4px; }
-    .btn { padding: 10px 22px; border: none; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; font-family: 'Inter', sans-serif; }
+    .btn { padding: 10px 22px; border: none; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; font-family: 'Inter', sans-serif; transition: all 0.2s; }
     .btn-primary { background: #002FA7; color: white; }
-    .btn-primary:hover { background: #003fd6; }
+    .btn-primary:hover { background: #003fd6; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,47,167,0.2); }
     .btn svg { width: 16px; height: 16px; stroke: currentColor; }
     .btn-primary svg { stroke: white; }
     .toast { position: fixed; top: 20px; right: 20px; padding: 14px 20px; border-radius: 10px; color: white; font-weight: 600; z-index: 3000; display: none; }
     .toast.success { background: #27ae60; }
     .toast.error { background: #e74c3c; }
     .info-banner { background: #f0f4ff; border: 1px solid #d0d8ff; border-radius: 10px; padding: 14px 18px; margin-bottom: 20px; font-size: 0.85rem; color: #002FA7; display: flex; align-items: center; gap: 10px; }
-    .copyright { text-align: center; padding: 20px; color: #888; font-size: 0.8rem; margin-top: 20px; border-top: 1px solid #f0f0f0; }
-    .copyright strong { color: #002FA7; }
+    .copyright { text-align: center; padding: 24px 20px; color: #888; font-size: 0.8rem; margin-top: 20px; border-top: 1px solid #f0f0f0; }
+    .copyright .logo-text { font-weight: 700; }
+    .copyright .logo-blue { color: #002FA7; }
+    .copyright .logo-gray { color: #888; font-weight: 400; }
+    .saved-indicator { display: inline-flex; align-items: center; gap: 6px; color: #27ae60; font-size: 0.8rem; font-weight: 600; margin-left: 12px; opacity: 0; transition: opacity 0.3s; }
+    .saved-indicator.show { opacity: 1; }
 </style>
 
 <h2 style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
@@ -39,111 +44,125 @@
 
 <div class="info-banner">
     <svg viewBox="0 0 24 24" fill="none" stroke="#002FA7" stroke-width="2" width="20" height="20" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-    <span>Ces paramètres s'appliquent uniquement à <strong>votre établissement</strong>. Les autres établissements ont leurs propres paramètres.</span>
+    <span>Ces paramètres s'appliquent uniquement à <strong>votre établissement</strong>. Ils sont conservés jusqu'à votre prochaine modification.</span>
 </div>
 
 <div class="section">
     <h3>
         <svg viewBox="0 0 24 24" fill="none" stroke="#002FA7" stroke-width="2" width="20" height="20"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-        Limites et capacités
+        Capacité d'accueil
     </h3>
     <div class="form-group">
         <label>Nombre maximum d'utilisateurs</label>
-        <input type="number" id="max_users" class="form-control" min="1" max="1500" value="500">
-        <div class="help-text">🔒 Maximum : 1 500 utilisateurs pour cet établissement.</div>
+        <select id="max_users" class="form-control">
+            <option value="500">500 utilisateurs</option>
+            <option value="1000">1 000 utilisateurs</option>
+            <option value="1500">1 500 utilisateurs</option>
+            <option value="2000">2 000 utilisateurs</option>
+            <option value="2500">2 500 utilisateurs (maximum)</option>
+        </select>
+        <div class="help-text">🔒 Maximum : 2 500 utilisateurs par établissement.</div>
     </div>
     <div class="form-group">
         <label>Rôle par défaut pour les nouveaux inscrits</label>
         <select id="default_role" class="form-control">
-            <option value="eleve">Élève</option>
-            <option value="parent">Parent</option>
+            <option value="eleve">👨‍🎓 Élève</option>
+            <option value="parent">👪 Parent</option>
         </select>
-        <div class="help-text">Les rôles Admin, Vie Scolaire et Professeur nécessitent une validation.</div>
+        <div class="help-text">Les rôles Admin, Vie Scolaire et Professeur nécessitent une validation manuelle.</div>
     </div>
 </div>
 
 <div class="section">
     <h3>
         <svg viewBox="0 0 24 24" fill="none" stroke="#002FA7" stroke-width="2" width="20" height="20"><rect x="2" y="2" width="20" height="20" rx="5"/><line x1="12" y1="17" x2="12" y2="11"/></svg>
-        Fonctionnalités
+        Fonctionnalités de l'établissement
     </h3>
     
     <div class="toggle-row">
         <div class="toggle-info">
-            <div class="title">Autoriser les inscriptions</div>
-            <div class="desc">Permet aux nouveaux utilisateurs de créer un compte dans cet établissement.</div>
+            <div class="title">✅ Autoriser les inscriptions</div>
+            <div class="desc">Coché = les nouveaux utilisateurs peuvent s'inscrire. Décoché = inscriptions bloquées.</div>
         </div>
         <label class="toggle-switch"><input type="checkbox" id="allow_registration"><span class="toggle-slider"></span></label>
     </div>
     <div class="toggle-row">
         <div class="toggle-info">
-            <div class="title">Mode maintenance</div>
-            <div class="desc">Bloque l'accès pour tous sauf les administrateurs de cet établissement.</div>
+            <div class="title">🔧 Mode maintenance</div>
+            <div class="desc">Bloque l'accès à l'application pour tous sauf les administrateurs.</div>
         </div>
         <label class="toggle-switch"><input type="checkbox" id="maintenance_mode"><span class="toggle-slider"></span></label>
     </div>
     <div class="toggle-row">
         <div class="toggle-info">
-            <div class="title">Notifications</div>
-            <div class="desc">Active les notifications pour tous les utilisateurs de l'établissement.</div>
+            <div class="title">🔔 Notifications</div>
+            <div class="desc">Active/désactive les notifications pour tous les utilisateurs.</div>
         </div>
         <label class="toggle-switch"><input type="checkbox" id="notifications_active"><span class="toggle-slider"></span></label>
     </div>
     <div class="toggle-row">
         <div class="toggle-info">
-            <div class="title">Messagerie interne</div>
+            <div class="title">💬 Messagerie interne</div>
             <div class="desc">Permet l'envoi de messages entre utilisateurs de l'établissement.</div>
         </div>
         <label class="toggle-switch"><input type="checkbox" id="messagerie_active"><span class="toggle-slider"></span></label>
     </div>
     <div class="toggle-row">
         <div class="toggle-info">
-            <div class="title">Chat entre élèves</div>
+            <div class="title">👥 Chat entre élèves</div>
             <div class="desc">Active le système d'amis et de groupes pour les élèves.</div>
         </div>
         <label class="toggle-switch"><input type="checkbox" id="chat_eleves_active"><span class="toggle-slider"></span></label>
     </div>
     <div class="toggle-row">
         <div class="toggle-info">
-            <div class="title">Paiements en ligne</div>
+            <div class="title">💳 Paiements en ligne</div>
             <div class="desc">Permet aux parents de payer les frais via Mobile Money.</div>
         </div>
         <label class="toggle-switch"><input type="checkbox" id="paiements_online_active"><span class="toggle-slider"></span></label>
     </div>
 </div>
 
-<div style="display:flex;gap:12px;margin-bottom:20px;">
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
     <button class="btn btn-primary" onclick="sauvegarderParametres()">
         <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
         Enregistrer les paramètres
     </button>
+    <span class="saved-indicator" id="savedIndicator">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#27ae60" stroke-width="2" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>
+        Enregistré
+    </span>
 </div>
 
 <div class="copyright">
-    <strong>EducOS-pro</strong> v1.0.0 — © 2026 Tous droits réservés
+    <span class="logo-text"><span class="logo-blue">EducOS</span><span class="logo-gray">-pro</span></span> v1.0.0 — © 2026 Tous droits réservés
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
     // ============================================
-    // CHARGER LES PARAMÈTRES DE CET ÉTABLISSEMENT
+    // CHARGER LES PARAMÈTRES DEPUIS LA BASE
     // ============================================
     async function loadSettings() {
         try {
             var r = await fetch('/admin/api/settings');
             if (!r.ok) throw new Error('Erreur HTTP: ' + r.status);
             var s = await r.json();
-            console.log('✅ Paramètres chargés:', s);
+            console.log('✅ Paramètres chargés depuis la base:', s);
             
+            // Appliquer les valeurs sauvegardées
             document.getElementById('max_users').value = s.max_users || 500;
             document.getElementById('default_role').value = s.default_role || 'eleve';
+            
+            // IMPORTANT : Les checkboxes reflètent l'état SAUVEGARDÉ
             document.getElementById('allow_registration').checked = s.allow_registration == 1;
             document.getElementById('maintenance_mode').checked = s.maintenance_mode == 1;
             document.getElementById('notifications_active').checked = s.notifications_active == 1;
             document.getElementById('messagerie_active').checked = s.messagerie_active == 1;
             document.getElementById('chat_eleves_active').checked = s.chat_eleves_active == 1;
             document.getElementById('paiements_online_active').checked = s.paiements_online_active == 1;
+            
         } catch(e) {
             console.error('❌ Erreur chargement:', e);
             showToast('Erreur de chargement des paramètres', 'error');
@@ -151,23 +170,13 @@
     }
 
     // ============================================
-    // SAUVEGARDER LES PARAMÈTRES
+    // SAUVEGARDER LES PARAMÈTRES DANS LA BASE
     // ============================================
     async function sauvegarderParametres() {
-        var maxUsers = parseInt(document.getElementById('max_users').value);
-        if (isNaN(maxUsers) || maxUsers < 1) {
-            showToast('Veuillez entrer un nombre valide', 'error');
-            return;
-        }
-        if (maxUsers > 1500) {
-            showToast('⚠️ Maximum 1 500 utilisateurs autorisés par établissement', 'error');
-            document.getElementById('max_users').value = 1500;
-            return;
-        }
-        
         var data = {
-            max_users: maxUsers,
+            max_users: parseInt(document.getElementById('max_users').value),
             default_role: document.getElementById('default_role').value,
+            // COCHÉ = 1 (bloqué), DÉCOCHÉ = 0 (autorisé)
             allow_registration: document.getElementById('allow_registration').checked ? 1 : 0,
             maintenance_mode: document.getElementById('maintenance_mode').checked ? 1 : 0,
             notifications_active: document.getElementById('notifications_active').checked ? 1 : 0,
@@ -176,7 +185,7 @@
             paiements_online_active: document.getElementById('paiements_online_active').checked ? 1 : 0
         };
         
-        console.log('📤 Envoi paramètres:', data);
+        console.log('📤 Sauvegarde dans la base:', data);
         
         try {
             var r = await fetch('/admin/api/settings', {
@@ -185,11 +194,16 @@
                 body: JSON.stringify(data)
             });
             var j = await r.json();
-            console.log('📥 Réponse:', j);
+            console.log('📥 Réponse serveur:', j);
             
             if (j.success) {
-                showToast('✅ Paramètres enregistrés avec succès', 'success');
-                loadSettings(); // Recharger pour confirmer
+                // Afficher l'indicateur "Enregistré"
+                var indicator = document.getElementById('savedIndicator');
+                indicator.classList.add('show');
+                setTimeout(function() { indicator.classList.remove('show'); }, 2500);
+                
+                // Recharger pour confirmer que tout est bien en base
+                setTimeout(loadSettings, 500);
             } else {
                 showToast(j.error || 'Erreur lors de l\'enregistrement', 'error');
             }
