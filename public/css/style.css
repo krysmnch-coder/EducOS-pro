@@ -1364,3 +1364,138 @@ body.dark-mode .toggle-btn-dashboard {
 .chat-msg.autre { background: #e0e0e0; color: #333; }
 .chat-msg img { max-width: 200px; border-radius: 8px; margin-top: 4px; }
 .chat-msg small { font-size: 0.65rem; opacity: 0.7; display: block; margin-top: 2px; }
+
+/* ============================================
+   STYLES SPÉCIFIQUES À LA PAGE D'ACCUEIL (home.ejs)
+   ============================================ */
+
+body.body-home {
+    /* Image de fond scolaire */
+    background-image: url('https://source.unsplash.com/random/1920x1080/?school,education,classroom'); /* Image de fond par défaut */
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    color: var(--blanc); /* Couleur de texte par défaut pour le contraste */
+    text-align: center;
+    position: relative; /* Pour l'overlay */
+    /* Réinitialise les styles de body.dark-mode pour éviter les conflits */
+    background-color: transparent !important; 
+}
+
+/* Overlay sombre pour améliorer la lisibilité du texte sur l'image de fond */
+body.body-home::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.4); /* Overlay sombre */
+    z-index: -1; /* Place l'overlay derrière le contenu */
+}
+
+.home-container {
+    max-width: 800px;
+    padding: 40px;
+    background-color: rgba(255, 255, 255, 0.1); /* Fond transparent pour le conteneur */
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-lg);
+    backdrop-filter: blur(10px); /* Effet de flou (glassmorphism) */
+    -webkit-backdrop-filter: blur(10px); /* Pour Safari */
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    z-index: 1;
+}
+
+.home-container h1 {
+    color: var(--blanc); /* Titre en blanc pour le contraste */
+    font-size: 3rem;
+    margin-bottom: 30px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); /* Ombre pour le texte */
+}
+
+.home-container .buttons {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+/* Boutons plus modernes pour la page d'accueil */
+.home-container .btn-primary {
+    padding: 14px 28px;
+    font-size: 1rem;
+    border-radius: 50px; /* Boutons plus arrondis */
+    box-shadow: 0 4px 15px rgba(0, 47, 167, 0.3);
+    transition: all 0.3s ease;
+}
+
+.home-container .btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 47, 167, 0.4);
+}
+
+/* Mode sombre pour la page d'accueil */
+body.dark-mode.body-home {
+    background-image: url('https://source.unsplash.com/random/1920x1080/?night-school,education,library'); /* Image de fond différente en mode sombre */
+}
+
+body.dark-mode.body-home::before {
+    background-color: rgba(0, 0, 0, 0.6); /* Overlay plus sombre en mode sombre */
+}
+
+body.dark-mode .home-container {
+    background-color: rgba(0, 0, 0, 0.3); /* Fond transparent plus sombre */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .home-container h1 {
+    color: var(--blanc); /* Le titre reste blanc */
+}
+
+/* Styles du bouton de bascule de thème sur la page d'accueil */
+body.body-home .theme-toggle {
+    position: fixed; /* Reste fixe même en scrollant */
+    top: 20px;
+    right: 20px;
+    z-index: 1000; /* Assure qu'il est au-dessus des autres éléments */
+}
+
+body.body-home .toggle-switch {
+    background: rgba(255, 255, 255, 0.2); /* Fond semi-transparent clair */
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+body.body-home .toggle-switch:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+body.dark-mode.body-home .toggle-switch {
+    background: rgba(0, 0, 0, 0.3); /* Fond semi-transparent sombre */
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode.body-home .toggle-switch:hover {
+    background: rgba(0, 0, 0, 0.4);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+body.body-home .toggle-label {
+    color: var(--blanc); /* Texte du label en blanc */
+}
+
+body.dark-mode.body-home .toggle-label {
+    color: var(--blanc); /* Texte du label en blanc en mode sombre */
+}
+.avatar-color { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; color: white; font-size: 0.9rem; flex-shrink: 0; }
+.chat-messages { max-height: 350px; overflow-y: auto; padding: 10px; background: #f8f9fa; border-radius: 10px; margin-bottom: 12px; }
+.chat-msg { margin-bottom: 8px; padding: 8px 12px; border-radius: 12px; max-width: 80%; word-wrap: break-word; }
+.chat-msg.moi { background: #002FA7; color: white; margin-left: auto; }
+.chat-msg.autre { background: #e0e0e0; color: #333; }
+.chat-msg img { max-width: 200px; border-radius: 8px; margin-top: 4px; }
+.chat-msg small { font-size: 0.65rem; opacity: 0.7; display: block; margin-top: 2px; }

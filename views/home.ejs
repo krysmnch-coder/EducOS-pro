@@ -3,36 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bienvenue | EducOS-pro</title>
-    <link rel="stylesheet" href="/css/style.css"> <!-- Assuming you have a main CSS file -->
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background-color: #f0f2f5;
-            color: #333;
-            text-align: center;
-        }
-        .container { max-width: 800px; padding: 20px; }
-        h1 { color: #002FA7; margin-bottom: 20px; }
-        p { margin-bottom: 15px; line-height: 1.6; }
-        .buttons a { display: inline-block; background-color: #002FA7; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; margin: 10px; transition: background-color 0.3s ease; }
-        .buttons a:hover { background-color: #001f7a; }
-    </style>
+    <title>Bienvenue sur EducOS-pro</title>
+    <link rel="stylesheet" href="/css/style.css">
 </head>
-<body>
-    <div class="container">
-        <h1>Bienvenue sur EducOS-pro</h1>
-        <p>Votre plateforme éducative complète pour la gestion scolaire.</p>
-        <p>Connectez-vous ou inscrivez-vous pour accéder à toutes les fonctionnalités.</p>
-        <div class="buttons">
-            <a href="/auth/login">Se connecter</a>
-            <a href="/auth/register">S'inscire</a>
+<body class="body-home">
+    <div class="theme-toggle" id="theme-toggle">
+        <div class="toggle-switch">
+            <span class="toggle-icon sun-icon">☀️</span>
+            <span class="toggle-label">Clair</span>
+            <span class="toggle-icon moon-icon">🌙</span>
         </div>
     </div>
+
+    <div class="home-container">
+        <h1>Bienvenue sur EducOS-pro</h1>
+        <div class="buttons">
+            <a href="/auth/login" class="btn btn-primary">Se connecter</a>
+            <a href="/auth/register" class="btn btn-primary">S'inscrire</a>
+        </div>
+    </div>
+
+    <script>
+        // Script pour gérer le mode sombre/clair sur la page d'accueil
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+
+        // Vérifier la préférence de thème sauvegardée
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            body.classList.add('dark-mode');
+        }
+
+        // Basculer le thème au clic
+        themeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            if (body.classList.contains('dark-mode')) {
+                localStorage.setItem('theme', 'dark');
+            } else {
+                localStorage.setItem('theme', 'light');
+            }
+        });
+    </script>
 </body>
 </html>
