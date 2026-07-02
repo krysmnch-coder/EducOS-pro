@@ -4,7 +4,8 @@ const session = require('express-session');
 const SQLiteStore = require('connect-sqlite3')(session);
 const multer = require('multer');
 const fs = require('fs');
-const passport = require('./config/passport');
+const passport = require('./config/passport'); 
+const { authorize } = require('./auth'); // Correction du chemin du middleware d'autorisation
 require('dotenv').config();
 
 const app = express();
@@ -67,7 +68,7 @@ app.use('/parent', require('./routes/parent')(upload));
 // ============================================
 app.get('/', (req, res) => {
     if (req.session.user) return res.redirect('/dashboard');
-    res.redirect('/auth/login');
+    res.render('home'); // Render the new homepage
 });
 
 // ============================================
@@ -88,104 +89,82 @@ app.get('/dashboard', (req, res) => {
 // ============================================
 // DASHBOARD ADMIN
 // ============================================
-app.get('/dashboard/admin', (req, res) => {
-    if (!req.session.user || req.session.user.role !== 'admin') return res.redirect('/auth/login');
+app.get('/dashboard/admin', authorize(['admin']), (req, res) => {
     res.render('dashboard/admin', { title: 'Administration | EducOS-pro', user: req.session.user });
 });
-app.get('/dashboard/admin/utilisateurs', (req, res) => {
-    if (!req.session.user || req.session.user.role !== 'admin') return res.redirect('/auth/login');
+app.get('/dashboard/admin/utilisateurs', authorize(['admin']), (req, res) => {
     res.render('dashboard/admin/utilisateurs', { title: 'Utilisateurs | EducOS-pro', user: req.session.user });
 });
-app.get('/dashboard/admin/etablissement', (req, res) => {
-    if (!req.session.user || req.session.user.role !== 'admin') return res.redirect('/auth/login');
+app.get('/dashboard/admin/etablissement', authorize(['admin']), (req, res) => {
     res.render('dashboard/admin/etablissement', { title: 'Établissement | EducOS-pro', user: req.session.user });
 });
-app.get('/dashboard/admin/paiements', (req, res) => {
-    if (!req.session.user || req.session.user.role !== 'admin') return res.redirect('/auth/login');
+app.get('/dashboard/admin/paiements', authorize(['admin']), (req, res) => {
     res.render('dashboard/admin/paiements', { title: 'Paiements | EducOS-pro', user: req.session.user });
 });
-app.get('/dashboard/admin/messages', (req, res) => {
-    if (!req.session.user || req.session.user.role !== 'admin') return res.redirect('/auth/login');
+app.get('/dashboard/admin/messages', authorize(['admin']), (req, res) => {
     res.render('dashboard/admin/messages', { title: 'Messages | EducOS-pro', user: req.session.user });
 });
-app.get('/dashboard/admin/parametres', (req, res) => {
-    if (!req.session.user || req.session.user.role !== 'admin') return res.redirect('/auth/login');
+app.get('/dashboard/admin/parametres', authorize(['admin']), (req, res) => {
     res.render('dashboard/admin/parametres', { title: 'Paramètres | EducOS-pro', user: req.session.user });
 });
 
 // ============================================
 // DASHBOARD VIE SCOLAIRE
 // ============================================
-app.get('/dashboard/vie-scolaire', (req, res) => {
-    if (!req.session.user || req.session.user.role !== 'vie_scolaire') return res.redirect('/auth/login');
+app.get('/dashboard/vie-scolaire', authorize(['vie_scolaire']), (req, res) => {
     res.render('dashboard/vie-scolaire', { title: 'Vie Scolaire | EducOS-pro', user: req.session.user });
 });
-app.get('/dashboard/vie-scolaire/absences', (req, res) => {
-    if (!req.session.user || req.session.user.role !== 'vie_scolaire') return res.redirect('/auth/login');
+app.get('/dashboard/vie-scolaire/absences', authorize(['vie_scolaire']), (req, res) => {
     res.render('dashboard/vie-scolaire/absences', { title: 'Absences | EducOS-pro', user: req.session.user });
 });
-app.get('/dashboard/vie-scolaire/edt', (req, res) => {
-    if (!req.session.user || req.session.user.role !== 'vie_scolaire') return res.redirect('/auth/login');
+app.get('/dashboard/vie-scolaire/edt', authorize(['vie_scolaire']), (req, res) => {
     res.render('dashboard/vie-scolaire/edt', { title: 'EDT | EducOS-pro', user: req.session.user });
 });
-app.get('/dashboard/vie-scolaire/pointage', (req, res) => {
-    if (!req.session.user || req.session.user.role !== 'vie_scolaire') return res.redirect('/auth/login');
+app.get('/dashboard/vie-scolaire/pointage', authorize(['vie_scolaire']), (req, res) => {
     res.render('dashboard/vie-scolaire/pointage', { title: 'Pointage | EducOS-pro', user: req.session.user });
 });
-app.get('/dashboard/vie-scolaire/sanctions', (req, res) => {
-    if (!req.session.user || req.session.user.role !== 'vie_scolaire') return res.redirect('/auth/login');
+app.get('/dashboard/vie-scolaire/sanctions', authorize(['vie_scolaire']), (req, res) => {
     res.render('dashboard/vie-scolaire/sanctions', { title: 'Sanctions | EducOS-pro', user: req.session.user });
 });
-app.get('/dashboard/vie-scolaire/messages', (req, res) => {
-    if (!req.session.user || req.session.user.role !== 'vie_scolaire') return res.redirect('/auth/login');
+app.get('/dashboard/vie-scolaire/messages', authorize(['vie_scolaire']), (req, res) => {
     res.render('dashboard/vie-scolaire/messages', { title: 'Messages | EducOS-pro', user: req.session.user });
 });
-app.get('/dashboard/vie-scolaire/annuaire', (req, res) => {
-    if (!req.session.user || req.session.user.role !== 'vie_scolaire') return res.redirect('/auth/login');
+app.get('/dashboard/vie-scolaire/annuaire', authorize(['vie_scolaire']), (req, res) => {
     res.render('dashboard/vie-scolaire/annuaire', { title: 'Annuaire | EducOS-pro', user: req.session.user });
 });
 
 // ============================================
 // DASHBOARD PROFESSEUR
 // ============================================
-app.get('/dashboard/prof', (req, res) => {
-    if (!req.session.user || req.session.user.role !== 'prof') return res.redirect('/auth/login');
+app.get('/dashboard/prof', authorize(['prof']), (req, res) => {
     res.render('dashboard/prof/index', { title: 'Tableau de bord | EducOS-pro', user: req.session.user });
 });
-app.get('/dashboard/prof/pointages', (req, res) => {
-    if (!req.session.user || req.session.user.role !== 'prof') return res.redirect('/auth/login');
+app.get('/dashboard/prof/pointages', authorize(['prof']), (req, res) => {
     res.render('dashboard/prof/pointages', { title: 'Pointages | EducOS-pro', user: req.session.user });
 });
-app.get('/dashboard/prof/edt', (req, res) => {
-    if (!req.session.user || req.session.user.role !== 'prof') return res.redirect('/auth/login');
+app.get('/dashboard/prof/edt', authorize(['prof']), (req, res) => {
     res.render('dashboard/prof/edt', { title: 'Emploi du temps | EducOS-pro', user: req.session.user });
 });
-app.get('/dashboard/prof/ressources', (req, res) => {
-    if (!req.session.user || req.session.user.role !== 'prof') return res.redirect('/auth/login');
+app.get('/dashboard/prof/ressources', authorize(['prof']), (req, res) => {
     res.render('dashboard/prof/ressources', { title: 'Ressources | EducOS-pro', user: req.session.user });
 });
-app.get('/dashboard/prof/notes', (req, res) => {
-    if (!req.session.user || req.session.user.role !== 'prof') return res.redirect('/auth/login');
+app.get('/dashboard/prof/notes', authorize(['prof']), (req, res) => {
     res.render('dashboard/prof/notes', { title: 'Notes | EducOS-pro', user: req.session.user });
 });
-app.get('/dashboard/prof/messages', (req, res) => {
-    if (!req.session.user || req.session.user.role !== 'prof') return res.redirect('/auth/login');
+app.get('/dashboard/prof/messages', authorize(['prof']), (req, res) => {
     res.render('dashboard/prof/messages', { title: 'Messages | EducOS-pro', user: req.session.user });
 });
-app.get('/dashboard/prof/sanctions', (req, res) => {
-    if (!req.session.user || req.session.user.role !== 'prof') return res.redirect('/auth/login');
+app.get('/dashboard/prof/sanctions', authorize(['prof']), (req, res) => {
     res.render('dashboard/prof/sanctions', { title: 'Sanctions | EducOS-pro', user: req.session.user });
 });
 
 // ============================================
 // DASHBOARD PARENT
 // ============================================
-app.get('/dashboard/parent', (req, res) => {
-    if (!req.session.user || req.session.user.role !== 'parent') return res.redirect('/auth/login');
+app.get('/dashboard/parent', authorize(['parent']), (req, res) => {
     res.render('dashboard/parent', { title: 'Parent | EducOS-pro', user: req.session.user });
 });
-app.get('/dashboard/parent/messages', (req, res) => {
-    if (!req.session.user || req.session.user.role !== 'parent') return res.redirect('/auth/login');
+app.get('/dashboard/parent/messages', authorize(['parent']), (req, res) => {
     res.render('dashboard/parent/messages', { title: 'Messages | EducOS-pro', user: req.session.user });
 });
 // Vérifier les dates limites chaque heure
@@ -224,8 +203,7 @@ setInterval(() => {
 // ============================================
 // DASHBOARD ÉLÈVE
 // ============================================
-app.get('/dashboard/eleve', (req, res) => {
-    if (!req.session.user || req.session.user.role !== 'eleve') return res.redirect('/auth/login');
+app.get('/dashboard/eleve', authorize(['eleve']), (req, res) => {
     res.render('dashboard/eleve', { title: 'Élève | EducOS-pro', user: req.session.user });
 });
 
@@ -268,8 +246,7 @@ app.use((req, res, next) => {
     }
     next();
 });
-app.get('/dashboard/vie-scolaire/fiches', (req, res) => {
-    if (!req.session.user || req.session.user.role !== 'vie_scolaire') return res.redirect('/auth/login');
+app.get('/dashboard/vie-scolaire/fiches', authorize(['vie_scolaire']), (req, res) => {
     res.render('dashboard/vie-scolaire/fiches', { title: 'Fiches élèves | EducOS-pro', user: req.session.user });
 });
 // Middleware : initialiser la base établissement

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bienvenue | EducOS-pro</title>
+    <link rel="stylesheet" href="/css/style.css"> <!-- Assuming you have a main CSS file -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f2f5;
+            color: #333;
+            text-align: center;
+        }
+        .container { max-width: 800px; padding: 20px; }
+        h1 { color: #002FA7; margin-bottom: 20px; }
+        p { margin-bottom: 15px; line-height: 1.6; }
+        .buttons a { display: inline-block; background-color: #002FA7; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; margin: 10px; transition: background-color 0.3s ease; }
+        .buttons a:hover { background-color: #001f7a; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Bienvenue sur EducOS-pro</h1>
+        <p>Votre plateforme éducative complète pour la gestion scolaire.</p>
+        <p>Connectez-vous ou inscrivez-vous pour accéder à toutes les fonctionnalités.</p>
+        <div class="buttons">
+            <a href="/auth/login">Se connecter</a>
+            <a href="/auth/register">S'inscrire</a>
+        </div>
+    </div>
+</body>
+</html>
