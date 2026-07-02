@@ -297,8 +297,14 @@ body {
     white-space: nowrap;
 }
 
-.btn-primary { background: #002FA7; color: white; }
-.btn-primary:hover { background: #003fd6; }
+.btn-primary {
+    background: rgba(0, 47, 167, 0.85); /* Bleu Klein semi-transparent */
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+.btn-primary:hover { background: #003fd6; border-color: rgba(255, 255, 255, 0.3); }
 .btn-danger { background: #e74c3c; color: white; }
 .btn-danger:hover { background: #c0392b; }
 .btn-success { background: #27ae60; color: white; }
