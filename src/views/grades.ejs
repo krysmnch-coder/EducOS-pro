@@ -1,0 +1,46 @@
+<%- include('partials/head') %>
+<div class="page-section">
+  <div class="section-header">
+    <h1>Notes</h1>
+    <% if (user.role === 'professeur' || user.role === 'administrateur') { %>
+      <a href="/students/grades/new" class="btn btn-primary">Ajouter une note</a>
+    <% } %>
+  </div>
+
+  <div class="table-shell">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Élève</th>
+          <th>Matière</th>
+          <th>Note</th>
+          <th>Commentaire</th>
+          <th>Date</th>
+          <% if (user.role === 'professeur' || user.role === 'administrateur') { %>
+            <th>Actions</th>
+          <% } %>
+        </tr>
+      </thead>
+      <tbody>
+        <% grades.forEach((grade) => { %>
+          <tr>
+            <td><%= grade.first_name %> <%= grade.last_name %></td>
+            <td><%= grade.subject %></td>
+            <td><%= grade.grade %></td>
+            <td><%= grade.comment %></td>
+            <td><%= new Date(grade.created_at).toLocaleDateString('fr-FR') %></td>
+            <% if (user.role === 'professeur' || user.role === 'administrateur') { %>
+              <td>
+                <a href="/students/grades/<%= grade.id %>/edit" class="btn btn-small">Modifier</a>
+                <form action="/students/grades/<%= grade.id %>/delete" method="POST" class="inline-form">
+                  <button type="submit" class="btn btn-danger">Supprimer</button>
+                </form>
+              </td>
+            <% } %>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+<%- include('partials/footer') %>

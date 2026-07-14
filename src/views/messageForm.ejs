@@ -1,0 +1,89 @@
+<%- include('partials/head') %>
+<div class="page-section">
+  <div class="section-header d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3">
+    <div>
+      <h1>Envoyer un message</h1>
+      <p class="text-muted">Choisissez comment envoyer votre message : à tous, par rôle ou à une personne précise.</p>
+    </div>
+  </div>
+
+  <form action="/communications/send" method="POST" enctype="multipart/form-data" class="form-card">
+    <label class="form-label">Destinataire</label>
+    <div class="mb-3 d-flex flex-wrap gap-2">
+      <label class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2">
+        <input type="radio" name="receiver_type" value="all" autocomplete="off" checked class="d-none" />
+        Tous
+      </label>
+      <label class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2">
+        <input type="radio" name="receiver_type" value="role" autocomplete="off" class="d-none" />
+        Par rôle
+      </label>
+      <label class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2">
+        <input type="radio" name="receiver_type" value="user" autocomplete="off" class="d-none" />
+        Une personne
+      </label>
+    </div>
+
+    <div class="mb-3 receiver-role-field d-none">
+      <label for="receiver_role" class="form-label">Rôle</label>
+      <select id="receiver_role" name="receiver_role" class="form-select form-select-lg">
+        <option value="administrateur">Administrateur</option>
+        <option value="responsable vie scolaire">Responsable vie scolaire</option>
+        <option value="secretaire">Secrétaire</option>
+        <option value="professeur">Professeur</option>
+        <option value="parent">Parent</option>
+        <option value="eleve">Élève</option>
+      </select>
+    </div>
+
+    <div class="mb-3 receiver-user-field d-none">
+      <label for="receiver_user_id" class="form-label">Personne spécifique</label>
+      <select id="receiver_user_id" name="receiver_user_id" class="form-select form-select-lg">
+        <option value="">Choisir un utilisateur</option>
+        <% const recipientUsers = typeof users !== 'undefined' ? users : []; %>
+        <% recipientUsers.forEach((u) => { %>
+          <% if (u.id !== user.id) { %>
+            <option value="<%= u.id %>"><%= u.name %> — <%= u.role %></option>
+          <% } %>
+        <% }) %>
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label for="subject" class="form-label">Objet</label>
+      <input id="subject" type="text" name="subject" class="form-control form-control-lg" required />
+    </div>
+
+    <div class="mb-3">
+      <label for="body" class="form-label">Message</label>
+      <textarea id="body" name="body" rows="6" class="form-control form-control-lg" required></textarea>
+    </div>
+
+    <div class="mb-4">
+      <label for="attachment" class="form-label">Fichier à joindre</label>
+      <input id="attachment" type="file" name="attachment" class="form-control form-control-lg" />
+      <small class="text-muted">PDF, image ou document. Taille maximale recommandée 10 Mo.</small>
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-lg w-100">Envoyer</button>
+  </form>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const radios = document.querySelectorAll('input[name="receiver_type"]');
+    const roleField = document.querySelector('.receiver-role-field');
+    const userField = document.querySelector('.receiver-user-field');
+
+    const updateFields = () => {
+      const selected = document.querySelector('input[name="receiver_type"]:checked').value;
+      roleField.classList.toggle('d-none', selected !== 'role');
+      userField.classList.toggle('d-none', selected !== 'user');
+    };
+
+    radios.forEach((radio) => radio.addEventListener('change', updateFields));
+    updateFields();
+  });
+</script>
+
+<%- include('partials/footer') %>

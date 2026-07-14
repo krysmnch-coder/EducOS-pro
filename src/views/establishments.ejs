@@ -1,0 +1,173 @@
+<%- include('partials/head') %>
+<%- include('partials/navbar') %>
+
+<div class="container page-shell py-4">
+    <div class="themed-container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3 mb-0">Gestion des Établissements</h1>
+        </div>
+
+        <%- include('partials/messages') %>
+
+        <div class="row g-5">
+            <!-- Colonne pour ajouter un établissement -->
+            <div class="col-lg-4">
+                <div class="card h-100">
+                    <div class="card-header fw-bold">
+                        Ajouter un établissement
+                    </div>
+                    <div class="card-body">
+                        <form action="/establishments" method="POST">
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Nom de l'établissement</label>
+                                <input type="text" class="form-control" id="name" name="name" placeholder="Ex: Lycée Victor Hugo" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="subdomain" class="form-label">Sous-domaine</label>
+                                <input type="text" class="form-control" id="subdomain" name="subdomain" placeholder="Ex: victor-hugo" required>
+                                <div class="form-text">Uniquement des lettres minuscules, chiffres et tirets.</div>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle me-2" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/></svg>
+                                Ajouter
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Colonne pour lister les établissements -->
+            <div class="col-lg-8">
+                 <div class="card h-100">
+                    <div class="card-header fw-bold">
+                        Établissements existants
+                    </div>
+                     <% if (typeof establishments !== 'undefined' && establishments.length > 0) { %>
+                        <div class="list-group list-group-flush">
+                            <% establishments.forEach(establishment => { %>
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-0"><%= establishment.name %></h6>
+                                        <small class="text-muted"><%= establishment.subdomain %>.educos.pro</small>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#editEstablishmentModal-<%= establishment.id %>">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil me-1" viewBox="0 0 16 16"><path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/></svg>
+                                            Modifier
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteEstablishmentModal-<%= establishment.id %>">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash me-1" viewBox="0 0 16 16"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/><path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/></svg>
+                                            Supprimer
+                                        </button>
+                                    </div>
+                                </div>
+                            <% }) %>
+                        </div>
+                     <% } else { %>
+                        <div class="card-body text-center text-muted d-flex align-items-center justify-content-center">
+                            <p>Aucun établissement n'a été créé pour le moment.</p>
+                        </div>
+                     <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modals -->
+<% if (typeof establishments !== 'undefined' && establishments.length > 0) { %>
+    <% establishments.forEach(establishment => { %>
+        <!-- Modal de modification -->
+        <div class="modal fade" id="editEstablishmentModal-<%= establishment.id %>" tabindex="-1" aria-labelledby="editModalLabel-<%= establishment.id %>" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form action="/establishments/<%= establishment.id %>/update" method="POST">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="editModalLabel-<%= establishment.id %>">Modifier l'établissement</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="name-<%= establishment.id %>" class="form-label">Nom de l'établissement</label>
+                                <input type="text" class="form-control" id="name-<%= establishment.id %>" name="name" value="<%= establishment.name %>" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="subdomain-<%= establishment.id %>" class="form-label">Sous-domaine</label>
+                                <input type="text" class="form-control" id="subdomain-<%= establishment.id %>" name="subdomain" value="<%= establishment.subdomain %>" required>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                            <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de suppression -->
+        <div class="modal fade" id="deleteEstablishmentModal-<%= establishment.id %>" tabindex="-1" aria-labelledby="deleteModalLabel-<%= establishment.id %>" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form action="/establishments/<%= establishment.id %>/delete" method="POST">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="deleteModalLabel-<%= establishment.id %>">Confirmer la suppression</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Êtes-vous sûr de vouloir supprimer l'établissement "<strong><%= establishment.name %></strong>" ?</p>
+                            <p class="text-danger"><small>Cette action est irréversible. Les utilisateurs liés à cet établissement ne seront plus associés à aucune école.</small></p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                            <button type="submit" class="btn btn-danger">Supprimer définitivement</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    <% }) %>
+<% } %>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const nameInput = document.getElementById('name');
+  const subdomainInput = document.getElementById('subdomain');
+  let userHasEditedSubdomain = false;
+
+  if (nameInput && subdomainInput) {
+    // Si l'utilisateur commence à taper dans le champ du sous-domaine,
+    // on considère qu'il veut une valeur manuelle et on arrête la mise à jour auto.
+    subdomainInput.addEventListener('input', function() {
+      userHasEditedSubdomain = true;
+    });
+
+    nameInput.addEventListener('input', function() {
+      // On met à jour le sous-domaine uniquement si l'utilisateur ne l'a pas modifié manuellement.
+      if (userHasEditedSubdomain) {
+        return;
+      }
+
+      const nameValue = this.value;
+      
+      // Fonction pour convertir une chaîne en "slug" (URL-friendly)
+      const slugify = (str) => {
+        str = str.toString().toLowerCase().trim();
+        
+        const from = "àáâäæãåāăąçćčđďèéêëēėęěğǵḧîïíīįìłḿñńǹňôöòóœøōõőṕŕřßśšşșťțûüùúūǘůűųẃẍÿýžźż·/_,:;";
+        const to   = "aaaaaaaaaacccddeeeeeeeegghiiiiiilmnnnnoooooooooprrsssssttuuuuuuuuuwxyyzzz------";
+        
+        for (let i = 0, l = from.length; i < l; i++) {
+          str = str.replace(new RegExp(from.charAt(i), 'g'), to.charAt(i));
+        }
+
+        return str.replace(/[^a-z0-9 -]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-');
+      };
+
+      subdomainInput.value = slugify(nameValue);
+    });
+  }
+});
+</script>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,439 @@
+<%- include('partials/head') %>
+<style>
+  body {
+    padding-top: 0 !important;
+    min-height: 100vh;
+    display: grid; /* Utiliser grid pour un centrage plus robuste */
+    place-items: center; /* Raccourci pour aligner et justifier au centre */
+    position: relative;
+    overflow-y: auto; /* Permet le défilement si le contenu est trop grand */
+    padding: 2rem 1rem; /* Ajoute un peu d'espace sur les côtés et en haut/bas */
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: -10px; left: -10px; right: -10px; bottom: -10px;
+    width: calc(100vw + 20px);
+    height: calc(100vh + 20px);
+    background-image: url('/img/bg.png');
+    background-size: cover;
+    background-position: center;
+    filter: blur(10px) saturate(1.2);
+    z-index: -2;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    transition: background-color 0.3s ease;
+  }
+
+  body[data-theme="light"]::after {
+    background-color: rgba(245, 245, 245, 0.6);
+  }
+  body[data-theme="dark"]::after {
+    background-color: rgba(10, 10, 26, 0.7);
+    color: #ffffff;
+  }
+
+  .auth-card {
+    width: 100%;
+    border-radius: 20px;
+    border: none;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+    animation: fadeIn 0.8s ease-out forwards;
+    overflow: hidden;
+    padding: 2rem;
+  }
+
+  body[data-theme="light"] .auth-card {
+    background: rgba(255, 255, 255, 0.4);
+    border-color: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  body[data-theme="dark"] .auth-card {
+    background: rgba(22, 33, 62, 0.4);
+    border-color: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    color: #ffffff;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  /* Styles pour les alertes */
+  .alert {
+    display: flex;
+    align-items: center;
+    padding: 0.9rem 1rem;
+    margin-bottom: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    border-left-width: 5px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    animation: alert-fade-in 0.4s ease-out;
+    font-size: 0.95rem;
+    font-weight: 500;
+  }
+
+  @keyframes alert-fade-in {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .alert::before {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    margin-right: 0.85rem;
+    flex-shrink: 0;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+
+  /* Alerte Succès */
+  .alert-success {
+    background-color: #e9f7ef;
+    border-color: #198754;
+    color: #146c43;
+  }
+  .alert-success::before {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23198754'%3e%3cpath d='M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z'/%3e%3c/svg%3e");
+  }
+  body[data-theme="dark"] .alert-success {
+    background-color: rgba(25, 135, 84, 0.15);
+    border-color: rgba(25, 135, 84, 0.5);
+    color: #75b798;
+  }
+  body[data-theme="dark"] .alert-success::before {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%2375b798'%3e%3cpath d='M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z'/%3e%3c/svg%3e");
+  }
+
+  /* Alerte Erreur */
+  .alert-danger {
+    background-color: #fdeded;
+    border-color: #dc3545;
+    color: #b02a37;
+  }
+  .alert-danger::before {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23dc3545'%3e%3cpath d='M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z'/%3e%3c/svg%3e");
+  }
+  body[data-theme="dark"] .alert-danger {
+    background-color: rgba(220, 53, 69, 0.15);
+    border-color: rgba(220, 53, 69, 0.5);
+    color: #e3868f;
+  }
+  body[data-theme="dark"] .alert-danger::before {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23e3868f'%3e%3cpath d='M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z'/%3e%3c/svg%3e");
+  }
+
+  .form-label {
+    font-weight: 500;
+  }
+
+  .form-control, .form-select {
+    background-color: transparent !important;
+    border: none !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.3) !important;
+    border-radius: 0 !important;
+    padding: 0.75rem 0.2rem !important;
+    transition: border-color 0.2s;
+    box-shadow: none !important;
+  }
+
+  .form-control:focus, .form-select:focus {
+    background-color: transparent !important;
+    box-shadow: none !important;
+    border-color: var(--bs-primary) !important;
+  }
+
+  body[data-theme="dark"] .form-control,
+  body[data-theme="dark"] .form-select {
+    color: #ffffff !important;
+    border-bottom-color: rgba(255, 255, 255, 0.3) !important;
+  }
+  body[data-theme="dark"] .form-control::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+  }
+  body[data-theme="dark"] .form-select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+  }
+  body[data-theme="dark"] option {
+    background-color: #16213e;
+  }
+
+  body[data-theme="light"] .form-control, body[data-theme="light"] .form-select {
+    color: #212529 !important;
+  }
+  body[data-theme="light"] .form-control::placeholder {
+    color: #6c757d;
+  }
+  body[data-theme="light"] .form-select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23212529' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+  }
+
+  .btn-primary {
+    font-weight: 600;
+    padding: 0.75rem;
+    border-radius: 8px;
+    transition: transform 0.2s;
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  }
+
+  .btn-outline-secondary, .btn-outline-primary {
+    font-weight: 500;
+    padding: 0.75rem;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+  }
+
+  body[data-theme="dark"] .text-muted {
+    color: rgba(255, 255, 255, 0.6) !important;
+  }
+  body[data-theme="dark"] a {
+    color: var(--bs-primary);
+  }
+</style>
+<a href="/" class="btn btn-outline-light shadow-sm" style="position: absolute; top: 20px; left: 20px; z-index: 10;">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+  
+</a>
+<div class="auth-card" style="max-width: 960px;">
+      <div class="mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h1 class="h3 fw-bold mb-0">Inscription</h1>
+          <span class="h2 fw-bold">
+            <span style="color: var(--bs-primary);">EducOS</span><span class="text-muted">-pro</span>
+          </span>
+        </div>
+        <p class="text-muted mb-0">Créez votre compte en quelques secondes.</p>
+      </div>
+
+      <% if (success_msg) { %>
+      <div class="alert alert-success"><%= success_msg %></div>
+      <% } %>
+      <% if (error_msg) { %>
+      <div class="alert alert-danger"><%= error_msg %></div>
+      <% } %>
+
+      <div class="row">
+        <div class="col-md-7 border-end pe-4">
+          <form action="/register" method="POST" class="auth-form">
+            
+            <% if (typeof establishments !== 'undefined' && establishments.length > 0) { %>
+            <div class="mb-4">
+              <label for="establishment" class="form-label">Votre établissement</label>
+              <select id="establishment" name="establishment_id" class="form-select" required>
+                <option value="" disabled selected>-- Choisissez une école --</option>
+                <% establishments.forEach(establishment => { %>
+                  <option value="<%= establishment.id %>"><%= establishment.name %></option>
+                <% }) %>
+              </select>
+            </div>
+            <% } %>
+
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label for="name" class="form-label">Nom complet</label>
+                <input id="name" type="text" name="name" class="form-control" placeholder="Jean Dupont" required />
+              </div>
+              <div class="col-md-6">
+                <label for="email" class="form-label">Adresse e-mail</label>
+                <input id="email" type="email" name="email" class="form-control" placeholder="votre@mail.com" required />
+              </div>
+            </div>
+    
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label for="password" class="form-label">Mot de passe</label>
+                <div class="position-relative">
+                  <input id="password" type="password" name="password" class="form-control" placeholder="********" required style="padding-right: 3rem;" />
+                  <span class="position-absolute top-50 end-0 translate-middle-y" style="right: 1rem !important; cursor: pointer;" onclick="togglePasswordVisibility('password', this)">
+                    <svg class="eye-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/><path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/></svg>
+                    <svg class="eye-slash-icon d-none" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a7.028 7.028 0 0 0-2.79.588l.77.771A5.94 5.94 0 0 1 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.134 13.134 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755-.165.165-.337.328-.517.486l.708.707z"/><path d="M11.297 9.176a3.5 3.5 0 0 0-4.474-4.474l.823.823a2.5 2.5 0 0 1 2.829 2.829l.822.822zm-2.943 1.288.822.822.056.056.056.056.822.822 1.288-2.943-.822-.822-.056-.056-.056-.056-.822-.822-1.288 2.943z"/><path d="M3.35 5.47c-.18.16-.353.322-.518.487A13.134 13.134 0 0 0 1.172 8l.195.288c.335.48.83 1.12 1.465 1.755C4.121 11.332 5.881 12.5 8 12.5c.716 0 1.39-.133 2.02-.36l.77.772A7.029 7.029 0 0 1 8 13.5C3 13.5 0 8 0 8s.939-1.721 2.641-3.238l.708.707zm10.296 6.574.986.986L2.344 2.344.36 4.325l1.62 1.62L13.645 12.044z"/></svg>
+                  </span>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label for="password2" class="form-label">Confirmation</label>
+                <div class="position-relative">
+                  <input id="password2" type="password" name="password2" class="form-control" placeholder="********" required style="padding-right: 3rem;" />
+                  <span class="position-absolute top-50 end-0 translate-middle-y" style="right: 1rem !important; cursor: pointer;" onclick="togglePasswordVisibility('password2', this)">
+                    <svg class="eye-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/><path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/></svg>
+                    <svg class="eye-slash-icon d-none" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a7.028 7.028 0 0 0-2.79.588l.77.771A5.94 5.94 0 0 1 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.134 13.134 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755-.165.165-.337.328-.517.486l.708.707z"/><path d="M11.297 9.176a3.5 3.5 0 0 0-4.474-4.474l.823.823a2.5 2.5 0 0 1 2.829 2.829l.822.822zm-2.943 1.288.822.822.056.056.056.056.822.822 1.288-2.943-.822-.822-.056-.056-.056-.056-.822-.822-1.288 2.943z"/><path d="M3.35 5.47c-.18.16-.353.322-.518.487A13.134 13.134 0 0 0 1.172 8l.195.288c.335.48.83 1.12 1.465 1.755C4.121 11.332 5.881 12.5 8 12.5c.716 0 1.39-.133 2.02-.36l.77.772A7.029 7.029 0 0 1 8 13.5C3 13.5 0 8 0 8s.939-1.721 2.641-3.238l.708.707zm10.296 6.574.986.986L2.344 2.344.36 4.325l1.62 1.62L13.645 12.044z"/></svg>
+                  </span>
+                </div>
+              </div>
+            </div>
+    
+            <div class="mb-4">
+              <label for="role" class="form-label">Rôle</label>
+              <select id="role" name="role" class="form-select" required>
+                <option value="administrateur">Administrateur</option>
+                <option value="responsable vie scolaire">Responsable vie scolaire</option>
+                <option value="secretaire">Secrétaire</option>
+                <option value="professeur">Professeur</option>
+                <option value="parent">Parent</option>
+                <option value="eleve">Élève</option>
+              </select>
+            </div>
+    
+            <div id="teacher-fields" class="role-fields d-none mb-3">
+              <label for="subject" class="form-label">Matière</label>
+              <input id="subject" type="text" name="subject" class="form-control" placeholder="Mathématiques" />
+            </div>
+    
+            <div id="student-fields" class="role-fields d-none mb-3">
+              <label for="student_class" class="form-label">Classe</label>
+              <input id="student_class" type="text" name="student_class" class="form-control" placeholder="6ème A" />
+              <label for="matricule" class="form-label mt-3">Matricule</label>
+              <input id="matricule" type="text" name="matricule" class="form-control" placeholder="123456" />
+            </div>
+    
+            <div id="parent-fields" class="role-fields d-none mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <label class="form-label mb-0">Informations des enfants</label>
+                <button type="button" id="add-child-btn" class="btn btn-sm btn-outline-primary">Ajouter un enfant</button>
+              </div>
+              <div id="children-list"></div>
+            </div>
+    
+            <button type="submit" class="btn btn-primary w-100">Créer mon compte</button>
+          </form>
+        </div>
+        <div class="col-md-5 ps-4 d-flex flex-column justify-content-center">
+          <p class="text-muted text-center small mb-3">Ou inscrivez-vous avec :</p>
+          <div class="social-buttons d-grid gap-3">
+            <a href="/auth/google" class="btn btn-outline-secondary d-flex align-items-center justify-content-center gap-2 w-100">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M21.35 11.1H12v2.8h5.35c-.24 1.4-1.25 2.58-2.66 3.24v2.7h4.3c2.52-2.32 3.98-5.74 3.98-9.74 0-.76-.07-1.5-.21-2.22h-.11Z" fill="#4285F4"/><path d="M12 22c2.7 0 4.96-.9 6.62-2.44l-4.3-2.7c-1.2.8-2.73 1.26-4.32 1.26-3.33 0-6.15-2.25-7.16-5.26H.95v2.77C2.62 19.78 7 22 12 22Z" fill="#34A853"/><path d="M4.84 13.86A7.96 7.96 0 0 1 4 12c0-.64.1-1.26.29-1.86V7.37H.95A11.98 11.98 0 0 0 0 12c0 1.9.45 3.7 1.24 5.3l3.6-3.44Z" fill="#FBBC05"/><path d="M12 4.6c1.47 0 2.8.5 3.84 1.48l2.88-2.88C16.94 1.56 14.7.6 12 .6 7 0 2.62 2.22.95 5.32l3.34 2.77C5.85 6.85 8.67 4.6 12 4.6Z" fill="#EA4335"/></svg>
+              Google
+            </a>
+            <a href="/auth/facebook" class="btn btn-outline-primary d-flex align-items-center justify-content-center gap-2 w-100">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 8H7V12H9V22H13V12H15.5L16 8H13V6.5C13 5.7 13.2 5 14.33 5H16V1H13.24C9.5 1 8 2.92 8 6.5V8Z" fill="currentColor"/></svg>
+              Facebook
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <p class="auth-text text-center mt-4 mb-0">
+        Vous avez déjà un compte ? <a href="/login">Connexion</a>
+      </p>
+</div>
+
+<script>
+  function togglePasswordVisibility(inputId, toggler) {
+    const passwordInput = document.getElementById(inputId);
+    const eyeIcon = toggler.querySelector('.eye-icon');
+    const eyeSlashIcon = toggler.querySelector('.eye-slash-icon');
+
+    if (passwordInput) {
+      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      passwordInput.setAttribute('type', type);
+      eyeIcon.classList.toggle('d-none');
+      eyeSlashIcon.classList.toggle('d-none');
+    }
+  }
+</script>
+
+<script>
+  const roleSelect = document.getElementById('role');
+  const teacherFields = document.getElementById('teacher-fields');
+  const studentFields = document.getElementById('student-fields');
+  const parentFields = document.getElementById('parent-fields');
+  const addChildBtn = document.getElementById('add-child-btn');
+  const childrenList = document.getElementById('children-list');
+  let childIndex = 0;
+
+  function addChildEntry() {
+    const index = childIndex++;
+    const entry = document.createElement('div');
+    entry.className = 'child-entry border rounded-3 p-3 mb-3';
+    entry.dataset.index = index;
+    entry.innerHTML = `
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="mb-0">Enfant ${childrenList.children.length + 1}</h6>
+        <button type="button" class="btn btn-sm btn-outline-danger remove-child-btn">Supprimer</button>
+      </div>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Prénom</label>
+          <input type="text" name="children[${index}][first_name]" class="form-control" placeholder="Prénom de l'enfant" required />
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Nom</label>
+          <input type="text" name="children[${index}][last_name]" class="form-control" placeholder="Nom de l'enfant" required />
+        </div>
+      </div>
+      <div class="row g-3 mt-3">
+        <div class="col-md-6">
+          <label class="form-label">Classe</label>
+          <input type="text" name="children[${index}][student_class]" class="form-control" placeholder="Classe de l'enfant" required />
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Matricule</label>
+          <input type="text" name="children[${index}][matricule]" class="form-control" placeholder="Matricule de l'enfant" required />
+        </div>
+      </div>
+    `;
+    const removeBtn = entry.querySelector('.remove-child-btn');
+    removeBtn.addEventListener('click', () => {
+      if (childrenList.children.length > 1) {
+        entry.remove();
+        updateChildNames();
+      }
+    });
+    childrenList.appendChild(entry);
+    updateChildNames();
+  }
+
+  function updateChildNames() {
+    Array.from(childrenList.children).forEach((entry, idx) => {
+      const title = entry.querySelector('h6');
+      if (title) title.textContent = `Enfant ${idx + 1}`;
+      const inputs = entry.querySelectorAll('input');
+      inputs.forEach((input) => {
+        const nameParts = input.name.match(/children\[(\d+)\]\[([^\]]+)\]/);
+        if (nameParts) {
+          input.name = `children[${idx}][${nameParts[2]}]`;
+        }
+      });
+    });
+  }
+
+  function updateRoleFields() {
+    const role = roleSelect.value;
+    teacherFields.classList.toggle('d-none', role !== 'professeur');
+    studentFields.classList.toggle('d-none', role !== 'eleve');
+    parentFields.classList.toggle('d-none', role !== 'parent');
+    if (role === 'parent' && childrenList && childrenList.children.length === 0) {
+      addChildEntry();
+    }
+  }
+
+  if (addChildBtn) {
+    addChildBtn.addEventListener('click', addChildEntry);
+  }
+  if (roleSelect) {
+    roleSelect.addEventListener('change', updateRoleFields);
+    updateRoleFields();
+  }
+</script>
+
+<script src="/js/theme.js"></script>
+<%- include('partials/footer') %>

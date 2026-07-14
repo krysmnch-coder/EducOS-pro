@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- TomSelect pour les listes déroulantes améliorées -->
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.css" rel="stylesheet">
+
+    <!-- Styles personnalisés -->
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <%- include('partials/header') %>
+
+    <main class="main-content">
+        <div class="container mt-4 page-shell">
+            <div class="themed-container">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="mb-0"><%= title %></h2>
+                    <a href="/students" class="btn btn-outline-secondary">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                        Retour à la liste
+                    </a>
+                </div>
+
+                <%- include('partials/messages') %>
+
+                <% 
+                    const actionUrl = student && !isCompletion 
+                        ? `/students/${student.id}/edit` 
+                        : (isCompletion ? '/students/complete' : '/students/new');
+                %>
+
+                <form action="<%= actionUrl %>" method="POST">
+                    
+                    <!-- Champs cachés pour la complétion -->
+                    <% if (isCompletion) { %>
+                        <input type="hidden" name="parent_id" value="<%= student.parent_id %>">
+                    <% } %>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="name" class="form-label">Nom complet de l'élève</label>
+                            <input type="text" class="form-control" id="name" name="name" value="<%= student ? student.name : '' %>" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="matricule" class="form-label">Matricule</label>
+                            <input type="text" class="form-control" id="matricule" name="matricule" value="<%= student ? student.matricule : '' %>" required <%= isCompletion ? 'readonly' : '' %>>
+                            <% if (isCompletion) { %>
+                                <div class="form-text">Le matricule ne peut pas être modifié lors de la complétion.</div>
+                            <% } %>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="student_class" class="form-label">Classe</label>
+                            <input type="text" class="form-control" id="student_class" name="student_class" value="<%= student ? student.student_class : '' %>" required>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+                    <h5 class="mb-3">Informations personnelles</h5>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="date_of_birth" class="form-label">Date de naissance</label>
+                            <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" value="<%= student && student.date_of_birth ? new Date(student.date_of_birth).toISOString().split('T')[0] : '' %>">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="place_of_birth" class="form-label">Lieu de naissance</label>
+                            <input type="text" class="form-control" id="place_of_birth" name="place_of_birth" value="<%= student ? student.place_of_birth : '' %>">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="address" class="form-label">Adresse</label>
+                        <textarea class="form-control" id="address" name="address" rows="2"><%= student ? student.address : '' %></textarea>
+                    </div>
+
+                    <hr class="my-4">
+                    <h5 class="mb-3">Liaison Parent</h5>
+
+                    <% if (isCompletion) { %>
+                        <!-- Pour la complétion, le parent est fixe et non modifiable -->
+                        <div class="mb-3">
+                            <label class="form-label">Parent initiateur du dossier</label>
+                            <input type="text" class="form-control" value="<%= student.parent_name %>" disabled>
+                            <div class="form-text">Ce parent est déjà lié à l'élève.</div>
+                        </div>
+                    <% } else { %>
+                        <!-- Pour la création/modification, on peut lier un ou plusieurs parents existants -->
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label for="parent_ids" class="form-label mb-0">Parent(s) lié(s)</label>
+                                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addParentModal">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                    Nouveau Parent
+                                </button>
+                            </div>
+                            <select name="parent_ids" id="parent_ids" class="form-select" multiple>
+                                <% if (parents && parents.length > 0) { %>
+                                    <% parents.forEach(parent => { %>
+                                        <option value="<%= parent.id %>" <%= linkedParentIds.includes(parent.id) ? 'selected' : '' %>>
+                                            <%= parent.name %>
+                                        </option>
+                                    <% }) %>
+                                <% } else { %>
+                                    <option disabled>Aucun compte parent approuvé n'a été trouvé.</option>
+                                <% } %>
+                            </select>
+                            <div class="form-text">
+                                Maintenez la touche Ctrl (ou Cmd sur Mac) enfoncée pour sélectionner plusieurs parents.
+                                Seuls les parents avec un compte approuvé apparaissent ici.
+                            </div>
+                        </div>
+                    <% } %>
+
+                    <div class="d-flex justify-content-end mt-4">
+                        <a href="/students" class="btn btn-secondary me-2">Annuler</a>
+                        <button type="submit" class="btn btn-primary">
+                            <% if (student && !isCompletion) { %>
+                                Mettre à jour le dossier
+                            <% } else if (isCompletion) { %>
+                                Finaliser et créer le compte
+                            <% } else { %>
+                                Enregistrer l'élève
+                            <% } %>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal pour ajouter un parent -->
+    <div class="modal fade" id="addParentModal" tabindex="-1" aria-labelledby="addParentModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="addParentModalLabel">Créer un nouveau compte parent</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div id="add-parent-alert" class="alert alert-danger" style="display: none;"></div>
+            <form id="add-parent-form">
+                <div class="mb-3">
+                    <label for="new-parent-name" class="form-label">Nom complet du parent</label>
+                    <input type="text" class="form-control" id="new-parent-name" required>
+                </div>
+                <div class="mb-3">
+                    <label for="new-parent-email" class="form-label">Adresse e-mail</label>
+                    <input type="email" class="form-control" id="new-parent-email" required>
+                </div>
+            </form>
+            <div id="new-parent-credentials" class="alert alert-success" style="display: none;"></div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+            <button type="button" class="btn btn-primary" id="save-new-parent-btn">Enregistrer et lier</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- TomSelect JS -->
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+
+    <!-- Socket.IO client -->
+    <script src="/socket.io/socket.io.js"></script>
+
+    <!-- Scripts personnalisés (assurez-vous que ces fichiers existent dans votre dossier public/js) -->
+    <script src="/js/theme.js"></script>
+    <script src="/js/main.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let tomSelectInstance;
+            const parentSelect = document.getElementById('parent_ids');
+            if (parentSelect) {
+                tomSelectInstance = new TomSelect(parentSelect, {
+                    plugins: ['remove_button'],
+                    create: false, // Empêche la création de nouvelles options
+                    placeholder: 'Rechercher et sélectionner un ou plusieurs parents...'
+                });
+            }
+
+            // Logique de la modale d'ajout de parent
+            const addParentModalEl = document.getElementById('addParentModal');
+            if (addParentModalEl) {
+                const addParentModal = new bootstrap.Modal(addParentModalEl);
+                const saveParentBtn = document.getElementById('save-new-parent-btn');
+                const addParentForm = document.getElementById('add-parent-form');
+                const alertEl = document.getElementById('add-parent-alert');
+                const credentialsEl = document.getElementById('new-parent-credentials');
+                const nameInput = document.getElementById('new-parent-name');
+                const emailInput = document.getElementById('new-parent-email');
+
+                saveParentBtn.addEventListener('click', async () => {
+                    const name = nameInput.value.trim();
+                    const email = emailInput.value.trim();
+
+                    if (!name || !email) {
+                        showAlert('Veuillez remplir le nom et l\'email.');
+                        return;
+                    }
+                    
+                    saveParentBtn.disabled = true;
+                    saveParentBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Enregistrement...';
+
+                    try {
+                        const response = await fetch('/students/create-parent', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                            body: JSON.stringify({ name, email })
+                        });
+
+                        const result = await response.json();
+                        if (!response.ok) throw new Error(result.message || 'Une erreur est survenue.');
+
+                        const newParent = result.parent;
+                        
+                        if (tomSelectInstance) {
+                            tomSelectInstance.addOption({ value: newParent.id, text: newParent.name });
+                            tomSelectInstance.addItem(newParent.id);
+                        }
+                        
+                        credentialsEl.innerHTML = `
+                            <strong>Succès !</strong> Le compte a été créé.<br>
+                            <strong>Identifiant :</strong> ${newParent.email}<br>
+                            <strong>Mot de passe :</strong> ${newParent.defaultPassword}<br>
+                            <small>Veuillez communiquer ces informations au parent.</small>
+                        `;
+                        credentialsEl.style.display = 'block';
+                        addParentForm.style.display = 'none';
+                        saveParentBtn.textContent = 'Fermer';
+                        saveParentBtn.onclick = () => addParentModal.hide();
+
+                    } catch (error) {
+                        showAlert(error.message);
+                        saveParentBtn.disabled = false;
+                        saveParentBtn.innerHTML = 'Enregistrer et lier';
+                    }
+                });
+
+                addParentModalEl.addEventListener('hidden.bs.modal', () => {
+                    addParentForm.reset();
+                    addParentForm.style.display = 'block';
+                    credentialsEl.style.display = 'none';
+                    alertEl.style.display = 'none';
+                    saveParentBtn.disabled = false;
+                    saveParentBtn.innerHTML = 'Enregistrer et lier';
+                    saveParentBtn.onclick = null;
+                });
+
+                function showAlert(message) {
+                    alertEl.textContent = message;
+                    alertEl.style.display = 'block';
+                }
+            }
+        });
+    </script>
+</body>
+</html>

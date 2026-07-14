@@ -1,0 +1,8 @@
+{
+    "geminiAssistant.apiKey": "AIzaSyBK4oE3iacaYxPJuzCrVPFMCMF8JnjpJLQ",
+    "geminiAssistant.model": "gemini-2.5-flash",
+    "codeGPT.apiKey": "AIzaSyBK4oE3iacaYxPJuzCrVPFMCMF8JnjpJLQ",
+    "codegpt.provider": "Google AI Studio",
+    "CodeGPT.apiKey": "Google AI Studio",
+    "geminiAssistant.customModelName": "gemini-3.5-flash",
+}

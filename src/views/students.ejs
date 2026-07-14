@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <%- include('partials/head') %>
+    <style>
+        .student-row { cursor: pointer; }
+    </style>
+</head>
+<body data-theme="light" data-user-id="<%= user ? user.id : '' %>">
+    <div class="page-shell container-xl py-4">
+        <%- include('partials/header') %>
+
+        <main class="page-main">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h1 class="h4 mb-1"><%= title %></h1>
+                            <p class="text-muted mb-0">Consultez les informations des élèves inscrits.</p>
+                        </div>
+                        <% if (user.role === ROLES.SECRETARY || user.role === ROLES.SCHOOL_LIFE_MANAGER) { %>
+                            <a href="/students/new" class="btn btn-primary">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2Z"/></svg>
+                                Ajouter un élève
+                            </a>
+                        <% } %>
+                    </div>
+
+                    <%- include('partials/messages') %>
+
+                    <% if (Object.keys(studentsByClass).length > 0) { %>
+                        <% Object.keys(studentsByClass).sort().forEach(className => { %>
+                            <% 
+                                let canViewClass = false;
+                                if (user.role === ROLES.STUDENT) {
+                                    // Un élève ne voit que sa propre classe
+                                    canViewClass = user.student_class === className;
+                                } else if (user.role === ROLES.PARENT) {
+                                    // Un parent ne voit que les classes de ses enfants
+                                    // La variable `parentChildrenClasses` est fournie par le contrôleur
+                                    canViewClass = parentChildrenClasses.includes(className);
+                                } else {
+                                    // Les autres rôles (admin, prof, etc.) voient tout
+                                    canViewClass = true;
+                                }
+                            %>
+                            <% if (canViewClass) { %>
+                            <h5 class="mt-4 mb-3 border-bottom pb-2">Classe : <%= className %></h5>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 50px;"></th>
+                                            <th>Nom de l'élève</th>
+                                            <th>Matricule</th>
+                                            <%# Seuls certains rôles peuvent voir les identifiants de connexion %>
+                                            <% if (user.role === ROLES.ADMINISTRATOR || user.role === ROLES.SECRETARY || user.role === ROLES.SCHOOL_LIFE_MANAGER) { %>
+                                                <th>Identifiant de connexion</th>
+                                                <th>Mot de passe (défaut)</th>
+                                            <% } %>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% studentsByClass[className].forEach(student => { %>
+                                            <% const isPlaceholder = !!student.is_placeholder; %>
+                                            <% const canSeeDetails = (user.role === ROLES.ADMINISTRATOR || user.role === ROLES.SECRETARY || user.role === ROLES.SCHOOL_LIFE_MANAGER || user.role === ROLES.PROFESSOR); %>
+
+                                            <% if (canSeeDetails) { %>
+                                                <tr class="student-row" 
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#studentDetailModal"
+                                                    data-id="<%= student.id %>"
+                                                    data-is-placeholder="<%= isPlaceholder %>"
+                                                    data-created-by="<%= student.created_by || '' %>"
+                                                    data-name="<%= student.name %>"
+                                                    data-matricule="<%= student.matricule || 'N/A' %>"
+                                                    data-class="<%= student.student_class || 'N/A' %>"
+                                                    data-avatar="<%= student.avatar_url || '/img/user.png' %>"
+                                                    <% if (isPlaceholder) { %>
+                                                        data-parent-name="<%= student.parent_name %>"
+                                                        data-parent-id="<%= student.parent_id %>"
+                                                    <% } else { %>
+                                                        data-birthdate="<%= student.date_of_birth ? new Date(student.date_of_birth).toLocaleDateString('fr-FR') : 'Non renseignée' %>"
+                                                        data-birthplace="<%= student.place_of_birth || 'Non renseigné' %>"
+                                                        data-address="<%= student.address || 'Non renseignée' %>"
+                                                        data-parent-info='<%- student.parent_info || "[]" %>'
+                                                    <% } %>
+                                                >
+                                            <% } else { %>
+                                                <%# Pour les élèves et parents, la ligne n'est pas cliquable. %>
+                                                <tr>
+                                            <% } %>
+                                                <td><img src="<%= student.avatar_url || '/img/user.png' %>" class="rounded-circle" width="40" height="40" style="object-fit: cover;" alt="Avatar"></td>
+                                                <td>
+                                                    <%= student.name %>
+                                                    <% if (isPlaceholder && canSeeDetails) { %>
+                                                        <span class="badge bg-info-subtle text-info-emphasis rounded-pill ms-2">À compléter</span>
+                                                    <% } %>
+                                                </td>
+                                                <td><%= student.matricule %></td>
+                                                <%# Afficher les identifiants uniquement pour les rôles autorisés %>
+                                                <% if (user.role === ROLES.ADMINISTRATOR || user.role === ROLES.SECRETARY || user.role === ROLES.SCHOOL_LIFE_MANAGER) { %>
+                                                    <% if (isPlaceholder) { %>
+                                                        <td><em class="text-muted small">Non créé</em></td>
+                                                        <td><em class="text-muted small">Non créé</em></td>
+                                                    <% } else { %>
+                                                        <td><small><%= student.email %></small></td>
+                                                        <td><span class="badge bg-secondary"><%= student.matricule %></span></td>
+                                                    <% } %>
+                                                <% } %>
+                                            </tr>
+                                        <% }) %>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <% } %>
+                        <% }) %>
+                    <% } else { %>
+                        <div class="text-center text-muted py-5">
+                            <p>Aucun élève n'est enregistré pour le moment.</p>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal pour les détails de l'élève -->
+    <div class="modal fade" id="studentDetailModal" tabindex="-1" aria-labelledby="studentDetailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="studentDetailModalLabel">Détails de l'élève</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center">
+                            <img id="modal-avatar" src="/img/user.png" class="rounded-circle mb-3" width="120" height="120" style="object-fit: cover;" alt="Avatar">
+                            <h5 id="modal-name"></h5>
+                            <p class="text-muted">Matricule: <span id="modal-matricule"></span></p>
+                        </div>
+                        <div class="col-md-8">
+                            <h6>Informations personnelles</h6>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item"><strong>Classe :</strong> <span id="modal-class"></span></li>
+                                <li class="list-group-item"><strong>Date de naissance :</strong> <span id="modal-birthdate"></span></li>
+                                <li class="list-group-item"><strong>Lieu de naissance :</strong> <span id="modal-birthplace"></span></li>
+                                <li class="list-group-item"><strong>Adresse :</strong> <span id="modal-address"></span></li>
+                            </ul>
+                            <h6 class="mt-4">Informations des parents</h6>
+                            <div id="modal-parent-info">
+                                <!-- Les informations des parents seront injectées ici par JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    <a href="#" id="modal-edit-btn" class="btn btn-primary" style="display: none;">Modifier</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <%- include('partials/footer') %>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const studentDetailModal = document.getElementById('studentDetailModal');
+            studentDetailModal.addEventListener('show.bs.modal', function (event) {
+                const row = event.relatedTarget;
+
+                const isPlaceholder = row.dataset.isPlaceholder === 'true';
+                const editBtn = document.getElementById('modal-edit-btn');
+                const studentId = row.dataset.id;
+                const currentUserId = '<%= user.id %>';
+                const currentUserRole = '<%= user.role %>';
+
+                // Réinitialiser l'affichage des champs
+                document.getElementById('modal-birthdate').closest('.list-group-item').style.display = '';
+                document.getElementById('modal-birthplace').closest('.list-group-item').style.display = '';
+                document.getElementById('modal-address').closest('.list-group-item').style.display = '';
+                document.getElementById('modal-parent-info').innerHTML = '';
+
+                if (isPlaceholder) {
+                    // --- Vue pour un dossier à compléter ---
+                    editBtn.textContent = 'Compléter le dossier';
+                    const canComplete = (currentUserRole === '<%= ROLES.ADMINISTRATOR %>' || currentUserRole === '<%= ROLES.SECRETARY %>' || currentUserRole === '<%= ROLES.SCHOOL_LIFE_MANAGER %>');
+
+                    if (canComplete) {
+                        const query = new URLSearchParams({
+                            matricule: row.dataset.matricule,
+                            name: row.dataset.name,
+                            class: row.dataset.class,
+                            parent_id: row.dataset.parentId,
+                            parent_name: row.dataset.parentName
+                        });
+                        editBtn.href = `/students/complete/form?${query.toString()}`;
+                        editBtn.style.display = 'inline-block';
+                    } else {
+                        editBtn.style.display = 'none';
+                    }
+
+                    // Remplir les infos de base
+                    document.getElementById('modal-avatar').src = row.dataset.avatar;
+                    document.getElementById('modal-name').textContent = row.dataset.name;
+                    document.getElementById('modal-matricule').textContent = row.dataset.matricule;
+                    document.getElementById('modal-class').textContent = row.dataset.class;
+                    document.getElementById('modal-parent-info').innerHTML = `<p class="text-muted ps-3">Dossier initié par le parent : <strong>${row.dataset.parentName}</strong>.</p>`;
+
+                    // Cacher les champs non pertinents
+                    document.getElementById('modal-birthdate').closest('.list-group-item').style.display = 'none';
+                    document.getElementById('modal-birthplace').closest('.list-group-item').style.display = 'none';
+                    document.getElementById('modal-address').closest('.list-group-item').style.display = 'none';
+
+                } else {
+                    // --- Vue pour un élève complet ---
+                    editBtn.textContent = 'Modifier';
+                    const canEdit = (currentUserRole === '<%= ROLES.ADMINISTRATOR %>' || currentUserRole === '<%= ROLES.SECRETARY %>' || currentUserRole === '<%= ROLES.SCHOOL_LIFE_MANAGER %>');
+
+                    if (canEdit) {
+                        editBtn.href = `/students/${studentId}/edit`;
+                        editBtn.style.display = 'inline-block';
+                    } else {
+                        editBtn.style.display = 'none';
+                    }
+
+                    // Remplir toutes les informations
+                    document.getElementById('modal-avatar').src = row.dataset.avatar;
+                    document.getElementById('modal-name').textContent = row.dataset.name;
+                    document.getElementById('modal-matricule').textContent = row.dataset.matricule;
+                    document.getElementById('modal-class').textContent = row.dataset.class;
+                    document.getElementById('modal-birthdate').textContent = row.dataset.birthdate;
+                    document.getElementById('modal-birthplace').textContent = row.dataset.birthplace;
+                    document.getElementById('modal-address').textContent = row.dataset.address;
+
+                    // Traitement des informations des parents
+                    const parentInfoContainer = document.getElementById('modal-parent-info');
+                    try {
+                        const parents = JSON.parse(row.dataset.parentInfo);
+                        if (parents && parents.length > 0) {
+                            const list = document.createElement('ul');
+                            list.className = 'list-group list-group-flush';
+                            parents.forEach(parent => {
+                                const item = document.createElement('li');
+                                item.className = 'list-group-item';
+                                item.innerHTML = `<strong>${parent.name || 'N/A'}</strong> (${parent.profession || 'N/A'}) - Contact: ${parent.contact || 'N/A'}`;
+                                list.appendChild(item);
+                            });
+                            parentInfoContainer.appendChild(list);
+                        } else {
+                            parentInfoContainer.innerHTML = '<p class="text-muted">Aucune information sur les parents.</p>';
+                        }
+                    } catch (e) {
+                        console.error("Erreur lors de l'analyse des informations des parents:", e);
+                        parentInfoContainer.innerHTML = '<p class="text-danger">Erreur de format des données parentales.</p>';
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <%- include('partials/head') %>
+</head>
+<body data-user-id="<%= user ? user.id : '' %>">
+  <div class="page-shell container-xl py-4">
+    <%- include('partials/header') %>
+
+    <main class="page-main">
+        <div class="chat-page-container">
+            <!-- Colonne de gauche : Liste des conversations -->
+            <div class="chat-sidebar card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Conversations</span>
+                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#new-chat-modal" aria-label="Nouvelle conversation">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2Z"/></svg>
+                        <span class="d-none d-md-inline ms-1">Nouveau</span>
+                    </button>
+                </div>
+                <div class="list-group list-group-flush" id="user-list">
+                    <!-- Indicateur de chargement -->
+                    <div class="p-4 text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Colonne de droite : Fenêtre de chat -->
+            <div class="chat-main card">
+                <!-- Fenêtre de chat active (initialement cachée) -->
+                <div class="d-flex flex-column h-100" id="chat-window" style="display: none;">
+                    <div class="card-header d-flex align-items-center" id="chat-header">
+                        <button class="btn btn-light me-3 d-lg-none" id="back-to-list-btn" aria-label="Retour à la liste">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/></svg>
+                        </button>
+                        <span id="chat-header-title" class="fw-bold"></span>
+                    </div>
+                    <div class="card-body" id="message-container">
+                        <!-- Les messages seront injectés ici par JavaScript -->
+                    </div>
+                    <div class="card-footer">
+                        <div id="typing-indicator" class="text-muted small mb-1" style="height: 20px;"></div>
+                        <form id="message-form" class="d-flex align-items-center gap-2">
+                            <input type="text" id="message-input" class="form-control" placeholder="Écrivez un message..." autocomplete="off" disabled>
+                            <button class="btn btn-primary flex-shrink-0" type="submit" disabled>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Placeholder quand aucune conversation n'est sélectionnée -->
+                <div class="d-flex flex-column align-items-center justify-content-center h-100" id="chat-placeholder">
+                    <div class="d-flex flex-column align-items-center justify-content-center h-100 text-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather feather-message-square text-muted mb-3"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                        <h5 class="text-muted">Sélectionnez une conversation</h5>
+                        <p class="text-muted small">Commencez une nouvelle discussion pour voir les messages apparaître ici.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+  </div>
+
+  <%- include('partials/footer') %>
+
+  <!-- New Chat Modal -->
+  <div class="modal fade" id="new-chat-modal" tabindex="-1" aria-labelledby="newChatModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="newChatModalLabel">Démarrer une nouvelle conversation</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <% if (otherUsers.length > 0) { %>
+            <div class="list-group list-group-flush">
+              <% otherUsers.forEach(otherUser => { %>
+                <a href="#" class="list-group-item list-group-item-action new-chat-user d-flex align-items-center" data-user-id="<%= otherUser.id %>" data-user-name="<%= otherUser.name %>">
+                  <div class="avatar-container me-3">
+                    <img src="<%= otherUser.avatar_url || '/img/user.png' %>" alt="<%= otherUser.name %>" class="list-avatar">
+                  </div>
+                  <span class="align-middle"><%= otherUser.name %></span>
+                </a>
+              <% }); %>
+            </div>
+          <% } else { %>
+            <p class="text-muted text-center">Aucun autre utilisateur à qui parler.</p>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts pour le chat -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/chat.js"></script>
+</body>
+</html>

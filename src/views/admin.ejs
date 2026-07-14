@@ -1,0 +1,152 @@
+<%- include('partials/head') %>
+<%- include('partials/navbar') %>
+
+<div class="container page-shell py-4">
+    <div class="themed-container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3 mb-0"><%= title %></h1>
+        </div>
+
+        <%- include('partials/messages') %>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Utilisateur</th>
+                        <% if (currentUser.role === 'superadmin') { %>
+                            <th>Établissement</th>
+                            <th>Utilisateurs Approuvés</th>
+                        <% } else { %>
+                            <th>Rôle</th>
+                            <th>Statut</th>
+                        <% } %>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (typeof users !== 'undefined' && users.length > 0) { %>
+                        <% users.forEach(user => { %>
+                            <tr>
+                                <!-- Colonne Utilisateur -->
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img src="<%= user.avatar_url || '/img/user.png' %>" alt="Avatar" class="list-avatar me-3">
+                                        <div>
+                                            <div class="fw-bold"><%= user.name %></div>
+                                            <div class="text-muted small"><%= user.email %></div>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <% if (currentUser.role === 'superadmin') { %>
+                                    <!-- Vue Super Admin -->
+                                    <td>
+                                        <span class="text-muted"><%= user.establishment_name || 'Non affilié' %></span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary rounded-pill fs-6" id="user-count-<%= user.establishment_id %>">
+                                            <%= user.userCount %>
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="d-flex gap-2 justify-content-end">
+                                            <button type="button" onclick="window.location.href='mailto:<%= user.email %>'" class="btn btn-sm btn-outline-secondary">Contacter</button>
+                                            <form action="/admin/users/<%= user.id %>/delete" method="POST" class="d-inline mb-0">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet administrateur ? Cette action est irréversible.');">Supprimer</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                <% } else { %>
+                                    <!-- Vue Admin d'école -->
+                                    <td>
+                                        <span class="badge bg-secondary text-capitalize"><%= user.role %></span>
+                                    </td>
+                                    <td>
+                                        <% if (user.approved) { %>
+                                            <span class="badge bg-success">Approuvé</span>
+                                        <% } else { %>
+                                            <span class="badge bg-warning text-dark">En attente</span>
+                                        <% } %>
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="d-flex gap-2 justify-content-end">
+                                            <% if (!user.approved) { %>
+                                                <form action="/admin/users/<%= user.id %>/approve" method="POST" class="d-inline">
+                                                    <button type="submit" class="btn btn-sm btn-success">Approuver</button>
+                                                </form>
+                                            <% } %>
+                                            <form action="/admin/users/<%= user.id %>/delete" method="POST" class="d-inline">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?');">Supprimer</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                <% } %>
+                            </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">
+                                <% if (currentUser.role === 'superadmin') { %>
+                                    Aucun administrateur d'établissement trouvé.
+                                <% } else { %>
+                                    Aucun utilisateur trouvé dans votre établissement.
+                                <% } %>
+                            </td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<% if (currentUser.role === 'superadmin') { %>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // On se connecte au namespace global car l'event est émis globalement
+            const socket = io();
+
+            socket.on('establishmentUserCountUpdate', function(data) {
+                const { establishmentId, count } = data;
+                const countElement = document.getElementById(`user-count-${establishmentId}`);
+                if (countElement) {
+                    const oldValue = parseInt(countElement.textContent, 10);
+                    countElement.textContent = count;
+
+                    // Animation pour mettre en évidence le changement
+                    let animationClass = 'flash-increase';
+                    if (count < oldValue) {
+                        animationClass = 'flash-decrease';
+                    }
+                    
+                    countElement.classList.remove('flash-increase', 'flash-decrease');
+                    // Force le reflow pour que l'animation puisse rejouer
+                    void countElement.offsetWidth; 
+                    countElement.classList.add(animationClass);
+                }
+            });
+        });
+    </script>
+    <style>
+        @keyframes flash-increase {
+            0% { background-color: var(--bs-primary); transform: scale(1); }
+            50% { background-color: var(--bs-success); transform: scale(1.2); }
+            100% { background-color: var(--bs-primary); transform: scale(1); }
+        }
+        @keyframes flash-decrease {
+            0% { background-color: var(--bs-primary); transform: scale(1); }
+            50% { background-color: var(--bs-danger); transform: scale(1.2); }
+            100% { background-color: var(--bs-primary); transform: scale(1); }
+        }
+        .flash-increase {
+            animation: flash-increase 0.8s ease-out;
+        }
+        .flash-decrease {
+            animation: flash-decrease 0.8s ease-out;
+        }
+    </style>
+<% } %>
+
+<%- include('partials/footer') %>

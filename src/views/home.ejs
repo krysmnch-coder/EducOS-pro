@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Accueil | EducOS-pro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    
+    <style>
+      /* Reset et styles de base */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background-image: url('/img/bg.png'); /* Image de fond scolaire */
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+        font-family: 'Inter', sans-serif;
+        min-height: 100vh;
+        transition: background 0.3s ease, color 0.3s ease;
+      }
+
+      /* Mode clair */
+      body[data-theme="light"] { /* Applique un voile semi-transparent sur l'image de fond */
+        background-color: rgba(240, 242, 245, 0.8);
+        background-blend-mode: overlay;
+        color: #1a1a2e;
+      }
+      body[data-theme="light"] .bg-body-tertiary {
+        background: rgba(255,255,255,0.2) !important; /* Rendre la navbar du home plus transparente */
+        border: 1px solid rgba(0,0,0,0.05);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+      }
+      body[data-theme="light"] .nav-link {
+        color: #4b5563 !important;
+      }
+      body[data-theme="light"] .nav-link:hover {
+        color: #0d6efd !important;
+      }
+      body[data-theme="light"] .nav-link svg {
+        color: #4b5563 !important;
+      }
+      body[data-theme="light"] .nav-link:hover svg {
+        color: #0d6efd !important;
+      }
+      body[data-theme="light"] .nav-link .nav-text {
+        color: #4b5563 !important;
+      }
+      body[data-theme="light"] .nav-link:hover .nav-text {
+        color: #0d6efd !important;
+      }
+      body[data-theme="light"] .nav-divider {
+        color: #d1d5db !important;
+      }
+      body[data-theme="light"] .nav-icon-btn {
+        color: #4b5563 !important;
+      }
+      body[data-theme="light"] .nav-icon-btn:hover {
+        color: #0d6efd !important;
+        background-color: rgba(13, 110, 253, 0.08) !important;
+      }
+      body[data-theme="light"] .text-white-75 {
+        color: rgba(0,0,0,0.75) !important;
+      }
+      body[data-theme="light"] .navbar-brand span {
+        color: #1a1a2e !important;
+      }
+      body[data-theme="light"] .navbar-toggler svg {
+        stroke: #1a1a2e !important;
+      }
+      body[data-theme="light"] .badge.bg-success {
+        background: #198754 !important;
+        color: white !important;
+      }
+      body[data-theme="light"] .btn-outline-light {
+        border-color: rgba(0,0,0,0.2);
+        color: #1a1a2e;
+      }
+      body[data-theme="light"] .btn-outline-light:hover {
+        background: rgba(0,0,0,0.05);
+        border-color: rgba(0,0,0,0.3);
+      }
+      body[data-theme="light"] h1, 
+      body[data-theme="light"] h2, 
+      body[data-theme="light"] h3,
+      body[data-theme="light"] h4,
+      body[data-theme="light"] h5 {
+        color: #1a1a2e !important;
+      }
+
+      /* Mode sombre */
+      body[data-theme="dark"] { /* Applique un voile semi-transparent sur l'image de fond */
+        background-color: rgba(10, 10, 26, 0.8);
+        background-blend-mode: overlay;
+        color: #ffffff;
+      }
+      body[data-theme="dark"] .bg-body-tertiary {
+        background: rgba(17, 24, 39, 0.2) !important; /* Rendre la navbar du home plus transparente */
+        border: 1px solid rgba(255,255,255,0.05);
+      }
+      body[data-theme="dark"] .text-white-75 {
+        color: rgba(255,255,255,0.75) !important;
+      }
+      body[data-theme="dark"] .navbar-brand span {
+        color: #ffffff !important;
+      }
+      body[data-theme="dark"] .nav-link {
+        color: #e0e0e0 !important;
+      }
+      body[data-theme="dark"] .nav-link:hover {
+        color: #ffffff !important;
+      }
+      body[data-theme="dark"] .nav-link svg {
+        color: #e0e0e0 !important;
+      }
+      body[data-theme="dark"] .nav-link:hover svg {
+        color: #ffffff !important;
+      }
+      body[data-theme="dark"] .nav-link .nav-text {
+        color: #e0e0e0 !important;
+      }
+      body[data-theme="dark"] .nav-link:hover .nav-text {
+        color: #ffffff !important;
+      }
+      body[data-theme="dark"] .nav-divider {
+        color: #3d3d5c !important;
+      }
+      body[data-theme="dark"] .nav-icon-btn {
+        color: #e0e0e0 !important;
+      }
+      body[data-theme="dark"] .nav-icon-btn:hover {
+        color: #ffffff !important;
+        background-color: rgba(13, 110, 253, 0.15) !important;
+      }
+      body[data-theme="dark"] .navbar-toggler svg {
+        stroke: #e0e0e0 !important;
+      }
+
+      /* Navbar fixe */
+      .navbar {
+        position: fixed;
+        top: 1rem;
+        left: 50%;
+        transform: translateX(-50%);
+        width: calc(100% - 40px);
+        max-width: 1400px;
+        z-index: 1030;
+      }
+      /* Navbar */
+      .nav-item-spaced {
+        margin: 0 12px !important;
+      }
+      .nav-icon-btn {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        background: transparent;
+        border: none;
+      }
+      .nav-divider {
+        font-size: 20px;
+        font-weight: 300;
+        padding: 0 8px;
+        opacity: 0.5;
+      }
+      .navbar-toggler {
+        border: none !important;
+        padding: 8px !important;
+      }
+      .navbar-toggler:focus {
+        box-shadow: none !important;
+      }
+      .navbar-toggler-icon {
+        background-image: none !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .nav-link {
+        transition: color 0.2s ease;
+        text-decoration: none;
+      }
+      .nav-link .nav-text {
+        font-size: 0.75rem;
+      }
+      .page-shell {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 100px 20px 24px 20px; /* Ajout d'un padding-top pour la navbar fixe */
+      }
+
+      /* Boutons */
+      .btn-success {
+        border: none;
+        padding: 12px 32px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+      }
+      .btn-success:hover {
+        transform: scale(1.02);
+      }
+      .btn-outline-light {
+        padding: 12px 32px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+      }
+      .btn-outline-light:hover {
+        transform: scale(1.02);
+      }
+
+      /* Nouveaux styles pour la refonte */
+      .hero-section {
+        padding: 6rem 0;
+        text-align: center;
+      }
+      .hero-section .display-3 {
+        font-weight: 800;
+        letter-spacing: -1.5px;
+      }
+      .hero-section .lead {
+        max-width: 700px;
+        margin: 1.5rem auto 2.5rem auto;
+      }
+      body[data-theme="light"] .hero-section .lead {
+        color: #4a5568 !important;
+      }
+      body[data-theme="dark"] .hero-section .lead {
+        color: rgba(255,255,255,0.7) !important;
+      }
+
+      .stats-section .stat-card {
+        border-radius: 16px;
+        padding: 2rem;
+        transition: all 0.3s ease;
+      }
+      body[data-theme="dark"] .stats-section .stat-card {
+        background: rgba(22, 27, 34, 0.8);
+        border: 1px solid rgba(255,255,255,0.06);
+      }
+      body[data-theme="light"] .stats-section .stat-card {
+        background: rgba(255,255,255,0.9);
+        border: 1px solid rgba(0,0,0,0.06);
+      }
+      .stats-section .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      }
+      .stats-section .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+      }
+      .stats-section .stat-label {
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      body[data-theme="dark"] .stats-section .stat-label {
+        color: rgba(255,255,255,0.5);
+      }
+      body[data-theme="light"] .stats-section .stat-label {
+        color: rgba(0,0,0,0.5);
+      }
+
+      .feature-showcase {
+        padding: 4rem 0;
+      }
+      .feature-item {
+        margin-bottom: 6rem;
+      }
+      .feature-item:last-child {
+        margin-bottom: 0;
+      }
+      .feature-image {
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+      }
+      body[data-theme="dark"] .feature-image {
+         box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+      }
+      .feature-text .feature-tag {
+        display: inline-block;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 1rem;
+      }
+      .feature-text h2 {
+        font-weight: 700;
+        margin-bottom: 1rem;
+      }
+      .feature-text p {
+        font-size: 1.1rem;
+        line-height: 1.7;
+      }
+      body[data-theme="light"] .feature-text p {
+        color: #4a5568 !important;
+      }
+      body[data-theme="dark"] .feature-text p {
+        color: rgba(255,255,255,0.7) !important;
+      }
+
+      .cta-section {
+        border-radius: 20px;
+        padding: 4rem 2rem;
+      }
+      body[data-theme="dark"] .cta-section {
+        background: linear-gradient(45deg, rgba(59, 130, 246, 0.2), rgba(16, 185, 129, 0.2));
+      }
+      body[data-theme="light"] .cta-section {
+        background: linear-gradient(45deg, rgba(13, 110, 253, 0.1), rgba(25, 135, 84, 0.1));
+      }
+      .cta-section h2 {
+        font-weight: 700;
+      }
+
+      /* Couleurs des tags */
+      .tag-communication { background-color: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+      .tag-pedagogy { background-color: rgba(16, 185, 129, 0.15); color: #34d399; }
+      .tag-organization { background-color: rgba(251, 191, 36, 0.15); color: #fbbf24; }
+
+      body[data-theme="light"] .tag-communication { background-color: rgba(13, 110, 253, 0.1); color: #0d6efd; }
+      body[data-theme="light"] .tag-pedagogy { background-color: rgba(25, 135, 84, 0.1); color: #198754; }
+      body[data-theme="light"] .tag-organization { background-color: rgba(255, 193, 7, 0.15); color: #d4a800; }
+
+      /* Theme toggle button icons */
+      #themeToggle .moon-icon { display: none; }
+      #themeToggle .sun-icon { display: block; }
+
+      body[data-theme="dark"] #themeToggle .moon-icon { display: block; }
+      body[data-theme="dark"] #themeToggle .sun-icon { display: none; }
+
+      /* Bouton Retour en Haut */
+      .back-to-top-btn {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: #0d6efd;
+        color: white;
+        border: none;
+        box-shadow: 0 4px 20px rgba(13, 110, 253, 0.4);
+        cursor: pointer;
+        transition: opacity 0.3s ease, transform 0.3s ease;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transform: translateY(20px);
+        pointer-events: none;
+        text-decoration: none;
+      }
+      .back-to-top-btn.visible {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto;
+      }
+      .back-to-top-btn:hover {
+        background: #0a58ca;
+        transform: scale(1.1);
+        color: white;
+      }
+      body[data-theme="light"] .back-to-top-btn {
+          background: #0d6efd;
+          box-shadow: 0 4px 20px rgba(13, 110, 253, 0.3);
+      }
+      body[data-theme="light"] .back-to-top-btn:hover {
+          background: #0b5ed7;
+      }
+
+      /* Animations */
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .hero-section .badge,
+      .hero-section h1,
+      .hero-section .lead,
+      .hero-section .d-flex {
+        animation: fadeInUp 0.8s ease-out forwards;
+        opacity: 0; /* Démarrer caché */
+      }
+
+      /* Délais échelonnés pour les éléments du hero */
+      .hero-section h1 { animation-delay: 0.2s; }
+      .hero-section .lead { animation-delay: 0.4s; }
+      .hero-section .d-flex { animation-delay: 0.6s; }
+
+      /* Pour les animations au défilement */
+      .stats-section .stat-card,
+      .feature-item {
+        opacity: 0;
+        transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        transform: translateY(30px);
+      }
+
+      .stats-section .stat-card.is-visible,
+      .feature-item.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      /* Délais échelonnés pour les cartes de statistiques */
+      .stats-section .row > div:nth-child(2) .stat-card { transition-delay: 0.1s; }
+      .stats-section .row > div:nth-child(3) .stat-card { transition-delay: 0.2s; }
+      .stats-section .row > div:nth-child(4) .stat-card { transition-delay: 0.3s; }
+
+      /* Styles pour l'avatar dans la barre de navigation */
+      .navbar-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        object-fit: cover;
+      }
+
+      .navbar-avatar-placeholder {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        background-color: var(--bs-primary);
+        color: white;
+        font-size: 1rem;
+      }
+    </style>
+  </head>
+  <body data-theme="dark">
+    <div class="page-shell">
+      <header class="navbar navbar-expand-lg rounded-4 bg-body-tertiary px-4 py-2">
+        <div class="container-fluid px-0">
+          <a href="/" class="navbar-brand d-flex align-items-center gap-2 fw-bold text-decoration-none">
+            <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-primary text-white p-2">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+              </svg>
+            </span>
+            <span>EducOS-pro</span>
+          </a>
+          
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+            <span class="navbar-toggler-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <line x1="3" y1="12" x2="21" y2="12" />
+                <line x1="3" y1="18" x2="21" y2="18" />
+              </svg>
+            </span>
+          </button>
+
+          <div class="collapse navbar-collapse" id="mainNavbar">
+            <ul class="navbar-nav ms-auto align-items-center">
+              <li class="nav-item">
+                <button id="themeToggle" class="nav-icon-btn" aria-label="Toggle theme">
+                  <svg class="sun-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="5" /><line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" /><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" /><line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" /><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                  </svg>
+                  <svg class="moon-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                  </svg>
+                </button>
+              </li>
+              <% if (user) { %>
+                <!-- Menu déroulant de l'utilisateur -->
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" id="navbarUserDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <% if (user.avatar_url) { %>
+                      <img src="<%= user.avatar_url %>" alt="Avatar" class="navbar-avatar">
+                    <% } else { %>
+                      <div class="navbar-avatar-placeholder">
+                        <%= user.name.charAt(0).toUpperCase() %>
+                      </div>
+                    <% } %>
+                    <span class="d-none d-lg-inline text-white-75"><%= user.name %></span>
+                  </a>
+                  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarUserDropdown">
+                    <li>
+                      <a class="dropdown-item d-flex align-items-center" href="/profile">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        Mon Profil
+                      </a>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                      <a class="dropdown-item text-danger d-flex align-items-center" href="/logout">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                        Déconnexion
+                      </a>
+                    </li>
+                  </ul>
+                </li>
+              <% } %>
+            </ul>
+          </div>
+        </div>
+      </header>
+
+      <main>
+        <!-- Hero Section -->
+        <section class="hero-section">
+          <div class="container">
+            <span class="badge bg-success mb-3 d-inline-flex align-items-center gap-2 px-3 py-2">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2L20 7V17L12 22L4 17V7L12 2Z" stroke-linejoin="round"/>
+              </svg>
+              EducOS-pro  v 1.0.0
+            </span>
+            <h1 class="display-3 text-white-75">La plateforme scolaire unifiée que vous attendiez.</h1>
+            <p class="lead">Gérez la vie scolaire, de la communication aux notes, en un seul endroit. Simple, puissant et accessible pour tous.</p>
+            <div class="d-flex flex-wrap justify-content-center gap-3">
+              <a href="/register" class="btn btn-success btn-lg">Commencer l'aventure</a>
+              <% if (user) { %>
+                <% const redirectPath = user.role === 'administrateur' ? '/admin' : '/dashboard'; %>
+                <a href="<%= redirectPath %>" class="btn btn-outline-light btn-lg">Accéder à mon espace</a>
+              <% } else { %>
+                <a href="/login" class="btn btn-outline-light btn-lg">Accéder à mon espace</a>
+              <% } %>
+            </div>
+          </div>
+        </section>
+
+        <!-- Stats Section -->
+        <section class="stats-section container my-5">
+          <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+              <div class="stat-card">
+                <div id="dashboardStudents" class="stat-number">...</div>
+                <div class="stat-label text-muted">Élèves Inscrits</div>
+              </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+              <div class="stat-card">
+                <div id="dashboardProfessors" class="stat-number">...</div>
+                <div class="stat-label text-muted">Professeurs Actifs</div>
+              </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+              <div class="stat-card">
+                <div id="dashboardMessages" class="stat-number">...</div>
+                <div class="stat-label text-muted">Messages Échangés</div>
+              </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+              <div class="stat-card">
+                <div id="dashboardRequests" class="stat-number">...</div>
+                <div class="stat-label text-muted">Demandes en cours</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Feature Showcase Section -->
+        <section class="feature-showcase container">
+          <!-- Feature 1 -->
+          <div class="row feature-item align-items-center">
+            <div class="col-md-6">
+              <div class="feature-text">
+                <span class="feature-tag tag-communication">Communication</span>
+                <h2>Messagerie intégrée et centralisée</h2>
+                <p>Facilitez les échanges entre l'administration, les professeurs, les parents et les élèves grâce à un système de messagerie sécurisé et intuitif.</p>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <img src="/img/img1.png" alt="Messagerie intégrée" class="img-fluid feature-image">
+            </div>
+          </div>
+
+          <!-- Feature 2 -->
+          <div class="row feature-item align-items-center">
+            <div class="col-md-6 order-md-2">
+              <div class="feature-text">
+                <span class="feature-tag tag-pedagogy">Pédagogie</span>
+                <h2>Suivi des notes et des absences en temps réel</h2>
+                <p>Les professeurs saisissent les notes et les absences, les parents et les élèves les consultent instantanément. Fini l'attente des bulletins trimestriels.</p>
+              </div>
+            </div>
+            <div class="col-md-6 order-md-1">
+              <img src="/img/img2.png" alt="Suivi des notes" class="img-fluid feature-image">
+            </div>
+          </div>
+
+          <!-- Feature 3 -->
+          <div class="row feature-item align-items-center">
+            <div class="col-md-6">
+              <div class="feature-text">
+                <span class="feature-tag tag-organization">Organisation</span>
+                <h2>Calendrier scolaire partagé</h2>
+                <p>Examens, vacances, événements... Tous les moments importants de l'année scolaire sont synchronisés dans un calendrier accessible à tous les rôles.</p>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <img src="/img/img3.png" alt="Calendrier scolaire" class="img-fluid feature-image">
+            </div>
+          </div>
+        </section>
+
+        <!-- Final CTA Section -->
+        <section class="container my-5">
+          <div class="cta-section text-center">
+            <h2 class="mb-3">Prêt à transformer votre établissement ?</h2>
+            <p class="lead mb-4">Rejoignez les écoles qui font confiance à EducOS-pro pour une gestion simplifiée.</p>
+            <a href="/register" class="btn btn-success btn-lg">Créer un compte gratuitement</a>
+          </div>
+        </section>
+      </main>
+
+      <footer class="py-4 text-center text-muted small">
+        <span>© 2026 EducOS-pro ver 1.0.0. Tous droits réservés.</span>
+      </footer>
+    </div>
+
+    <!-- Bouton Retour en Haut -->
+    <a href="#" id="backToTopBtn" class="back-to-top-btn" aria-label="Retour en haut">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 19V5M5 12l7-7 7 7"/>
+      </svg>
+    </a>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/theme.js"></script>
+    <script>
+      function setDashboardStats(data) {
+        const students = document.getElementById('dashboardStudents');
+        const professors = document.getElementById('dashboardProfessors');
+        const messages = document.getElementById('dashboardMessages');
+        const requests = document.getElementById('dashboardRequests');
+
+        if (students) students.textContent = data.studentCount ?? '...';
+        if (professors) professors.textContent = data.professorCount ?? '...';
+        if (messages) messages.textContent = data.totalMessageCount ?? '...';
+        if (requests) requests.textContent = data.pendingCount ?? '...';
+      }
+
+      async function refreshDashboardStats() {
+        try {
+          const response = await fetch('/api/dashboard-stats');
+          if (!response.ok) throw new Error('Response not OK');
+          const data = await response.json();
+          setDashboardStats(data);
+        } catch (error) {
+          console.warn('Impossible de charger le tableau de bord live:', error);
+        }
+      }
+
+      if (typeof io !== 'undefined') {
+        const liveSocket = io('/public');
+        liveSocket.on('dashboardUpdate', function(data) {
+          setDashboardStats(data);
+        });
+      }
+
+      document.addEventListener('DOMContentLoaded', function() {
+        refreshDashboardStats();
+        setInterval(refreshDashboardStats, 30000);
+
+        // Animations au défilement avec Intersection Observer
+        const animatedElements = document.querySelectorAll('.stats-section .stat-card, .feature-item');
+
+        if ('IntersectionObserver' in window) {
+          const observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('is-visible');
+                observer.unobserve(entry.target);
+              }
+            });
+          }, {
+            rootMargin: '0px 0px -100px 0px' // Déclenche l'animation un peu avant que l'élément soit complètement visible
+          });
+
+          animatedElements.forEach(el => observer.observe(el));
+        } else {
+          // Fallback pour les navigateurs plus anciens qui ne supportent pas IntersectionObserver
+          animatedElements.forEach(el => {
+            el.classList.add('is-visible');
+          });
+        }
+      });
+
+      // Gestion du bouton "Retour en haut"
+      const backToTopBtn = document.getElementById('backToTopBtn');
+
+      if (backToTopBtn) {
+        window.addEventListener('scroll', () => {
+          if (window.scrollY > 300) {
+            backToTopBtn.classList.add('visible');
+          } else {
+            backToTopBtn.classList.remove('visible');
+          }
+        });
+
+        backToTopBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        });
+      }
+    </script>
+  </body>
+</html>

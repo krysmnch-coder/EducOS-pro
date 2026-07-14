@@ -1,0 +1,30 @@
+/* Styles pour la barre de navigation */
+.navbar {
+    position: fixed; /* Rend la barre de navigation fixe */
+    top: 0; /* La positionne en haut de la page */
+    left: 0;
+    width: 100%; /* Prend toute la largeur */
+    z-index: 1030; /* Assure qu'elle est au-dessus des autres éléments (valeur Bootstrap pour navbar) */
+    background-color: rgba(255, 255, 255, 0.5) !important; /* Fond blanc semi-transparent */
+    backdrop-filter: blur(10px); /* Applique un flou à l'arrière-plan */
+    -webkit-backdrop-filter: blur(10px); /* Pour la compatibilité Safari */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Ajoute une légère ombre pour la distinguer */
+}
+
+/* Ajustement pour le contenu sous la barre de navigation fixe */
+body {
+    padding-top: 70px; /* Ajustez cette valeur en fonction de la hauteur de votre navbar */
+}
+
+/* Espacement équitable des icônes/liens dans la barre de navigation */
+.navbar-nav {
+    display: flex;
+    justify-content: space-around; /* Distribue l'espace équitablement entre les éléments */
+    width: 100%; /* S'assure que la liste prend toute la largeur disponible */
+    flex-grow: 1; /* Permet à la liste de s'étendre */
+}
+
+.navbar-nav .nav-item {
+    flex-grow: 1; /* Chaque élément de navigation prend une part égale de l'espace */
+    text-align: center; /* Centre le contenu (icône et texte) de chaque élément */
+}

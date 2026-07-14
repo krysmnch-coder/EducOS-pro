@@ -1,0 +1,27 @@
+<%- include('partials/head') %>
+<div class="page-section">
+  <div class="section-header">
+    <h1><%= grade ? 'Modifier une note' : 'Ajouter une note' %></h1>
+  </div>
+
+  <form action="<%= grade ? `/students/grades/${grade.id}/edit` : '/students/grades/new' %>" method="POST" class="form-card">
+    <label for="student_id">Élève</label>
+    <select id="student_id" name="student_id" required>
+      <% students.forEach((student) => { %>
+        <option value="<%= student.id %>" <%= grade && grade.student_id === student.id ? 'selected' : '' %>><%= student.first_name %> <%= student.last_name %> (<%= student.student_class %>)</option>
+      <% }) %>
+    </select>
+
+    <label for="subject">Matière</label>
+    <input id="subject" type="text" name="subject" value="<%= grade ? grade.subject : '' %>" required />
+
+    <label for="grade">Note</label>
+    <input id="grade" type="text" name="grade" value="<%= grade ? grade.grade : '' %>" required />
+
+    <label for="comment">Commentaire</label>
+    <textarea id="comment" name="comment" rows="4"><%= grade ? grade.comment : '' %></textarea>
+
+    <button type="submit" class="btn btn-primary"><%= grade ? 'Enregistrer les modifications' : 'Ajouter la note' %></button>
+  </form>
+</div>
+<%- include('partials/footer') %>

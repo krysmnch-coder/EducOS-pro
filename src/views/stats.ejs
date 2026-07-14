@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <%- include('partials/head') %>
+  <style>
+    .chart-card {
+      background-color: var(--bs-card-bg);
+      border: 1px solid var(--bs-border-color);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .chart-card h4 {
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="page-shell container-xl py-4">
+    <%- include('partials/header') %>
+
+    <main class="page-main">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2 fw-bold">Statistiques Globales</h1>
+        <a href="/dashboard" class="btn btn-outline-secondary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          Retour au tableau de bord
+        </a>
+      </div>
+
+      <div class="row">
+        <!-- Students per Class Chart -->
+        <div class="col-lg-8">
+          <div class="chart-card">
+            <h4>Élèves par classe</h4>
+            <canvas id="studentsByClassChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Payments Chart -->
+        <div class="col-lg-4">
+          <div class="chart-card">
+            <h4>Statut des Paiements</h4>
+            <canvas id="paymentsChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <!-- Online Registrations Chart -->
+        <div class="col-12">
+          <div class="chart-card">
+            <h4>Inscriptions en ligne (par mois)</h4>
+            <canvas id="registrationsChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="/js/theme.js"></script>
+  <%- include('partials/footer') %>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const isDarkMode = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+      const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+      const textColor = isDarkMode ? '#e0e0e0' : '#495057';
+
+      // 1. Students by Class Chart (Bar)
+      const studentsCtx = document.getElementById('studentsByClassChart').getContext('2d');
+      const studentData = JSON.parse('<%- studentDistribution %>');
+      new Chart(studentsCtx, {
+        type: 'bar',
+        data: {
+          labels: studentData.labels,
+          datasets: [{
+            label: 'Nombre d\'élèves',
+            data: studentData.data,
+            backgroundColor: 'rgba(54, 162, 235, 0.6)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1,
+            borderRadius: 5,
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: { color: gridColor },
+              ticks: { color: textColor }
+            },
+            x: {
+              grid: { display: false },
+              ticks: { color: textColor }
+            }
+          }
+        }
+      });
+
+      // 2. Payments Chart (Doughnut)
+      const paymentsCtx = document.getElementById('paymentsChart').getContext('2d');
+      const paymentData = JSON.parse('<%- paymentStatus %>');
+      new Chart(paymentsCtx, {
+        type: 'doughnut',
+        data: {
+          labels: paymentData.labels,
+          datasets: [{
+            label: 'Statut des paiements',
+            data: paymentData.data,
+            backgroundColor: [
+              'rgba(25, 135, 84, 0.7)',
+              'rgba(255, 193, 7, 0.7)',
+              'rgba(13, 110, 253, 0.7)'
+            ],
+            borderColor: [
+              'rgba(25, 135, 84, 1)',
+              'rgba(255, 193, 7, 1)',
+              'rgba(13, 110, 253, 1)'
+            ],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                color: textColor
+              }
+            }
+          }
+        }
+      });
+
+      // 3. Registrations Chart (Line)
+      const registrationsCtx = document.getElementById('registrationsChart').getContext('2d');
+      const registrationData = JSON.parse('<%- registrationTrend %>');
+      new Chart(registrationsCtx, {
+        type: 'line',
+        data: {
+          labels: registrationData.labels,
+          datasets: [{
+            label: 'Nouvelles inscriptions',
+            data: registrationData.data,
+            fill: true,
+            backgroundColor: 'rgba(25, 135, 84, 0.2)',
+            borderColor: 'rgba(25, 135, 84, 1)',
+            tension: 0.3
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: { color: gridColor },
+              ticks: { color: textColor }
+            },
+            x: {
+              grid: { display: false },
+              ticks: { color: textColor }
+            }
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.css" rel="stylesheet">
+  <%- include('partials/head') %>
+</head>
+<body data-user-id="<%= user ? user.id : '' %>">
+  <div class="page-shell container-xl py-4">
+    <%- include('partials/header') %>
+
+    <main class="page-main">
+      <div class="row g-4 communication-layout">
+        <!-- Colonne de gauche : Formulaire d'envoi -->
+        <div class="col-lg-5">
+          <div class="card new-communication-card shadow-sm border-0 h-100">
+            <div class="card-header">
+              <h5 class="mb-0">Envoyer un nouveau message</h5>
+            </div>
+            <div class="card-body">
+              <!-- Onglets pour choisir le type d'envoi -->
+              <ul class="nav nav-tabs nav-fill mb-3" id="communicationTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link active" id="direct-message-tab" data-bs-toggle="tab" data-bs-target="#direct-message-form" type="button" role="tab" aria-controls="direct-message-form" aria-selected="true">Message Direct</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="group-message-tab" data-bs-toggle="tab" data-bs-target="#group-message-form" type="button" role="tab" aria-controls="group-message-form" aria-selected="false">Communication de Groupe</button>
+                </li>
+              </ul>
+
+              <div class="tab-content" id="communicationTabContent">
+                <!-- Onglet 1: Message Direct à un utilisateur -->
+                <div class="tab-pane fade show active" id="direct-message-form" role="tabpanel" aria-labelledby="direct-message-tab">
+                  <form action="/communications/send" method="POST">
+                    <div class="mb-3">
+                      <label for="user-recipient-select" class="form-label">Destinataire</label>
+                      <% if (locals.allUsers && allUsers.length > 0) { %>
+                        <select id="user-recipient-select" name="recipient" required placeholder="Rechercher un utilisateur...">
+                          <% allUsers.sort((a, b) => a.name.localeCompare(b.name)).forEach(user => { %>
+                            <option value="user_<%= user.id %>" data-avatar="<%= user.avatar_url || '/img/user.png' %>" data-email="<%= user.email || '' %>">
+                              <%= user.name %>
+                            </option>
+                          <% }) %>
+                        </select>
+                      <% } else { %>
+                        <input type="text" class="form-control" value="Aucun autre utilisateur disponible" disabled>
+                        <!-- On désactive le bouton d'envoi s'il n'y a personne à qui envoyer -->
+                        <style>#direct-message-form button[type="submit"] { pointer-events: none; opacity: 0.6; }</style>
+                      <% } %>
+                    </div>
+                    <div class="mb-3">
+                      <label for="direct-subject" class="form-label">Sujet</label>
+                      <input type="text" class="form-control" id="direct-subject" name="subject" required>
+                    </div>
+                    <div class="mb-3">
+                      <label for="direct-message-content" class="form-label">Message</label>
+                      <textarea class="form-control" id="direct-message-content" name="message" rows="5" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Envoyer le message direct</button>
+                  </form>
+                </div>
+
+                <!-- Onglet 2: Communication de Groupe -->
+                <div class="tab-pane fade" id="group-message-form" role="tabpanel" aria-labelledby="group-message-tab">
+                  <form action="/communications/send" method="POST">
+                    <div class="mb-3">
+                      <label for="group-recipient-select" class="form-label">Destinataires</label>
+                      <select id="group-recipient-select" name="recipient" required>
+                        <option value="" disabled selected>Choisir un groupe...</option>
+                        <option value="all">Tous les utilisateurs</option>
+                        <optgroup label="Par Rôle">
+                          <option value="role_responsable vie scolaire">Vie scolaire</option>
+                          <option value="role_secretaire">Secretaire</option>
+                          <option value="role_professeur">Professeurs</option>
+                          <option value="role_parent">Parents</option>
+                          <option value="role_eleve">Élèves</option>
+                        </optgroup>
+                      </select>
+                    </div>
+                    <div class="mb-3">
+                      <label for="group-subject" class="form-label">Sujet</label>
+                      <input type="text" class="form-control" id="group-subject" name="subject" required>
+                    </div>
+                    <div class="mb-3">
+                      <label for="group-message-content" class="form-label">Message</label>
+                      <textarea class="form-control" id="group-message-content" name="message" rows="5" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Envoyer la communication</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Colonne de droite : Liste des communications -->
+        <div class="col-lg-7">
+          <div class="card shadow-sm border-0 h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <h5 class="mb-0 w-50">Messages reçus</h5>
+              <input type="text" id="communication-search" class="form-control form-control-sm w-50" placeholder="Rechercher par nom d'expéditeur...">
+            </div>
+            <div class="card-body">
+              <div class="accordion communication-list" id="communicationAccordion">
+                <% if (locals.communications && communications.length > 0) { %>
+                  <% communications.forEach((comm, index) => { %>
+                    <div class="accordion-item" data-sender-name="<%= (comm.sender_name || 'Système').toLowerCase() %>">
+                      <h2 class="accordion-header" id="heading-<%= comm.id %>">
+                        <button class="accordion-button <%= index > 0 ? 'collapsed' : '' %>" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-<%= comm.id %>" aria-expanded="<%= index === 0 ? 'true' : 'false' %>" aria-controls="collapse-<%= comm.id %>">
+                          <div class="communication-header">
+                            <span class="communication-subject"><%= comm.subject %></span>
+                            <span class="communication-meta d-flex align-items-center">
+                              De:
+                              <img src="<%= comm.sender_avatar_url || '/img/user.png' %>" class="communication-avatar" alt="">
+                              <span class="sender-name"><%= comm.sender_name || 'Système' %></span>
+                              <span class="mx-2">|</span> Le: <%= new Date(comm.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) %>
+                            </span>
+                          </div>
+                        </button>
+                      </h2>
+                      <div id="collapse-<%= comm.id %>" class="accordion-collapse collapse <%= index === 0 ? 'show' : '' %>" aria-labelledby="heading-<%= comm.id %>" data-bs-parent="#communicationAccordion">
+                        <div class="accordion-body communication-body">
+                          <%- (comm.message || '').replace(/\n/g, '<br>') %>
+                          <!-- Actions pour le message -->
+                          <div class="communication-actions">
+                            <button class="btn btn-sm btn-outline-primary reply-btn" 
+                                    data-sender-id="<%= comm.sender_id %>" 
+                                    data-subject="<%= comm.subject %>">Répondre</button>
+                            <form action="/communications/delete/<%= comm.id %>" method="POST" onsubmit="return confirm('Voulez-vous vraiment supprimer ce message ?');" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Supprimer</button>
+                            </form>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  <% }) %>
+                <% } else { %>
+                  <div class="text-center text-muted py-5">
+                    Vous n'avez aucune communication pour le moment.
+                  </div>
+                <% } %>
+              </div>
+              <div id="no-results-message" class="text-center text-muted py-5" style="display: none;">
+                Aucun message ne correspond à votre recherche.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <%- include('partials/footer') %>
+  <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+  <script>
+    // Logique pour la barre de recherche des communications
+    const searchInput = document.getElementById('communication-search');
+    if (searchInput) {
+      const communicationItems = document.querySelectorAll('#communicationAccordion .accordion-item');
+      const noResultsMessage = document.getElementById('no-results-message');
+
+      searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase().trim();
+        let visibleCount = 0;
+
+        communicationItems.forEach(item => {
+          const senderName = item.dataset.senderName;
+          const isVisible = senderName.includes(searchTerm);
+          item.style.display = isVisible ? '' : 'none';
+          if (isVisible) visibleCount++;
+        });
+
+        noResultsMessage.style.display = (visibleCount === 0 && communicationItems.length > 0) ? 'block' : 'none';
+      });
+    }
+
+    // Logique pour le bouton "Répondre"
+    document.querySelectorAll('.reply-btn').forEach(button => {
+      button.addEventListener('click', function() {
+        const senderId = this.dataset.senderId;
+        const subject = this.dataset.subject;
+
+        // 1. Activer l'onglet "Message Direct"
+        const directMessageTab = new bootstrap.Tab(document.getElementById('direct-message-tab'));
+        directMessageTab.show();
+
+        // 2. Sélectionner le bon destinataire dans la liste
+        const userSelect = document.getElementById('user-recipient-select').tomselect;
+        if (userSelect) {
+          userSelect.setValue(`user_${senderId}`);
+        }
+
+        // 3. Pré-remplir le sujet avec "Re: "
+        const subjectInput = document.getElementById('direct-subject');
+        subjectInput.value = subject.startsWith('Re: ') ? subject : `Re: ${subject}`;
+
+        // 4. Mettre le focus sur le champ de message
+        const messageInput = document.getElementById('direct-message-content');
+        messageInput.focus();
+        
+        // 5. Faire défiler jusqu'au formulaire
+        document.querySelector('.new-communication-card').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialise TomSelect pour la sélection d'utilisateur direct, s'il existe
+      const userSelect = document.getElementById('user-recipient-select');
+      if (userSelect) {
+        new TomSelect(userSelect, {
+          create: false,
+          render: {
+            option: function(data, escape) {
+              const avatar = data.avatar || '/img/user.png';
+              const email = data.email || 'Email non disponible';
+              return `<div class="d-flex align-items-center p-2">
+                        <img class="list-avatar me-3" src="${escape(avatar)}" alt="">
+                        <div>
+                          <div class="text-body">${escape(data.text)}</div>
+                          <div class="text-muted small">${escape(email)}</div>
+                        </div>
+                      </div>`;
+            },
+            item: function(data, escape) {
+              const avatar = data.avatar || '/img/user.png';
+              return `<div class="d-flex align-items-center">
+                        <img class="me-2" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;" src="${escape(avatar)}" alt="">
+                        <span>${escape(data.text)}</span>
+                      </div>`;
+            }
+          }
+        });
+      }
+
+      // Initialise un TomSelect plus simple pour les groupes
+      new TomSelect('#group-recipient-select', {
+        create: false
+      });
+    });
+  </script>
+</body>

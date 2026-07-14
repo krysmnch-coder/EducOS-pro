@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <%- include('partials/head') %>
+</head>
+<body data-theme="light">
+  <div class="page-shell container-xl py-4">
+    <%- include('partials/header') %>
+
+    <main class="page-main">
+      <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+              <h1 class="h4 mb-1"><%= title %></h1>
+              <p class="text-muted mb-0">Consultez vos dernières notifications.</p>
+            </div>
+          </div>
+          <p class="text-center text-muted py-5">La logique pour afficher la liste des notifications est à implémenter.</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <%- include('partials/footer') %>
+</body>
+</html>

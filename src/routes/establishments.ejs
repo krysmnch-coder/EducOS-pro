@@ -1,0 +1,63 @@
+<%- include('../partials/head') %>
+
+<body>
+  <%- include('../partials/navbar') %>
+
+  <div class="container-fluid page-shell py-4">
+    <div class="themed-container">
+      <h1 class="mb-4"><%= title %></h1>
+
+      <!-- Affichage des messages flash -->
+      <%- include('../partials/messages') %>
+
+      <div class="row">
+        <!-- Formulaire d'ajout -->
+        <div class="col-lg-5 mb-4">
+          <div class="card h-100">
+            <div class="card-body">
+              <h5 class="card-title mb-3">Ajouter un nouvel établissement</h5>
+              <form action="/establishments" method="POST">
+                <div class="mb-3">
+                  <label for="name" class="form-label">Nom de l'établissement</label>
+                  <input type="text" class="form-control" id="name" name="name" placeholder="Ex: Lycée Saint-Exupéry" required>
+                </div>
+                <div class="mb-3">
+                  <label for="subdomain" class="form-label">Identifiant unique</label>
+                  <input type="text" class="form-control" id="subdomain" name="subdomain" placeholder="Ex: saint-exupery" required pattern="[a-z0-9-]+" aria-describedby="subdomainHelp">
+                  <div id="subdomainHelp" class="form-text">Utilisé pour les URL. Uniquement des minuscules, chiffres et tirets.</div>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 mt-2">Ajouter l'établissement</button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Liste des établissements existants -->
+        <div class="col-lg-7">
+          <div class="card h-100">
+            <div class="card-body">
+              <h5 class="card-title mb-3">Établissements existants</h5>
+              <% if (establishments && establishments.length > 0) { %>
+                <div class="list-group">
+                  <% establishments.forEach(est => { %>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                      <div>
+                        <h6 class="mb-0"><%= est.name %></h6>
+                        <small class="text-muted">ID: <%= est.id %> | Identifiant: <%= est.subdomain %></small>
+                      </div>
+                      <!-- Vous pourriez ajouter des boutons d'action (modifier, supprimer) ici à l'avenir -->
+                    </div>
+                  <% }) %>
+                </div>
+              <% } else { %>
+                <p class="text-muted">Aucun établissement n'a été ajouté pour le moment.</p>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%- include('../partials/footer') %>
+</body>

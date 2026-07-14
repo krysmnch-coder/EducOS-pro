@@ -1,0 +1,1201 @@
+/* =================================
+   Variables de Thème CSS
+==================================== */
+:root {
+  /* Couleurs de base */
+  --primary-color: #0d6efd;
+  --danger-color: #dc3545;
+  --success-color: #198754;
+  --white-color: #ffffff;
+  --black-color: #000000;
+
+  /* Thème Clair */
+  --body-bg: rgba(240, 242, 245, 0.8);
+  --body-color: #1a1a2e;
+  --navbar-bg: rgba(255, 255, 255, 0.2);
+  --nav-link-color: #1a1a2e;
+  --nav-link-hover-color: #000;
+  --nav-divider-color: #dee2e6;
+  --card-bg: var(--white-color);
+  --card-border-color: #dee2e6;
+  --card-color: #1a1a2e;
+  --text-muted-color: #6c757d;
+  --auth-card-bg: rgba(255, 255, 255, 0.75);
+  --auth-card-border-color: rgba(0,0,0,0.08);
+  --dashboard-stat-bg: var(--white-color);
+  --dashboard-stat-border-color: #e9ecef;
+  --stat-icon-color: var(--primary-color);
+  --chat-panel-bg: var(--white-color);
+  --chat-panel-body-bg: #f8f9fa;
+  --chat-message-received-bg: var(--white-color);
+  --chat-message-received-color: #212529;
+  --chat-panel-footer-bg: var(--white-color);
+  --chat-panel-footer-border-color: #e9ecef;
+  --chat-input-bg: var(--white-color);
+  --chat-input-border-color: #dee2e6;
+  --chat-input-color: #212529;
+  --chat-input-placeholder-color: #6c757d;
+  --online-status-border-color: var(--white-color);
+}
+
+:root[data-theme="dark"] {
+  --body-bg: rgba(10, 10, 26, 0.8);
+  --body-color: var(--white-color);
+  --navbar-bg: rgba(22, 33, 62, 0.2);
+  --nav-link-color: #e0e0e0;
+  --nav-link-hover-color: var(--white-color);
+  --nav-divider-color: #3d3d5c;
+  --card-bg: #16213e;
+  --card-border-color: #2d2d44;
+  --card-color: #e0e0e0;
+  --text-muted-color: #a0a0b8;
+  --auth-card-bg: rgba(22, 27, 34, 0.75);
+  --auth-card-border-color: rgba(255,255,255,0.1);
+  --dashboard-stat-bg: #1a1a2e;
+  --dashboard-stat-border-color: #2d2d44;
+  --stat-icon-color: #4d9aff;
+  --chat-panel-bg: #1a1a2e;
+  --chat-panel-body-bg: #16213e;
+  --chat-message-received-bg: #2d2d44;
+  --chat-message-received-color: #e0e0e0;
+  --chat-panel-footer-bg: #1a1a2e;
+  --chat-panel-footer-border-color: #2d2d44;
+  --chat-input-bg: #2d2d44;
+  --chat-input-border-color: #3d3d5c;
+  --chat-input-color: #e0e0e0;
+  --chat-input-placeholder-color: #8888aa;
+  --online-status-border-color: #16213e;
+}
+
+/* Styles pour la barre de navigation */
+body .navbar {
+    position: fixed; /* Rend la barre de navigation fixe */
+    top: 0; /* La positionne en haut de la page */
+    left: 0;
+    width: 100%; /* Prend toute la largeur */
+    z-index: 1030; /* Assure qu'elle est au-dessus des autres éléments (valeur Bootstrap pour navbar) */
+    /* NOTE : L'utilisation de `!important` est fréquente dans ce fichier, souvent pour surcharger
+       les styles par défaut de Bootstrap. Pour une meilleure maintenabilité, il serait préférable
+       d'augmenter la spécificité des sélecteurs (ex: `body .navbar`) ou, idéalement, d'utiliser
+       les variables SASS de Bootstrap pour une personnalisation en amont. */
+    background-color: var(--navbar-bg);
+    border-radius: 0; /* Pas d'arrondi pour la navbar */
+    backdrop-filter: blur(10px); /* Applique un flou à l'arrière-plan */
+    -webkit-backdrop-filter: blur(10px); /* Pour la compatibilité Safari */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Ajoute une légère ombre pour la distinguer */
+}
+
+/* Ajustement pour le contenu sous la barre de navigation fixe */
+body { /* Ceci doit être ajusté en fonction de la hauteur réelle de la navbar */
+    padding-top: 70px; /* Ajustez cette valeur en fonction de la hauteur de votre navbar */
+    background-color: var(--body-bg);
+    color: var(--body-color);
+    background-image: url('/img/bg.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-blend-mode: overlay;
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* Espacement des icônes/liens dans la barre de navigation */
+.navbar-nav {
+    display: flex;
+    /* ms-auto sur ul.navbar-nav gère l'alignement à droite */
+    align-items: center; /* Aligne verticalement les éléments */
+}
+
+.navbar-nav .nav-item {
+    /* Supprime flex-grow: 1 pour que les éléments prennent leur largeur naturelle */
+    text-align: center; /* Centre le contenu (icône et texte) de chaque élément */
+}
+
+/* Espacement pour le groupe "Accueil" à "Admin" (et maintenant Messages, Chat) */
+.nav-item-spaced {
+  margin-right: 15px !important; /* Espacement entre les icônes du premier groupe */
+}
+
+/* Espacement pour le séparateur */
+.nav-divider {
+  margin-left: 25px !important; /* Plus d'espace avant le séparateur */
+  margin-right: 25px !important; /* Plus d'espace après le séparateur */
+  color: var(--nav-divider-color) !important;
+  font-size: 20px;
+  font-weight: 300;
+  opacity: 0.5;
+}
+
+/* Espacement pour les éléments après le séparateur (Notifications, Mode, Déconnexion) */
+.navbar-nav .nav-item:not(.nav-item-spaced):not(:last-child) {
+    margin-right: 15px; /* Espacement entre Notifications, Mode, Déconnexion */
+}
+
+.nav-link {
+  color: var(--nav-link-color) !important;
+}
+.nav-link:hover {
+  color: var(--nav-link-hover-color) !important;
+}
+.nav-link svg {
+  color: var(--nav-link-color) !important;
+}
+.nav-link:hover svg {
+  color: var(--nav-link-hover-color) !important;
+}
+
+
+/* Le dernier élément n'a pas de marge à droite par défaut */
+
+/* Masquer et faire apparaître les noms des icônes de la navbar */
+.navbar-nav .nav-item .nav-text.small {
+  opacity: 0; /* Masqué par défaut */
+  max-height: 0; /* Réduit la hauteur pour ne pas prendre d'espace */
+  overflow: hidden; /* Cache le contenu qui dépasse */
+  transition: opacity 0.3s ease, max-height 0.3s ease, transform 0.3s ease; /* Animation fluide */
+  transform: translateY(5px); /* Démarre légèrement en dessous pour un effet de glissement */
+  pointer-events: none; /* Empêche le texte masqué de bloquer les événements de la souris */
+  white-space: nowrap; /* Empêche le texte de passer à la ligne */
+}
+
+/* Afficher le nom de l'icône au survol ou si l'élément est actif */
+.navbar-nav .nav-item .nav-link:hover .nav-text.small,
+.navbar-nav .nav-item .nav-link.active .nav-text.small {
+  opacity: 1; /* Rendu visible */
+  max-height: 20px; /* Hauteur suffisante pour afficher le texte */
+  transform: translateY(0); /* Retour à la position normale */
+  pointer-events: auto; /* Permet les événements de la souris sur le texte */
+}
+
+/* Style des boutons sans texte */
+.nav-icon-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.nav-icon-btn:hover {
+  background-color: rgba(13, 110, 253, 0.08);
+  transform: scale(1.05);
+}
+
+/* Séparateur */
+.nav-icon-btn {
+  color: var(--nav-link-color) !important;
+}
+.nav-icon-btn:hover {
+  color: var(--nav-link-hover-color) !important;
+  background-color: rgba(13, 110, 253, 0.15) !important;
+}
+
+.navbar-toggler svg {
+  stroke: var(--nav-link-color) !important;
+}
+
+/* Correction du bouton hamburger pour mobile */
+.navbar-toggler {
+  border: none !important;
+  padding: 8px !important;
+}
+.navbar-toggler:focus {
+  box-shadow: none !important;
+}
+.navbar-toggler-icon {
+  background-image: none !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Ajustement des marges pour la page */
+.page-shell {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding-left: 15px !important;
+  padding-right: 15px !important;
+}
+
+/* Ajustement des marges pour le header */
+.app-header .container-fluid {
+  padding-left: 12px !important;
+  padding-right: 12px !important;
+}
+
+/* Responsive pour les petits écrans */
+@media (max-width: 768px) {
+  .page-shell {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+  .app-header .container-fluid {
+    padding-left: 6px !important;
+    padding-right: 6px !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .page-shell {
+    padding-left: 6px !important;
+    padding-right: 6px !important;
+  }
+}
+
+/* Ajustement pour les grands écrans */
+@media (min-width: 1400px) {
+  .page-shell {
+    padding-left: 39px !important;
+    padding-right: 39px !important;
+  }
+}
+
+/* Styles pour les cartes */
+.card {
+  background-color: var(--card-bg) !important;
+  border-color: var(--card-border-color) !important;
+  color: var(--card-color) !important;
+}
+.card .text-muted {
+  color: var(--text-muted-color) !important;
+}
+
+/* Styles pour les cartes d'authentification */
+.auth-card {
+    background: var(--auth-card-bg) !important;
+    border-color: var(--auth-card-border-color) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+/* Theme toggle button icons */
+/* Par défaut (thème clair), on affiche l'icône de la lune pour passer au thème sombre */
+#themeToggle .moon-icon { display: block; }
+#themeToggle .sun-icon { display: none; }
+/* En thème sombre, on affiche l'icône du soleil pour passer au thème clair */
+:root[data-theme="dark"] #themeToggle .moon-icon { display: none; }
+:root[data-theme="dark"] #themeToggle .sun-icon { display: block; }
+
+/* Style des cartes du dashboard */
+.dashboard-stat {
+  background-color: var(--dashboard-stat-bg) !important;
+  border: 1px solid var(--dashboard-stat-border-color) !important;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.dashboard-stat:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.1) !important;
+  border-color: #0d6efd;
+}
+.stat-icon svg {
+  color: var(--stat-icon-color) !important;
+  stroke: currentColor;
+}
+
+/* Bouton de chat flottant */
+body .chat-float-btn {
+  position: fixed;
+  bottom: 25px;
+  right: 25px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%; /* Rendu parfaitement rond */
+  background-color: var(--navbar-bg); /* Fond semi-transparent comme la navbar */
+  backdrop-filter: blur(10px); /* Effet de flou */
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--auth-card-border-color); /* Bordure subtile pour la délimitation */
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1); /* Ombre neutre */
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 1090; /* Au-dessus de tout, y compris les tooltips Bootstrap (1080) */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.chat-float-btn:hover {
+  transform: translateY(-4px) scale(1.05); /* Effet de "pop" au survol */
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  background-color: var(--auth-card-bg); /* Légèrement plus opaque au survol */
+}
+.chat-float-btn:active {
+  transform: scale(0.95);
+}
+.chat-float-btn svg {
+  width: 26px;
+  height: 26px;
+  stroke: var(--nav-link-color); /* Couleur de l'icône qui s'adapte au thème */
+}
+
+.icon-badge-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-badge-wrapper .chat-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  transform: translate(25%, -25%); 
+  background: var(--danger-color);
+  color: var(--white-color);
+  border-radius: 50%;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  font-size: 10px; 
+  font-weight: 700;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+}
+
+.chat-badge.pulse {
+  animation: pulse-badge 2s infinite;
+}
+
+.chat-badge.nav-visible {
+  display: flex;
+}
+
+@keyframes pulse-badge {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+/* Classe simple pour l'état "pulsation", contrôlée par JavaScript. */
+/* La transition existante sur .chat-float-btn rendra le changement de couleur fluide. */
+.chat-float-btn.is-pulsing {
+  background-color: rgba(13, 110, 253, 0.3);
+}
+
+body .chat-panel {
+  position: fixed;
+  bottom: 90px; /* Ajusté pour le bouton (25px + 56px + 9px) */
+  top: 25px; /* Positionne le panneau à 25px du haut de l'écran */
+  right: 25px;
+  width: 350px; /* Un peu plus étroit */
+  max-width: calc(100vw - 50px);
+  height: calc(100vh - 115px); /* 100vh - bottom (90px) - top (25px) */
+  min-height: 200px; /* Hauteur minimale pour les petits écrans */
+  border-radius: 12px; /* Coins plus nets */
+  box-shadow: 0 10px 40px rgba(0,0,0,0.15); /* Ombre plus douce */
+  z-index: 1089; /* Juste en dessous du bouton, mais au-dessus du reste */
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideUp 0.3s ease;
+}
+.chat-panel.open {
+  display: flex;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.chat-panel-header {
+  background: linear-gradient(135deg, #0d6efd, #0a58ca);
+  color: white;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+.chat-panel-header h6 {
+  margin: 0;
+  font-weight: 600;
+}
+.chat-panel-close {
+  background: none;
+  border: none;
+  color: var(--white-color);
+  font-size: 20px;
+  cursor: pointer;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+  padding: 0 4px;
+}
+.chat-panel-close:hover {
+  opacity: 1;
+}
+.chat-panel-body {
+  padding: 20px;
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+.chat-message {
+  margin-bottom: 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  max-width: 85%;
+  word-wrap: break-word;
+  font-size: 14px;
+}
+.chat-message.received {
+  background: white;
+  align-self: flex-start;
+  border-bottom-left-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+.chat-message.sent {
+  background: #0d6efd;
+  color: var(--white-color);
+  align-self: flex-end;
+  border-bottom-right-radius: 4px;
+  margin-left: auto;
+}
+.chat-panel-footer {
+  padding: 12px 16px;
+  border-top: 1px solid #e9ecef;
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.chat-panel-footer input {
+  flex: 1;
+  border: 1px solid #dee2e6;
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.chat-panel-footer input:focus {
+  border-color: #0d6efd;
+}
+.chat-panel-footer button {
+  background: #0d6efd;
+  color: var(--white-color);
+  border: none;
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+.chat-panel-footer button:hover {
+  background: #0a58ca;
+}
+
+.chat-panel {
+  background: var(--chat-panel-bg);
+}
+.chat-panel-body {
+  background: var(--chat-panel-body-bg);
+  /* Padding déjà défini plus haut, mais s'assurer qu'il est appliqué */
+  padding: 20px; 
+}
+.chat-message.received {
+  background: var(--chat-message-received-bg);
+  color: var(--chat-message-received-color);
+}
+.chat-panel-footer {
+  background: var(--chat-panel-footer-bg);
+  border-top-color: var(--chat-panel-footer-border-color);
+  /* Padding déjà défini plus haut, mais s'assurer qu'il est appliqué */
+  padding: 12px 16px; 
+}
+.chat-panel-footer input {
+  background: var(--chat-input-bg);
+  border-color: var(--chat-input-border-color);
+  color: var(--chat-input-color);
+}
+.chat-panel-footer input::placeholder {
+  color: var(--chat-input-placeholder-color);
+}
+ 
+@media (max-width: 576px) {
+  .chat-float-btn {
+    bottom: 20px; /* Conserve une bonne marge */
+    right: 20px; /* Conserve une bonne marge */
+    width: 54px;
+    height: 54px;
+  }
+  .chat-float-btn svg {
+    width: 24px;
+    height: 24px;
+  }
+  .chat-panel {
+    bottom: 85px; /* 20px + 54px + 11px */
+    top: 15px; /* Ajustement pour mobile */
+    right: 15px;
+    width: calc(100vw - 30px);
+    height: calc(100vh - 100px); /* 100vh - bottom (85px) - top (15px) */
+  }
+}
+
+/* Styles des liens de navigation actifs */
+.nav-link.active {
+  color: #0d6efd !important;
+}
+.nav-link.active svg {
+  color: #0d6efd !important;
+}
+
+/* Styles pour l'avatar dans la barre de navigation */
+.navbar-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* =================================
+   Styles pour la page de profil
+==================================== */
+
+.profile-avatar-wrapper {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 1.5rem auto;
+}
+
+.profile-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid var(--bs-card-bg);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.upload-label {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background-color: var(--text-muted-color);
+  color: white;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: 2px solid var(--bs-card-bg);
+  transition: transform 0.2s ease;
+}
+
+.upload-label:hover {
+  transform: scale(1.1);
+}
+
+#avatarUpload { display: none; }
+
+.navbar-avatar-placeholder {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  background-color: var(--bs-primary);
+  color: white;
+  font-size: 1rem;
+}
+
+/* =================================
+   Styles pour la page de Chat
+==================================== */
+
+/* Conteneur principal de la page de chat */
+.chat-page-container {
+    height: calc(100vh - 70px - 3rem); /* Hauteur pleine moins la navbar (70px) et le padding vertical du conteneur (py-4 -> 3rem) */
+    min-height: 500px;
+    display: flex;
+    gap: 1rem;
+}
+
+/* Panneau de gauche : liste des conversations */
+.chat-sidebar {
+    flex: 0 0 350px;
+    display: flex;
+    flex-direction: column;
+    border-radius: 0.75rem !important;
+    /* Ajout des styles de la carte directement ici pour garantir le theming */
+    background-color: var(--card-bg) !important;
+    border: 1px solid var(--card-border-color) !important;
+    overflow: hidden;
+}
+
+.chat-sidebar .card-header {
+    font-weight: 600;
+}
+
+#user-list {
+    overflow-y: auto;
+}
+
+#user-list .list-group-item {
+    border: none;
+    padding: 0.85rem 1.25rem;
+    transition: background-color 0.2s ease;
+    cursor: pointer;
+}
+
+#user-list .list-group-item.active {
+    background-color: var(--bs-primary) !important;
+    color: white !important;
+}
+
+#user-list .list-group-item.active .text-muted {
+    color: rgba(255, 255, 255, 0.75) !important;
+}
+
+#user-list .list-group-item:not(.active):hover {
+    background-color: var(--bs-tertiary-bg);
+}
+
+/* Panneau de droite : fenêtre de chat */
+.chat-main {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    border-radius: 0.75rem !important;
+    /* Ajout des styles de la carte directement ici pour garantir le theming */
+    background-color: var(--card-bg) !important;
+    border: 1px solid var(--card-border-color) !important;
+    overflow: hidden;
+}
+
+#chat-window .card-header {
+    font-weight: 600;
+}
+
+#message-container {
+    flex-grow: 1;
+    padding: 1.5rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+/* Bulles de message */
+.chat-message {
+    padding: 0.75rem 1.1rem;
+    border-radius: 1.25rem; 
+    max-width: 75%;
+    line-height: 1.4;
+    animation: message-fade-in 0.3s ease-out;
+    word-wrap: break-word;
+}
+.chat-message.sent {
+    background-color: var(--bs-primary);
+    color: var(--white-color);
+    align-self: flex-end;
+    border-bottom-right-radius: 0.375rem; /* Effet "queue" */
+}
+
+.chat-message.received {
+    background-color: var(--bs-tertiary-bg);
+    color: var(--bs-body-color);
+    align-self: flex-start;
+    border-bottom-left-radius: 0.375rem; /* Effet "queue" */
+}
+
+/* Séparateur de date dans le chat */
+.date-separator {
+    text-align: center;
+    margin: 1rem auto;
+    padding: 0.25rem 0.75rem;
+    background-color: var(--bs-tertiary-bg);
+    color: var(--bs-secondary-color);
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    user-select: none;
+}
+
+/* Conteneur pour l'heure et le statut de lecture */
+.message-meta-container {
+    float: right;
+    clear: both;
+    margin-top: 4px;
+    margin-left: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    user-select: none; /* Empêche la sélection du texte de l'heure */
+}
+.chat-message.sent .message-meta-container {
+    color: rgba(255, 255, 255, 0.75);
+}
+.chat-message.received .message-meta-container {
+    color: var(--text-muted-color);
+    float: right; /* Toujours à droite, même pour les messages reçus */
+}
+
+/* Styles pour la confirmation de lecture (double coche), maintenant dans le conteneur meta */
+.message-status {
+    width: 18px; /* Légèrement plus grand */
+    height: 12px; /* Légèrement plus grand */
+    flex-shrink: 0;
+    margin-bottom: 3px; /* Ajustement vertical */
+    position: relative; /* Nécessaire pour les pseudo-éléments */
+}
+
+.message-status::before, .message-status::after {
+    content: '';
+    position: absolute;
+    width: 4px; /* Plus large */
+    height: 9px; /* Plus haut */
+    border-right: 2.5px solid; /* Plus épais */
+    border-bottom: 2.5px solid; /* Plus épais */
+    transform: rotate(45deg);
+    border-radius: 2px; /* Coins légèrement arrondis pour un look plus doux */
+    color: inherit; /* Hérite de la couleur du conteneur meta */
+    transition: color 0.3s ease; /* Animation sur le changement de couleur */
+}
+
+/* Coche unique pour "envoyé" */
+.message-status[data-status="sent"]::before {
+    bottom: 0;
+    right: 7px; /* Position ajustée */
+}
+.message-status[data-status="sent"]::after {
+    display: none;
+}
+
+/* Double coche pour "lu" */
+.message-status[data-status="read"]::before, .message-status[data-status="read"]::after {
+    color: #00c6ff; /* Un bleu plus vibrant et moderne */
+}
+.message-status[data-status="read"]::before { bottom: 0; right: 10px; } /* Position de la première coche */
+.message-status[data-status="read"]::after { display: block; bottom: 0; right: 4px; } /* Position de la deuxième coche */
+
+@keyframes message-fade-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Pied de page du chat : formulaire d'envoi */
+#message-input {
+    border-radius: 2rem;
+    padding: 0.6rem 1.2rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+#message-form button {
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+}
+
+/* Ajout d'un espacement à droite sur le pied de page du chat principal
+   pour éviter que le bouton flottant ne le masque. */
+.chat-main .card-footer {
+    padding-right: 85px; /* 56px (largeur bouton flottant) + 25px (marge) + marge de sécurité */
+}
+
+/* Placeholder quand aucune conversation n'est active */
+#chat-placeholder.card {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    background-color: transparent !important;
+    border: 2px dashed var(--bs-border-color) !important;
+}
+
+/* Statut de l'utilisateur dans l'en-tête du chat */
+#chat-window .card-header {
+    display: flex;
+    align-items: center;
+}
+
+#chat-header-title {
+    line-height: 1.2;
+}
+
+.user-status {
+    font-size: 0.8rem;
+    font-weight: 400;
+    transition: color 0.3s ease;
+}
+.user-status.online {
+    color: var(--success-color);
+}
+.user-status.offline {
+    color: var(--text-muted-color);
+}
+
+/* =================================
+   Responsive Styles for Chat Page
+==================================== */
+
+/* Pour tablettes et en dessous */
+@media (max-width: 991.98px) {
+    .chat-page-container {
+        position: relative;
+        overflow-x: hidden;
+        height: calc(100vh - 70px - 2rem); /* Hauteur de la fenêtre visible */
+        gap: 0;
+    }
+
+    .chat-sidebar, .chat-main {
+        width: 100%;
+        height: 100%;
+        flex: 0 0 100%;
+        transition: transform 0.3s ease-in-out;
+        position: absolute;
+        top: 0;
+    }
+
+    .chat-sidebar {
+        left: 0;
+        z-index: 2;
+    }
+
+    .chat-main {
+        left: 100%;
+        z-index: 3;
+        display: flex !important;
+        flex-direction: column;
+    }
+
+    /* Logique de "glissement" */
+    .chat-page-container.show-chat .chat-sidebar {
+        transform: translateX(-100%);
+    }
+
+    .chat-page-container.show-chat .chat-main {
+        transform: translateX(-100%);
+    }
+}
+
+/* Pour mobile, on réduit la taille de la police pour une meilleure lisibilité */
+@media (max-width: 576px) {
+    #message-container {
+        padding: 1rem;
+    }
+}
+
+/* =================================
+   Styles pour le Widget de Chat Amélioré
+==================================== */
+
+.chat-panel-back {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 22px;
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+    padding: 0 10px 0 0;
+    line-height: 1;
+}
+.chat-panel-back:hover {
+    opacity: 1;
+}
+
+.chat-panel-header h6 {
+    flex-grow: 1;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2; /* Pour le statut */
+}
+
+#chat-widget-user-list {
+    padding: 0;
+    background-color: var(--bs-body-bg);
+}
+
+#chat-widget-user-list .list-group-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    border: none;
+    border-bottom: 1px solid var(--bs-border-color-translucent);
+}
+
+#chat-widget-user-list .list-group-item:last-child {
+    border-bottom: none;
+}
+
+#chat-widget-user-list .list-group-item:hover {
+    background-color: var(--bs-tertiary-bg);
+}
+
+#chat-widget-user-list img {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+#chat-widget-user-list .user-info {
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+#chat-widget-user-list .user-name {
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 2px;
+}
+
+#chat-widget-user-list .last-message {
+    font-size: 0.85rem;
+    color: var(--bs-secondary-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#chat-widget-user-list .unread-badge {
+    background-color: var(--primary-color);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: bold;
+    border-radius: 50%;
+    min-width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+    flex-shrink: 0;
+}
+
+/* Conteneur pour chaque "écran" du widget (liste ou conversation) */
+.chat-widget-screen {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+}
+
+.list-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+/* Conteneur pour chaque "écran" du widget (liste ou conversation) */
+.chat-widget-screen {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+}
+
+.widget-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+/* =================================
+   Indicateur de statut en ligne
+==================================== */
+
+.avatar-container {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.avatar-container.online::after {
+    content: '';
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 10px;
+    height: 10px; 
+    background-color: var(--success-color); /* Vert */
+    border: 2px solid var(--online-status-border-color);
+    border-radius: 50%;
+}
+
+/* =================================================================== */
+/* Correctif de Thème Global pour les Conteneurs de Page Principaux
+/* =================================================================== */
+/* Applique un style de "carte" aux conteneurs principaux sur des pages
+   comme "Communication", "Admin", etc., pour qu'ils réagissent au thème.
+   NOTE: Si une page ne réagit toujours pas, trouvez la classe de son
+   conteneur principal avec l'outil "Inspecter" et ajoutez-la ici. */
+.communication-container, .admin-container, .stats-container {
+    background-color: var(--card-bg);
+    border: 1px solid var(--card-border-color);
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+}
+
+/* =================================================================== */
+/* Correctif de Thème Global (Version 2)
+/* =================================================================== */
+/* Cette classe peut être ajoutée à n'importe quel conteneur principal
+   pour lui donner un fond qui réagit au thème. */
+.themed-container {
+    background-color: var(--card-bg);
+    border: 1px solid var(--card-border-color);
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+}
+
+/* =================================================================== */
+/* Styles pour la page de Communication
+/* =================================================================== */
+
+/* Layout pour la page de communication pour occuper toute la hauteur */
+.communication-layout {
+    /* Hauteur de la fenêtre moins la navbar (70px) et le padding vertical du conteneur (py-4 -> 1.5rem * 2) */
+    height: calc(100vh - 70px - 3rem);
+    min-height: 500px; /* Hauteur minimale pour éviter que le layout ne soit trop écrasé */
+}
+
+.communication-layout .card {
+    display: flex;
+    flex-direction: column;
+}
+
+.communication-layout .card-body {
+    overflow-y: auto;
+}
+
+/* Style pour la liste des communications avec un accordéon Bootstrap */
+.communication-list .accordion-item {
+    background-color: var(--card-bg);
+    border: 1px solid var(--card-border-color);
+    color: var(--card-color);
+    margin-bottom: 0.5rem;
+    border-radius: 0.5rem !important;
+    overflow: hidden; /* Pour que les coins arrondis s'appliquent bien */
+}
+
+.communication-list .accordion-button {
+    background-color: transparent;
+    color: var(--card-color);
+}
+
+.communication-list .accordion-button:not(.collapsed) {
+    background-color: rgba(var(--bs-primary-rgb), 0.1);
+    color: var(--primary-color);
+    box-shadow: none;
+}
+
+.communication-list .accordion-button:focus {
+    box-shadow: none;
+    border-color: transparent;
+}
+
+.communication-list .accordion-body {
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.communication-actions {
+    border-top: 1px solid var(--card-border-color);
+    padding-top: 1rem;
+    margin-top: 1rem;
+    text-align: right;
+}
+
+/* En-tête de l'accordéon pour afficher le sujet, l'expéditeur et la date */
+.communication-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding-right: 1.5rem; /* Espace pour la flèche de l'accordéon */
+}
+
+.communication-subject {
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-right: 1rem;
+}
+
+.communication-meta {
+    font-size: 0.8rem;
+    color: var(--text-muted-color);
+    font-weight: 400;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.communication-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-left: 8px;
+    margin-right: 4px;
+    vertical-align: middle;
+}
+
+.sender-name {
+    font-weight: 500;
+}
+
+/* Améliorations pour Select2 avec le thème sombre */
+[data-theme="dark"] .select2-container--bootstrap-5 .select2-dropdown {
+    background-color: var(--card-bg);
+    border-color: var(--card-border-color);
+}
+[data-theme="dark"] .select2-container--bootstrap-5 .select2-selection {
+    background-color: var(--chat-input-bg);
+    border-color: var(--chat-input-border-color);
+    color: var(--body-color);
+}
+[data-theme="dark"] .select2-container--bootstrap-5 .select2-selection .select2-selection__rendered {
+    color: var(--body-color);
+}
+[data-theme="dark"] .select2-container--bootstrap-5 .select2-search--dropdown .select2-search__field {
+    background-color: var(--bs-body-bg);
+    color: var(--body-color);
+    border-color: var(--chat-input-border-color);
+}
+[data-theme="dark"] .select2-container--bootstrap-5 .select2-results__option--highlighted {
+    background-color: var(--bs-primary) !important;
+}
+[data-theme="dark"] .select2-results__option {
+    color: var(--body-color);
+}
+[data-theme="dark"] .select2-results__group {
+    color: var(--text-muted-color);
+}
+
+/* Rendre les lignes du tableau des élèves cliquables */
+.student-row {
+    cursor: pointer;
+}
