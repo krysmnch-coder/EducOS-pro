@@ -24,19 +24,24 @@ const socketIo = require('socket.io');
 const { ROLES } = require('./constants');
 const notificationModel = require('./src/models/notificationModel');
 const userModel = require('./src/models/userModel');
-const db = require('./src/models/db'); // Importer la connexion à la base de données
+const db = require('./src/models/db');
 const communicationModel = require('./src/models/communicationModel');
+const { createClient } = require("redis");
+const { createAdapter } = require("@socket.io/redis-adapter");
 
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
-const onlineUsers = new Set();
 const PORT = process.env.PORT || 5000;
 
 // Vérification critique des secrets au démarrage
 if (!process.env.SESSION_SECRET) {
   throw new Error('FATAL ERROR: SESSION_SECRET is not defined in environment variables.');
 }
+
+// Initialisation des clients Redis (à connecter dans startServer)
+const pubClient = createClient({ url: process.env.REDIS_URL || 'redis://localhost:6379' });
+const subClient = pubClient.duplicate();
 
 // Passport initialization
 initializePassport(passport);
@@ -184,15 +189,17 @@ authNamespace.use((socket, next) => {
 });
 
 // Gestion des connexions Socket.IO
-authNamespace.on('connection', (socket) => {
-  console.log(`Utilisateur connecté: ${socket.user.name} (${socket.userId})`);
-  onlineUsers.add(socket.userId.toString());
-  // Diffuser la liste mise à jour des utilisateurs en ligne à tout le monde
-  authNamespace.emit('onlineUsersUpdate', Array.from(onlineUsers));
-  
-  // Rejoindre sa propre room pour recevoir ses messages
-  socket.join(`user_${socket.userId}`);
-
+authNamespace.on('connection', (socket) => { // Note: les gestionnaires à l'intérieur sont maintenant asynchrones
+  (async () => {
+    console.log(`Utilisateur connecté: ${socket.user.name} (${socket.userId})`);
+    await pubClient.sAdd('online_users', socket.userId.toString());
+    
+    // Diffuser la liste mise à jour des utilisateurs en ligne à tout le monde
+    const onlineUserIds = await pubClient.sMembers('online_users');
+    authNamespace.emit('onlineUsersUpdate', onlineUserIds);
+    
+    socket.join(`user_${socket.userId}`); // Rejoindre sa propre room pour recevoir ses messages
+  })();
   // Envoyer un message (avec confirmation)
   socket.on('sendMessage', async (data, callback) => {
     try {
@@ -223,35 +230,37 @@ authNamespace.on('connection', (socket) => {
       }
       // --- FIN DE LA VÉRIFICATION ---
       
-      // 1. Sauvegarder dans la base de données
-      const newMessage = await chatModel.sendMessage(socket.userId, receiverId, message);
-      
-      // 2. Envoyer au destinataire en temps réel
-      authNamespace.to(`user_${receiverId}`).emit('newMessage', {
-        message: newMessage,
-        senderId: socket.userId,
-        senderName: socket.user.name,
-        timestamp: new Date()
-      });
-      
-      // 3. Confirmer à l'expéditeur que tout s'est bien passé
-      if (typeof callback === 'function') {
-        callback({
-          success: true,
-          message: newMessage
-        });
-      }
+      // Utilisation d'une transaction pour garantir la cohérence des données
+      const newMessage = await db.transaction(async (trx) => {
+        // 1. Sauvegarder dans la base de données
+        const savedMessage = await chatModel.sendMessage(socket.userId, receiverId, message, trx);
 
-      // 4. Tâches post-envoi (notifications, mise à jour du badge)
-      try {
-        await notificationModel.createNotification({ // Ajout de 'await' pour une meilleure gestion d'erreur
+        // 2. Créer la notification associée
+        await notificationModel.createNotification({
           user_id: parseInt(receiverId),
           user_role: 'all',
           type: 'message',
           title: `Nouveau message de ${socket.user.name}`,
           body: message.trim().substring(0, 100),
           link: '/chat'
-        });
+        }, trx);
+
+        return savedMessage;
+      });
+
+      // 3. Envoyer au destinataire en temps réel (après succès de la transaction)
+      authNamespace.to(`user_${receiverId}`).emit('newMessage', {
+        message: newMessage,
+        senderId: socket.userId,
+        senderName: socket.user.name,
+        timestamp: new Date() // Le timestamp du message de la DB serait plus précis
+      });
+
+      // 4. Confirmer à l'expéditeur
+      if (typeof callback === 'function') callback({ success: true, message: newMessage });
+
+      // 5. Mettre à jour le badge de chat non lu pour le destinataire
+      try {
         const unreadCount = await chatModel.getUnreadCount(receiverId);
         authNamespace.to(`user_${receiverId}`).emit('unreadChatUpdate', {
           count: unreadCount
@@ -259,6 +268,7 @@ authNamespace.on('connection', (socket) => {
       } catch (postSendError) {
         console.error('Erreur post-envoi (notification/badge):', postSendError);
       }
+
     } catch (error) {
       console.error('Erreur sendMessage:', error);
       if (typeof callback === 'function') callback({ success: false, error: 'Impossible d\'enregistrer le message.' });
@@ -296,10 +306,11 @@ authNamespace.on('connection', (socket) => {
   });
 
   // Déconnexion
-  socket.on('disconnect', () => {
+  socket.on('disconnect', async () => {
     console.log(`Utilisateur déconnecté: ${socket.user.name} (${socket.userId})`);
-    onlineUsers.delete(socket.userId.toString());
-    authNamespace.emit('onlineUsersUpdate', Array.from(onlineUsers));
+    await pubClient.sRem('online_users', socket.userId.toString());
+    const onlineUserIds = await pubClient.sMembers('online_users');
+    authNamespace.emit('onlineUsersUpdate', onlineUserIds);
   });
 });
 
@@ -314,10 +325,22 @@ app.set('broadcastDashboardStats', broadcastDashboardStats);
  * est prête avant de lancer le serveur.
  */
 async function startServer() {
-  // 1. Initialise la base de données (crée les tables si elles n'existent pas)
+  // 1. Connecter les clients Redis et configurer l'adaptateur
+  try {
+    await Promise.all([pubClient.connect(), subClient.connect()]);
+    io.adapter(createAdapter(pubClient, subClient));
+    console.log('Adaptateur Redis pour Socket.IO configuré avec succès.');
+  } catch (err) {
+    console.error('Erreur de connexion à Redis. Le serveur va démarrer sans scalabilité temps réel.', err);
+    // Le serveur peut continuer, mais ne sera pas scalable pour les sockets.
+  }
+  pubClient.on('error', (err) => console.error('Erreur client Redis (Pub):', err));
+  subClient.on('error', (err) => console.error('Erreur client Redis (Sub):', err));
+
+  // 2. Initialise la base de données (crée les tables si elles n'existent pas)
   await initializeDatabase();
 
-  // 2. Démarre le serveur HTTP
+  // 3. Démarre le serveur HTTP
   server.listen(PORT, () => {
     console.log(`Serveur démarré sur http://localhost:${PORT}`);
   });
@@ -343,10 +366,12 @@ const gracefulShutdown = (signal, callback) => {
         clearTimeout(timeout); // L'arrêt a réussi, on annule le timeout
         console.log('Serveur HTTP arrêté.');
         try {
+            await Promise.all([pubClient.quit(), subClient.quit()]);
+            console.log('Connexions Redis fermées.');
             await db.destroy();
             console.log('Connexion à la base de données fermée.');
         } catch (err) {
-            console.error('Erreur lors de la fermeture de la base de données:', err.message);
+            console.error('Erreur lors de la fermeture des connexions:', err.message);
         } finally {
             callback();
         }

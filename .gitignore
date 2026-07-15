@@ -1,0 +1,45 @@
+# Fichiers de dépendances et de build
+/node_modules
+/dist
+/build
+
+# Fichiers d'environnement - NE JAMAIS COMMITTER CES FICHIERS
+.env
+.env.*
+!.env.example
+
+# Fichiers de logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Données d'exécution
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Répertoires de couverture de test
+coverage
+.nyc_output
+
+# Fichiers de configuration d'éditeurs
+.idea
+.vscode
+*.sublime-project
+*.sublime-workspace
+
+# Fichiers générés par le système d'exploitation
+.DS_Store
+Thumbs.db
+
+# Bases de données de développement
+# Celles-ci doivent être sur le disque du serveur de production, pas dans le repo.
+/dev.sqlite3
+/database.sqlite
+
+# Fichiers uploadés par les utilisateurs
+# Ceux-ci doivent être stockés sur un service de stockage persistant (ex: S3, Render Disks).
+/uploads/
