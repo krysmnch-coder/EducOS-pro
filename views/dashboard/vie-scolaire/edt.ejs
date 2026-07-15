@@ -1,0 +1,235 @@
+<%- include('../../partials/header-vs') %>
+
+<style>
+    .edt-grid { display: grid; grid-template-columns: 100px repeat(6, 1fr); gap: 2px; background: #e0e0e0; border-radius: 12px; overflow-x: auto; font-size: 0.75rem; min-width: 700px; }
+    .edt-cell { background: white; padding: 6px; min-height: 60px; position: relative; }
+    .edt-header { background: #002FA7; color: white; font-weight: 700; text-align: center; padding: 10px 4px; font-size: 0.78rem; }
+    .edt-time { background: #f8f9fa; font-weight: 600; text-align: center; display: flex; align-items: center; justify-content: center; color: #555; font-size: 0.7rem; flex-direction: column; }
+    .edt-cours { background: #f0f4ff; border-left: 3px solid #002FA7; padding: 5px 6px; border-radius: 4px; margin: 2px 0; font-size: 0.68rem; position: relative; }
+    .edt-cours .delete-cours { position: absolute; top: 2px; right: 4px; cursor: pointer; color: #e74c3c; font-weight: 700; font-size: 14px; display: none; z-index: 5; }
+    .edt-cours:hover .delete-cours { display: block; }
+    .edt-add-btn { position: absolute; bottom: 2px; right: 2px; background: #27ae60; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s; line-height: 1; }
+    .edt-cell:hover .edt-add-btn { opacity: 1; }
+    .btn { padding: 10px 18px; border: none; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; font-family: 'Inter', sans-serif; }
+    .btn-primary { background: #002FA7; color: white; }
+    .btn-info { background: #6366f1; color: white; }
+    .btn svg { width: 16px; height: 16px; }
+    .btn-primary svg, .btn-info svg { stroke: white; }
+    .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center; padding: 20px; }
+    .modal.active { display: flex; }
+    .modal-content { background: white; border-radius: 16px; padding: 24px; width: 100%; max-width: 550px; max-height: 85vh; overflow-y: auto; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .close-modal { background: none; border: none; font-size: 1.4rem; cursor: pointer; color: #666; }
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.85rem; color: #333; }
+    .form-control { width: 100%; padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 0.88rem; font-family: 'Inter', sans-serif; }
+    .form-control:focus { border-color: #002FA7; outline: none; }
+    .form-row { display: flex; gap: 12px; }
+    .form-row .form-group { flex: 1; }
+    .search-bar { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+    .search-bar select { padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 0.88rem; font-family: 'Inter', sans-serif; }
+    .bulk-btn { margin-top: 8px; }
+    .toast { position: fixed; top: 20px; right: 20px; padding: 14px 20px; border-radius: 10px; color: white; font-weight: 600; z-index: 3000; display: none; }
+    .toast.success { background: #27ae60; }
+    .toast.error { background: #e74c3c; }
+    @media (max-width: 768px) { .edt-grid { font-size: 0.6rem; grid-template-columns: 60px repeat(6, 1fr); min-width: 500px; } }
+</style>
+
+<h2 style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#002FA7" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    Emploi du temps
+</h2>
+
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+    <div class="search-bar" style="margin:0;">
+        <select id="filtreClasseEDT" onchange="loadEDT()"><option value="">Toutes les classes</option></select>
+        <select id="filtreJourEDT" onchange="loadEDT()"><option value="">Tous les jours</option><option>Lundi</option><option>Mardi</option><option>Mercredi</option><option>Jeudi</option><option>Vendredi</option><option>Samedi</option></select>
+    </div>
+    <button class="btn btn-primary" onclick="openModal('edtModal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Ajouter un cours
+    </button>
+</div>
+
+<div style="overflow-x:auto;">
+    <div class="edt-grid" id="edtGrid"><div style="padding:40px;text-align:center;grid-column:1/-1;color:#888;">Chargement...</div></div>
+</div>
+
+<!-- Modal Ajout Cours -->
+<div class="modal" id="edtModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="edtModalTitle">Ajouter un cours</h3>
+            <button class="close-modal" onclick="closeModal('edtModal')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <form onsubmit="return false;">
+            <input type="hidden" id="edtId">
+            <div class="form-row">
+                <div class="form-group"><label>Classe *</label>
+                    <select id="edtClasse" class="form-control" required>
+                        <option value="">Choisir une classe</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Jour *</label>
+                    <select id="edtJour" class="form-control" required>
+                        <option value="">Choisir</option>
+                        <option>Lundi</option><option>Mardi</option><option>Mercredi</option>
+                        <option>Jeudi</option><option>Vendredi</option><option>Samedi</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Heure début *</label><input type="time" id="edtDebut" class="form-control" required></div>
+                <div class="form-group"><label>Heure fin *</label><input type="time" id="edtFin" class="form-control" required></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Matière *</label>
+                    <select id="edtMatiere" class="form-control" required>
+                        <option value="">Choisir</option>
+                        <option>Mathématiques</option><option>Français</option><option>Histoire-Géographie</option>
+                        <option>SVT</option><option>Physique-Chimie</option><option>Anglais</option>
+                        <option>Espagnol</option><option>Allemand</option><option>Philosophie</option>
+                        <option>EPS</option><option>Arts Plastiques</option><option>Musique</option>
+                        <option>Informatique</option><option>Économie</option><option>Autre</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Salle</label><input type="text" id="edtSalle" class="form-control"></div>
+            </div>
+            <div class="form-group"><label>Professeur</label><select id="edtProfId" class="form-control"><option value="">Aucun</option></select></div>
+            <button class="btn btn-primary" onclick="saveEDT()" style="width:100%;margin-bottom:8px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
+                Ajouter ce cours
+            </button>
+            <button class="btn btn-info" onclick="remplirTouteClasse()" style="width:100%;">
+                📅 Remplir pour tous les jours (Lun-Sam)
+            </button>
+        </form>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    var classesList = [];
+
+    async function loadEDT() {
+        var classe = document.getElementById('filtreClasseEDT').value;
+        var jour = document.getElementById('filtreJourEDT').value;
+        var r = await fetch('/vie-scolaire/api/edt?classe=' + encodeURIComponent(classe) + '&jour=' + encodeURIComponent(jour));
+        var edt = await r.json();
+        
+        var jours = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+        var plages = [{d:'07:00',f:'08:00'},{d:'08:00',f:'09:00'},{d:'09:00',f:'10:00'},{d:'10:00',f:'11:00'},{d:'11:00',f:'12:00'},{d:'12:00',f:'13:00'},{d:'13:00',f:'14:00'},{d:'14:00',f:'15:00'},{d:'15:00',f:'16:00'},{d:'16:00',f:'17:00'},{d:'17:00',f:'18:00'}];
+        
+        var html = '<div class="edt-header">Heure</div>';
+        jours.forEach(function(j) { html += '<div class="edt-header">' + j + '</div>'; });
+        
+        plages.forEach(function(p) {
+            html += '<div class="edt-time"><span>' + p.d + '</span><span>' + p.f + '</span></div>';
+            jours.forEach(function(j) {
+                var cours = edt.filter(function(e) { return e.jour === j && e.heure_debut >= p.d + ':00' && e.heure_debut < p.f + ':00'; });
+                html += '<div class="edt-cell">';
+                cours.forEach(function(c) {
+                    html += '<div class="edt-cours"><strong>' + c.matiere + '</strong> ' + (c.classe||'') + '<br><small>' + (c.salle||'') + ' ' + (c.prof_nom||'') + '</small><span class="delete-cours" onclick="event.stopPropagation();deleteEDT(' + c.id + ')">✕</span></div>';
+                });
+                html += '<button class="edt-add-btn" onclick="event.stopPropagation();quickAddEDT(\'' + j + '\',\'' + p.d + '\',\'' + (classe||'') + '\')">+</button>';
+                html += '</div>';
+            });
+        });
+        document.getElementById('edtGrid').innerHTML = html;
+    }
+
+    function quickAddEDT(jour, debut, classe) {
+        document.getElementById('edtClasse').value = classe || '';
+        document.getElementById('edtJour').value = jour;
+        document.getElementById('edtDebut').value = debut + ':00';
+        document.getElementById('edtFin').value = (parseInt(debut) + 1).toString().padStart(2, '0') + ':00';
+        document.getElementById('edtId').value = '';
+        document.getElementById('edtModalTitle').textContent = 'Ajouter un cours';
+        openModal('edtModal');
+    }
+
+    async function saveEDT() {
+        var data = {
+            classe: document.getElementById('edtClasse').value,
+            jour: document.getElementById('edtJour').value,
+            heure_debut: document.getElementById('edtDebut').value,
+            heure_fin: document.getElementById('edtFin').value,
+            matiere: document.getElementById('edtMatiere').value,
+            prof_id: document.getElementById('edtProfId').value || null,
+            salle: document.getElementById('edtSalle').value
+        };
+        if (!data.classe || !data.jour || !data.heure_debut || !data.heure_fin || !data.matiere) {
+            showToast('Tous les champs sont obligatoires', 'error');
+            return;
+        }
+        var r = await fetch('/vie-scolaire/api/edt', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) });
+        var j = await r.json();
+        showToast(j.message || j.error, r.ok ? 'success' : 'error');
+        if (r.ok) { closeModal('edtModal'); loadEDT(); }
+    }
+
+    async function remplirTouteClasse() {
+        var classe = document.getElementById('edtClasse').value;
+        var debut = document.getElementById('edtDebut').value;
+        var fin = document.getElementById('edtFin').value;
+        var matiere = document.getElementById('edtMatiere').value;
+        var prof = document.getElementById('edtProfId').value;
+        var salle = document.getElementById('edtSalle').value;
+        if (!classe || !debut || !fin || !matiere) {
+            showToast('Remplissez classe, horaires et matière', 'error');
+            return;
+        }
+        if (!confirm('Ajouter ce cours pour Lundi, Mardi, Mercredi, Jeudi, Vendredi et Samedi ?')) return;
+        var r = await fetch('/vie-scolaire/api/edt-bulk', {
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({classe:classe, jours:['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'], heure_debut:debut, heure_fin:fin, matiere:matiere, prof_id:prof||null, salle:salle})
+        });
+        var j = await r.json();
+        showToast(j.message, r.ok ? 'success' : 'error');
+        if (r.ok) { closeModal('edtModal'); loadEDT(); }
+    }
+
+    async function deleteEDT(id) {
+        if (!confirm('Supprimer ce cours ?')) return;
+        await fetch('/vie-scolaire/api/edt/' + id, { method:'DELETE' });
+        loadEDT();
+    }
+
+    function openModal(id) { document.getElementById(id).classList.add('active'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+    function showToast(msg, type) {
+        var t = document.getElementById('toast');
+        t.textContent = msg; t.className = 'toast ' + type; t.style.display = 'block';
+        setTimeout(function() { t.style.display = 'none'; }, 3000);
+    }
+
+    // Charger les classes depuis les élèves inscrits
+    async function loadClasses() {
+        var r = await fetch('/vie-scolaire/api/eleves');
+        var eleves = await r.json();
+        var classes = [];
+        eleves.forEach(function(e) {
+            if (e.classes_assignees && !classes.includes(e.classes_assignees)) {
+                classes.push(e.classes_assignees);
+            }
+        });
+        var opts = '<option value="">Toutes les classes</option>';
+        classes.sort().forEach(function(c) { opts += '<option value="' + c + '">' + c + '</option>'; });
+        document.getElementById('filtreClasseEDT').innerHTML = opts;
+        document.getElementById('edtClasse').innerHTML = '<option value="">Choisir une classe</option>' + classes.map(function(c) { return '<option value="' + c + '">' + c + '</option>'; }).join('');
+    }
+
+    fetch('/vie-scolaire/api/profs').then(r => r.json()).then(p => {
+        document.getElementById('edtProfId').innerHTML = '<option value="">Aucun</option>' + p.map(function(x) { return '<option value="' + x.id + '">' + x.nom + ' ' + x.prenom + '</option>'; }).join('');
+    });
+
+    document.getElementById('edtModal').addEventListener('click', function(e) { if (e.target === this) closeModal('edtModal'); });
+
+    loadClasses();
+    loadEDT();
+</script>
+
+<%- include('../../partials/footer-vs') %>

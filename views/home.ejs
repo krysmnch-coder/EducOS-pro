@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bienvenue sur EducOS-pro</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="body-home">
+    <div class="theme-toggle" id="theme-toggle">
+        <div class="toggle-switch">
+            <span class="toggle-icon sun-icon">☀️</span>
+            <span class="toggle-label">Clair</span>
+            <span class="toggle-icon moon-icon">🌙</span>
+        </div>
+    </div>
+
+    <div class="home-container">
+        <h1>Bienvenue sur EducOS-pro</h1>
+        <div class="buttons">
+            <a href="/auth/login" class="btn btn-primary">Se connecter</a>
+            <a href="/auth/register" class="btn btn-primary">S'inscrire</a>
+        </div>
+    </div>
+
+    <script>
+        // Script pour gérer le mode sombre/clair sur la page d'accueil
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+
+        // Vérifier la préférence de thème sauvegardée
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            body.classList.add('dark-mode');
+        }
+
+        // Basculer le thème au clic
+        themeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            if (body.classList.contains('dark-mode')) {
+                localStorage.setItem('theme', 'dark');
+            } else {
+                localStorage.setItem('theme', 'light');
+            }
+        });
+    </script>
+</body>
+</html>

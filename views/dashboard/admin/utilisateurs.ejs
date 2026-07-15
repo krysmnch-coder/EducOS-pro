@@ -1,0 +1,406 @@
+<%- include('../../partials/header-admin') %>
+
+<style>
+    .btn { padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; font-family: 'Inter', sans-serif; }
+    .btn-primary { background: #002FA7; color: white; }
+    .btn-primary:hover { background: #003fd6; }
+    .btn-danger { background: #e74c3c; color: white; }
+    .btn-danger:hover { background: #c0392b; }
+    .btn-warning { background: #f39c12; color: white; }
+    .btn-success { background: #27ae60; color: white; }
+    .btn-info { background: #6366f1; color: white; }
+    .btn-sm { padding: 6px 10px; font-size: 0.73rem; }
+    .btn svg { width: 14px; height: 14px; stroke: currentColor; }
+    .btn-primary svg, .btn-danger svg, .btn-success svg, .btn-info svg, .btn-warning svg { stroke: white; }
+    .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center; padding: 20px; }
+    .modal.active { display: flex; }
+    .modal-content { background: white; border-radius: 16px; padding: 24px; width: 100%; max-width: 550px; max-height: 85vh; overflow-y: auto; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .close-modal { background: none; border: none; cursor: pointer; color: #666; }
+    .close-modal svg { width: 20px; height: 20px; stroke: #666; }
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.85rem; color: #333; }
+    .form-control { width: 100%; padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 0.88rem; font-family: 'Inter', sans-serif; background: #f8f9fa; }
+    .form-control:focus { border-color: #002FA7; outline: none; background: white; }
+    select.form-control { appearance: none; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23999999' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 10px center; background-size: 16px; padding-right: 32px; cursor: pointer; }
+    .form-row { display: flex; gap: 12px; }
+    .form-row .form-group { flex: 1; }
+    .dynamic-fields { background: #f8f9fa; border-radius: 8px; padding: 14px; margin-top: 8px; border: 1px dashed #d0d0d0; }
+    .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; }
+    .badge-success { background: #d4edda; color: #155724; }
+    .badge-danger { background: #f8d7da; color: #721c24; }
+    .badge-info { background: #d1ecf1; color: #0c5460; }
+    .search-bar { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+    .search-bar input, .search-bar select { padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 0.88rem; font-family: 'Inter', sans-serif; }
+    .search-bar input { flex: 1; min-width: 180px; }
+    .pagination { display: flex; gap: 6px; justify-content: center; margin-top: 16px; }
+    .pagination button { padding: 7px 12px; border: 1px solid #e0e0e0; background: white; border-radius: 6px; cursor: pointer; font-family: 'Inter', sans-serif; }
+    .pagination button.active { background: #002FA7; color: white; border-color: #002FA7; }
+    .table-actions { display: flex; gap: 6px; }
+    .toast { position: fixed; top: 20px; right: 20px; padding: 14px 20px; border-radius: 10px; color: white; font-weight: 600; z-index: 3000; display: none; }
+    .toast.success { background: #27ae60; }
+    .toast.error { background: #e74c3c; }
+    .role-badge { display: inline-flex; align-items: center; gap: 4px; }
+    @media (max-width: 768px) { .form-row { flex-direction: column; } }
+</style>
+
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:10px;">
+    <h2 style="display:flex;align-items:center;gap:10px;">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#002FA7" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Gestion des utilisateurs
+    </h2>
+    <button class="btn btn-primary" onclick="openCreateModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Ajouter un utilisateur
+    </button>
+</div>
+
+<div class="section">
+    <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="🔍 Rechercher par nom, prénom ou email..." onkeyup="loadUsers()">
+        <select id="roleFilter" onchange="loadUsers()">
+            <option value="">Tous les rôles</option>
+            <option value="admin">Administrateur</option>
+            <option value="vie_scolaire">Vie Scolaire</option>
+            <option value="prof">Professeur</option>
+            <option value="parent">Parent</option>
+            <option value="eleve">Élève</option>
+        </select>
+    </div>
+    
+    <div class="table-container">
+        <table class="data-table">
+            <thead><tr><th>ID</th><th>Utilisateur</th><th>Email</th><th>Rôle</th><th>Téléphone</th><th>Statut</th><th>Créé le</th><th>Actions</th></tr></thead>
+            <tbody id="usersTableBody"><tr><td colspan="8">Chargement...</td></tr></tbody>
+        </table>
+    </div>
+    <div class="pagination" id="pagination"></div>
+</div>
+
+<!-- Modal Ajout/Modification -->
+<div class="modal" id="userModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modalTitle">Ajouter un utilisateur</h3>
+            <button class="close-modal" onclick="closeModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <form id="userForm" onsubmit="return false;">
+            <input type="hidden" id="userId">
+            
+            <div class="form-row">
+                <div class="form-group"><label>Nom *</label><input type="text" id="userNom" class="form-control" required></div>
+                <div class="form-group"><label>Prénom *</label><input type="text" id="userPrenom" class="form-control" required></div>
+            </div>
+            
+            <div class="form-group"><label>Email *</label><input type="email" id="userEmail" class="form-control" required></div>
+            
+            <div class="form-group"><label>Téléphone</label><input type="text" id="userTelephone" class="form-control" placeholder="+261 XX XXX XX"></div>
+            
+            <div class="form-group">
+                <label>Rôle *</label>
+                <select id="userRole" class="form-control" required onchange="showDynamicFields()">
+                    <option value="">Sélectionner un rôle</option>
+                    <option value="admin">Administrateur</option>
+                    <option value="vie_scolaire">Responsable Vie Scolaire</option>
+                    <option value="prof">Professeur</option>
+                    <option value="parent">Parent</option>
+                    <option value="eleve">Élève</option>
+                </select>
+            </div>
+            
+            <!-- Champs dynamiques selon le rôle -->
+            <div id="dynamicFields" style="display:none;"></div>
+            
+            <div class="form-group" id="passwordGroup"><label>Mot de passe *</label><input type="password" id="userPassword" class="form-control" minlength="8" placeholder="Minimum 8 caractères"></div>
+            
+            <button type="button" class="btn btn-primary" style="width:100%;" onclick="saveUser()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
+                Enregistrer
+            </button>
+        </form>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    var currentPage = 1;
+    var editingUserId = null;
+
+    // ========== CHAMPS DYNAMIQUES ==========
+    function showDynamicFields() {
+        var role = document.getElementById('userRole').value;
+        var container = document.getElementById('dynamicFields');
+        var html = '';
+
+        if (role === 'prof') {
+            html = '<div class="dynamic-fields">' +
+                '<div class="form-group"><label>Matière principale *</label>' +
+                '<select id="userMatiere" class="form-control" required>' +
+                '<option value="">Choisissez une matière</option>' +
+                '<option value="Mathématiques">Mathématiques</option>' +
+                '<option value="Français">Français</option>' +
+                '<option value="Histoire-Géographie">Histoire-Géographie</option>' +
+                '<option value="SVT">SVT</option>' +
+                '<option value="Physique-Chimie">Physique-Chimie</option>' +
+                '<option value="Anglais">Anglais</option>' +
+                '<option value="Espagnol">Espagnol</option>' +
+                '<option value="Allemand">Allemand</option>' +
+                '<option value="Philosophie">Philosophie</option>' +
+                '<option value="EPS">EPS</option>' +
+                '<option value="Arts Plastiques">Arts Plastiques</option>' +
+                '<option value="Musique">Musique</option>' +
+                '<option value="Informatique">Informatique</option>' +
+                '<option value="Économie">Économie</option>' +
+                '<option value="Autre">Autre</option>' +
+                '</select></div>' +
+                '<div class="form-group"><label>Classes assignées</label>' +
+                '<input type="text" id="userClasses" class="form-control" placeholder="ex: 6ème A, 5ème B, 4ème C"></div>' +
+                '</div>';
+            container.style.display = 'block';
+        } else if (role === 'eleve') {
+            html = '<div class="dynamic-fields">' +
+                '<div class="form-group"><label>Classe *</label>' +
+                '<select id="userClasse" class="form-control" required>' +
+                '<option value="">Choisissez une classe</option>' +
+                '<option>6ème A</option><option>6ème B</option>' +
+                '<option>5ème A</option><option>5ème B</option>' +
+                '<option>4ème A</option><option>4ème B</option>' +
+                '<option>3ème A</option><option>3ème B</option>' +
+                '<option>2nde A</option><option>2nde B</option>' +
+                '<option>1ère A</option><option>1ère B</option>' +
+                '<option>Tle A</option><option>Tle B</option>' +
+                '</select></div>' +
+                '<div class="form-group"><label>Date de naissance</label>' +
+                '<input type="date" id="userDateNaissance" class="form-control"></div>' +
+                '</div>';
+            container.style.display = 'block';
+        } else if (role === 'parent') {
+            html = '<div class="dynamic-fields">' +
+                '<label style="font-weight:600;font-size:0.85rem;margin-bottom:8px;display:block;">Enfant(s) inscrit(s)</label>' +
+                '<div id="childrenContainer">' +
+                '<div class="form-row" style="margin-bottom:8px;">' +
+                '<input type="text" class="form-control enfant-nom" placeholder="Nom" required>' +
+                '<input type="text" class="form-control enfant-prenom" placeholder="Prénom" required>' +
+                '<select class="form-control enfant-classe" required>' +
+                '<option value="">Classe</option>' +
+                '<option>6ème A</option><option>6ème B</option><option>5ème A</option><option>5ème B</option>' +
+                '<option>4ème A</option><option>4ème B</option><option>3ème A</option><option>3ème B</option>' +
+                '<option>2nde A</option><option>2nde B</option><option>1ère A</option><option>1ère B</option>' +
+                '<option>Tle A</option><option>Tle B</option>' +
+                '</select></div></div>' +
+                '<button type="button" class="btn btn-sm btn-info" onclick="addChild()" style="margin-top:8px;">+ Ajouter un autre enfant</button>' +
+                '</div>';
+            container.style.display = 'block';
+        } else {
+            container.style.display = 'none';
+        }
+
+        container.innerHTML = html;
+    }
+
+    function addChild() {
+        var container = document.getElementById('childrenContainer');
+        var row = document.createElement('div');
+        row.className = 'form-row';
+        row.style.marginBottom = '8px';
+        row.innerHTML = `
+            <input type="text" class="form-control enfant-nom" placeholder="Nom" required>
+            <input type="text" class="form-control enfant-prenom" placeholder="Prénom" required>
+            <select class="form-control enfant-classe" required>
+                <option value="">Classe</option>
+                <option>6ème A</option><option>6ème B</option><option>5ème A</option><option>5ème B</option>
+                <option>4ème A</option><option>4ème B</option><option>3ème A</option><option>3ème B</option>
+                <option>2nde A</option><option>2nde B</option><option>1ère A</option><option>1ère B</option>
+                <option>Tle A</option><option>Tle B</option>
+            </select>
+            <button type="button" class="btn btn-sm btn-danger" onclick="this.parentElement.remove()">✕</button>
+        `;
+        container.appendChild(row);
+    }
+
+    // ========== UTILISATEURS ==========
+    async function loadUsers(page) {
+        page = page || 1;
+        currentPage = page;
+        var search = document.getElementById('searchInput').value;
+        var role = document.getElementById('roleFilter').value;
+        var r = await fetch('/admin/api/users?page=' + page + '&search=' + encodeURIComponent(search) + '&role=' + encodeURIComponent(role));
+        var data = await r.json();
+        var tbody = document.getElementById('usersTableBody');
+        
+        if (!data.users || !data.users.length) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:30px;">Aucun utilisateur</td></tr>';
+            return;
+        }
+
+        var roleLabels = {
+            'admin': ' Admin',
+            'vie_scolaire': ' Vie Scolaire',
+            'prof': ' Professeur',
+            'parent': ' Parent',
+            'eleve': ' Élève'
+        };
+
+        tbody.innerHTML = data.users.map(function(u) {
+            return '<tr>' +
+                '<td>#' + u.id + '</td>' +
+                '<td><strong>' + u.nom + ' ' + u.prenom + '</strong></td>' +
+                '<td>' + u.email + '</td>' +
+                '<td><span class="role-badge">' + (roleLabels[u.role] || u.role) + '</span></td>' +
+                '<td>' + (u.telephone || '<span style="color:#ccc;">-</span>') + '</td>' +
+                '<td><span class="badge ' + (u.compte_actif ? 'badge-success' : 'badge-danger') + '">' + (u.compte_actif ? 'Actif' : 'Inactif') + '</span></td>' +
+                '<td>' + new Date(u.created_at).toLocaleDateString('fr-FR') + '</td>' +
+                '<td><div class="table-actions">' +
+                '<button class="btn btn-warning btn-sm" onclick="editUser(' + u.id + ')" title="Modifier"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>' +
+                '<button class="btn btn-info btn-sm" onclick="resetPassword(' + u.id + ')" title="Reset MDP"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></button>' +
+                '<button class="btn btn-sm ' + (u.compte_actif ? 'btn-danger' : 'btn-success') + '" onclick="toggleStatus(' + u.id + ')" title="' + (u.compte_actif ? 'Désactiver' : 'Activer') + '"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">' + (u.compte_actif ? '<circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>' : '<circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/>') + '</svg></button>' +
+                '<button class="btn btn-danger btn-sm" onclick="deleteUser(' + u.id + ',\'' + u.nom + ' ' + u.prenom + '\')" title="Supprimer"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>' +
+                '</div></td></tr>';
+        }).join('');
+
+        var pag = '';
+        for (var i = 1; i <= data.pagination.totalPages; i++) {
+            pag += '<button class="' + (i === page ? 'active' : '') + '" onclick="loadUsers(' + i + ')">' + i + '</button>';
+        }
+        document.getElementById('pagination').innerHTML = pag;
+    }
+
+    function openCreateModal() {
+        editingUserId = null;
+        document.getElementById('modalTitle').textContent = 'Ajouter un utilisateur';
+        document.getElementById('userForm').reset();
+        document.getElementById('passwordGroup').style.display = 'block';
+        document.getElementById('userPassword').required = true;
+        document.getElementById('dynamicFields').innerHTML = '';
+        document.getElementById('dynamicFields').style.display = 'none';
+        document.getElementById('userModal').classList.add('active');
+    }
+
+    async function editUser(id) {
+        var r = await fetch('/admin/api/users?page=1&search=&role=');
+        var data = await r.json();
+        var u = data.users.find(function(x) { return x.id === id; });
+        if (!u) return;
+
+        editingUserId = id;
+        document.getElementById('modalTitle').textContent = 'Modifier l\'utilisateur';
+        document.getElementById('userId').value = u.id;
+        document.getElementById('userNom').value = u.nom;
+        document.getElementById('userPrenom').value = u.prenom;
+        document.getElementById('userEmail').value = u.email;
+        document.getElementById('userTelephone').value = u.telephone || '';
+        document.getElementById('userRole').value = u.role;
+        document.getElementById('passwordGroup').style.display = 'none';
+        document.getElementById('userPassword').required = false;
+        
+        showDynamicFields();
+        
+        // Remplir les champs dynamiques si prof
+        if (u.role === 'prof') {
+            setTimeout(function() {
+                if (document.getElementById('userMatiere')) document.getElementById('userMatiere').value = u.matiere_principale || '';
+                if (document.getElementById('userClasses')) document.getElementById('userClasses').value = u.classes_assignees || '';
+            }, 200);
+        }
+        if (u.role === 'eleve') {
+            setTimeout(function() {
+                if (document.getElementById('userClasse')) document.getElementById('userClasse').value = u.classes_assignees || '';
+                if (document.getElementById('userDateNaissance')) document.getElementById('userDateNaissance').value = u.date_naissance || '';
+            }, 200);
+        }
+        
+        document.getElementById('userModal').classList.add('active');
+    }
+
+    async function saveUser() {
+        var data = {
+            nom: document.getElementById('userNom').value.trim(),
+            prenom: document.getElementById('userPrenom').value.trim(),
+            email: document.getElementById('userEmail').value.trim(),
+            telephone: document.getElementById('userTelephone').value.trim(),
+            role: document.getElementById('userRole').value
+        };
+
+        if (!data.nom || !data.prenom || !data.email || !data.role) {
+            showToast('Tous les champs obligatoires doivent être remplis', 'error');
+            return;
+        }
+
+        if (!editingUserId) {
+            data.password = document.getElementById('userPassword').value;
+            if (!data.password || data.password.length < 8) {
+                showToast('Mot de passe minimum 8 caractères', 'error');
+                return;
+            }
+        }
+
+        // Ajouter les champs spécifiques au rôle
+        if (data.role === 'prof') {
+            data.matiere_principale = document.getElementById('userMatiere')?.value || '';
+            data.classes_assignees = document.getElementById('userClasses')?.value || '';
+        }
+        if (data.role === 'eleve') {
+            data.classes_assignees = document.getElementById('userClasse')?.value || '';
+            data.date_naissance = document.getElementById('userDateNaissance')?.value || '';
+        }
+        if (data.role === 'parent') {
+            var noms = document.querySelectorAll('.enfant-nom');
+            var prenoms = document.querySelectorAll('.enfant-prenom');
+            var classes = document.querySelectorAll('.enfant-classe');
+            var enfants = [];
+            for (var i = 0; i < noms.length; i++) {
+                if (noms[i].value && prenoms[i].value) {
+                    enfants.push({ nom: noms[i].value, prenom: prenoms[i].value, classe: classes[i]?.value || '' });
+                }
+            }
+            data.enfants = enfants;
+            data.classes_assignees = JSON.stringify(enfants);
+        }
+
+        var url = editingUserId ? '/admin/api/users/' + editingUserId : '/admin/api/users';
+        var method = editingUserId ? 'PUT' : 'POST';
+
+        var r = await fetch(url, { method: method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+        var j = await r.json();
+        showToast(j.message || j.error, r.ok ? 'success' : 'error');
+        if (r.ok) { closeModal(); loadUsers(currentPage); }
+    }
+
+    async function resetPassword(id) {
+        if (!confirm('Réinitialiser le mot de passe ? Le nouveau MDP sera EducOS2024!')) return;
+        var r = await fetch('/admin/api/users/' + id + '/reset-password', { method: 'POST' });
+        var j = await r.json();
+        showToast(j.tempPassword ? 'Nouveau MDP : ' + j.tempPassword : j.message, 'success');
+    }
+
+    async function toggleStatus(id) {
+        var r = await fetch('/admin/api/users/' + id + '/toggle-status', { method: 'PUT' });
+        var j = await r.json();
+        if (r.ok) loadUsers(currentPage);
+    }
+
+    async function deleteUser(id, name) {
+        if (!confirm('Supprimer définitivement ' + name + ' ?')) return;
+        var r = await fetch('/admin/api/users/' + id, { method: 'DELETE' });
+        var j = await r.json();
+        showToast(j.message || j.error, r.ok ? 'success' : 'error');
+        if (r.ok) loadUsers(currentPage);
+    }
+
+    function closeModal() { document.getElementById('userModal').classList.remove('active'); }
+    
+    function showToast(msg, type) {
+        var t = document.getElementById('toast');
+        t.textContent = msg; t.className = 'toast ' + (type || 'success'); t.style.display = 'block';
+        setTimeout(function() { t.style.display = 'none'; }, 3000);
+    }
+
+    document.getElementById('userModal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+
+    loadUsers();
+</script>
+
+<%- include('../../partials/footer-admin') %>

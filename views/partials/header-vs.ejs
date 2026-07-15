@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .nav-icon { stroke: #b0b0c0; stroke-width: 2; fill: none; transition: all 0.2s; }
+        .nav-item:hover .nav-icon, .nav-item.active .nav-icon { stroke: white; }
+        .notif-btn { position: relative; cursor: pointer; }
+        .badge-notif { position: absolute; top: -6px; right: -6px; background: #e74c3c; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 0.65rem; display: none; align-items: center; justify-content: center; font-weight: 700; }
+        .notif-dropdown { display: none; position: fixed; top: 60px; right: 16px; background: white; border-radius: 14px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); width: 380px; max-height: 450px; overflow-y: auto; z-index: 200; }
+        .notif-dropdown.active { display: block; }
+        .notif-item { padding: 14px 16px; border-bottom: 1px solid #f0f0f0; cursor: pointer; }
+        .notif-item:hover { background: #f8f9fa; }
+        .notif-item.non-lu { background: #f0f4ff; border-left: 3px solid #002FA7; }
+        .message-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 3000; align-items: center; justify-content: center; padding: 20px; }
+        .message-modal.active { display: flex; }
+        .message-modal-content { background: white; border-radius: 16px; padding: 24px; width: 100%; max-width: 550px; max-height: 80vh; overflow-y: auto; }
+        .search-icon-svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; stroke: #999; }
+        .search-wrapper { position: relative; }
+        .search-wrapper input { padding-left: 36px !important; }
+    </style>
+</head>
+<body>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    <div class="dashboard-container">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 2 4 3 6 3s6-1 6-3v-5"/></svg>
+                <h2>EducOS<span>-pro</span></h2>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section-title">VIE SCOLAIRE</div>
+                <a href="/dashboard/vie-scolaire" class="nav-item active">
+                    <svg viewBox="0 0 24 24" class="nav-icon" width="20" height="20"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                    <span>Tableau de bord</span>
+                </a>
+                <a href="/dashboard/vie-scolaire/absences" class="nav-item">
+                    <svg viewBox="0 0 24 24" class="nav-icon" width="20" height="20"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                    <span>Absences & Retards</span>
+                </a>
+                <a href="/dashboard/vie-scolaire/edt" class="nav-item">
+                    <svg viewBox="0 0 24 24" class="nav-icon" width="20" height="20"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    <span>Emploi du temps</span>
+                </a>
+                <a href="/dashboard/vie-scolaire/pointage" class="nav-item">
+                    <svg viewBox="0 0 24 24" class="nav-icon" width="20" height="20"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <span>Pointage</span>
+                </a>
+                <a href="/dashboard/vie-scolaire/sanctions" class="nav-item">
+                    <svg viewBox="0 0 24 24" class="nav-icon" width="20" height="20"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <span>Sanctions</span>
+                </a>
+                <div class="nav-section-title">COMMUNICATION</div>
+                <a href="/dashboard/vie-scolaire/messages" class="nav-item">
+                    <svg viewBox="0 0 24 24" class="nav-icon" width="20" height="20"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    <span>Messagerie</span>
+                </a>
+                <a href="/dashboard/vie-scolaire/annuaire" class="nav-item">
+                    <svg viewBox="0 0 24 24" class="nav-icon" width="20" height="20"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    <span>Annuaire</span>
+                </a>
+                <a href="/dashboard/vie-scolaire/fiches" class="nav-item">
+                    <svg viewBox="0 0 24 24" class="nav-icon" width="20" height="20"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    <span>Fiches élèves <span class="badge-fiches" id="badgeFiches" style="background:#e74c3c;color:white;border-radius:10px;padding:1px 6px;font-size:0.6rem;display:none;">0</span></span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info-sidebar">
+                    <div class="user-avatar"><%= user.prenom.charAt(0) %><%= user.nom.charAt(0) %></div>
+                    <div class="user-details"><span class="user-name"><%= user.prenom %> <%= user.nom %></span><span class="user-role">Vie Scolaire</span></div>
+                </div>
+                <a href="/auth/logout" class="logout-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#ff6b6b" stroke-width="2" width="16" height="16"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    <span>Déconnexion</span>
+                </a>
+            </div>
+        </aside>
+        <main class="main-content">
+            <header class="content-header">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <button class="menu-toggle" onclick="toggleSidebar()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                    </button>
+                    <h1><%= title %></h1>
+                </div>
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <div class="notif-btn" onclick="toggleNotifications()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                        <span class="badge-notif" id="badgeNotif">0</span>
+                    </div>
+                    <button onclick="toggleDarkMode()" class="toggle-btn-dashboard">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                    </button>
+                </div>
+            </header>
+            <div class="notif-dropdown" id="notifDropdown">
+                <div style="padding:14px;font-weight:700;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center;">
+                    <span>🔔 Notifications</span>
+                    <button onclick="viderNotifications()" style="background:none;border:none;color:#e74c3c;cursor:pointer;font-size:0.75rem;font-weight:600;">🗑️ Vider</button>
+                </div>
+                <div id="notifList" style="padding:20px;text-align:center;color:#888;">Chargement...</div>
+            </div>
+            <div class="message-modal" id="messageModal">
+                <div class="message-modal-content">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                        <h3 id="modalMessageSujet"></h3>
+                        <button onclick="closeMessageModal()" style="background:none;border:none;font-size:1.5rem;cursor:pointer;color:#666;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        </button>
+                    </div>
+                    <p style="color:#888;font-size:0.85rem;" id="modalMessageFrom"></p>
+                    <div style="margin:16px 0;padding:20px;background:#f8f9fa;border-radius:10px;line-height:1.6;" id="modalMessageContenu"></div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <p style="font-size:0.75rem;color:#999;margin:0;" id="modalMessageDate"></p>
+                        <a href="#" id="modalMessageFichier" style="display:none;font-size:0.85rem;color:#002FA7;text-decoration:none;" download>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#002FA7" stroke-width="2" width="16" height="16" style="vertical-align:middle;margin-right:4px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            Télécharger le fichier
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="content-body">

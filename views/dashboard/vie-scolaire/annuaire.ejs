@@ -1,0 +1,85 @@
+<%- include('../../partials/header-vs') %>
+
+<style>
+    .search-bar { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+    .search-wrapper { position: relative; flex: 1; min-width: 180px; }
+    .search-wrapper input { padding-left: 36px !important; }
+    .search-icon-svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; stroke: #999; }
+    .form-control { width: 100%; padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 0.88rem; font-family: 'Inter', sans-serif; }
+    .form-control:focus { border-color: #002FA7; outline: none; }
+    .btn { padding: 6px 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 600; font-family: 'Inter', sans-serif; }
+    .btn-primary { background: #002FA7; color: white; }
+    .btn-success { background: #27ae60; color: white; }
+    .btn-warning { background: #f39c12; color: white; }
+    .telephone-cell { cursor: pointer; }
+    .telephone-cell:hover { background: #f0f4ff; }
+    .toast { position: fixed; top: 20px; right: 20px; padding: 14px 20px; border-radius: 10px; color: white; font-weight: 600; z-index: 3000; display: none; }
+    .toast.success { background: #27ae60; }
+    .toast.error { background: #e74c3c; }
+</style>
+
+<h2 style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#002FA7" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    Annuaire
+</h2>
+
+<div class="search-bar">
+    <div class="search-wrapper">
+        <svg class="search-icon-svg" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="searchContact" placeholder="Rechercher..." onkeyup="loadContacts()" class="form-control">
+    </div>
+    <select id="filtreRole" onchange="loadContacts()" class="form-control" style="width:auto;">
+        <option value="">Tous</option><option value="prof">Professeurs</option><option value="parent">Parents</option><option value="eleve">Élèves</option>
+    </select>
+</div>
+
+<div class="table-container">
+    <table class="data-table">
+        <thead><tr><th>Nom</th><th>Email</th><th>Téléphone</th><th>Rôle</th></tr></thead>
+        <tbody id="contactsBody"><tr><td colspan="4">Chargement...</td></tr></tbody>
+    </table>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    async function loadContacts() {
+        var role = document.getElementById('filtreRole').value;
+        var search = document.getElementById('searchContact').value;
+        var r = await fetch('/vie-scolaire/api/users-by-role?role=' + encodeURIComponent(role) + '&search=' + encodeURIComponent(search));
+        var users = await r.json();
+        document.getElementById('contactsBody').innerHTML = users.length ? users.map(function(u) {
+            return '<tr>' +
+                '<td><strong>' + u.nom + ' ' + u.prenom + '</strong></td>' +
+                '<td>' + u.email + '</td>' +
+                '<td class="telephone-cell" onclick="editTelephone(' + u.id + ', \'' + (u.telephone||'') + '\', \'' + u.nom + ' ' + u.prenom + '\')">' +
+                    (u.telephone || '<span style="color:#ccc;">Ajouter un numéro</span>') +
+                '</td>' +
+                '<td>' + u.role + '</td>' +
+                '</tr>';
+        }).join('') : '<tr><td colspan="4">Aucun contact</td></tr>';
+    }
+
+    function editTelephone(id, tel, nom) {
+        var nouveauTel = prompt('Numéro de téléphone pour ' + nom + ' :', tel);
+        if (nouveauTel === null) return;
+        fetch('/vie-scolaire/api/users/' + id + '/telephone', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ telephone: nouveauTel })
+        }).then(function(r) { return r.json(); }).then(function(j) {
+            showToast(j.message || j.error, j.success ? 'success' : 'error');
+            if (j.success) loadContacts();
+        });
+    }
+
+    function showToast(msg, type) {
+        var t = document.getElementById('toast');
+        t.textContent = msg; t.className = 'toast ' + type; t.style.display = 'block';
+        setTimeout(function() { t.style.display = 'none'; }, 3000);
+    }
+
+    loadContacts();
+</script>
+
+<%- include('../../partials/footer-vs') %>

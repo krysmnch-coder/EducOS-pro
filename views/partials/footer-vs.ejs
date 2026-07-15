@@ -1,0 +1,120 @@
+            </div>
+        </main>
+    </div>
+    <script>
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+        }
+        if (localStorage.getItem('darkMode') === 'true') document.body.classList.add('dark-mode');
+        
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        }
+        document.querySelectorAll('.sidebar .nav-item').forEach(l => l.addEventListener('click', () => {
+            if (window.innerWidth <= 768) toggleSidebar();
+        }));
+        
+        // Charger le compteur de notifications au chargement
+        async function loadNotifCount() {
+            try {
+                var r = await fetch('/vie-scolaire/api/notifications');
+                var notifs = await r.json();
+                var badge = document.getElementById('badgeNotif');
+                var nonLues = notifs.filter(function(n) { return !n.lu; }).length;
+                badge.textContent = nonLues;
+                badge.style.display = nonLues > 0 ? 'flex' : 'none';
+            } catch(e) {}
+        }
+        
+        async function toggleNotifications() {
+            var dd = document.getElementById('notifDropdown');
+            if (dd.classList.contains('active')) {
+                dd.classList.remove('active');
+            } else {
+                dd.classList.add('active');
+                await loadNotifications();
+            }
+        }
+        
+        async function loadNotifications() {
+            try {
+                var r = await fetch('/vie-scolaire/api/notifications');
+                var notifs = await r.json();
+                var html = '';
+                if (!notifs.length) {
+                    html = '<div style="padding:20px;text-align:center;color:#888;">Aucune notification</div>';
+                } else {
+                    notifs.forEach(function(n) {
+                        html += '<div class="notif-item ' + (n.lu ? '' : 'non-lu') + '" onclick="openNotifMessage(' + n.id + ', ' + (n.message_id||0) + ')" style="cursor:pointer;">';
+                        html += '<div style="font-weight:600;font-size:0.85rem;">' + (n.titre||'Sans titre') + '</div>';
+                        html += '<div style="font-size:0.78rem;color:#666;margin-top:2px;">' + (n.message||'').substring(0, 80) + '</div>';
+                        html += '<div style="font-size:0.7rem;color:#999;margin-top:6px;">' + new Date(n.created_at).toLocaleString('fr-FR') + '</div>';
+                        html += '</div>';
+                    });
+                }
+                document.getElementById('notifList').innerHTML = html;
+                var badge = document.getElementById('badgeNotif');
+                var nonLues = notifs.filter(function(n) { return !n.lu; }).length;
+                badge.textContent = nonLues;
+                badge.style.display = nonLues > 0 ? 'flex' : 'none';
+            } catch(e) { console.error('Erreur notifs:', e); }
+        }
+        
+        async function openNotifMessage(notifId, messageId) {
+            // Marquer comme lu
+            await fetch('/vie-scolaire/api/notifications/' + notifId + '/read', { method: 'PUT' });
+            document.getElementById('notifDropdown').classList.remove('active');
+            
+            if (messageId && messageId > 0) {
+                try {
+                    var r = await fetch('/vie-scolaire/api/messages/' + messageId);
+                    var msg = await r.json();
+                    document.getElementById('modalMessageSujet').textContent = msg.sujet || '';
+                    document.getElementById('modalMessageFrom').textContent = 'De: ' + (msg.exp_nom||'') + ' ' + (msg.exp_prenom||'');
+                    document.getElementById('modalMessageContenu').textContent = msg.contenu || '';
+                    document.getElementById('modalMessageDate').textContent = new Date(msg.created_at).toLocaleString('fr-FR');
+                    if (msg.fichier) {
+                        document.getElementById('modalMessageFichier').href = '/uploads/' + msg.fichier;
+                        document.getElementById('modalMessageFichier').style.display = 'inline-block';
+                    } else {
+                        document.getElementById('modalMessageFichier').style.display = 'none';
+                    }
+                    document.getElementById('messageModal').classList.add('active');
+                } catch(e) { console.error('Erreur message:', e); }
+            }
+            loadNotifications();
+        }
+        
+        function closeMessageModal() { document.getElementById('messageModal').classList.remove('active'); }
+        
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.notif-btn') && !e.target.closest('#notifDropdown')) {
+                document.getElementById('notifDropdown').classList.remove('active');
+            }
+        });
+        
+        document.getElementById('messageModal').addEventListener('click', function(e) {
+            if (e.target === this) closeMessageModal();
+        });
+        
+        // Charger le compteur au démarrage
+        loadNotifCount();
+        // Rafraîchir toutes les 30 secondes
+        setInterval(loadNotifCount, 30000);
+        async function viderNotifications() {
+    if (!confirm('Supprimer toutes les notifications ?')) return;
+    await fetch('/eleve/api/notifications', { method: 'DELETE' });
+    document.getElementById('notifList').innerHTML = '<div style="padding:20px;">Aucune notification</div>';
+    document.getElementById('badgeNotif').style.display = 'none';
+}
+
+async function openNotif(notifId) {
+    await fetch('/eleve/api/notifications/' + notifId + '/read', { method: 'PUT' });
+    document.getElementById('notifDropdown').classList.remove('active');
+    loadNotifCount();
+}
+    </script>
+</body>
+</html>

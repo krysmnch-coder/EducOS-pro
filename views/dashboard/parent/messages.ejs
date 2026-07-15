@@ -1,0 +1,114 @@
+<%- include('../../partials/header-parent') %>
+
+<style>
+    .messages-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .msg-card { background: white; border-radius: 14px; padding: 20px; box-shadow: 0 1px 6px rgba(0,0,0,0.04); }
+    .msg-item { padding: 12px 14px; border: 1px solid #e8e8e8; border-radius: 10px; margin-bottom: 8px; cursor: pointer; }
+    .msg-item.non-lu { border-left: 3px solid #002FA7; background: #f8f9ff; }
+    .btn { padding: 10px 18px; border: none; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600; font-family: 'Inter', sans-serif; }
+    .btn-primary { background: #002FA7; color: white; }
+    .btn svg { width: 16px; height: 16px; stroke: white; }
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.85rem; }
+    .form-control { width: 100%; padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 0.88rem; font-family: 'Inter', sans-serif; }
+    textarea.form-control { resize: vertical; min-height: 80px; }
+    .file-upload-label { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: #f0f4ff; border: 2px dashed #002FA7; border-radius: 8px; cursor: pointer; font-size: 0.85rem; color: #002FA7; }
+    .file-name { font-size: 0.8rem; color: #27ae60; margin-top: 4px; }
+    .toast { position: fixed; top: 20px; right: 20px; padding: 14px 20px; border-radius: 10px; color: white; font-weight: 600; z-index: 3000; display: none; }
+    .toast.success { background: #27ae60; }
+    @media (max-width: 768px) { .messages-grid { grid-template-columns: 1fr; } }
+</style>
+
+<h2 style="display:flex;align-items:center;gap:10px;margin-bottom:24px;">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#002FA7" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    Messages
+</h2>
+
+<div class="messages-grid">
+    <div class="msg-card">
+        <h3 style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#002FA7" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            Nouveau message
+        </h3>
+        <form onsubmit="return false;">
+            <div class="form-group"><label>Destinataire</label><select id="msgDest" class="form-control" onchange="toggleDest()"><option value="all">Tout le monde</option><option value="role">Par rôle</option><option value="user">Personne</option></select></div>
+            <div class="form-group" id="msgRoleGrp" style="display:none;"><select id="msgRole" class="form-control"><option value="admin">Admin</option><option value="vie_scolaire">Vie Scolaire</option><option value="prof">Professeur</option></select></div>
+            <div class="form-group" id="msgUserGrp" style="display:none;"><select id="msgUserId" class="form-control"></select></div>
+            <div class="form-group"><label>Sujet</label><input type="text" id="msgSujet" class="form-control" required></div>
+            <div class="form-group"><label>Message</label><textarea id="msgContenu" class="form-control" rows="4" required></textarea></div>
+            <div class="form-group">
+                <label>Pièce jointe</label>
+                <label class="file-upload-label" for="msgFichier">📎 Choisir un fichier</label>
+                <input type="file" id="msgFichier" style="display:none;" onchange="showFileName()">
+                <div class="file-name" id="fileName"></div>
+            </div>
+            <button class="btn btn-primary" style="width:100%;" onclick="sendMessage()">Envoyer</button>
+        </form>
+    </div>
+    <div class="msg-card">
+        <h3 style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#002FA7" stroke-width="2"><path d="M22 12h-6l-3 9-3-18-3 9H2"/></svg>
+            Messages reçus
+        </h3>
+        <div id="messagesList"></div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    function toggleDest() {
+        var t = document.getElementById('msgDest').value;
+        document.getElementById('msgRoleGrp').style.display = t==='role'?'block':'none';
+        document.getElementById('msgUserGrp').style.display = t==='user'?'block':'none';
+    }
+    function showFileName() {
+        var f = document.getElementById('msgFichier').files[0];
+        document.getElementById('fileName').textContent = f ? '📎 ' + f.name : '';
+    }
+    async function loadMessages() {
+        var r = await fetch('/parent/api/messages');
+        var msgs = await r.json();
+        document.getElementById('messagesList').innerHTML = msgs.length ? msgs.map(function(m) {
+            return '<div class="msg-item ' + (m.lu?'':'non-lu') + '" onclick="openMsg(' + m.id + ')"><strong>' + m.sujet + '</strong><br><small>De: ' + m.exp_nom + ' ' + m.exp_prenom + '</small><br>' + m.contenu.substring(0,80) + '...</div>';
+        }).join('') : '<p style="color:#888;">Aucun message</p>';
+    }
+    async function openMsg(id) {
+        var r = await fetch('/parent/api/messages');
+        var msgs = await r.json();
+        var m = msgs.find(function(x) { return x.id === id; });
+        if (!m) return;
+        document.getElementById('modalMessageSujet').textContent = m.sujet;
+        document.getElementById('modalMessageContenu').textContent = m.contenu;
+        if (m.fichier) {
+            document.getElementById('modalMessageFichier').innerHTML = '<a href="/uploads/' + m.fichier + '" target="_blank" style="color:#002FA7;">📎 Télécharger ' + m.fichier + '</a>';
+        }
+        document.getElementById('messageModal').classList.add('active');
+    }
+    async function sendMessage() {
+        var formData = new FormData();
+        formData.append('sujet', document.getElementById('msgSujet').value);
+        formData.append('contenu', document.getElementById('msgContenu').value);
+        var type = document.getElementById('msgDest').value;
+        if (type==='role') formData.append('destinataire_role', document.getElementById('msgRole').value);
+        else if (type==='user') formData.append('destinataire_id', document.getElementById('msgUserId').value);
+        else formData.append('destinataire_role', 'all');
+        var f = document.getElementById('msgFichier').files[0];
+        if (f) formData.append('fichier', f);
+        var r = await fetch('/parent/api/messages', { method: 'POST', body: formData });
+        var j = await r.json();
+        showToast(j.message, 'success');
+        loadMessages();
+    }
+    function showToast(msg, type) {
+        var t = document.getElementById('toast');
+        t.textContent = msg; t.className = 'toast ' + type; t.style.display = 'block';
+        setTimeout(function() { t.style.display = 'none'; }, 3000);
+    }
+    fetch('/parent/api/profs').then(r=>r.json()).then(p => {
+        document.getElementById('msgUserId').innerHTML = p.map(function(x) { return '<option value="'+x.id+'">'+x.nom+' '+x.prenom+'</option>'; }).join('');
+    });
+    loadMessages();
+</script>
+
+<%- include('../../partials/footer-parent') %>

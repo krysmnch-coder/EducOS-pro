@@ -1,0 +1,230 @@
+            </div>
+        </main>
+    </div>
+
+    <!-- Panneau Discussions (au-dessus du bouton) -->
+    <div class="discussions-panel" id="discussionsPanel">
+        <div class="panel-header">
+            <span style="display:flex;align-items:center;gap:8px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#002FA7" stroke-width="2" width="18" height="18"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                Discussions
+            </span>
+            <button onclick="toggleDiscussionsPanel()" style="background:none;border:none;cursor:pointer;font-size:1.2rem;color:#666;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div id="discussionsList"></div>
+    </div>
+
+    <!-- Bouton Discussions -->
+    <div class="discussions-btn-container">
+        <button class="btn-discussions" onclick="toggleDiscussionsPanel()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="24" height="24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span class="badge-chat" id="badgeDiscussions" style="display:none;">0</span>
+        </button>
+    </div>
+
+    <!-- Popups Container -->
+    <div class="popups-container" id="popupsContainer"></div>
+
+    <script>
+        var userId = '<%= user.id %>';
+        var openPopups = {};
+        var popupIntervals = {};
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+        }
+        if (localStorage.getItem('darkMode') === 'true') document.body.classList.add('dark-mode');
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        }
+        document.querySelectorAll('.sidebar .nav-item').forEach(function(l) {
+            l.addEventListener('click', function() { if (window.innerWidth <= 768) toggleSidebar(); });
+        });
+
+        function showTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
+            document.querySelectorAll('.sidebar .nav-item').forEach(function(n) { n.classList.remove('active'); });
+            var el = document.getElementById('tab-' + tab);
+            if (el) el.classList.add('active');
+            if (event && event.target) event.target.classList.add('active');
+            if (tab === 'notes') loadNotes();
+            if (tab === 'edt') loadEDT();
+            if (tab === 'ressources') loadRessources();
+            if (tab === 'absences') loadAbsences();
+            if (tab === 'sanctions') loadSanctions();
+            if (tab === 'amis') loadAmis();
+            if (tab === 'groupes') loadGroupes();
+            if (tab === 'messages') loadMessages();
+            if (tab === 'accueil') loadAccueil();
+        }
+
+        // ========== DISCUSSIONS ==========
+        function toggleDiscussionsPanel() {
+            var panel = document.getElementById('discussionsPanel');
+            panel.classList.toggle('active');
+            if (panel.classList.contains('active')) loadDiscussionsList();
+        }
+
+        async function loadDiscussionsList() {
+            var rAmis = await fetch('/eleve/api/amis');
+            var amis = await rAmis.json();
+            var rGroupes = await fetch('/eleve/api/groupes');
+            var groupes = await rGroupes.json();
+            var html = '';
+            var totalNonLus = 0;
+
+            amis.forEach(function(a) {
+                html += '<div class="discussion-item" onclick="openChatPopup(\'ami\',' + a.id + ',\'' + a.prenom + ' ' + a.nom + '\')">' +
+                    '<div class="disc-avatar" style="background:' + getAvatarColor(a.nom + a.prenom) + ';">' + getInitials(a.nom, a.prenom) + '</div>' +
+                    '<div class="disc-info"><div class="disc-name">' + a.prenom + ' ' + a.nom + '</div><div class="disc-last">👤 Ami</div></div>' +
+                    '</div>';
+            });
+
+            groupes.forEach(function(g) {
+                html += '<div class="discussion-item" onclick="openChatPopup(\'groupe\',' + g.id + ',\'' + (g.nom || 'Groupe').replace(/'/g, "\\'") + '\')">' +
+                    '<div class="disc-avatar" style="background:#6366f1;">' + (g.nom || 'G').charAt(0).toUpperCase() + '</div>' +
+                    '<div class="disc-info"><div class="disc-name">' + (g.nom || 'Groupe') + '</div><div class="disc-last">👥 ' + (g.nb_membres || 0) + ' membres</div></div>' +
+                    '</div>';
+            });
+
+            document.getElementById('discussionsList').innerHTML = html || '<p style="text-align:center;color:#888;padding:20px;">Aucune discussion</p>';
+        }
+
+        function openChatPopup(type, id, nom) {
+            var key = type + '-' + id;
+            if (openPopups[key]) { openPopups[key].classList.remove('minimized'); return; }
+
+            var popup = document.createElement('div');
+            popup.className = 'chat-popup';
+            popup.id = 'popup-' + key;
+            popup.innerHTML = 
+                '<div class="chat-popup-header" onclick="this.parentElement.classList.toggle(\'minimized\')">' +
+                '<span style="display:flex;align-items:center;gap:6px;">' +
+                (type === 'groupe' ? '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="16" height="16"><path d="M17 21v-2a4 4 0 0 0-3-3.87"/><circle cx="12" cy="7" r="4"/></svg>' : '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="16" height="16"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>') +
+                nom + '</span>' +
+                '<div style="display:flex;gap:4px;">' +
+                (type === 'groupe' ? '<button class="btn-icon" onclick="event.stopPropagation();openGroupeSettings(' + id + ',\'' + (nom || '').replace(/'/g, "\\'") + '\')" title="Paramètres"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="14" height="14"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>' : '') +
+                '<button class="btn-icon" onclick="event.stopPropagation();toggleEmojiPopup(\'' + key + '\')"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="14" height="14"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></button>' +
+                '<button class="btn-icon" onclick="event.stopPropagation();closeChatPopup(\'' + key + '\')"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="14" height="14"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +
+                '</div></div>' +
+                '<div class="chat-popup-body">' +
+                '<div class="chat-messages" id="msgs-' + key + '"></div>' +
+                '<div class="emoji-popup" id="emoji-' + key + '">' +
+                '<span onclick="addEmoji(\'' + key + '\',\'😀\')">😀</span><span onclick="addEmoji(\'' + key + '\',\'😂\')">😂</span><span onclick="addEmoji(\'' + key + '\',\'😍\')">😍</span><span onclick="addEmoji(\'' + key + '\',\'👍\')">👍</span><span onclick="addEmoji(\'' + key + '\',\'❤️\')">❤️</span><span onclick="addEmoji(\'' + key + '\',\'🔥\')">🔥</span><span onclick="addEmoji(\'' + key + '\',\'🎉\')">🎉</span><span onclick="addEmoji(\'' + key + '\',\'💯\')">💯</span><span onclick="addEmoji(\'' + key + '\',\'😢\')">😢</span><span onclick="addEmoji(\'' + key + '\',\'😡\')">😡</span><span onclick="addEmoji(\'' + key + '\',\'🤔\')">🤔</span><span onclick="addEmoji(\'' + key + '\',\'😎\')">😎</span>' +
+                '</div>' +
+                '<div class="chat-input-area">' +
+                '<div class="chat-input-row">' +
+                '<label for="img-' + key + '" style="cursor:pointer;padding:6px;display:flex;align-items:center;">' +
+                '<svg viewBox="0 0 24 24" fill="none" stroke="#002FA7" stroke-width="2" width="18" height="18"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>' +
+                '</label>' +
+                '<input type="file" id="img-' + key + '" style="display:none;" accept="image/*" onchange="sendChatImage(\'' + type + '\',' + id + ',\'' + key + '\')">' +
+                '<input type="text" id="input-' + key + '" placeholder="Message..." onkeypress="if(event.key===\'Enter\')sendChatMessage(\'' + type + '\',' + id + ',\'' + key + '\')">' +
+                '<button class="btn btn-sm btn-primary" onclick="sendChatMessage(\'' + type + '\',' + id + ',\'' + key + '\')" style="border-radius:50%;width:36px;height:36px;padding:0;display:flex;align-items:center;justify-content:center;">' +
+                '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="16" height="16"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>' +
+                '</button></div></div></div>';
+
+            document.getElementById('popupsContainer').appendChild(popup);
+            openPopups[key] = popup;
+            document.getElementById('discussionsPanel').classList.remove('active');
+
+            if (type === 'ami') {
+                loadAmiMessages(id, key);
+                popupIntervals[key] = setInterval(function() { loadAmiMessages(id, key); }, 3000);
+            } else {
+                loadGroupeMessages(id, key);
+                popupIntervals[key] = setInterval(function() { loadGroupeMessages(id, key); }, 3000);
+            }
+        }
+
+        function closeChatPopup(key) {
+            var popup = openPopups[key];
+            if (popup) { popup.remove(); delete openPopups[key]; if (popupIntervals[key]) { clearInterval(popupIntervals[key]); delete popupIntervals[key]; } }
+        }
+        function toggleEmojiPopup(key) { var e = document.getElementById('emoji-' + key); if (e) e.classList.toggle('active'); }
+        function addEmoji(key, emoji) { var i = document.getElementById('input-' + key); if (i) { i.value += emoji; i.focus(); } }
+
+        async function loadAmiMessages(amiId, key) {
+            var r = await fetch('/eleve/api/messages-amis?ami_id=' + amiId); var msgs = await r.json();
+            var html = ''; msgs.forEach(function(m) { var isMoi = m.expediteur_id == userId; var c = m.contenu || ''; if (m.fichier && m.fichier.match(/\.(jpg|jpeg|png|gif|webp)$/i)) c = '<img src="/uploads/' + m.fichier + '" style="max-width:180px;border-radius:8px;cursor:pointer;" onclick="window.open(\'/uploads/' + m.fichier + '\')">'; html += '<div class="chat-msg ' + (isMoi?'moi':'autre') + '">' + c + '<small>' + new Date(m.created_at).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}) + '</small></div>'; });
+            var d = document.getElementById('msgs-' + key); if (d) { var wasBottom = d.scrollHeight - d.scrollTop - d.clientHeight < 50; d.innerHTML = html || '<p style="text-align:center;color:#888;">Aucun message</p>'; if (wasBottom || html === '') d.scrollTop = d.scrollHeight; }
+        }
+        async function loadGroupeMessages(groupeId, key) {
+            var r = await fetch('/eleve/api/messages-groupe?groupe_id=' + groupeId); var msgs = await r.json();
+            var html = ''; msgs.forEach(function(m) { var isMoi = m.expediteur_id == userId; var c = m.contenu || ''; if (m.fichier && m.fichier.match(/\.(jpg|jpeg|png|gif|webp)$/i)) c = '<img src="/uploads/' + m.fichier + '" style="max-width:180px;border-radius:8px;cursor:pointer;" onclick="window.open(\'/uploads/' + m.fichier + '\')">'; html += '<div class="chat-msg ' + (isMoi?'moi':'autre') + '"><strong style="font-size:0.65rem;">' + (isMoi?'Moi':m.prenom) + '</strong><br>' + c + '<small>' + new Date(m.created_at).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}) + '</small></div>'; });
+            var d = document.getElementById('msgs-' + key); if (d) { var wasBottom = d.scrollHeight - d.scrollTop - d.clientHeight < 50; d.innerHTML = html || '<p style="text-align:center;color:#888;">Aucun message</p>'; if (wasBottom || html === '') d.scrollTop = d.scrollHeight; }
+        }
+        async function sendChatMessage(type, id, key) { var i = document.getElementById('input-' + key); if (!i) return; var c = i.value.trim(); if (!c) return; i.value = ''; if (type==='ami') { await fetch('/eleve/api/envoyer-message-ami',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ami_id:id,contenu:c})}); loadAmiMessages(id,key); } else { await fetch('/eleve/api/envoyer-message-groupe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({groupe_id:id,contenu:c})}); loadGroupeMessages(id,key); } }
+        async function sendChatImage(type, id, key) { var f = document.getElementById('img-' + key); if (!f||!f.files[0]) return; var fd = new FormData(); fd.append(type==='ami'?'ami_id':'groupe_id',id); fd.append('contenu','📷 Image'); fd.append('fichier',f.files[0]); if (type==='ami') { await fetch('/eleve/api/envoyer-message-ami',{method:'POST',body:fd}); loadAmiMessages(id,key); } else { await fetch('/eleve/api/envoyer-message-groupe',{method:'POST',body:fd}); loadGroupeMessages(id,key); } f.value=''; }
+
+        // ========== GROUPE SETTINGS ==========
+        async function openGroupeSettings(id, nom) {
+            var membres = await fetch('/eleve/api/membres-groupe?groupe_id=' + id); var membresData = await membres.json();
+            var info = await fetch('/eleve/api/groupe-info?groupe_id=' + id); var groupeInfo = await info.json();
+            var isCreateur = groupeInfo.createur_id == userId;
+            var html = '<div style="padding:16px;"><h4 style="display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" fill="none" stroke="#002FA7" stroke-width="2" width="18" height="18"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Paramètres</h4>';
+            if (isCreateur) { html += '<button class="btn btn-sm btn-primary" onclick="renommerGroupe(' + id + ')"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="14" height="14"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Renommer</button> <button class="btn btn-sm btn-danger" onclick="supprimerGroupe(' + id + ')"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="14" height="14"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> Supprimer</button><br><br><input type="text" id="addMembreInput" class="form-control" placeholder="Nom de l\'élève à ajouter..." style="margin-bottom:8px;"><button class="btn btn-sm btn-success" onclick="ajouterMembre(' + id + ')"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Ajouter</button>'; }
+            else { html += '<button class="btn btn-sm btn-danger" onclick="quitterGroupe(' + id + ')"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="14" height="14"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Quitter</button>'; }
+            html += '<h5 style="margin-top:16px;">Membres (' + membresData.length + ')</h5>';
+            membresData.forEach(function(m) { html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f0f0f0;"><span><strong>' + m.nom + ' ' + m.prenom + '</strong> <small>' + (m.classe||'') + '</small></span>' + (isCreateur && m.id != userId ? '<button class="btn btn-sm btn-danger" onclick="retirerMembre(' + id + ',' + m.id + ')"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="12" height="12"><line x1="18" y1="6" x2="6" y2="18"/></svg></button>' : '') + '</div>'; });
+            html += '</div>';
+            var modal = document.createElement('div'); modal.className = 'modal active'; modal.innerHTML = '<div class="modal-content" style="max-width:500px;"><div class="modal-header"><h3>⚙️ ' + nom + '</h3><button onclick="this.parentElement.parentElement.parentElement.remove()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>' + html + '</div>'; modal.onclick = function(e) { if (e.target === modal) modal.remove(); }; document.body.appendChild(modal);
+        }
+        async function ajouterMembre(id) { var nomRecherche = document.getElementById('addMembreInput').value.trim(); if (!nomRecherche) return; var r = await fetch('/eleve/api/rechercher-eleves?search=' + encodeURIComponent(nomRecherche)); var eleves = await r.json(); if (!eleves||!eleves.length) { alert('Aucun élève trouvé'); return; } if (eleves.length===1) { await fetch('/eleve/api/ajouter-membre-groupe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({groupe_id:id,eleve_id:eleves[0].id})}); } else { var liste = eleves.map(function(e,i){ return (i+1)+'. '+e.nom+' '+e.prenom+' ('+(e.classe||'?')+')'; }).join('\n'); var choix = prompt('Plusieurs élèves:\n\n'+liste+'\n\nNuméro:'); if (choix && eleves[parseInt(choix)-1]) { await fetch('/eleve/api/ajouter-membre-groupe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({groupe_id:id,eleve_id:eleves[parseInt(choix)-1].id})}); } } document.querySelectorAll('.modal').forEach(function(m){m.remove();}); openGroupeSettings(id,''); }
+        async function renommerGroupe(id) { var nom = prompt('Nouveau nom:'); if (!nom) return; await fetch('/eleve/api/update-groupe-nom',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({groupe_id:id,nom:nom})}); document.querySelectorAll('.modal').forEach(function(m){m.remove();}); loadGroupes(); }
+        async function supprimerGroupe(id) { if(!confirm('Supprimer ?')) return; await fetch('/eleve/api/supprimer-groupe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({groupe_id:id})}); document.querySelectorAll('.modal').forEach(function(m){m.remove();}); closeChatPopup('groupe-'+id); loadGroupes(); }
+        async function quitterGroupe(id) { if(!confirm('Quitter ?')) return; await fetch('/eleve/api/quitter-groupe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({groupe_id:id})}); document.querySelectorAll('.modal').forEach(function(m){m.remove();}); closeChatPopup('groupe-'+id); loadGroupes(); }
+        async function retirerMembre(groupeId,eleveId) { await fetch('/eleve/api/retirer-membre-groupe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({groupe_id:groupeId,eleve_id:eleveId})}); document.querySelectorAll('.modal').forEach(function(m){m.remove();}); openGroupeSettings(groupeId,''); }
+
+        var avatarColors = ['#002FA7','#e74c3c','#27ae60','#f39c12','#8e44ad','#1abc9c','#e67e22','#2980b9','#c0392b','#16a085'];
+        function getAvatarColor(name) { var sum=0; for(var i=0;i<name.length;i++) sum+=name.charCodeAt(i); return avatarColors[sum%avatarColors.length]; }
+        function getInitials(nom,prenom) { return (prenom.charAt(0)+nom.charAt(0)).toUpperCase(); }
+
+        // ========== NOTIFICATIONS ==========
+        async function loadNotifCount() { try { var r=await fetch('/eleve/api/notifications'); var notifs=await r.json(); var b=document.getElementById('badgeNotif'); var n=notifs.filter(function(x){return !x.lu;}).length; b.textContent=n; b.style.display=n>0?'flex':'none'; } catch(e){} }
+        async function toggleNotifications() { var dd=document.getElementById('notifDropdown'); if(dd.classList.contains('active')){dd.classList.remove('active');}else{dd.classList.add('active');loadNotifications();} }
+        async function loadNotifications() { var r=await fetch('/eleve/api/notifications'); var notifs=await r.json(); var html=notifs.length?notifs.map(function(n){return '<div class="notif-item '+(n.lu?'':'non-lu')+'" onclick="openNotif('+n.id+')"><div style="font-weight:600;">'+n.titre+'</div><div style="font-size:0.78rem;color:#666;">'+n.message+'</div></div>';}).join(''):'<div style="padding:20px;">Aucune notification</div>'; document.getElementById('notifList').innerHTML=html; var b=document.getElementById('badgeNotif'); var n=notifs.filter(function(x){return !x.lu;}).length; b.textContent=n; b.style.display=n>0?'flex':'none'; }
+        async function openNotif(notifId) { await fetch('/eleve/api/notifications/'+notifId+'/read',{method:'PUT'}); document.getElementById('notifDropdown').classList.remove('active'); loadNotifCount(); }
+        async function viderNotifications() { if(!confirm('Supprimer ?')) return; await fetch('/eleve/api/notifications',{method:'DELETE'}); document.getElementById('notifList').innerHTML='<div style="padding:20px;">Aucune notification</div>'; document.getElementById('badgeNotif').style.display='none'; }
+
+        // ========== SCREEN TABS ==========
+        async function loadAccueil() { var r=await fetch('/eleve/api/profil'); var p=await r.json(); var el=document.getElementById('accueilClasse'); if(el)el.textContent=p.classe||'Non assignée'; var rn=await fetch('/eleve/api/notes'); var notes=await rn.json(); var elN=document.getElementById('accueilNotes'); if(elN)elN.innerHTML=notes.matieres&&notes.matieres.length?notes.matieres.map(function(n){return '<div class="note-card"><div class="note-value">'+n.moyenne.toFixed(2)+'</div><div class="note-label">'+n.matiere+'</div></div>';}).join(''):'<p>Aucune note</p>'; }
+        async function loadNotes() { var r=await fetch('/eleve/api/notes'); var data=await r.json(); var html='<div style="text-align:center;margin-bottom:16px;"><span style="font-size:2rem;font-weight:700;color:#002FA7;">'+data.moyenneGenerale.toFixed(2)+'/20</span><br>Moyenne générale</div>'; if(data.matieres&&data.matieres.length){html+='<table class="data-table"><thead><tr><th>Matière</th><th>Prof</th><th>NJ1</th><th>NJ2</th><th>Moy NJ</th><th>Examen</th><th>Coef</th><th>Moyenne</th></tr></thead><tbody>'; data.matieres.forEach(function(m){html+='<tr><td><strong>'+m.matiere+'</strong></td><td>'+m.prof_nom+'</td><td>'+m.nj1+'</td><td>'+m.nj2+'</td><td>'+m.moyenneNJ.toFixed(2)+'</td><td>'+m.examen+'</td><td>×'+m.coef+'</td><td><strong>'+m.moyenne.toFixed(2)+'/20</strong></td></tr>';}); html+='</tbody></table>';}else{html+='<p style="color:#888;">Aucune note</p>';} var el=document.getElementById('notesContent'); if(el)el.innerHTML=html; }
+        async function loadEDT() { var r=await fetch('/eleve/api/edt'); var edt=await r.json(); var jours=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi']; var plages=[{d:'07:00',f:'08:00'},{d:'08:00',f:'09:00'},{d:'09:00',f:'10:00'},{d:'10:00',f:'11:00'},{d:'11:00',f:'12:00'},{d:'12:00',f:'13:00'},{d:'13:00',f:'14:00'},{d:'14:00',f:'15:00'},{d:'15:00',f:'16:00'},{d:'16:00',f:'17:00'},{d:'17:00',f:'18:00'}]; var html='<div style="overflow-x:auto;"><div class="edt-grid"><div class="edt-header">Heure</div>'; jours.forEach(function(j){html+='<div class="edt-header">'+j+'</div>';}); plages.forEach(function(p){html+='<div class="edt-time"><span>'+p.d+'</span><span>'+p.f+'</span></div>'; jours.forEach(function(j){var cours=edt.filter(function(e){return e.jour===j&&e.heure_debut>=p.d+':00'&&e.heure_debut<p.f+':00';}); html+='<div class="edt-cell">'; if(cours.length)cours.forEach(function(c){html+='<div class="edt-cours"><strong>'+c.matiere+'</strong><br><small>'+(c.salle||'')+' '+(c.prof_nom||'')+'</small></div>';}); else html+='<div style="color:#ccc;text-align:center;">-</div>'; html+='</div>';});}); html+='</div></div>'; var el=document.getElementById('edtContent'); if(el)el.innerHTML=edt.length?html:'<p style="color:#888;">Aucun cours</p>'; }
+        async function loadRessources() { var r=await fetch('/eleve/api/ressources'); var ressources=await r.json(); var el=document.getElementById('ressourcesContent'); if(el)el.innerHTML=ressources.length?ressources.map(function(rs){return '<div class="ressource-card"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;"><div><strong>'+rs.titre+'</strong> <span class="badge badge-info">'+rs.type+'</span><br><small>'+(rs.prof_nom||'')+' | '+(rs.matiere||'')+'</small>'+(rs.date_limite?' <span class="badge badge-warning">Limite: '+rs.date_limite+'</span>':'')+'</div>'+(rs.fichier?'<a href="/uploads/'+rs.fichier+'" target="_blank" class="btn btn-sm btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/></svg></a>':'')+(rs.type==='exercice'?'<button class="btn btn-sm btn-success" onclick="rendreDevoir('+rs.id+')"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Rendre</button>':'')+'</div></div>';}).join(''):'<p style="color:#888;">Aucune ressource</p>'; }
+        function rendreDevoir(id){var input=document.createElement('input');input.type='file';input.onchange=async function(){var fd=new FormData();fd.append('ressource_id',id);fd.append('fichier',input.files[0]);await fetch('/eleve/api/rendre-devoir',{method:'POST',body:fd});loadRessources();};input.click();}
+        async function loadAbsences(){var r=await fetch('/eleve/api/absences');var absences=await r.json();var el=document.getElementById('absencesContent');if(el)el.innerHTML=absences.length?'<table class="data-table"><thead><tr><th>Date</th><th>Type</th><th>Motif</th><th>Justifié</th></tr></thead><tbody>'+absences.map(function(a){return'<tr><td>'+a.date_absence+'</td><td><span class="badge '+(a.type==='absence'?'badge-danger':'badge-warning')+'">'+a.type+'</span></td><td>'+a.motif+'</td><td>'+(a.justifie?'✅':'❌')+'</td></tr>';}).join('')+'</tbody></table>':'<p style="color:#888;">Aucune absence</p>';}
+        async function loadSanctions(){var r=await fetch('/eleve/api/sanctions');var sanctions=await r.json();var el=document.getElementById('sanctionsContent');if(el)el.innerHTML=sanctions.length?'<table class="data-table"><thead><tr><th>Date</th><th>Type</th><th>Motif</th><th>Gravité</th></tr></thead><tbody>'+sanctions.map(function(s){return'<tr><td>'+s.date_sanction+'</td><td>'+s.type_sanction+'</td><td>'+s.motif+'</td><td><span class="badge" style="background:'+((s.gravite==='grave'||s.gravite==='tres_grave')?'#e74c3c':'#f39c12')+';color:white;">'+s.gravite+'</span></td></tr>';}).join('')+'</tbody></table>':'<p style="color:#888;">Aucune sanction</p>';}
+        async function loadMessages(){var r=await fetch('/eleve/api/messages');var msgs=await r.json();var el=document.getElementById('messagesList');if(el)el.innerHTML=msgs.length?msgs.map(function(m){return'<div style="padding:10px;border:1px solid #eee;border-radius:8px;margin-bottom:6px;"><strong>'+m.sujet+'</strong><br><small>'+m.exp_nom+' '+m.exp_prenom+'</small><br>'+m.contenu.substring(0,100)+'</div>';}).join(''):'<p style="color:#888;">Aucun message</p>';}
+async function loadAmis(){
+    var rAmis=await fetch('/eleve/api/amis');var amis=await rAmis.json();
+    var rDemandes=await fetch('/eleve/api/demandes-amis');var demandes=await rDemandes.json();
+    var htmlDemandes='';
+    if(demandes.length>0){htmlDemandes='<h4>🔔 Demandes en attente</h4>';demandes.forEach(function(d){htmlDemandes+='<div class="ami-card" style="background:#fff3cd;"><div style="display:flex;align-items:center;gap:10px;"><div class="avatar-color" style="background:'+getAvatarColor(d.nom+d.prenom)+';">'+getInitials(d.nom,d.prenom)+'</div><div><strong>'+d.nom+' '+d.prenom+'</strong></div></div><div style="display:flex;gap:6px;"><button class="btn btn-sm btn-success" onclick="accepterAmi('+d.id+')">✅</button><button class="btn btn-sm btn-danger" onclick="refuserAmi('+d.id+')">❌</button></div></div>';});}
+    var elDemandes=document.getElementById('demandesAmis');if(elDemandes)elDemandes.innerHTML=htmlDemandes;
+    var elAmis=document.getElementById('amisList');
+    if(elAmis)elAmis.innerHTML=amis.length?amis.map(function(a){
+        return'<div class="ami-card"><div style="display:flex;align-items:center;gap:10px;flex:1;"><div class="avatar-color" style="background:'+getAvatarColor(a.nom+a.prenom)+';">'+getInitials(a.nom,a.prenom)+'</div><div><strong>'+a.nom+' '+a.prenom+'</strong></div></div><button class="btn btn-sm btn-danger" onclick="supprimerAmi('+a.id+')" title="Retirer"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="14" height="14"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>';
+    }).join(''):'<p style="color:#888;">Aucun ami</p>';
+}
+
+async function supprimerAmi(id){
+    if(!confirm('Retirer cet ami ?'))return;
+    await fetch('/eleve/api/supprimer-ami',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ami_id:id})});
+    loadAmis();
+}
+       async function rechercherEleves(){var search=document.getElementById('searchAmi').value;if(search.length<2){var el=document.getElementById('rechercheList');if(el)el.innerHTML='';return;} var r=await fetch('/eleve/api/rechercher-eleves?search='+encodeURIComponent(search));var eleves=await r.json();var el=document.getElementById('rechercheList');if(el)el.innerHTML='<h4>Résultats</h4>'+(eleves.length?eleves.map(function(e){return'<div class="ami-card"><div style="display:flex;align-items:center;gap:10px;"><div class="avatar-color" style="background:'+getAvatarColor(e.nom+e.prenom)+';">'+getInitials(e.nom,e.prenom)+'</div><div><strong>'+e.nom+' '+e.prenom+'</strong></div></div><button class="btn btn-sm btn-success" onclick="ajouterAmi('+e.id+')">➕</button></div>';}).join(''):'<p style="color:#888;">Aucun résultat</p>');}
+        async function ajouterAmi(id){await fetch('/eleve/api/ajouter-ami',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ami_id:id})});loadAmis();}
+        async function accepterAmi(id){await fetch('/eleve/api/accepter-ami',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ami_id:id})});loadAmis();}
+        async function refuserAmi(id){await fetch('/eleve/api/refuser-ami',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ami_id:id})});loadAmis();}
+        async function loadGroupes(){var r=await fetch('/eleve/api/groupes');var groupes=await r.json();var el=document.getElementById('groupesList');if(el)el.innerHTML='<button class="btn btn-primary" onclick="creerGroupe()" style="margin-bottom:12px;"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Créer un groupe</button>'+(groupes.length?groupes.map(function(g){return'<div style="padding:12px;border:1px solid #eee;border-radius:10px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;"><div style="display:flex;align-items:center;gap:10px;">'+(g.photo?'<img src="/uploads/'+g.photo+'" style="width:40px;height:40px;border-radius:50%;object-fit:cover;">':'<div style="width:40px;height:40px;border-radius:50%;background:#6366f1;color:white;display:flex;align-items:center;justify-content:center;font-weight:700;">'+(g.nom||'G').charAt(0).toUpperCase()+'</div>')+'<div><strong>'+(g.nom||'Groupe')+'</strong><br><small>'+(g.nb_membres||0)+' membres</small></div></div><button class="btn btn-sm" style="background:#6366f1;color:white;" onclick="openGroupeSettings('+g.id+',\''+(g.nom||'').replace(/'/g,"\\'")+'\')"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="14" height="14"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button></div>';}).join(''):'<p style="color:#888;">Aucun groupe</p>');}
+        function creerGroupe(){var nom=prompt('Nom du groupe :');if(!nom)return;fetch('/eleve/api/creer-groupe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nom:nom})}).then(r=>r.json()).then(j=>{loadGroupes();});}
+        loadAccueil();
+        loadNotifCount();
+        setInterval(loadNotifCount, 30000);
+    </script>
+</body>
+</html>

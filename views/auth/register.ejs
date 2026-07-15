@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --bleu-klein: #002FA7; --blanc: #ffffff; --noir: #1a1a1a; --gris: #666666; --gris-clair: #999999; --gris-tres-clair: #e0e0e0; --gris-background: #f8f9fa; --rouge: #e74c3c; --rouge-clair: #fee; --vert: #27ae60; --vert-clair: #efe; --border-radius: 14px; --border-radius-sm: 8px; --shadow-lg: 0 8px 40px rgba(0,0,0,0.1); }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; background-color:var(--blanc); color:var(--noir); line-height:1.5; }
+        .theme-toggle { position:fixed; top:16px; right:16px; z-index:1000; }
+        .toggle-switch { display:flex; align-items:center; gap:6px; background:var(--gris-background); padding:5px 10px; border-radius:30px; border:1.5px solid var(--gris-tres-clair); cursor:pointer; }
+        .toggle-icon { width:16px; height:16px; }
+        .toggle-label { font-size:0.7rem; font-weight:600; color:var(--gris); }
+        .auth-wrapper { min-height:100vh; display:flex; align-items:center; justify-content:center; background-color:var(--blanc); background-image:radial-gradient(circle at 15% 25%, rgba(0,47,167,0.02) 0%, transparent 50%), radial-gradient(circle at 85% 75%, rgba(0,47,167,0.02) 0%, transparent 50%); padding:16px; }
+        .auth-container { background:var(--blanc); border-radius:20px; box-shadow:var(--shadow-lg); width:100%; max-width:900px; min-height:500px; overflow:hidden; display:flex; border:1px solid var(--gris-tres-clair); }
+        .auth-left { flex:0.9; display:flex; align-items:center; justify-content:center; padding:30px 25px; background:var(--bleu-klein); position:relative; overflow:hidden; }
+        .auth-left::before { content:''; position:absolute; width:200px; height:200px; background:rgba(255,255,255,0.06); border-radius:50%; top:-60px; right:-60px; }
+        .auth-left-content { position:relative; z-index:2; text-align:center; color:var(--blanc); background:rgba(255,255,255,0.08); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border-radius:18px; padding:30px 22px; border:1px solid rgba(255,255,255,0.18); max-width:280px; }
+        .logo-icon { width:45px; height:45px; color:white; animation:float 3s ease-in-out infinite; }
+        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+        .auth-left-content h1 { font-size:2rem; font-weight:700; }
+        .text-highlight { color:#8ab4ff; font-weight:300; }
+        .tagline { font-size:0.85rem; opacity:0.85; margin-bottom:22px; }
+        .features { display:flex; flex-direction:column; gap:8px; }
+        .feature-item { display:flex; align-items:center; gap:10px; padding:8px 12px; background:rgba(255,255,255,0.06); border-radius:10px; border:1px solid rgba(255,255,255,0.1); }
+        .feature-item svg { width:16px; height:16px; }
+        .feature-item span { font-size:0.78rem; }
+        .auth-right { flex:1.2; display:flex; align-items:center; justify-content:center; padding:25px 30px; }
+        .auth-form-container { width:100%; max-width:420px; }
+        .auth-form-container h2 { font-size:1.5rem; font-weight:700; margin-bottom:2px; }
+        .subtitle { color:var(--gris); margin-bottom:18px; font-size:0.82rem; }
+        .alert { display:flex; align-items:center; gap:8px; padding:10px 12px; border-radius:var(--border-radius-sm); margin-bottom:14px; font-size:0.8rem; font-weight:500; }
+        .alert-danger { background:var(--rouge-clair); color:var(--rouge); }
+        .alert-success { background:var(--vert-clair); color:var(--vert); }
+        .alert svg { width:16px; height:16px; }
+        .social-buttons { display:flex; flex-direction:column; gap:8px; margin-bottom:4px; }
+        .btn-social { width:100%; padding:10px 16px; border-radius:var(--border-radius-sm); font-weight:500; font-size:0.82rem; display:flex; align-items:center; justify-content:center; gap:10px; border:1.5px solid var(--gris-tres-clair); background:var(--blanc); color:var(--noir); cursor:pointer; text-decoration:none; }
+        .btn-social:hover { transform:translateY(-1px); }
+        .social-icon { width:18px; height:18px; }
+        .separator { display:flex; align-items:center; text-align:center; margin:14px 0; }
+        .separator::before, .separator::after { content:''; flex:1; border-bottom:1px solid var(--gris-tres-clair); }
+        .separator span { padding:0 12px; font-size:0.75rem; color:var(--gris); }
+        .auth-form { display:flex; flex-direction:column; gap:10px; }
+        .form-group { display:flex; flex-direction:column; gap:5px; }
+        .form-group label { font-weight:600; font-size:0.78rem; color:#333; }
+        .form-control { width:100%; padding:10px 12px; border:1.5px solid var(--gris-tres-clair); border-radius:var(--border-radius-sm); font-size:0.85rem; font-family:'Inter',sans-serif; background:var(--gris-background); outline:none; }
+        .form-control:focus { border-color:var(--bleu-klein); background:var(--blanc); }
+        .form-row { display:flex; gap:10px; }
+        .form-row .form-group { flex:1; }
+        select.form-control { appearance:none; background-image:url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23999999' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat:no-repeat; background-position:right 10px center; background-size:16px; padding-right:32px; cursor:pointer; }
+        .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:11px 22px; border:none; border-radius:var(--border-radius-sm); font-size:0.88rem; font-weight:600; cursor:pointer; font-family:'Inter',sans-serif; }
+        .btn-primary { background:var(--bleu-klein); color:var(--blanc); }
+        .btn-primary:hover { background:#003fd6; }
+        .btn-block { width:100%; }
+        .btn-arrow { width:15px; height:15px; }
+        .auth-link { text-align:center; margin-top:16px; font-size:0.8rem; color:var(--gris); }
+        .auth-link a { color:var(--bleu-klein); text-decoration:none; font-weight:700; }
+        .dynamic-fields { background:var(--gris-background); border-radius:var(--border-radius-sm); padding:12px; margin-top:4px; border:1px dashed var(--gris-tres-clair); }
+        .admin-fields { background:#f0f4ff; border-radius:var(--border-radius-sm); padding:14px; margin-top:4px; border:1px solid #d0d8ff; }
+        .info-banner { background:#fff3cd; border:1px solid #ffc107; border-radius:8px; padding:10px 14px; margin-bottom:12px; font-size:0.75rem; color:#856404; }
+        @media (max-width:768px) { .auth-container { flex-direction:column; max-width:450px; } .auth-left { padding:22px 18px; } .auth-left-content { padding:22px 18px; max-width:100%; } .auth-right { padding:20px 18px; } .form-row { flex-direction:column; } }
+    </style>
+</head>
+<body>
+    <div class="theme-toggle">
+        <div class="toggle-switch" onclick="toggleDarkMode()">
+            <div class="toggle-icon sun-icon" id="sunIcon"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="5"/></svg></div>
+            <div class="toggle-icon moon-icon" id="moonIcon" style="display:none;"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></div>
+            <span class="toggle-label" id="toggleLabel">Sombre</span>
+        </div>
+    </div>
+
+    <div class="auth-wrapper">
+        <div class="auth-container">
+            <div class="auth-left">
+                <div class="auth-left-content">
+                    <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 2 4 3 6 3s6-1 6-3v-5"/></svg>
+                    <h1>EducOS<span class="text-highlight">-pro</span></h1>
+                    <p class="tagline">Rejoignez la communauté<br>éducative</p>
+                    <div class="features">
+                        <div class="feature-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg><span>5 profils disponibles</span></div>
+                        <div class="feature-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span>Inscription sécurisée</span></div>
+                        <div class="feature-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span>Gratuit et rapide</span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="auth-right">
+                <div class="auth-form-container">
+                    <h2>Inscription</h2>
+                    <p class="subtitle">Créez votre compte EducOS-pro</p>
+                    <% if (locals.error) { %><div class="alert alert-danger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg><span><%= error %></span></div><% } %>
+
+                    <div class="social-buttons">
+                        <a href="/auth/google" class="btn-social btn-google"><svg class="social-icon" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg><span>Google</span></a>
+                        <a href="/auth/facebook" class="btn-social btn-facebook"><svg class="social-icon" viewBox="0 0 24 24"><path fill="#1877F2" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg><span>Facebook</span></a>
+                    </div>
+                    <div class="separator"><span>ou</span></div>
+
+                    <form id="registerForm" class="auth-form" method="POST">
+                        <div class="form-row">
+                            <div class="form-group"><label>Nom *</label><input type="text" name="nom" class="form-control" required></div>
+                            <div class="form-group"><label>Prénom *</label><input type="text" name="prenom" class="form-control" required></div>
+                        </div>
+                        <div class="form-group"><label>Email *</label><input type="email" name="email" class="form-control" required></div>
+                        <div class="form-group">
+                            <label>Rôle *</label>
+                            <select name="role" class="form-control" required onchange="showDynamicFields()">
+                                <option value="">Choisissez votre profil</option>
+                                <option value="admin">👑 Administrateur</option>
+                                <option value="vie_scolaire">📋 Vie Scolaire</option>
+                                <option value="prof">👨‍🏫 Professeur</option>
+                                <option value="parent">👪 Parent</option>
+                                <option value="eleve">🎓 Élève</option>
+                            </select>
+                        </div>
+
+                        <div id="dynamicFields" style="display:none;"></div>
+
+                        <!-- Champs Admin -->
+                        <div id="adminFields" style="display:none;">
+                            <div class="admin-fields">
+                                <h4 style="margin-bottom:12px;color:#002FA7;">🏫 Informations de l'établissement</h4>
+                                <div class="form-group"><label>Nom de l'établissement *</label><input type="text" name="etablissement_nom" class="form-control"></div>
+                                <div class="form-group"><label>Adresse</label><input type="text" name="adresse" class="form-control"></div>
+                                <div class="form-row"><div class="form-group"><label>Téléphone</label><input type="text" name="telephone" class="form-control"></div><div class="form-group"><label>Année scolaire</label><input type="text" name="annee_scolaire" class="form-control" value="2024-2025"></div></div>
+                                <div class="form-group"><label>Directeur</label><input type="text" name="directeur" class="form-control"></div>
+                            </div>
+                        </div>
+
+                        <!-- Sélection école pour NON-admin -->
+                        <div id="ecoleFields" style="display:none;">
+                            <div class="dynamic-fields">
+                                <div class="info-banner">⚠️ Sélectionnez votre école. Le code s'affiche automatiquement.</div>
+                                <div class="form-group">
+                                    <label>Sélectionnez votre école *</label>
+                                    <select id="etablissement_id" name="etablissement_id" class="form-control" onchange="afficherCode()">
+                                        <option value="">Choisissez une école...</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" id="codeDisplay" style="display:none;">
+                                    <label>Code établissement</label>
+                                    <input type="text" id="etablissement_code_display" class="form-control" disabled style="background:#f0f4ff;font-weight:700;color:#002FA7;text-transform:uppercase;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group"><label>Mot de passe *</label><input type="password" name="password" class="form-control" required minlength="8"></div>
+                        <div class="form-group"><label>Confirmer *</label><input type="password" name="confirm_password" class="form-control" required></div>
+
+                        <button type="submit" class="btn btn-primary btn-block"><span>Créer mon compte</span><svg class="btn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button>
+                    </form>
+                    <p class="auth-link">Déjà un compte ? <a href="/auth/login">Se connecter</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            var isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDark);
+            document.getElementById('sunIcon').style.display = isDark ? 'none' : 'flex';
+            document.getElementById('moonIcon').style.display = isDark ? 'flex' : 'none';
+            document.getElementById('toggleLabel').textContent = isDark ? 'Clair' : 'Sombre';
+        }
+        if (localStorage.getItem('darkMode') === 'true') { document.body.classList.add('dark-mode'); document.getElementById('sunIcon').style.display = 'none'; document.getElementById('moonIcon').style.display = 'flex'; }
+
+        function showDynamicFields() {
+            var role = document.querySelector('select[name="role"]').value;
+            document.getElementById('dynamicFields').innerHTML = '';
+            document.getElementById('dynamicFields').style.display = 'none';
+            document.getElementById('adminFields').style.display = 'none';
+            document.getElementById('ecoleFields').style.display = 'none';
+
+            if (role === 'prof') {
+                document.getElementById('dynamicFields').style.display = 'block';
+                document.getElementById('dynamicFields').innerHTML = '<div class="dynamic-fields"><div class="form-group"><label>Matière principale *</label><select name="matiere_principale" class="form-control"><option value="">Choisissez</option><option value="Mathématiques">Mathématiques</option><option value="Français">Français</option><option value="Histoire-Géographie">Histoire-Géographie</option><option value="SVT">SVT</option><option value="Physique-Chimie">Physique-Chimie</option><option value="Anglais">Anglais</option><option value="Informatique">Informatique</option><option value="Autre">Autre</option></select></div><div class="form-group"><label>Classes</label><input type="text" name="classes_assignees" class="form-control" placeholder="ex: 6ème A, 5ème B"></div></div>';
+                document.getElementById('ecoleFields').style.display = 'block';
+            } else if (role === 'eleve') {
+                document.getElementById('dynamicFields').style.display = 'block';
+                document.getElementById('dynamicFields').innerHTML = '<div class="dynamic-fields"><div class="form-group"><label>Classe *</label><select name="classe_eleve" class="form-control"><option value="">Choisissez</option><option>6ème A</option><option>6ème B</option><option>5ème A</option><option>5ème B</option><option>4ème A</option><option>4ème B</option><option>3ème A</option><option>3ème B</option><option>2nde A</option><option>2nde B</option><option>1ère A</option><option>1ère B</option><option>Tle A</option><option>Tle B</option></select></div><div class="form-group"><label>Date de naissance</label><input type="date" name="date_naissance" class="form-control"></div></div>';
+                document.getElementById('ecoleFields').style.display = 'block';
+            } else if (role === 'parent') {
+                document.getElementById('dynamicFields').style.display = 'block';
+                document.getElementById('dynamicFields').innerHTML = '<div class="dynamic-fields"><label style="font-weight:600;">Enfant(s)</label><div id="childrenContainer"><div class="form-row" style="margin-bottom:8px;"><input type="text" name="enfant_nom[]" class="form-control" placeholder="Nom" required><input type="text" name="enfant_prenom[]" class="form-control" placeholder="Prénom" required><select name="enfant_classe[]" class="form-control"><option value="">Classe</option><option>6ème A</option><option>6ème B</option><option>5ème A</option><option>5ème B</option><option>4ème A</option><option>4ème B</option><option>3ème A</option><option>3ème B</option></select></div></div><button type="button" style="background:#002FA7;color:white;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;margin-top:6px;font-size:0.8rem;" onclick="addChild()">+ Ajouter</button></div>';
+                document.getElementById('ecoleFields').style.display = 'block';
+            } else if (role === 'admin') {
+                document.getElementById('adminFields').style.display = 'block';
+                document.getElementById('etablissement_nom').required = true;
+            } else if (role === 'vie_scolaire') {
+                document.getElementById('ecoleFields').style.display = 'block';
+            }
+
+            // Mettre à jour l'action du formulaire
+            var form = document.getElementById('registerForm');
+            form.action = (role === 'admin') ? '/auth/register-admin' : '/auth/register';    
+        }
+
+        function addChild() {
+            var div = document.createElement('div');
+            div.className = 'form-row';
+            div.style.marginBottom = '8px';
+            div.innerHTML = '<input type="text" name="enfant_nom[]" class="form-control" placeholder="Nom" required><input type="text" name="enfant_prenom[]" class="form-control" placeholder="Prénom" required><select name="enfant_classe[]" class="form-control"><option value="">Classe</option><option>6ème A</option><option>6ème B</option><option>5ème A</option><option>5ème B</option><option>4ème A</option><option>4ème B</option><option>3ème A</option><option>3ème B</option></select><button type="button" style="background:#e74c3c;color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;" onclick="this.parentElement.remove()">✕</button>';
+            document.getElementById('childrenContainer').appendChild(div);
+        }
+
+        async function loadEcoles() {
+            try {
+                var r = await fetch('/auth/api/ecoles');
+                var ecoles = await r.json();
+                var select = document.getElementById('etablissement_id');
+                select.innerHTML = '<option value="">Choisissez une école...</option>' + ecoles.map(function(e) { return '<option value="' + e.id + '" data-code="' + e.code + '">' + e.nom + '</option>'; }).join('');
+            } catch(e) {}
+        }
+
+        function afficherCode() {
+            var select = document.getElementById('etablissement_id');
+            var option = select.options[select.selectedIndex];
+            var codeDisplay = document.getElementById('codeDisplay');
+            var codeInput = document.getElementById('etablissement_code_display');
+            if (option && option.value) {
+                codeDisplay.style.display = 'block';
+                codeInput.value = option.getAttribute('data-code');
+            } else {
+                codeDisplay.style.display = 'none';
+                codeInput.value = '';
+            }
+        }
+
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            var p1 = document.querySelector('input[name="password"]').value;
+            var p2 = document.querySelector('input[name="confirm_password"]').value;
+            if (p1 !== p2) { e.preventDefault(); alert('Les mots de passe ne correspondent pas !'); }
+        });
+
+        loadEcoles();
+    </script>
+</body>
+</html>
