@@ -4,7 +4,6 @@ dotenv.config(); // Charge les variables d'environnement depuis le fichier .env
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
-const session = require('express-session');
 const flash = require('connect-flash');
 const passport = require('passport');
 const multer = require('multer');
@@ -27,6 +26,8 @@ const userModel = require('./src/models/userModel');
 const db = require('./src/models/db');
 const communicationModel = require('./src/models/communicationModel');
 const { createClient } = require("redis");
+const session = require('express-session');
+const pgSession = require('connect-pg-simple')(session);
 const { createAdapter } = require("@socket.io/redis-adapter");
 
 const app = express();
@@ -91,12 +92,32 @@ const avatarUpload = multer({
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Sessions
+// Sessions - Configuration conditionnelle pour la production et le développement
+let sessionStore;
+if (process.env.NODE_ENV === 'production') {
+  console.log('Configuration du store de session pour la production (PostgreSQL).');
+  sessionStore = new pgSession({
+    pool: db, // Utilise le pool Knex existant
+    tableName: 'user_sessions', // Nom de la table pour les sessions
+    createTableIfMissing: true, // Crée la table automatiquement
+  });
+} else {
+  console.log('Configuration du store de session pour le développement (en mémoire).');
+  // En développement, on utilise le MemoryStore par défaut, qui ne nécessite aucune configuration.
+  // L'erreur "Cannot find module 'connect-sqlite3'" suggère que vous aviez une configuration
+  // pour SQLite ici. Il est recommandé de la retirer pour la production.
+}
+
 const sessionMiddleware = session({
+  store: sessionStore, // Utilise le store configuré
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
-  cookie: { maxAge: 1000 * 60 * 60 * 3 }
+  cookie: { 
+    maxAge: 1000 * 60 * 60 * 24 * 7, // 7 jours
+    secure: process.env.NODE_ENV === 'production', // 'true' en production (HTTPS)
+    httpOnly: true
+  }
 });
 app.use(sessionMiddleware);
 
