@@ -1,9 +1,9 @@
 const dotenv = require('dotenv');
 dotenv.config(); // Charge les variables d'environnement depuis le fichier .env
-
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
+const session = require('express-session');
 const flash = require('connect-flash');
 const passport = require('passport');
 const multer = require('multer');
@@ -26,7 +26,6 @@ const userModel = require('./src/models/userModel');
 const db = require('./src/models/db');
 const communicationModel = require('./src/models/communicationModel');
 const { createClient } = require("redis");
-const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
 const { createAdapter } = require("@socket.io/redis-adapter");
 
@@ -41,8 +40,12 @@ if (!process.env.SESSION_SECRET) {
 }
 
 // Initialisation des clients Redis (à connecter dans startServer)
-const pubClient = createClient({ url: process.env.REDIS_URL || 'redis://localhost:6379' });
-const subClient = pubClient.duplicate();
+let pubClient, subClient;
+if (process.env.REDIS_URL) {
+  console.log('Configuration des clients Redis car REDIS_URL est fournie.');
+  pubClient = createClient({ url: process.env.REDIS_URL });
+  subClient = pubClient.duplicate();
+}
 
 // Passport initialization
 initializePassport(passport);
@@ -347,17 +350,21 @@ app.set('broadcastDashboardStats', broadcastDashboardStats);
  */
 async function startServer() {
   // 1. Connecter les clients Redis et configurer l'adaptateur
-  try {
-    await Promise.all([pubClient.connect(), subClient.connect()]);
-    io.adapter(createAdapter(pubClient, subClient));
-    console.log('Adaptateur Redis pour Socket.IO configuré avec succès.');
-  } catch (err) {
-    console.error('Erreur de connexion à Redis. Le serveur va démarrer sans scalabilité temps réel.', err);
-    // Le serveur peut continuer, mais ne sera pas scalable pour les sockets.
+  if (pubClient && subClient) {
+    try {
+      await Promise.all([pubClient.connect(), subClient.connect()]);
+      io.adapter(createAdapter(pubClient, subClient));
+      console.log('Adaptateur Redis pour Socket.IO configuré avec succès.');
+      pubClient.on('error', (err) => console.error('Erreur client Redis (Pub):', err));
+      subClient.on('error', (err) => console.error('Erreur client Redis (Sub):', err));
+    } catch (err) {
+      console.error('Erreur de connexion à Redis. Le serveur va démarrer sans scalabilité temps réel.', err);
+      // Le serveur peut continuer, mais ne sera pas scalable pour les sockets.
+    }
+  } else {
+    console.log('REDIS_URL non fournie. Démarrage sans adaptateur Redis. La scalabilité temps réel est désactivée.');
   }
-  pubClient.on('error', (err) => console.error('Erreur client Redis (Pub):', err));
-  subClient.on('error', (err) => console.error('Erreur client Redis (Sub):', err));
-
+  
   // 2. Initialise la base de données (crée les tables si elles n'existent pas)
   await initializeDatabase();
 
@@ -387,8 +394,10 @@ const gracefulShutdown = (signal, callback) => {
         clearTimeout(timeout); // L'arrêt a réussi, on annule le timeout
         console.log('Serveur HTTP arrêté.');
         try {
+            if (pubClient && subClient && pubClient.isOpen) {
             await Promise.all([pubClient.quit(), subClient.quit()]);
             console.log('Connexions Redis fermées.');
+            }
             await db.destroy();
             console.log('Connexion à la base de données fermée.');
         } catch (err) {

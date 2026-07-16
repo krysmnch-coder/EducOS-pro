@@ -1,0 +1,40 @@
+# Blueprint pour le projet EducOS-pro sur Render
+# Documentation : https://render.com/docs/blueprint-spec
+
+services:
+  # 1. Le service web principal (votre application Node.js/Express)
+  - type: web
+    name: educos-pro-app
+    runtime: node
+    plan: starter # ou 'standard' pour de meilleures performances en production
+    region: frankfurt # Choisissez la région la plus proche de vos utilisateurs
+    buildCommand: "npm install"
+    startCommand: "node index.js"
+    healthCheckPath: / # Assurez-vous d'avoir une route qui répond avec un statut 200 OK
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: educos-db # Doit correspondre au nom du service de base de données ci-dessous
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: educos-redis # Doit correspondre au nom du service Redis ci-dessous
+          property: connectionString
+      # IMPORTANT : La variable SESSION_SECRET doit être ajoutée manuellement
+      # dans le dashboard Render comme "Secret" pour des raisons de sécurité.
+      - key: SESSION_SECRET
+        sync: false # Indique à Render de ne pas écraser la valeur définie dans le dashboard
+
+  # 2. La base de données PostgreSQL
+  - type: psql
+    name: educos-db
+    region: frankfurt
+    plan: free # ou un plan payant pour la production
+
+  # 3. Le service Redis pour Socket.IO et les sessions
+  - type: redis
+    name: educos-redis
+    region: frankfurt
+    plan: free # ou un plan payant pour la production
