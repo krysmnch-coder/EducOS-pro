@@ -8,7 +8,7 @@ services:
     runtime: node
     plan: starter # ou 'standard' pour de meilleures performances en production
     region: frankfurt # Choisissez la région la plus proche de vos utilisateurs
-    buildCommand: "npm install"
+    buildCommand: "npm install && npx knex migrate:latest --env production"
     startCommand: "node index.js"
     healthCheckPath: / # Assurez-vous d'avoir une route qui répond avec un statut 200 OK
     envVars:

@@ -16,8 +16,19 @@ module.exports = {
     seeds: {
       directory: './db/seeds' // Dossier pour les données de test (optionnel)
     }
+  },
+
+  production: {
+    client: 'pg',
+    connection: {
+      connectionString: process.env.DATABASE_URL,
+      ssl: { rejectUnauthorized: false } // Requis pour les connexions sécurisées sur Render
+    },
+    migrations: {
+      directory: './db/migrations'
+    },
+    seeds: {
+      directory: './db/seeds'
+    }
   }
-
-  // Vous pouvez ajouter ici des configurations pour la production (ex: PostgreSQL, MySQL)
-
 };
