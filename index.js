@@ -100,7 +100,7 @@ let sessionStore;
 if (process.env.NODE_ENV === 'production') {
   console.log('Configuration du store de session pour la production (PostgreSQL).');
   sessionStore = new pgSession({
-    pool: db, // Utilise le pool Knex existant
+    knex: db, // Utilise l'instance Knex existante
     tableName: 'user_sessions', // Nom de la table pour les sessions
     createTableIfMissing: true, // Crée la table automatiquement
   });
