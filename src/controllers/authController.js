@@ -103,27 +103,30 @@ const renderForceChangePassword = (req, res) => {
   });
 };
 
-const postForceChangePassword = async (req, res) => {
-  const { password, password2 } = req.body;
+const postForceChangePassword = async (req, res, next) => {
+  const { new_password, confirm_password } = req.body;
   const userId = req.user.id;
 
-  if (password !== password2) {
+  if (new_password !== confirm_password) {
     req.flash('error_msg', 'Les mots de passe ne correspondent pas.');
     return res.redirect('/force-change-password');
   }
 
-  if (password.length < 6) {
+  if (!new_password || new_password.length < 6) {
     req.flash('error_msg', 'Le mot de passe doit contenir au moins 6 caractères.');
     return res.redirect('/force-change-password');
   }
 
   try {
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(new_password, 10);
     // Cette fonction met à jour le mot de passe et met le flag à false
     await updateUserPassword(userId, hashedPassword);
 
-    req.flash('success_msg', 'Votre mot de passe a été mis à jour avec succès. Vous pouvez maintenant utiliser l\'application.');
-    res.redirect('/dashboard');
+    req.flash('success_msg', 'Votre mot de passe a été mis à jour avec succès. Veuillez vous reconnecter.');
+    req.logout(function(err) {
+      if (err) { return next(err); }
+      res.redirect('/login');
+    });
   } catch (error) {
     console.error('Erreur lors du changement de mot de passe forcé:', error);
     req.flash('error_msg', 'Une erreur est survenue.');
@@ -312,6 +315,7 @@ const postRegister = async (req, res) => {
         flashMessage = 'Votre compte a été créé. Il doit être validé par un administrateur avant la connexion.';
       }
     }
+
 
     // Utilisation d'une transaction pour garantir l'atomicité de la création du parent et des liens enfants.
     await db.transaction(async trx => {
