@@ -95,6 +95,10 @@ const avatarUpload = multer({
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+// Indiquer à Express qu'il est derrière un proxy (nécessaire pour Render)
+// Cela permet aux cookies sécurisés de fonctionner correctement en production.
+app.set('trust proxy', 1);
+
 // Sessions - Configuration conditionnelle pour la production et le développement
 let sessionStore;
 if (process.env.NODE_ENV === 'production') {
