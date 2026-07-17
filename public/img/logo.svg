@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <style>
+    /* Utilise la couleur primaire de Bootstrap par défaut */
+    .hat { fill: #0d6efd; }
+    /* S'adapte si le navigateur est en mode sombre */
+    @media (prefers-color-scheme: dark) {
+      .hat { fill: #4d9aff; } /* Un bleu plus clair pour une meilleure visibilité sur les onglets sombres */
+    }
+  </style>
+  <g class="hat">
+    <polygon points="12,3 22,8 12,13 2,8" />
+    <path d="M6,10.2 v3.8 c0,2.2 2.7,4 6,4 s6-1.8 6-4 v-3.8" />
+  </g>
+</svg>
