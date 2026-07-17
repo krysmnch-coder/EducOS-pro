@@ -106,7 +106,7 @@ if (process.env.NODE_ENV === 'production') {
   sessionStore = new pgSession({
     knex: db, // Utilise l'instance Knex existante
     tableName: 'user_sessions', // Nom de la table pour les sessions
-    createTableIfMissing: true, // Crée la table automatiquement
+    // createTableIfMissing: true, // Retiré : la création est gérée par une migration, ce qui est plus sûr.
   });
 } else {
   console.log('Configuration du store de session pour le développement (en mémoire).');
@@ -123,7 +123,8 @@ const sessionMiddleware = session({
   cookie: { 
     maxAge: 1000 * 60 * 60 * 24 * 7, // 7 jours
     secure: process.env.NODE_ENV === 'production', // 'true' en production (HTTPS)
-    httpOnly: true
+    httpOnly: true,
+    sameSite: 'lax' // Protection CSRF de base
   }
 });
 app.use(sessionMiddleware);
