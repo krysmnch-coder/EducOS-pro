@@ -36,6 +36,12 @@ const createEstablishment = async (req, res) => {
     }
 
     await establishmentModel.create(name, subdomain.toLowerCase());
+
+    // --- Mise à jour en temps réel pour la page d'accueil ---
+    const broadcastDashboardStats = req.app.get('broadcastDashboardStats');
+    if (broadcastDashboardStats) {
+      broadcastDashboardStats();
+    }
     req.flash('success_msg', `L'établissement "${name}" a été créé avec succès.`);
     res.redirect('/establishments');
   } catch (error) {
@@ -82,6 +88,12 @@ const deleteEstablishment = async (req, res) => {
   const { id } = req.params;
   try {
     await establishmentModel.delete(id);
+
+    // --- Mise à jour en temps réel pour la page d'accueil ---
+    const broadcastDashboardStats = req.app.get('broadcastDashboardStats');
+    if (broadcastDashboardStats) {
+      broadcastDashboardStats();
+    }
     req.flash('success_msg', 'L\'établissement a été supprimé avec succès.');
     res.redirect('/establishments');
   } catch (error) {

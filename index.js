@@ -177,15 +177,15 @@ const authNamespace = io.of('/');
 
 async function broadcastDashboardStats() {
   try {
-    const studentCount = await userModel.countUsersByRole('eleve');
+    const totalUserCountResult = await db('users').where('status', 'active').count('id as count').first();
     const professorCount = await userModel.countUsersByRole('professeur');
-    const totalMessageCount = await communicationModel.countTotalMessages();
+    const establishmentCountResult = await db('establishments').count('id as count').first();
     const pendingCount = await userModel.countPendingUsers();
 
     publicNamespace.emit('dashboardUpdate', {
-      studentCount,
+      totalUserCount: totalUserCountResult ? totalUserCountResult.count : 0,
       professorCount,
-      totalMessageCount,
+      establishmentCount: establishmentCountResult ? establishmentCountResult.count : 0,
       pendingCount
     });
   } catch (error) {
@@ -216,12 +216,15 @@ authNamespace.use((socket, next) => {
 authNamespace.on('connection', (socket) => { // Note: les gestionnaires à l'intérieur sont maintenant asynchrones
   (async () => {
     console.log(`Utilisateur connecté: ${socket.user.name} (${socket.userId})`);
-    await pubClient.sAdd('online_users', socket.userId.toString());
-    
-    // Diffuser la liste mise à jour des utilisateurs en ligne à tout le monde
-    const onlineUserIds = await pubClient.sMembers('online_users');
-    authNamespace.emit('onlineUsersUpdate', onlineUserIds);
-    
+    // La gestion des utilisateurs en ligne ne fonctionne que si Redis est configuré
+    if (pubClient) {
+      await pubClient.sAdd('online_users', socket.userId.toString());
+      
+      // Diffuser la liste mise à jour des utilisateurs en ligne à tout le monde
+      const onlineUserIds = await pubClient.sMembers('online_users');
+      authNamespace.emit('onlineUsersUpdate', onlineUserIds);
+    }
+
     socket.join(`user_${socket.userId}`); // Rejoindre sa propre room pour recevoir ses messages
   })();
   // Envoyer un message (avec confirmation)
@@ -331,10 +334,15 @@ authNamespace.on('connection', (socket) => { // Note: les gestionnaires à l'int
 
   // Déconnexion
   socket.on('disconnect', async () => {
-    console.log(`Utilisateur déconnecté: ${socket.user.name} (${socket.userId})`);
-    await pubClient.sRem('online_users', socket.userId.toString());
-    const onlineUserIds = await pubClient.sMembers('online_users');
-    authNamespace.emit('onlineUsersUpdate', onlineUserIds);
+    if (socket.user) { // S'assurer que l'utilisateur était bien authentifié
+      console.log(`Utilisateur déconnecté: ${socket.user.name} (${socket.userId})`);
+      // La gestion des utilisateurs en ligne ne fonctionne que si Redis est configuré
+      if (pubClient) {
+        await pubClient.sRem('online_users', socket.userId.toString());
+        const onlineUserIds = await pubClient.sMembers('online_users');
+        authNamespace.emit('onlineUsersUpdate', onlineUserIds);
+      }
+    }
   });
 });
 

@@ -22,6 +22,7 @@ yarn-error.log*
 # Base de données locale
 # Votre knexfile.js est configuré pour utiliser une base de données SQLite en développement.
 database.sqlite
+dev.sqlite3
 database.sqlite-journal
 
 # Fichiers téléversés par les utilisateurs

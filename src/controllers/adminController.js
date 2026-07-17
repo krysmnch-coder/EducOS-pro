@@ -59,6 +59,12 @@ const approveUser = async (req, res) => {
 
     await userModel.approveUserById(id);
 
+    // --- Mise à jour en temps réel pour la page d'accueil ---
+    const broadcastDashboardStats = req.app.get('broadcastDashboardStats');
+    if (broadcastDashboardStats) {
+      broadcastDashboardStats();
+    }
+
     // --- Mise à jour en temps réel pour le super-admin ---
     if (userToApprove.establishment_id) {
       const establishmentId = userToApprove.establishment_id;
@@ -91,6 +97,12 @@ const deleteUser = async (req, res) => {
     }
 
     await userModel.deleteUserById(id);
+
+    // --- Mise à jour en temps réel pour la page d'accueil ---
+    const broadcastDashboardStats = req.app.get('broadcastDashboardStats');
+    if (broadcastDashboardStats) {
+      broadcastDashboardStats();
+    }
 
     req.flash('success_msg', `Le compte de ${userToDelete.name} a été supprimé.`);
     res.redirect(req.get('Referrer') || '/admin');

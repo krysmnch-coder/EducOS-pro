@@ -20,6 +20,7 @@ services:
           property: connectionString
       - key: REDIS_URL
         fromService:
+          type: keyvalue # Précise le type du service à référencer
           name: educos-redis # Doit correspondre au nom du service Redis ci-dessous
           property: connectionString
       # IMPORTANT : La variable SESSION_SECRET doit être ajoutée manuellement
@@ -27,14 +28,16 @@ services:
       - key: SESSION_SECRET
         sync: false # Indique à Render de ne pas écraser la valeur définie dans le dashboard
 
-  # 2. La base de données PostgreSQL
-  - type: psql
-    name: educos-db
-    region: frankfurt
-    plan: free # ou un plan payant pour la production
-
   # 3. Le service Redis pour Socket.IO et les sessions
-  - type: redis
+  - type: keyvalue
     name: educos-redis
     region: frankfurt
     plan: free # ou un plan payant pour la production
+    ipAllowList: [] # Autorise les connexions depuis d'autres services Render de votre compte
+
+databases:
+  # 2. La base de données PostgreSQL
+  - name: educos-db
+    region: frankfurt
+    plan: free # ou un plan payant pour la production
+    ipAllowList: [] # Autorise les connexions depuis d'autres services Render de votre compte
