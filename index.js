@@ -116,7 +116,8 @@ if (process.env.NODE_ENV === 'production') {
   sessionStore = new pgSession({
     knex: db, // Utilise l'instance Knex existante
     tableName: 'user_sessions', // Nom de la table pour les sessions
-    createTableIfMissing: true, // ACTIVÉ : Force la création de la table si elle manque. C'est la solution la plus robuste ici.
+    // createTableIfMissing: true, // On désactive cette option. La création de la table doit être gérée
+    // exclusivement par les migrations pour garantir la stabilité en production.
   });
 } else {
   console.log('Configuration du store de session pour le développement (en mémoire).');
