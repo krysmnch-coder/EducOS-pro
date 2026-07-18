@@ -7,7 +7,6 @@ const session = require('express-session');
 const flash = require('connect-flash');
 const passport = require('passport');
 const multer = require('multer');
-const initializeDatabase = require('./src/config/db-init'); // Import de la fonction d'initialisation
 const initializePassport = require('./src/config/passport-config');
 const authRoutes = require('./src/routes/authRoutes');
 const chatRoutes = require('./src/routes/chatRoutes');
@@ -389,9 +388,6 @@ async function startServer() {
     console.log('REDIS_URL non fournie. Démarrage sans adaptateur Redis. La scalabilité temps réel est désactivée.');
   }
   
-  // 2. Initialise la base de données (crée les tables si elles n'existent pas)
-  await initializeDatabase();
-
   // 3. Démarre le serveur HTTP
   server.listen(PORT, () => {
     console.log(`Serveur démarré sur http://localhost:${PORT}`);
