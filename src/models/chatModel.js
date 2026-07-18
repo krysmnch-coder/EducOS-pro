@@ -117,8 +117,10 @@ async function getUserConversations(userId) {
       db.raw('COALESCE(unread.unread_count, 0) as unread_count')
     )
     .where(function() { this.where('c.user1_id', userId).orWhere('c.user2_id', userId); })
-    .whereNotNull('last_activity') // On ne retourne que les conversations qui ont au moins un message.
-    .orderBy('last_activity', 'desc');
+    // Le tri par 'last_activity' peut mettre les conversations sans message (NULL) à la fin ou au début
+    // selon la base de données. 'nulls last' est plus explicite et garantit que les nouvelles
+    // conversations apparaissent en bas de la liste triée par date.
+    .orderBy('last_activity', 'desc', 'last');
 }
 
 // Marquer les messages comme lus

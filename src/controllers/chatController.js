@@ -119,8 +119,9 @@ const getConversations = async (req, res) => {
         // Transformer les données pour le frontend. Pour chaque conversation,
         // on extrait les informations de l'autre utilisateur.
         const conversations = rawConversations.map(convo => {
-            // Utilisation de '===' pour une comparaison stricte et éviter les bugs de type.
-            const isUser1 = convo.user1_id === Number(currentUserId);
+            // Comparaison robuste des IDs, qui peuvent être des nombres ou des chaînes de caractères
+            // en fonction du pilote de base de données.
+            const isUser1 = Number(convo.user1_id) === Number(currentUserId);
             const otherUser = {
                 id: isUser1 ? convo.user2_id : convo.user1_id,
                 name: isUser1 ? convo.user2_name : convo.user1_name,

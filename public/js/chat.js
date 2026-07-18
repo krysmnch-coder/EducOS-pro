@@ -299,7 +299,7 @@ document.addEventListener('DOMContentLoaded', () => {
     /**
      * Ouvre une conversation spécifique.
      */
-    const openChatWindow = (userId, userName) => {
+    const openChatWindow = async (userId, userName) => {
         activeUserId = userId;
 
         // Mettre en surbrillance l'utilisateur actif dans la liste
@@ -494,7 +494,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadConversations();
 
     // Gérer la sélection d'un nouvel utilisateur depuis la modale
-    document.getElementById('new-chat-modal')?.addEventListener('click', (e) => {
+    document.getElementById('new-chat-modal')?.addEventListener('click', async (e) => {
         const userLink = e.target.closest('.new-chat-user');
         if (userLink) {
             e.preventDefault();
@@ -505,7 +505,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const modal = bootstrap.Modal.getInstance(document.getElementById('new-chat-modal'));
             modal?.hide();
 
-            openChatWindow(newUserId, newUserName);
+            await openChatWindow(newUserId, newUserName);
         }
     });
 });
