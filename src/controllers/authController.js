@@ -22,14 +22,22 @@ exports.renderHome = (req, res) => {
 /**
  * Affiche la page de connexion.
  */
-exports.renderLogin = (req, res) => {
+exports.renderLogin = async (req, res) => {
   // Si l'utilisateur est déjà connecté, on le redirige vers le tableau de bord.
   if (req.isAuthenticated()) {
     return res.redirect('/dashboard');
   }
-  res.render('login', {
-    title: 'Connexion | EducOS-pro'
-  });
+  try {
+    const establishments = await establishmentModel.getAll();
+    res.render('login', {
+      title: 'Connexion | EducOS-pro',
+      establishments: establishments
+    });
+  } catch (error) {
+    console.error("Erreur lors de l'affichage de la page de connexion:", error);
+    req.flash('error_msg', 'Impossible de charger la page de connexion.');
+    res.redirect('/');
+  }
 };
 
 /**
