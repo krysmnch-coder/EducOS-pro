@@ -132,7 +132,7 @@ const getConversations = async (req, res) => {
                 name: otherUser.name,
                 avatar_url: otherUser.avatar_url,
                 last_message: convo.last_message_text,
-                unread_count: convo.unread_count
+                unread_count: Number(convo.unread_count) || 0
             };
         });
 

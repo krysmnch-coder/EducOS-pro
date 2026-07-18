@@ -1,12 +1,12 @@
 const db = require('./db');
 
 // Créer ou récupérer une conversation
-async function getOrCreateConversation(user1Id, user2Id) {
+async function getOrCreateConversation(user1Id, user2Id, trx = db) {
   // Assure que les IDs sont toujours dans le même ordre pour éviter les doublons
-  const u1 = Math.min(user1Id, user2Id);
-  const u2 = Math.max(user1Id, user2Id);
+  const u1 = Math.min(Number(user1Id), Number(user2Id));
+  const u2 = Math.max(Number(user1Id), Number(user2Id));
 
-  const conversation = await db('conversations')
+  const conversation = await trx('conversations')
     .where({ user1_id: u1, user2_id: u2 })
     .first('id');
 
@@ -14,35 +14,39 @@ async function getOrCreateConversation(user1Id, user2Id) {
     return conversation.id;
   }
 
-  // .returning() avec sqlite3 retourne un tableau d'IDs
-  const [newId] = await db('conversations').insert({
+  const result = await trx('conversations').insert({
     user1_id: u1,
     user2_id: u2
   }).returning('id');
 
-  return newId.id || newId;
+  if (!result || result.length === 0) {
+    throw new Error("La création de la conversation a échoué, aucun ID n'a été retourné.");
+  }
+  const [newIdObj] = result;
+
+  return newIdObj.id || newIdObj;
 }
 
 // Envoyer un message
-async function sendMessage(senderId, receiverId, message) {
-  const conversationId = await getOrCreateConversation(senderId, receiverId);
+async function sendMessage(senderId, receiverId, message, trx = db) {
+  // La transaction est gérée par l'appelant (le gestionnaire de socket dans index.js)
+  const conversationId = await getOrCreateConversation(senderId, receiverId, trx);
 
-  // Utilise une transaction pour garantir que les deux opérations réussissent
-  return db.transaction(async trx => {
-    const [messageId] = await trx('chat_messages').insert({
-      conversation_id: conversationId,
-      sender_id: senderId,
-      message: message
-    }).returning('id');
+  const [messageIdObj] = await trx('chat_messages').insert({
+    conversation_id: conversationId,
+    sender_id: senderId,
+    message: message
+  }).returning('id');
 
-    return {
-      id: messageId.id || messageId,
-      conversation_id: conversationId,
-      sender_id: senderId,
-      message: message,
-      created_at: new Date().toISOString()
-    };
-  });
+  const messageId = messageIdObj.id || messageIdObj;
+
+  return {
+    id: messageId,
+    conversation_id: conversationId,
+    sender_id: senderId,
+    message: message,
+    created_at: new Date().toISOString()
+  };
 }
 
 // Récupérer les messages d'une conversation
