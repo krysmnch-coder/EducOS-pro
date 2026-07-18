@@ -129,6 +129,18 @@ const ChatUtils = (() => {
     };
 })();
 
+/**
+ * Échappe les caractères HTML pour prévenir les attaques XSS.
+ * @param {string} str La chaîne à échapper.
+ * @returns {string} La chaîne sécurisée.
+ */
+const escapeHTML = (str) => {
+    if (str === null || str === undefined) return '';
+    return str.toString()
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+};
+
 document.addEventListener('DOMContentLoaded', function() {
     const currentUserId = document.body.dataset.userId;
     if (!currentUserId) {
@@ -217,18 +229,24 @@ document.addEventListener('DOMContentLoaded', function() {
             conversations.forEach(convo => {
                 const isOnline = onlineUserIds.has(convo.id.toString());
                 const unreadHtml = convo.unread_count > 0 ? `<div class="unread-badge">${convo.unread_count}</div>` : '';
+
+                // Logique d'affichage sécurisée pour le dernier message
+                let lastMessageText = 'Pas de messages';
+                if (convo.last_message) {
+                    const safeMessage = escapeHTML(convo.last_message);
+                    lastMessageText = safeMessage.length > 25 ? safeMessage.substring(0, 25) + '...' : safeMessage;
+                }
+
                 const item = document.createElement('div');
                 item.className = 'list-group-item';
                 item.dataset.userId = convo.id;
                 item.dataset.userName = convo.name;
                 item.dataset.userAvatar = convo.avatar_url || '/img/user.png';
                 item.innerHTML = `
-                    <div class="avatar-container ${isOnline ? 'online' : ''}">
-                        <img src="${item.dataset.userAvatar}" alt="${convo.name}" class="widget-avatar">
-                    </div>
+                    <div class="avatar-container ${isOnline ? 'online' : ''}"><img src="${escapeHTML(item.dataset.userAvatar)}" alt="${escapeHTML(convo.name)}" class="widget-avatar"></div>
                     <div class="user-info">
-                        <div class="user-name">${convo.name}</div>
-                        <div class="last-message">${convo.last_message ? convo.last_message.substring(0, 25) + '...' : 'Pas de messages'}</div>
+                        <div class="user-name">${escapeHTML(convo.name)}</div>
+                        <div class="last-message">${lastMessageText}</div>
                     </div>
                     ${unreadHtml}
                 `;
@@ -309,7 +327,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Le contenu du message est directement dans la bulle pour que le float fonctionne correctement
         messageEl.innerHTML = `
-            ${msg.message}
+            ${escapeHTML(msg.message)}
             <div class="message-meta-container">
                 <span class="message-time">${timeString}</span>
                 ${readStatusHtml}

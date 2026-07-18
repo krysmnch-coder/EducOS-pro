@@ -129,6 +129,18 @@ const ChatUtils = (() => {
     };
 })();
 
+/**
+ * Échappe les caractères HTML pour prévenir les attaques XSS.
+ * @param {string} str La chaîne à échapper.
+ * @returns {string} La chaîne sécurisée.
+ */
+const escapeHTML = (str) => {
+    if (str === null || str === undefined) return '';
+    return str.toString()
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+};
+
 document.addEventListener('DOMContentLoaded', () => {
     const socket = io();
 
@@ -154,39 +166,60 @@ document.addEventListener('DOMContentLoaded', () => {
      * Charge et affiche la liste des conversations depuis l'API.
      */
     const loadConversations = async () => {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 secondes de timeout
+
         try {
-            const response = await fetch('/chat/api/conversations');
+            const response = await fetch('/chat/api/conversations', {
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId); // Annuler le timeout si la réponse arrive
+
             if (!response.ok) throw new Error('Failed to fetch conversations');
             const conversations = await response.json();
 
             userListEl.innerHTML = ''; // Vider la liste
             if (conversations.length === 0) {
-                userListEl.innerHTML = '<p class="p-3 text-muted">Aucune conversation récente.</p>';
+                userListEl.innerHTML = '<p class="p-3 text-muted text-center small">Aucune conversation récente.</p>';
                 return;
             }
 
             conversations.forEach(convo => {
                 const isOnline = onlineUserIds.has(convo.id.toString());
                 const unreadCount = convo.unread_count > 0 ? `<span class="badge bg-danger rounded-pill ms-auto">${convo.unread_count}</span>` : '';
+
+                // Logique d'affichage sécurisée pour le dernier message
+                let lastMessageText = 'Pas de messages';
+                if (convo.last_message) {
+                    const safeMessage = escapeHTML(convo.last_message);
+                    lastMessageText = safeMessage.length > 25 ? safeMessage.substring(0, 25) + '...' : safeMessage;
+                }
+
                 const userItem = document.createElement('a');
                 userItem.href = '#';
                 userItem.className = 'list-group-item list-group-item-action d-flex align-items-center';
                 userItem.dataset.userId = convo.id;
                 userItem.innerHTML = `
                     <div class="avatar-container me-3 ${isOnline ? 'online' : ''}">
-                        <img src="${convo.avatar_url || '/img/user.png'}" alt="${convo.name}" class="list-avatar">
+                        <img src="${escapeHTML(convo.avatar_url || '/img/user.png')}" alt="${escapeHTML(convo.name)}" class="list-avatar">
                     </div>
                     <div class="flex-grow-1">
-                        ${convo.name}
-                        <div class="small text-muted">${convo.last_message ? convo.last_message.substring(0, 25) + '...' : 'Pas de messages'}</div>
+                        ${escapeHTML(convo.name)}
+                        <div class="small text-muted">${lastMessageText}</div>
                     </div>
                     ${unreadCount}
                 `;
                 userListEl.appendChild(userItem);
             });
         } catch (error) {
-            console.error('Error loading conversations:', error);
-            userListEl.innerHTML = '<p class="p-3 text-danger">Erreur de chargement.</p>';
+            clearTimeout(timeoutId);
+            if (error.name === 'AbortError') {
+                console.error('Error loading conversations: Request timed out.');
+                userListEl.innerHTML = '<p class="p-3 text-danger text-center small">Le chargement des conversations a pris trop de temps.</p>';
+            } else {
+                console.error('Error loading conversations:', error);
+                userListEl.innerHTML = '<p class="p-3 text-danger text-center small">Erreur de chargement des conversations.</p>';
+            }
         }
     };
 
@@ -258,7 +291,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Le contenu du message est directement dans la bulle pour que le float fonctionne correctement
         messageEl.innerHTML = `
-            ${msg.message}
+            ${escapeHTML(msg.message)}
             <div class="message-meta-container">
                 <span class="message-time">${timeString}</span>
                 ${readStatusHtml}
