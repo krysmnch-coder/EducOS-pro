@@ -1,146 +1,3 @@
-const ChatUtils = (() => {
-    // --- État géré par l'utilitaire ---
-    let originalTitle = document.title;
-    let blinkInterval = null;
-    let hasWarnedAboutAudio = false;
-
-    // Créer une seule instance de l'objet Audio
-    const notificationSound = new Audio('/sounds/notification.mp3');
-    notificationSound.onerror = function() {
-        console.error("Erreur: Impossible de charger le fichier audio '/sounds/notification.mp3'.");
-    };
-
-    // --- Fonctions Publiques ---
-
-    /**
-     * Joue le son de notification, en gérant les restrictions de lecture automatique du navigateur.
-     */
-    const playNotificationSound = () => {
-        const promise = notificationSound.play();
-        if (promise !== undefined) {
-            promise.catch(error => {
-                if (!hasWarnedAboutAudio) {
-                    console.warn("La lecture du son a été bloquée par le navigateur. C'est normal avant la première interaction de l'utilisateur.", error);
-                    hasWarnedAboutAudio = true;
-                }
-            });
-        }
-    };
-
-    /**
-     * Fait clignoter le titre de l'onglet pour attirer l'attention de l'utilisateur.
-     */
-    const startTitleBlink = () => {
-        if (blinkInterval) return; // Déjà en cours de clignotement
-        let isOriginal = true;
-        blinkInterval = setInterval(() => {
-            document.title = isOriginal ? 'Nouveau message !' : originalTitle;
-            isOriginal = !isOriginal;
-        }, 1000);
-    };
-
-    /**
-     * Arrête le clignotement du titre et restaure le titre original.
-     */
-    const stopTitleBlink = () => {
-        if (blinkInterval) {
-            clearInterval(blinkInterval);
-            blinkInterval = null;
-        }
-        document.title = originalTitle;
-    };
-
-    /**
-     * Affiche une notification système si la permission est accordée.
-     * @param {string} title - Le titre de la notification.
-     * @param {object} options - Les options de la notification (body, icon, etc.).
-     * @param {function} [onClickCallback] - Callback optionnel à exécuter lors du clic sur la notification.
-     */
-    const showSystemNotification = (title, options, onClickCallback) => {
-        if (!('Notification' in window) || Notification.permission !== 'granted') {
-            return;
-        }
-        const notification = new Notification(title, options);
-        notification.onclick = () => {
-            window.focus();
-            if (typeof onClickCallback === 'function') {
-                onClickCallback();
-            }
-        };
-    };
-
-    /**
-     * Vérifie si deux objets Date correspondent au même jour.
-     * @param {Date} date1
-     * @param {Date} date2
-     * @returns {boolean}
-     */
-    const isSameDay = (date1, date2) => {
-        if (!date1 || !date2) return false;
-        return date1.getFullYear() === date2.getFullYear() &&
-            date1.getMonth() === date2.getMonth() &&
-            date1.getDate() === date2.getDate();
-    };
-
-    /**
-     * Formate une date pour le séparateur de date dans le chat.
-     * @param {Date} date
-     * @returns {string} "Aujourd'hui", "Hier", ou la date complète.
-     */
-    const formatDateSeparator = (date) => {
-        const today = new Date();
-        const yesterday = new Date(today);
-        yesterday.setDate(yesterday.getDate() - 1);
-
-        if (isSameDay(date, today)) return "Aujourd'hui";
-        if (isSameDay(date, yesterday)) return "Hier";
-        return date.toLocaleDateString(navigator.language || 'fr-FR', { year: 'numeric', month: 'long', day: 'numeric' });
-    };
-
-    /**
-     * Ajoute un séparateur de date à un conteneur de messages donné.
-     * @param {Date} date - La date pour le séparateur.
-     * @param {HTMLElement} containerEl - L'élément DOM auquel l'ajouter.
-     */
-    const appendDateSeparator = (date, containerEl) => {
-        if (!containerEl) return;
-        const separatorEl = document.createElement('div');
-        separatorEl.className = 'date-separator';
-        separatorEl.textContent = formatDateSeparator(date);
-        containerEl.appendChild(separatorEl);
-    };
-
-    // Arrête le clignotement lorsque l'utilisateur revient sur l'onglet
-    document.addEventListener('visibilitychange', () => {
-        if (!document.hidden) {
-            stopTitleBlink();
-        }
-    });
-
-    // Exposer les fonctions publiques
-    return {
-        playNotificationSound,
-        startTitleBlink,
-        stopTitleBlink,
-        showSystemNotification,
-        isSameDay,
-        formatDateSeparator,
-        appendDateSeparator
-    };
-})();
-
-/**
- * Échappe les caractères HTML pour prévenir les attaques XSS.
- * @param {string} str La chaîne à échapper.
- * @returns {string} La chaîne sécurisée.
- */
-const escapeHTML = (str) => {
-    if (str === null || str === undefined) return '';
-    return str.toString()
-        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
-};
-
 document.addEventListener('DOMContentLoaded', function() {
     const currentUserId = document.body.dataset.userId;
     if (!currentUserId) {
@@ -151,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const socket = io();
 
-    // --- Audio ---
+    // --- State ---
     let activeUserId = null;
     let onlineUserIds = new Set();
     let buttonBlinkInterval = null;
@@ -216,9 +73,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const loadConversations = async () => {
         try {
-            const response = await fetch('/chat/api/conversations');
-            if (!response.ok) throw new Error('Failed to fetch conversations');
-            const conversations = await response.json();
+            const conversations = await ChatLogic.fetchConversations();
 
             userListEl.innerHTML = '';
             if (conversations.length === 0) {
@@ -233,7 +88,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Logique d'affichage sécurisée pour le dernier message
                 let lastMessageText = 'Pas de messages';
                 if (convo.last_message) {
-                    const safeMessage = escapeHTML(convo.last_message);
+                    const safeMessage = ChatLogic.escapeHTML(convo.last_message);
                     lastMessageText = safeMessage.length > 25 ? safeMessage.substring(0, 25) + '...' : safeMessage;
                 }
 
@@ -243,9 +98,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 item.dataset.userName = convo.name;
                 item.dataset.userAvatar = convo.avatar_url || '/img/user.png';
                 item.innerHTML = `
-                    <div class="avatar-container ${isOnline ? 'online' : ''}"><img src="${escapeHTML(item.dataset.userAvatar)}" alt="${escapeHTML(convo.name)}" class="widget-avatar"></div>
+                    <div class="avatar-container ${isOnline ? 'online' : ''}"><img src="${ChatLogic.escapeHTML(item.dataset.userAvatar)}" alt="${ChatLogic.escapeHTML(convo.name)}" class="widget-avatar"></div>
                     <div class="user-info">
-                        <div class="user-name">${escapeHTML(convo.name)}</div>
+                        <div class="user-name">${ChatLogic.escapeHTML(convo.name)}</div>
                         <div class="last-message">${lastMessageText}</div>
                     </div>
                     ${unreadHtml}
@@ -279,85 +134,46 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const loadMessages = async (userId) => {
         try {
-            const response = await fetch(`/chat/api/messages/${userId}`);
-            if (!response.ok) throw new Error('Failed to fetch messages');
-            const messages = await response.json();
+            const messages = await ChatLogic.fetchMessages(userId);
 
             messageContainerEl.innerHTML = '';
             let lastDate = null;
             messages.forEach(msg => {
                 const messageDate = new Date(msg.created_at);
-                if (!lastDate || !ChatUtils.isSameDay(messageDate, lastDate)) {
-                    ChatUtils.appendDateSeparator(messageDate, messageContainerEl);
+                if (!lastDate || !ChatLogic.isSameDay(messageDate, lastDate)) {
+                    const separatorEl = ChatLogic.renderDateSeparator(messageDate);
+                    ChatLogic.appendMessageToContainer(separatorEl, messageContainerEl);
                 }
-                appendMessage(msg, msg.sender_id);
+                const messageEl = ChatLogic.renderMessage(msg, currentUserId);
+                ChatLogic.appendMessageToContainer(messageEl, messageContainerEl);
                 lastDate = messageDate;
             });
+            ChatLogic.scrollToBottom(messageContainerEl);
             socket.emit('markRead', { senderId: userId });
         } catch (error) {
             console.error(`Error loading widget messages for user ${userId}:`, error);
             messageContainerEl.innerHTML = '<p class="text-center text-danger small">Erreur de chargement.</p>';
         }
     };
-
-    const appendMessage = (msg, senderId) => {
-        const container = messageContainerEl;
-        // Détermine si l'utilisateur est déjà en bas du conteneur AVANT d'ajouter le nouveau message.
-        // On ajoute une petite marge (5px) pour être plus tolérant.
-        const isScrolledToBottom = container.scrollHeight - container.clientHeight <= container.scrollTop + 5;
-
-        const messageEl = document.createElement('div');
-        const isSent = senderId == currentUserId;
-        messageEl.className = `chat-message ${isSent ? 'sent' : 'received'}`;
-        messageEl.dataset.messageId = msg.id;
-        messageEl.dataset.timestamp = msg.created_at || new Date().toISOString();
-
-        // Formatage de l'heure
-        const messageDate = new Date(msg.created_at || Date.now());
-        const timeString = messageDate.toLocaleTimeString(navigator.language, {
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-
-        let readStatusHtml = '';
-        if (isSent) {
-            const status = msg.is_read == 1 ? 'read' : 'sent';
-            readStatusHtml = `<span class="message-status" data-status="${status}"></span>`;
-        }
-
-        // Le contenu du message est directement dans la bulle pour que le float fonctionne correctement
-        messageEl.innerHTML = `
-            ${escapeHTML(msg.message)}
-            <div class="message-meta-container">
-                <span class="message-time">${timeString}</span>
-                ${readStatusHtml}
-            </div>
-        `;
-
-        container.appendChild(messageEl);
-        // Ne fait défiler vers le bas que si l'utilisateur était déjà en bas.
-        if (isScrolledToBottom) {
-            container.scrollTop = container.scrollHeight;
-        }
-    };
-
-    const sendMessage = () => {
+    
+    const sendMessage = async () => {
         const message = messageInput.value.trim();
         if (!message || !activeUserId || sendBtn.disabled) return;
 
         sendBtn.disabled = true;
-        socket.emit('sendMessage', { receiverId: activeUserId, message: message }, (response) => {
+        try {
+            const sentMessage = await ChatLogic.sendMessage(socket, activeUserId, message);
+            sentMessage.is_read = 0; // Un nouveau message n'est pas lu par défaut
+            const messageEl = ChatLogic.renderMessage(sentMessage, currentUserId);
+            ChatLogic.appendMessageToContainer(messageEl, messageContainerEl);
+            ChatLogic.scrollToBottom(messageContainerEl);
+            messageInput.value = '';
+            messageInput.focus();
+        } catch (error) {
+            console.error('Failed to send message from widget:', error);
+        } finally {
             sendBtn.disabled = false;
-            if (response.success) {
-                const sentMessage = response.message;
-                sentMessage.is_read = 0; // Un nouveau message n'est pas lu par défaut
-                appendMessage(sentMessage, currentUserId);
-                messageInput.value = '';
-                messageInput.focus();
-            } else {
-                console.error('Failed to send message from widget:', response.error);
-            }
-        });
+        }
     };
 
     const updateBadge = (count) => {
@@ -432,26 +248,28 @@ document.addEventListener('DOMContentLoaded', function() {
         const isWindowFocused = !document.hidden;
 
         // Condition pour simplement afficher le message : le panel est ouvert, pour la bonne conversation, et la fenêtre est visible.
-        if (isPanelOpen && isForActiveChat && isWindowFocused) {
+        if (isPanelOpen && isForActiveChat) {
             const lastMessageEl = messageContainerEl.querySelector('.chat-message:last-child');
             const lastMessageDate = lastMessageEl ? new Date(lastMessageEl.dataset.timestamp) : null;
             const newMessageDate = new Date(data.message.created_at);
 
-            if (!lastMessageDate || !ChatUtils.isSameDay(newMessageDate, lastMessageDate)) {
-                ChatUtils.appendDateSeparator(newMessageDate, messageContainerEl);
+            if (!lastMessageDate || !ChatLogic.isSameDay(newMessageDate, lastMessageDate)) {
+                const separatorEl = ChatLogic.renderDateSeparator(newMessageDate);
+                ChatLogic.appendMessageToContainer(separatorEl, messageContainerEl);
             }
             
-            appendMessage(data.message, data.senderId);
-            socket.emit('markRead', { senderId: activeUserId });
+            const messageEl = ChatLogic.renderMessage(data.message, data.senderId);
+            ChatLogic.appendMessageToContainer(messageEl, messageContainerEl);
+            ChatLogic.scrollToBottom(messageContainerEl);
+            if (isWindowFocused) socket.emit('markRead', { senderId: activeUserId });
         } else {
             // Dans tous les autres cas, on notifie.
-            if (!isWindowFocused) ChatUtils.startTitleBlink();
-            
-            ChatUtils.showSystemNotification(`Nouveau message de ${data.senderName}`, {
+            if (!isWindowFocused) ChatLogic.startTitleBlink();
+            ChatLogic.showSystemNotification(`Nouveau message de ${data.senderName}`, {
                 body: data.message.message.substring(0, 100),
                 icon: '/img/logo.png' // Assurez-vous que ce fichier existe dans /public/img
             }, openPanel); // Le callback ouvre le panneau de chat
-            ChatUtils.playNotificationSound();
+            ChatLogic.playNotificationSound();
 
             // Faire clignoter le bouton si le panneau est fermé
             if (!isPanelOpen) {
@@ -471,11 +289,6 @@ document.addEventListener('DOMContentLoaded', function() {
             loadConversations();
         }
     });
-
-    // Demander la permission pour les notifications au chargement
-    if ('Notification' in window && Notification.permission !== 'denied') {
-        Notification.requestPermission();
-    }
 
     // Initial fetch for badge count on page load
     (async () => {

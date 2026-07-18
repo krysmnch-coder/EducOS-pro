@@ -132,17 +132,18 @@ function markMessagesAsRead(conversationId, userId) {
 
 // Récupérer le nombre de messages non lus
 async function getUnreadCount(userId) {
-  const result = await db('chat_messages')
-    .where('is_read', 0)
-    .andWhere('sender_id', '!=', userId)
-    .whereIn('conversation_id', function() {
-      this.select('id').from('conversations')
-        .where('user1_id', userId)
-        .orWhere('user2_id', userId);
+  // Cette version utilise une jointure, ce qui est souvent plus performant
+  // qu'une sous-requête avec WHERE IN, surtout avec les nouveaux index.
+  const result = await db('chat_messages as m')
+    .join('conversations as c', 'm.conversation_id', 'c.id')
+    .where(function() {
+      this.where('c.user1_id', userId).orWhere('c.user2_id', userId);
     })
-    .count('id as count')
+    .andWhere('m.sender_id', '!=', userId)
+    .andWhere('m.is_read', 0)
+    .count('m.id as count')
     .first();
-  return result ? result.count : 0;
+  return result ? Number(result.count) : 0;
 }
 
 // Récupérer les utilisateurs pour le chat (sauf soi-même)
