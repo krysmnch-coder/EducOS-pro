@@ -191,7 +191,9 @@ const authNamespace = io.of('/');
 
 async function broadcastDashboardStats() {
   try {
-    const totalUserCountResult = await db('users').where('status', 'active').count('id as count').first();
+    // Correction : La colonne 'status' n'existe pas. On utilise la colonne 'approved'
+    // pour compter les utilisateurs actifs. Knex gère la différence entre `true` et `1`.
+    const totalUserCountResult = await db('users').where('approved', true).count('id as count').first();
     const professorCount = await userModel.countUsersByRole('professeur');
     const establishmentCountResult = await db('establishments').count('id as count').first();
     const pendingCount = await userModel.countPendingUsers();
