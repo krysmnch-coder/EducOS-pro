@@ -174,6 +174,28 @@ app.use(async (req, res, next) => {
 // Middleware de sécurité pour forcer le changement de mot de passe
 app.use(forcePasswordChange);
 
+// Nouvelle route API corrigée pour les statistiques du tableau de bord
+app.get('/api/v2/dashboard-stats', async (req, res) => {
+  try {
+      const totalUserCountResult = await db('users').where('approved', true).count('id as count').first();
+      const professorCount = await userModel.countUsersByRole('professeur');
+      const establishmentCountResult = await db('establishments').count('id as count').first();
+      const pendingCount = await userModel.countPendingUsers();
+
+      res.json({
+          totalUserCount: totalUserCountResult ? Number(totalUserCountResult.count) : 0,
+          professorCount,
+          establishmentCount: establishmentCountResult ? Number(establishmentCountResult.count) : 0,
+          pendingCount
+      });
+  } catch (error) {
+      // Utilisation d'un nom d'erreur clair pour le débogage
+      console.error('Erreur API /api/v2/dashboard-stats:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
 // Routes
 app.use('/', authRoutes);
 app.use('/chat', chatRoutes);
