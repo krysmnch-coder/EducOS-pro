@@ -8,9 +8,21 @@ const establishmentModel = require('../models/establishmentModel');
 const userModel = require('../models/userModel');
 
 /**
+ * Affiche la page d'accueil ou redirige vers le tableau de bord si l'utilisateur est connecté.
+ */
+exports.renderHome = (req, res) => {
+  if (req.isAuthenticated()) {
+    return res.redirect('/dashboard');
+  }
+  res.render('home', {
+      title: 'Accueil | EducOS-pro'
+  });
+};
+
+/**
  * Affiche la page de connexion.
  */
-exports.renderLoginPage = (req, res) => {
+exports.renderLogin = (req, res) => {
   // Si l'utilisateur est déjà connecté, on le redirige vers le tableau de bord.
   if (req.isAuthenticated()) {
     return res.redirect('/dashboard');
@@ -21,18 +33,27 @@ exports.renderLoginPage = (req, res) => {
 };
 
 /**
- * Gère la soumission du formulaire de connexion en utilisant la stratégie Passport.
+ * Redirige l'utilisateur vers le tableau de bord approprié en fonction de son rôle.
  */
-exports.loginUser = passport.authenticate('local', {
-  successRedirect: '/dashboard',
-  failureRedirect: '/login',
-  failureFlash: true // Active les messages flash en cas d'échec
-});
+exports.renderDashboard = (req, res) => {
+    const user = req.user;
+    // Le middleware ensureAuthenticated gère déjà le cas où l'utilisateur n'est pas connecté.
+
+    switch (user.role) {
+        case ROLES.SUPER_ADMIN:
+        case ROLES.ADMINISTRATOR:
+            // Redirige les administrateurs vers leur page de gestion dédiée.
+            return res.redirect('/admin');
+        default:
+            // Affiche un tableau de bord générique pour les autres rôles.
+            return res.render('dashboard', { title: 'Tableau de bord | EducOS-pro', user: req.user });
+    }
+};
 
 /**
  * Affiche la page d'inscription avec la liste des établissements.
  */
-exports.renderRegisterPage = async (req, res) => {
+exports.renderRegister = async (req, res) => {
   try {
     const establishments = await establishmentModel.getAll();
     res.render('register', {
@@ -48,9 +69,8 @@ exports.renderRegisterPage = async (req, res) => {
 
 /**
  * Gère l'inscription d'un nouvel utilisateur en utilisant Knex et async/await.
- * Ce code est portable entre SQLite et PostgreSQL.
  */
-exports.registerUser = async (req, res) => {
+exports.postRegister = async (req, res) => {
   // On récupère l'ID de l'établissement pour une architecture multi-tenant
   const { name, email, password, establishment_id } = req.body;
 
@@ -91,7 +111,7 @@ exports.registerUser = async (req, res) => {
 /**
  * Gère la déconnexion de l'utilisateur.
  */
-exports.logoutUser = (req, res, next) => {
+exports.logout = (req, res, next) => {
   req.logout(function(err) {
     if (err) { return next(err); }
     req.flash('success_msg', 'Vous êtes maintenant déconnecté.');
@@ -102,7 +122,7 @@ exports.logoutUser = (req, res, next) => {
 /**
  * Affiche la page de changement de mot de passe forcé.
  */
-exports.renderForceChangePasswordPage = (req, res) => {
+exports.renderForceChangePassword = (req, res) => {
     res.render('force-change-password', {
         title: 'Changer votre mot de passe'
     });
@@ -111,7 +131,7 @@ exports.renderForceChangePasswordPage = (req, res) => {
 /**
  * Gère la soumission du formulaire de changement de mot de passe forcé.
  */
-exports.handleForceChangePassword = async (req, res) => {
+exports.postForceChangePassword = async (req, res) => {
     const { password, confirm_password } = req.body;
     const userId = req.user.id;
 
@@ -143,5 +163,66 @@ exports.handleForceChangePassword = async (req, res) => {
         console.error('Erreur lors du changement de mot de passe forcé:', error);
         req.flash('error_msg', 'Une erreur est survenue.');
         res.redirect('/force-change-password');
+    }
+};
+
+/**
+ * Placeholder for social login.
+ */
+exports.socialLogin = (req, res) => {
+    res.status(501).send('Social login not implemented.');
+};
+
+/**
+ * Placeholder for API token retrieval.
+ */
+exports.getApiToken = (req, res) => {
+    res.status(501).send('API token not implemented.');
+};
+
+/**
+ * Renders the user profile page.
+ */
+exports.renderProfile = (req, res) => {
+    res.render('profile', {
+        title: 'Mon Profil | EducOS-pro',
+        user: req.user
+    });
+};
+
+/**
+ * Updates the user's profile picture.
+ */
+exports.updateProfilePicture = async (req, res) => {
+    if (!req.file) {
+        req.flash('error_msg', 'Aucun fichier sélectionné.');
+        return res.redirect('/profile');
+    }
+    try {
+        // Le chemin doit être relatif au dossier 'public' pour être servi correctement.
+        const avatarUrl = '/uploads/avatars/' + req.file.filename;
+        await userModel.updateUserAvatar(req.user.id, avatarUrl);
+        req.flash('success_msg', 'Photo de profil mise à jour.');
+        res.redirect('/profile');
+    } catch (error) {
+        console.error('Erreur lors de la mise à jour de la photo de profil:', error);
+        req.flash('error_msg', 'Erreur lors de la mise à jour de la photo.');
+        res.redirect('/profile');
+    }
+};
+
+/**
+ * Updates user's profile information.
+ */
+exports.updateProfileInfo = async (req, res) => {
+    const { name, phone_number } = req.body;
+    try {
+        await userModel.updateUserInfo(req.user.id, { name, phone_number });
+        req.flash('success_msg', 'Informations mises à jour.');
+        res.redirect('/profile');
+    } catch (error) {
+        console.error('Erreur lors de la mise à jour des informations:', error);
+        req.flash('error_msg', 'Erreur lors de la mise à jour.');
+        res.redirect('/profile');
     }
 };
