@@ -300,37 +300,46 @@ document.addEventListener('DOMContentLoaded', () => {
      * Ouvre une conversation spécifique.
      */
     const openChatWindow = async (userId, userName) => {
+        // Si on clique sur la conversation déjà active, on ne fait rien.
+        if (userId === activeUserId) return;
+
         activeUserId = userId;
 
-        // Mettre en surbrillance l'utilisateur actif dans la liste
-        document.querySelectorAll('#user-list a').forEach(el => el.classList.remove('active'));
-        const userLink = userListEl.querySelector(`a[data-user-id="${userId}"]`);
-        if (userLink) {
-            userLink.classList.add('active');
-        }
-
-        // Afficher la fenêtre de chat et masquer le placeholder
+        // 1. Afficher l'interface de chat et un état de chargement
         chatPlaceholder.style.display = 'none';
         chatWindow.style.display = 'flex';
         document.querySelector('.chat-page-container').classList.add('show-chat');
-
-        // Activer le formulaire
-        messageInput.disabled = false;
-        messageForm.querySelector('button').disabled = false;
-
-        // Mettre à jour l'en-tête
+        messageContainerEl.innerHTML = '<div class="text-center p-5"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+        
+        // 2. Mettre à jour l'en-tête immédiatement
         const isOnline = onlineUserIds.has(userId);
         chatHeaderTitle.innerHTML = `
             <div>
-                ${userName}
+                ${ChatLogic.escapeHTML(userName)}
                 <small class="d-block user-status ${isOnline ? 'online' : 'offline'}">
                     ${isOnline ? 'En ligne' : 'Hors ligne'}
                 </small>
             </div>
         `;
 
-        loadMessages(activeUserId).then(() => ChatLogic.scrollToBottom(messageContainerEl));
-        loadConversations(); // Recharger pour mettre à jour les badges
+        // 3. Charger les messages. Cette étape crée la conversation si elle n'existe pas.
+        await loadMessages(activeUserId);
+        ChatLogic.scrollToBottom(messageContainerEl);
+
+        // 4. Recharger la liste des conversations pour qu'elle inclue la nouvelle conversation.
+        await loadConversations();
+
+        // 5. Mettre en surbrillance l'utilisateur actif dans la liste mise à jour.
+        document.querySelectorAll('#user-list a').forEach(el => el.classList.remove('active'));
+        const userLink = userListEl.querySelector(`a[data-user-id="${userId}"]`);
+        if (userLink) {
+            userLink.classList.add('active');
+        }
+
+        // 6. Activer le formulaire d'envoi
+        messageInput.disabled = false;
+        messageForm.querySelector('button').disabled = false;
+        messageInput.focus();
     };
 
     const closeChatWindow = () => {
@@ -341,12 +350,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Écouteurs d'événements ---
 
     // Clic sur un utilisateur dans la liste
-    userListEl.addEventListener('click', async (e) => {
+    userListEl.addEventListener('click', (e) => {
         const userLink = e.target.closest('a.list-group-item');
         if (!userLink) return;
         e.preventDefault();
         const userName = userLink.querySelector('.flex-grow-1').textContent.trim().split('\n')[0];
-        openChatWindow(userLink.dataset.userId, userName);
+        openChatWindow(userLink.dataset.userId, userName); // La fonction est async, mais on n'a pas besoin de l'attendre ici.
     });
 
     // Bouton retour pour la vue mobile
@@ -505,7 +514,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const modal = bootstrap.Modal.getInstance(document.getElementById('new-chat-modal'));
             modal?.hide();
 
-            openChatWindow(newUserId, newUserName);
+            openChatWindow(newUserId, newUserName); // La fonction est async, mais on n'a pas besoin de l'attendre ici.
         }
     });
 });
