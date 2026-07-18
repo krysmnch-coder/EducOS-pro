@@ -84,8 +84,14 @@ document.addEventListener('DOMContentLoaded', () => {
             socket.emit('markRead', { senderId: userId });
 
         } catch (error) {
-            console.error(`Error loading messages for user ${userId}:`, error);
-            messageContainerEl.innerHTML = '<p class="text-center text-danger">Impossible de charger les messages.</p>';
+            console.error(`Erreur lors du chargement/traitement des messages pour ${userId}:`, error);
+            // On vérifie si l'erreur vient du fetch ou du traitement des données pour un message plus clair.
+            if (error.message.includes('Failed to fetch')) {
+                messageContainerEl.innerHTML = '<p class="text-center text-danger">Impossible de charger les messages (Erreur réseau).</p>';
+            } else {
+                // Ceci se déclenchera si ChatUtils est indéfini, par exemple.
+                messageContainerEl.innerHTML = '<p class="text-center text-danger">Une erreur est survenue lors de l\'affichage des messages.</p>';
+            }
         }
     };
 
