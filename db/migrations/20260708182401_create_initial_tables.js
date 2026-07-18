@@ -4,6 +4,12 @@
  */
 exports.up = function(knex) {
   return knex.schema
+    .createTable('establishments', function (table) {
+      table.increments('id').primary();
+      table.string('name').notNullable().unique();
+      table.string('subdomain').notNullable().unique();
+      table.timestamp('created_at').defaultTo(knex.fn.now());
+    })
     .createTable('users', function (table) {
       table.increments('id').primary();
       table.string('name').notNullable();
@@ -11,6 +17,8 @@ exports.up = function(knex) {
       table.string('password').notNullable();
       table.string('role').notNullable();
       table.boolean('approved').defaultTo(false);
+      table.integer('establishment_id').unsigned().references('id').inTable('establishments').onDelete('SET NULL');
+      table.boolean('password_reset_required').defaultTo(false);
       table.string('subject');
       table.string('student_class');
       table.string('matricule').unique();
@@ -77,5 +85,6 @@ exports.down = function(knex) {
     .dropTableIfExists('conversations')
     .dropTableIfExists('communication_recipients')
     .dropTableIfExists('communications')
-    .dropTableIfExists('users');
+    .dropTableIfExists('users')
+    .dropTableIfExists('establishments');
 };
