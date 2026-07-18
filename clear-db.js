@@ -4,18 +4,29 @@ async function clearDatabase() {
   console.log('Début du nettoyage de la base de données...');
   console.log('ATTENTION : Cette action est irréversible et va supprimer toutes les données.');
 
-  // Liste des tables à vider. L'ordre peut être important à cause des clés étrangères.
-  // On vide les tables qui dépendent des autres en premier.
+  // Liste des tables à vider. L'ordre est crucial à cause des clés étrangères.
+  // On vide les tables "enfants" avant les tables "parents".
   const tables = [
-    'notifications',
+    // Tables dépendantes
     'chat_messages',
-    'conversations',
     'communication_recipients',
-    'communications',
     'grades',
+    'parent_student_links', // Table de liaison
+    'payments',
+    'notifications',
+    
+    // Tables parentes des précédentes
+    'conversations',
+    'communications',
+
+    // Table des sessions
+    'user_sessions',
+
+    // Table des utilisateurs (dépend de 'establishments')
     'users',
+
+    // Table de base
     'establishments',
-    'payments' // Ajout de la table des paiements au cas où elle existerait
   ];
 
   try {
@@ -26,14 +37,19 @@ async function clearDatabase() {
         await db(table).del(); // Utilise Knex pour faire un "DELETE FROM table"
         
         // Pour SQLite, il faut aussi réinitialiser la séquence d'auto-incrémentation
-        await db('sqlite_sequence').where('name', table).del().catch(() => {
-          // Ignore l'erreur si la table n'est pas dans sqlite_sequence (ex: pas d'autoincrement)
-        });
+        // Cette partie est spécifique à SQLite et peut échouer sans risque sur PostgreSQL.
+        if (db.client.config.client === 'sqlite3') {
+            await db('sqlite_sequence').where('name', table).del().catch(() => {
+              // Ignore l'erreur si la table n'est pas dans sqlite_sequence (ex: pas d'autoincrement)
+            });
+        }
+      } else {
+        console.log(`- La table '${table}' n'existe pas, ignorée.`);
       }
     }
 
     console.log('\nNettoyage de la base de données terminé avec succès.');
-    console.log('Vous pouvez maintenant démarrer le serveur et vous inscrire pour devenir le super-administrateur.');
+    console.log('Vous pouvez maintenant lancer la commande "npx knex migrate:latest" pour reconstruire la structure.');
 
   } catch (error) {
     console.error('\nUne erreur est survenue lors du nettoyage de la base de données:', error);

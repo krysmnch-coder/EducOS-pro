@@ -70,6 +70,33 @@ exports.up = function(knex) {
         table.string('link');
         table.boolean('is_read').defaultTo(false);
         table.timestamp('created_at').defaultTo(knex.fn.now());
+    })
+    .createTable('grades', function (table) {
+        table.increments('id').primary();
+        table.integer('student_id').unsigned().notNullable().references('id').inTable('users').onDelete('CASCADE');
+        table.integer('professor_id').unsigned().notNullable().references('id').inTable('users').onDelete('CASCADE');
+        table.string('subject').notNullable();
+        table.float('grade').notNullable();
+        table.text('comment');
+        table.timestamp('created_at').defaultTo(knex.fn.now());
+    })
+    .createTable('payments', function (table) {
+        table.increments('id').primary();
+        table.integer('student_id').unsigned().notNullable().references('id').inTable('users').onDelete('CASCADE');
+        table.integer('secretary_id').unsigned().notNullable().references('id').inTable('users').onDelete('CASCADE');
+        table.decimal('amount', 14, 2).notNullable();
+        table.string('currency').defaultTo('MGA');
+        table.string('description');
+        table.timestamp('created_at').defaultTo(knex.fn.now());
+    })
+    .createTable('parent_student_links', function (table) {
+        table.increments('id').primary();
+        table.integer('parent_id').unsigned().notNullable().references('id').inTable('users').onDelete('CASCADE');
+        table.string('student_matricule').notNullable();
+        table.string('student_first_name').notNullable();
+        table.string('student_last_name').notNullable();
+        table.string('student_class');
+        table.unique(['parent_id', 'student_matricule']);
     });
 };
 
@@ -85,6 +112,9 @@ exports.down = function(knex) {
     .dropTableIfExists('conversations')
     .dropTableIfExists('communication_recipients')
     .dropTableIfExists('communications')
+    .dropTableIfExists('grades')
+    .dropTableIfExists('payments')
+    .dropTableIfExists('parent_student_links')
     .dropTableIfExists('users')
     .dropTableIfExists('establishments');
 };
