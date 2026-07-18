@@ -136,17 +136,7 @@ const getConversations = async (req, res) => {
             };
         });
 
-        const uniqueConversations = [];
-        const seenUserIds = new Set();
-
-        for (const convo of conversations) {
-            if (!seenUserIds.has(convo.id)) {
-                uniqueConversations.push(convo);
-                seenUserIds.add(convo.id);
-            }
-        }
-
-        res.json(uniqueConversations);
+        res.json(conversations);
     } catch (error) {
         console.error('Erreur API getConversations:', error);
         res.status(500).json({ error: 'Impossible de récupérer les conversations.' });

@@ -70,34 +70,50 @@ async function getMessages(user1Id, user2Id, limit = 50) {
 }
 
 // Récupérer les conversations d'un utilisateur
-function getUserConversations(userId) {  
-  const unreadSubquery = db('chat_messages')
-    .count('*')
-    .where('conversation_id', db.raw('c.id'))
-    .andWhere('sender_id', '!=', userId)
-    .andWhere('is_read', 0)
-    .as('unread_count');
-
-  const lastMessageSubquery = db('chat_messages')
-    .select('message')
-    .where('conversation_id', db.raw('c.id'))
-    .orderBy('created_at', 'desc')
-    .limit(1)
-    .as('last_message_text');
-
-  return db('conversations as c')
+async function getUserConversations(userId) {
+  // Sous-requête pour obtenir le dernier message de chaque conversation en utilisant une fonction de fenêtre.
+  // C'est beaucoup plus performant que des sous-requêtes corrélées.
+  const latestMessageSubquery = db('chat_messages as m')
     .select(
-      'c.*',
-      'u1.name as user1_name', 'u1.avatar_url as user1_avatar',
-      'u2.name as user2_name', 'u2.avatar_url as user2_avatar',
-      unreadSubquery,
-      db.raw('(SELECT MAX(created_at) FROM chat_messages WHERE conversation_id = c.id) as last_activity'),
-      lastMessageSubquery
+      'm.conversation_id',
+      'm.message as last_message_text',
+      'm.created_at as last_activity',
+      db.raw('ROW_NUMBER() OVER(PARTITION BY m.conversation_id ORDER BY m.created_at DESC) as rn')
     )
+    .as('latest_msg');
+
+  // Sous-requête pour compter les messages non lus par conversation.
+  const unreadCountsSubquery = db('chat_messages')
+    .select('conversation_id')
+    .count('* as unread_count')
+    .where('is_read', 0)
+    .andWhere('sender_id', '!=', userId)
+    .groupBy('conversation_id')
+    .as('unread');
+
+  // Requête principale qui assemble les informations.
+  return db('conversations as c')
     .join('users as u1', 'c.user1_id', 'u1.id')
     .join('users as u2', 'c.user2_id', 'u2.id')
-    .where('c.user1_id', userId)
-    .orWhere('c.user2_id', userId)
+    // Jointure avec le dernier message (on ne garde que la ligne classée n°1).
+    .leftJoin(latestMessageSubquery, function() {
+      this.on('c.id', '=', 'latest_msg.conversation_id').andOn('latest_msg.rn', '=', 1);
+    })
+    // Jointure avec les comptes de messages non lus.
+    .leftJoin(unreadCountsSubquery, 'c.id', 'unread.conversation_id')
+    .select(
+      'c.id',
+      'c.user1_id',
+      'c.user2_id',
+      'u1.name as user1_name', 'u1.avatar_url as user1_avatar',
+      'u2.name as user2_name', 'u2.avatar_url as user2_avatar',
+      'latest_msg.last_message_text',
+      'latest_msg.last_activity',
+      // Utilise COALESCE pour s'assurer que le compte est 0 si `unread` est null.
+      db.raw('COALESCE(unread.unread_count, 0) as unread_count')
+    )
+    .where(function() { this.where('c.user1_id', userId).orWhere('c.user2_id', userId); })
+    .whereNotNull('last_activity') // On ne retourne que les conversations qui ont au moins un message.
     .orderBy('last_activity', 'desc');
 }
 
