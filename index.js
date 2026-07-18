@@ -43,7 +43,17 @@ if (!process.env.SESSION_SECRET) {
 let pubClient, subClient;
 if (process.env.REDIS_URL) {
   console.log('Configuration des clients Redis car REDIS_URL est fournie.');
-  pubClient = createClient({ url: process.env.REDIS_URL });
+  const redisOptions = { url: process.env.REDIS_URL };
+
+  // Sur des plateformes comme Render, les connexions Redis peuvent nécessiter SSL.
+  // Cette option est similaire à celle utilisée pour PostgreSQL dans votre knexfile.
+  if (process.env.NODE_ENV === 'production' && process.env.REDIS_URL.startsWith('rediss://')) {
+    redisOptions.socket = {
+      tls: true,
+      rejectUnauthorized: false
+    };
+  }
+  pubClient = createClient(redisOptions);
   subClient = pubClient.duplicate();
 }
 
