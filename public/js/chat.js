@@ -494,7 +494,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadConversations();
 
     // Gérer la sélection d'un nouvel utilisateur depuis la modale
-    document.getElementById('new-chat-modal')?.addEventListener('click', async (e) => {
+    document.getElementById('new-chat-modal')?.addEventListener('click', (e) => {
         const userLink = e.target.closest('.new-chat-user');
         if (userLink) {
             e.preventDefault();
@@ -505,7 +505,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const modal = bootstrap.Modal.getInstance(document.getElementById('new-chat-modal'));
             modal?.hide();
 
-            await openChatWindow(newUserId, newUserName);
+            openChatWindow(newUserId, newUserName);
         }
     });
 });
