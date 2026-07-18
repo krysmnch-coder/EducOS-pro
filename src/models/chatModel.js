@@ -46,16 +46,25 @@ async function sendMessage(senderId, receiverId, message) {
 }
 
 // Récupérer les messages d'une conversation
-function getMessages(user1Id, user2Id, limit = 50) {
+async function getMessages(user1Id, user2Id, limit = 50) {
   const u1 = Math.min(user1Id, user2Id);
   const u2 = Math.max(user1Id, user2Id);
 
+  // Étape 1: Trouver l'ID de la conversation de manière beaucoup plus efficace.
+  const conversation = await db('conversations')
+    .where({ user1_id: u1, user2_id: u2 })
+    .first('id');
+
+  // S'il n'y a pas de conversation (donc pas de messages), on retourne un tableau vide.
+  if (!conversation) {
+    return [];
+  }
+
+  // Étape 2: Si la conversation existe, récupérer les messages associés.
   return db('chat_messages as m')
-    .select('m.*', 'sender.name as sender_name')
-    .join('conversations as c', 'm.conversation_id', 'c.id')
+    .select('m.*', 'sender.name as sender_name', 'sender.avatar_url as sender_avatar')
     .join('users as sender', 'm.sender_id', 'sender.id')
-    .where('c.user1_id', u1)
-    .andWhere('c.user2_id', u2)
+    .where('m.conversation_id', conversation.id)
     .orderBy('m.created_at', 'asc')
     .limit(limit);
 }

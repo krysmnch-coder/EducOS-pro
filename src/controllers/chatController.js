@@ -81,11 +81,15 @@ const getMessages = async (req, res) => {
         }
         // --- FIN DE LA VÉRIFICATION ---
 
-        const messages = await chatModel.getMessages(currentUserId, otherUserId);
-        
-        // Marquer les messages comme lus dès qu'ils sont récupérés
+        // La logique est optimisée pour la clarté et la performance :
+        // 1. On trouve ou crée la conversation pour obtenir son ID.
         const conversationId = await chatModel.getOrCreateConversation(currentUserId, otherUserId);
+        
+        // 2. On marque les messages de cette conversation comme lus.
         await chatModel.markMessagesAsRead(conversationId, currentUserId);
+
+        // 3. On récupère l'historique des messages en utilisant la nouvelle fonction optimisée.
+        const messages = await chatModel.getMessages(currentUserId, otherUserId);
 
         // Mettre à jour le badge de l'utilisateur via socket pour refléter la lecture
         const authIo = req.app.get('authIo');
