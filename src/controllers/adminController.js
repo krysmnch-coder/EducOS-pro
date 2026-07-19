@@ -10,6 +10,22 @@ const renderAdmin = async (req, res) => {
     // Si l'utilisateur est un administrateur, il ne voit que les utilisateurs de son établissement.
     if (req.user.role === ROLES.ADMINISTRATOR) {
       users = await userModel.getUsersByEstablishmentId(req.user.establishment_id);
+
+      // Déterminer qui peut être supprimé
+      const adminCount = users.filter(u => u.role === ROLES.ADMINISTRATOR).length;
+      users = users.map(user => {
+          let isDeletable = true;
+          // On ne peut pas se supprimer soi-même
+          if (user.id === req.user.id) {
+              isDeletable = false;
+          }
+          // Si l'utilisateur est un admin et qu'il est le dernier, on ne peut pas le supprimer
+          if (user.role === ROLES.ADMINISTRATOR && adminCount <= 1) {
+              isDeletable = false;
+          }
+          return { ...user, isDeletable };
+      });
+
     } 
     // Si c'est un super-admin, il voit la liste des administrateurs avec le compte d'utilisateurs de leur école.
     else if (req.user.role === ROLES.SUPER_ADMIN) {
@@ -18,16 +34,27 @@ const renderAdmin = async (req, res) => {
         .map(admin => admin.establishment_id)
         .filter(id => id != null);
 
+      let userCounts = {};
       if (establishmentIds.length > 0) {
-        const userCounts = await userModel.countApprovedUsersInEstablishments(establishmentIds);
-        // Enrichir chaque admin avec le nombre d'utilisateurs de son établissement
-        users = admins.map(admin => ({
-          ...admin,
-          userCount: userCounts[admin.establishment_id] || 0
-        }));
-      } else {
-        users = admins;
+        userCounts = await userModel.countApprovedUsersInEstablishments(establishmentIds);
       }
+
+      // Compter le nombre d'admins par établissement pour déterminer s'ils sont supprimables
+      const adminsPerEstablishment = admins.reduce((acc, admin) => {
+          if (admin.establishment_id) {
+              acc[admin.establishment_id] = (acc[admin.establishment_id] || 0) + 1;
+          }
+          return acc;
+      }, {});
+
+      users = admins.map(admin => {
+        const isLastAdmin = admin.establishment_id ? adminsPerEstablishment[admin.establishment_id] <= 1 : false;
+        return {
+          ...admin,
+          userCount: userCounts[admin.establishment_id] || 0,
+          isDeletable: !isLastAdmin // Ajout de la propriété pour la vue
+        };
+      });
     } else {
       // Pour tout autre rôle non autorisé, on renvoie une liste vide par sécurité.
       users = [];
@@ -94,6 +121,17 @@ const deleteUser = async (req, res) => {
     if (!userToDelete) {
       req.flash('error_msg', 'Utilisateur introuvable.');
       return res.redirect('/admin');
+    }
+
+    // --- SÉCURITÉ CÔTÉ SERVEUR ---
+    // Empêcher la suppression du dernier administrateur d'un établissement.
+    if (userToDelete.role === ROLES.ADMINISTRATOR && userToDelete.establishment_id) {
+        // On compte combien d'admins (approuvés ou non) sont dans l'établissement.
+        const adminCount = await userModel.countAdminsInEstablishment(userToDelete.establishment_id);
+        if (adminCount <= 1) {
+            req.flash('error_msg', `Impossible de supprimer le dernier administrateur (${userToDelete.name}) de cet établissement.`);
+            return res.redirect(req.get('Referrer') || '/admin');
+        }
     }
 
     await userModel.deleteUserById(id);
