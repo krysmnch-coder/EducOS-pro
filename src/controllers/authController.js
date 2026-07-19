@@ -6,6 +6,8 @@ const bcrypt = require('bcrypt');
 const { ROLES } = require('../../constants'); // Bonne pratique : utiliser des constantes pour les rôles
 const establishmentModel = require('../models/establishmentModel');
 const userModel = require('../models/userModel');
+const crypto = require('crypto');
+const { sendPasswordResetEmail } = require('../utils/emailService');
 
 /**
  * Affiche la page d'accueil ou redirige vers le tableau de bord si l'utilisateur est connecté.
@@ -17,6 +19,87 @@ exports.renderHome = (req, res) => {
   res.render('home', {
       title: 'Accueil | EducOS-pro'
   });
+};
+
+/**
+ * Affiche la page "mot de passe oublié".
+ */
+exports.renderForgotPassword = (req, res) => {
+  res.render('forgot-password', {
+    title: 'Mot de passe oublié | EducOS-pro'
+  });
+};
+
+/**
+ * Gère la demande de réinitialisation de mot de passe.
+ */
+exports.postForgotPassword = async (req, res) => {
+  const { email } = req.body;
+  try {
+    const user = await db('users').where({ email }).first();
+
+    // Important : On envoie un message de succès même si l'utilisateur n'existe pas
+    // pour ne pas permettre de deviner les e-mails enregistrés (email enumeration).
+    if (user) {
+      // 1. Générer un jeton sécurisé
+      const token = crypto.randomBytes(20).toString('hex');
+
+      // 2. Définir une date d'expiration (1 heure à partir de maintenant)
+      const expires = new Date(Date.now() + 3600000);
+
+      // 3. Sauvegarder le jeton et l'expiration pour l'utilisateur
+      await db('users').where({ id: user.id }).update({
+        password_reset_token: token,
+        password_reset_expires: expires,
+      });
+
+      // 4. Envoyer l'e-mail
+      await sendPasswordResetEmail(user.email, token);
+    }
+
+    req.flash('success_msg', 'Si un compte est associé à cet e-mail, un lien de réinitialisation a été envoyé.');
+    res.redirect('/forgot-password');
+  } catch (error) {
+    console.error('Erreur lors de la demande de réinitialisation:', error);
+    req.flash('error_msg', 'Une erreur est survenue.');
+    res.redirect('/forgot-password');
+  }
+};
+
+/**
+ * Affiche la page pour entrer le nouveau mot de passe.
+ */
+exports.renderResetPassword = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const user = await db('users')
+      .where({ password_reset_token: token })
+      .andWhere('password_reset_expires', '>', new Date())
+      .first();
+
+    if (!user) {
+      req.flash('error_msg', 'Le jeton de réinitialisation est invalide ou a expiré.');
+      return res.redirect('/forgot-password');
+    }
+
+    res.render('reset-password', {
+      title: 'Réinitialiser le mot de passe',
+      token: token
+    });
+  } catch (error) {
+    console.error('Erreur lors de l\'affichage de la page de réinitialisation:', error);
+    req.flash('error_msg', 'Une erreur est survenue.');
+    res.redirect('/forgot-password');
+  }
+};
+
+/**
+ * Gère la soumission du nouveau mot de passe.
+ */
+exports.postResetPassword = async (req, res) => {
+  // Cette fonction est très similaire à `postForceChangePassword`.
+  // On pourrait les fusionner à l'avenir pour éviter la duplication.
+  await exports.postForceChangePassword(req, res, `/reset-password/${req.params.token}`);
 };
 
 /**
@@ -139,21 +222,42 @@ exports.renderForceChangePassword = (req, res) => {
 /**
  * Gère la soumission du formulaire de changement de mot de passe forcé.
  */
-exports.postForceChangePassword = async (req, res) => {
+exports.postForceChangePassword = async (req, res, redirectUrl = '/force-change-password') => {
     const { password, confirm_password } = req.body;
-    const userId = req.user.id;
+    const { token } = req.params;
+    let user;
 
     if (password !== confirm_password) {
         req.flash('error_msg', 'Les mots de passe ne correspondent pas.');
-        return res.redirect('/force-change-password');
+        return res.redirect(redirectUrl);
     }
 
     if (password.length < 6) {
         req.flash('error_msg', 'Le mot de passe doit contenir au moins 6 caractères.');
-        return res.redirect('/force-change-password');
+        return res.redirect(redirectUrl);
     }
 
     try {
+        if (token) {
+            // Cas d'un reset de mot de passe oublié
+            user = await db('users')
+                .where({ password_reset_token: token })
+                .andWhere('password_reset_expires', '>', new Date())
+                .first();
+            if (!user) {
+                req.flash('error_msg', 'Le jeton de réinitialisation est invalide ou a expiré.');
+                return res.redirect('/forgot-password');
+            }
+        } else if (req.user) {
+            // Cas d'un changement de mot de passe forcé après connexion
+            user = req.user;
+        } else {
+            // Aucun contexte pour changer le mot de passe
+            req.flash('error_msg', 'Action non autorisée.');
+            return res.redirect('/login');
+        }
+
+        const userId = user.id;
         const hashedPassword = await bcrypt.hash(password, 10);
         await userModel.updateUserPassword(userId, hashedPassword);
 
@@ -170,7 +274,7 @@ exports.postForceChangePassword = async (req, res) => {
     } catch (error) {
         console.error('Erreur lors du changement de mot de passe forcé:', error);
         req.flash('error_msg', 'Une erreur est survenue.');
-        res.redirect('/force-change-password');
+        res.redirect(redirectUrl);
     }
 };
 
