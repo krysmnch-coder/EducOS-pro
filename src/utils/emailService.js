@@ -1,21 +1,14 @@
-const formData = require('form-data');
-const Mailgun = require('mailgun.js');
-
-let mailgunClient;
+const sgMail = require('@sendgrid/mail');
 
 /**
  * Initialise le service d'envoi d'e-mails.
  */
 async function initializeEmailService() {
-  if (process.env.MAILGUN_API_KEY && process.env.MAILGUN_DOMAIN) {
-    const mailgun = new Mailgun(formData);
-    mailgunClient = mailgun.client({
-      username: 'api',
-      key: process.env.MAILGUN_API_KEY,
-    });
-    console.log('Service d\'e-mail (Mailgun) configuré.');
+  if (process.env.SENDGRID_API_KEY) {
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+    console.log('Service d\'e-mail (SendGrid) configuré.');
   } else {
-    console.warn('MAILGUN_API_KEY ou MAILGUN_DOMAIN non configurée. L\'envoi d\'e-mails sera simulé dans la console.');
+    console.warn('SENDGRID_API_KEY non configurée. L\'envoi d\'e-mails sera simulé dans la console.');
   }
 }
 
@@ -25,25 +18,26 @@ async function initializeEmailService() {
  * @param {string} token - Le jeton de réinitialisation.
  */
 const sendPasswordResetEmail = async (to, token) => {
-  // Si le client n'est pas configuré, on simule l'envoi dans la console.
-  if (!mailgunClient) {
-    console.error('ERREUR: Mailgun n\'est pas configuré. Impossible d\'envoyer l\'e-mail.');
+  // Si la clé API n'est pas configurée, on simule l'envoi dans la console au lieu de planter.
+  if (!process.env.SENDGRID_API_KEY) {
+    console.error('ERREUR: SENDGRID_API_KEY est manquante. Impossible d\'envoyer l\'e-mail.');
     console.log('--- EMAIL SIMULÉ ---');
     console.log(`À: ${to}`);
     console.log(`Sujet: Réinitialisation de votre mot de passe EducOS-pro`);
     const resetUrl = `${process.env.BASE_URL || `http://localhost:${process.env.PORT || 5000}`}/reset-password/${token}`;
     console.log(`Lien (simulé): ${resetUrl}`);
     console.log('--------------------');
-    return;
+    // Lancer une erreur pour que le contrôleur puisse la gérer et afficher un message à l'utilisateur.
+    throw new Error('Service d\'e-mail non configuré.');
   }
 
   // Utilise la variable d'environnement BASE_URL, avec un fallback pour le développement local.
   const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 5000}`;
   const resetUrl = `${baseUrl}/reset-password/${token}`;
 
-  const messageData = {
-    from: process.env.EMAIL_FROM,
+  const msg = {
     to: to,
+    from: process.env.EMAIL_FROM, // IMPORTANT: Doit être une adresse vérifiée sur SendGrid
     subject: 'Réinitialisation de votre mot de passe EducOS-pro',
     html: `
       <p>Bonjour,</p>
@@ -57,10 +51,13 @@ const sendPasswordResetEmail = async (to, token) => {
   };
 
   try {
-    const response = await mailgunClient.messages.create(process.env.MAILGUN_DOMAIN, messageData);
-    console.log(`E-mail de réinitialisation envoyé à ${to} via Mailgun.`, response);
+    await sgMail.send(msg);
+    console.log(`E-mail de réinitialisation envoyé à ${to} via SendGrid.`);
   } catch (error) {
-    console.error('Erreur lors de l\'envoi de l\'e-mail via Mailgun:', error);
+    console.error('Erreur lors de l\'envoi de l\'e-mail via SendGrid:', error);
+    if (error.response) {
+      console.error(error.response.body);
+    }
     // Lancer une erreur pour que le contrôleur puisse la gérer
     throw new Error('Impossible d\'envoyer l\'e-mail de réinitialisation.');
   }
