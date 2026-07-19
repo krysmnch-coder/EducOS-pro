@@ -19,7 +19,11 @@ const {
   updateProfilePicture,
   updateProfileInfo,
   renderForceChangePassword,
-  postForceChangePassword
+  postForceChangePassword,
+  renderForgotPassword,
+  postForgotPassword,
+  renderResetPassword,
+  postResetPassword
 } = require('../controllers/authController');
 
 const { ensureAuthenticated } = require('../../authMiddleware');
@@ -31,6 +35,15 @@ const loginLimiter = rateLimit({
     message: 'Trop de tentatives de connexion depuis cette adresse IP. Veuillez réessayer dans 15 minutes.',
     standardHeaders: true, // Envoie les informations de limite dans les en-têtes `RateLimit-*`
     legacyHeaders: false, // Désactive les anciens en-têtes `X-RateLimit-*`
+});
+
+// Limiteur pour les demandes de réinitialisation de mot de passe pour éviter le spam d'e-mails
+const forgotPasswordLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 heure
+    max: 5, // Limite chaque IP à 5 requêtes par heure
+    message: 'Trop de demandes de réinitialisation de mot de passe depuis cette IP. Veuillez réessayer dans une heure.',
+    standardHeaders: true,
+    legacyHeaders: false,
 });
 
 // --- Configuration de Multer pour les avatars ---
@@ -76,6 +89,12 @@ router.post('/login', loginLimiter, passport.authenticate('local', {
 router.get('/register', renderRegister);
 router.post('/register', postRegister);
 
+// Routes pour la réinitialisation du mot de passe
+router.get('/forgot-password', renderForgotPassword);
+router.post('/forgot-password', forgotPasswordLimiter, postForgotPassword);
+router.get('/reset-password/:token', renderResetPassword);
+router.post('/reset-password/:token', postResetPassword);
+
 // Placeholders pour l'authentification sociale
 router.get('/auth/:provider', socialLogin);
 router.get('/auth/:provider/callback', socialLogin);
@@ -97,4 +116,4 @@ router.post('/profile/update', ensureAuthenticated, updateProfileInfo);
 // Route API pour le token
 router.get('/api/token', ensureAuthenticated, getApiToken);
 
-module.exports = router;
+module.exports = router; 
