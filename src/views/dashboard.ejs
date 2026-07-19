@@ -98,6 +98,7 @@
         justify-content: center;
         font-weight: 600;
         font-size: 1.2rem;
+        object-fit: cover; /* Pour que l'image de l'avatar remplisse le cercle */
       }
     </style>
   </head>
@@ -111,7 +112,7 @@
           <% if (user) { %>
           <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-4">
             <% if (user.avatar_url) { %>
-              <img src="<%= user.avatar_url %>" alt="Votre avatar" class="user-avatar" style="object-fit: cover;">
+              <img src="<%= user.avatar_url %>" alt="Votre avatar" class="user-avatar">
             <% } else { %>
               <div class="user-avatar">
                 <%= user.name ? user.name.charAt(0).toUpperCase() : 'U' %>
