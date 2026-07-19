@@ -108,24 +108,30 @@
       <main class="page-main">
         <!-- En-tête de bienvenue modernisé -->
         <div class="welcome-header">
+          <% if (user) { %>
           <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-4">
             <% if (user.avatar_url) { %>
               <img src="<%= user.avatar_url %>" alt="Votre avatar" class="user-avatar" style="object-fit: cover;">
             <% } else { %>
               <div class="user-avatar">
-                <%= user.name.charAt(0).toUpperCase() %>
+                <%= user.name ? user.name.charAt(0).toUpperCase() : 'U' %>
               </div>
             <% } %>
             <div class="flex-grow-1">
-              <h1 class="h3 fw-bold mb-1">Bienvenue, <%= user.name %> !</h1>
-              <p class="text-muted mb-0">Voici vos raccourcis en tant que <strong><%= user.role %></strong>.</p>
+              <h1 class="h3 fw-bold mb-1">Bienvenue, <%= user.name || 'Utilisateur' %> !</h1>
+              <p class="text-muted mb-0">Voici vos raccourcis en tant que <strong><%= user.role || 'Indéfini' %></strong>.</p>
             </div>
           </div>
+          <% } else { %>
+            <h1 class="h3 fw-bold mb-1">Bienvenue !</h1>
+            <p class="text-muted mb-0">Chargement des informations utilisateur...</p>
+          <% } %>
         </div>
 
         <!-- Grille de widgets dynamiques -->
         <div class="widget-grid">
-          <% widgets.forEach(widget => { %>
+          <% if (typeof widgets !== 'undefined' && widgets.length > 0) { %>
+            <% widgets.forEach(widget => { %>
             <a href="<%= widget.link %>" class="widget-card">
               <div class="widget-icon">
                 <%- widget.icon %>
@@ -136,7 +142,10 @@
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
               </div>
             </a>
-          <% }); %>
+            <% }); %>
+          <% } else { %>
+            <p class="text-muted">Aucun raccourci disponible pour le moment.</p>
+          <% } %>
         </div>
       </main>
     </div>
