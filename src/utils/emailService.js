@@ -1,14 +1,23 @@
-const nodemailer = require('nodemailer');
+const formData = require('form-data');
+const Mailgun = require('mailgun.js');
 
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: process.env.EMAIL_PORT,
-  secure: process.env.EMAIL_PORT === '465', // true for 465, false for other ports
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
+let mailgunClient;
+
+/**
+ * Initialise le service d'envoi d'e-mails.
+ */
+async function initializeEmailService() {
+  if (process.env.MAILGUN_API_KEY && process.env.MAILGUN_DOMAIN) {
+    const mailgun = new Mailgun(formData);
+    mailgunClient = mailgun.client({
+      username: 'api',
+      key: process.env.MAILGUN_API_KEY,
+    });
+    console.log('Service d\'e-mail (Mailgun) configuré.');
+  } else {
+    console.warn('MAILGUN_API_KEY ou MAILGUN_DOMAIN non configurée. L\'envoi d\'e-mails sera simulé dans la console.');
+  }
+}
 
 /**
  * Envoie un e-mail de réinitialisation de mot de passe.
@@ -16,9 +25,23 @@ const transporter = nodemailer.createTransport({
  * @param {string} token - Le jeton de réinitialisation.
  */
 const sendPasswordResetEmail = async (to, token) => {
-  const resetUrl = `http://localhost:5000/reset-password/${token}`; // Adaptez l'URL de base à votre environnement
+  // Si le client n'est pas configuré, on simule l'envoi dans la console.
+  if (!mailgunClient) {
+    console.error('ERREUR: Mailgun n\'est pas configuré. Impossible d\'envoyer l\'e-mail.');
+    console.log('--- EMAIL SIMULÉ ---');
+    console.log(`À: ${to}`);
+    console.log(`Sujet: Réinitialisation de votre mot de passe EducOS-pro`);
+    const resetUrl = `${process.env.BASE_URL || `http://localhost:${process.env.PORT || 5000}`}/reset-password/${token}`;
+    console.log(`Lien (simulé): ${resetUrl}`);
+    console.log('--------------------');
+    return;
+  }
 
-  const mailOptions = {
+  // Utilise la variable d'environnement BASE_URL, avec un fallback pour le développement local.
+  const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 5000}`;
+  const resetUrl = `${baseUrl}/reset-password/${token}`;
+
+  const messageData = {
     from: process.env.EMAIL_FROM,
     to: to,
     subject: 'Réinitialisation de votre mot de passe EducOS-pro',
@@ -33,9 +56,17 @@ const sendPasswordResetEmail = async (to, token) => {
     `,
   };
 
-  await transporter.sendMail(mailOptions);
+  try {
+    const response = await mailgunClient.messages.create(process.env.MAILGUN_DOMAIN, messageData);
+    console.log(`E-mail de réinitialisation envoyé à ${to} via Mailgun.`, response);
+  } catch (error) {
+    console.error('Erreur lors de l\'envoi de l\'e-mail via Mailgun:', error);
+    // Lancer une erreur pour que le contrôleur puisse la gérer
+    throw new Error('Impossible d\'envoyer l\'e-mail de réinitialisation.');
+  }
 };
 
 module.exports = {
+  initializeEmailService,
   sendPasswordResetEmail,
 };

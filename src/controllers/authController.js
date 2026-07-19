@@ -7,6 +7,7 @@ const { ROLES } = require('../../constants'); // Bonne pratique : utiliser des c
 const establishmentModel = require('../models/establishmentModel');
 const userModel = require('../models/userModel');
 const crypto = require('crypto');
+const { validateEmail } = require('../utils/emailValidationService');
 const { sendPasswordResetEmail } = require('../utils/emailService');
 
 /**
@@ -166,6 +167,14 @@ exports.postRegister = async (req, res) => {
   const { name, email, password, establishment_id } = req.body;
 
   try {
+    // ÉTAPE 0 : Valider l'adresse e-mail avec Mailboxlayer
+    const emailValidation = await validateEmail(email);
+    // On bloque si l'e-mail est invalide, mais on laisse passer en cas d'erreur de l'API pour ne pas pénaliser l'utilisateur.
+    if (!emailValidation.isValid && emailValidation.reason !== 'api_error' && emailValidation.reason !== 'request_failed') {
+        req.flash('error_msg', `L'adresse e-mail est invalide : ${emailValidation.reason}`);
+        return res.redirect('/register');
+    }
+
     // Étape 1 : Vérifier si l'utilisateur existe déjà.
     // .first() récupère le premier résultat ou undefined, c'est très pratique.
     const existingUser = await db('users').where({ email: email }).first();

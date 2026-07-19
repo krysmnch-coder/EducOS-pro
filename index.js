@@ -26,6 +26,7 @@ const db = require('./src/models/db');
 const communicationModel = require('./src/models/communicationModel');
 const { createClient } = require("redis");
 const pgSession = require('connect-pg-simple')(session);
+const { initializeEmailService } = require('./src/utils/emailService'); // Chemin vers votre fichier
 const { createAdapter } = require("@socket.io/redis-adapter");
 
 const app = express();
@@ -413,6 +414,13 @@ async function startServer() {
     console.log('REDIS_URL non fournie. Démarrage sans adaptateur Redis. La scalabilité temps réel est désactivée.');
   }
   
+  // 2. Initialiser le service d'e-mail (après la configuration de Redis)
+  try {
+    await initializeEmailService();
+    console.log('Service d\'e-mail initialisé.');
+  } catch (err) {
+    console.error('Erreur lors de l\'initialisation du service d\'e-mail:', err);
+  }
   // 3. Démarre le serveur HTTP
   server.listen(PORT, () => {
     console.log(`Serveur démarré sur http://localhost:${PORT}`);
