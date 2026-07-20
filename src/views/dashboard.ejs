@@ -1,164 +1,55 @@
-<!DOCTYPE html>
-<html lang="fr">
-  <head>
-    <%- include('partials/head') %>
-    <style>
-      /* Animations */
-      @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
+<%- include('partials/head') %>
+<%- include('partials/navbar') %>
 
-      .welcome-header, .widget-grid .widget-card {
-        animation: fadeInUp 0.6s ease-out forwards;
-        opacity: 0;
-      }
+<div class="container page-shell py-4">
+    <div class="themed-container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3 mb-0"><%= title %></h1>
+        </div>
 
-      /* Styles pour la nouvelle grille de widgets */
-      .widget-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 1.5rem;
-      }
+        <%- include('partials/messages') %>
 
-      .widget-card {
-        background-color: var(--bs-card-bg);
-        border: 1px solid var(--bs-border-color);
-        border-radius: 1rem;
-        padding: 1.5rem;
-        text-decoration: none;
-        color: inherit;
-        transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
-        display: flex;
-        flex-direction: column;
-      }
+        <%# --- Section de bienvenue --- %>
+        <div class="mb-5">
+            <h2 class="mb-1">Bonjour, <%= user.name %> !</h2>
+            <p class="lead text-muted">Voici les actions rapides disponibles pour votre rôle.</p>
+        </div>
 
-      .widget-card:hover {
-        transform: translateY(-5px);
-        box-shadow: var(--bs-box-shadow-lg);
-        color: inherit;
-      }
-
-      .widget-icon {
-        width: 48px;
-        height: 48px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 1rem;
-        color: var(--bs-primary);
-        background-color: rgba(var(--bs-primary-rgb), 0.1);
-      }
-
-      .widget-icon svg {
-        width: 24px;
-        height: 24px;
-      }
-
-      .widget-card h5 {
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-      }
-
-      .widget-card p {
-        font-size: 0.9rem;
-        color: var(--bs-secondary-color);
-        flex-grow: 1;
-      }
-
-      .widget-card .arrow-link {
-        align-self: flex-end;
-        color: var(--bs-primary);
-        transition: transform 0.2s ease;
-      }
-
-      .widget-card:hover .arrow-link {
-        transform: translateX(5px);
-      }
-
-      /* Le délai d'animation est maintenant géré en ligne sur chaque carte pour une meilleure compatibilité avec les éditeurs */
-
-      .welcome-header {
-        padding: 2rem;
-        border-radius: 1rem;
-        margin-bottom: 2.5rem;
-        background-color: var(--bs-card-bg);
-        border: 1px solid var(--bs-border-color);
-      }
-
-      .user-avatar {
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        background-color: var(--bs-primary);
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 600;
-        font-size: 1.2rem;
-        object-fit: cover; /* Pour que l'image de l'avatar remplisse le cercle */
-      }
-    </style>
-  </head>
-  <body data-user-id="<%= user ? user.id : '' %>">
-    <div class="page-shell container-xl py-4">
-      <%- include('partials/header') %>
-
-      <main class="page-main">
-        <!-- En-tête de bienvenue modernisé -->
-        <div class="welcome-header">
-          <% if (user) { %>
-          <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-4">
-            <% if (user.avatar_url) { %>
-              <img src="<%= user.avatar_url %>" alt="Votre avatar" class="user-avatar">
-            <% } else { %>
-              <div class="user-avatar">
-                <%= user.name ? user.name.charAt(0).toUpperCase() : 'U' %>
-              </div>
-            <% } %>
-            <div class="flex-grow-1">
-              <h1 class="h3 fw-bold mb-1">Bienvenue, <%= user.name || 'Utilisateur' %> !</h1>
-              <p class="text-muted mb-0">Voici vos raccourcis en tant que <strong><%= user.role || 'Indéfini' %></strong>.</p>
+        <%# --- Section des Raccourcis (Widgets) --- %>
+        <% if (typeof widgets !== 'undefined' && widgets.length > 0) { %>
+            <h3 class="mb-4">Vos raccourcis</h3>
+            <div class="row">
+                <% widgets.forEach(widget => { %>
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <a href="<%= widget.link %>" class="text-decoration-none">
+                    <div class="card dashboard-stat h-100">
+                        <div class="card-body text-center">
+                        <div class="stat-icon mb-3">
+                            <i data-feather="<%= widget.icon %>" width="36" height="36"></i>
+                        </div>
+                        <h5 class="card-title mb-2"><%= widget.title %></h5>
+                        <p class="card-text text-muted small"><%= widget.description %></p>
+                        </div>
+                    </div>
+                    </a>
+                </div>
+                <% }); %>
             </div>
-          </div>
-          <% } else { %>
-            <h1 class="h3 fw-bold mb-1">Bienvenue !</h1>
-            <p class="text-muted mb-0">Chargement des informations utilisateur...</p>
-          <% } %>
-        </div>
-
-        <!-- Grille de widgets dynamiques -->
-        <div class="widget-grid">
-          <% if (typeof widgets !== 'undefined' && widgets.length > 0) { %>
-            <% widgets.forEach(widget => { %>
-            <a href="<%= widget.link %>" class="widget-card">
-              <div class="widget-icon">
-                <%- widget.icon %>
-              </div>
-              <h5><%= widget.title %></h5>
-              <p><%= widget.text %></p>
-              <div class="arrow-link mt-auto">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-              </div>
-            </a>
-            <% }); %>
-          <% } else { %>
-            <p class="text-muted">Aucun raccourci disponible pour le moment.</p>
-          <% } %>
-        </div>
-      </main>
+        <% } else { %>
+            <div class="text-center py-5">
+                <p class="text-muted">Aucun raccourci n'est configuré pour votre rôle pour le moment.</p>
+            </div>
+        <% } %>
     </div>
-    <script src="/js/theme.js"></script>
-    <%- include('partials/footer') %>
-    <script>
-      document.addEventListener('DOMContentLoaded', () => {
-        const widgetCards = document.querySelectorAll('.widget-grid .widget-card');
-        widgetCards.forEach((card, index) => {
-          card.style.animationDelay = `${0.1 + (index * 0.05)}s`;
-        });
-      });
-    </script>
-  </body>
-</html>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof feather !== 'undefined') {
+            feather.replace();
+        }
+    });
+</script>
+
+<%- include('partials/page-end-scripts') %>
+<%- include('partials/footer') %>

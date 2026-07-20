@@ -140,8 +140,41 @@ exports.renderDashboard = (req, res) => {
             // Affiche le tableau de bord dédié aux administrateurs.
             return adminController.renderAdminDashboard(req, res);
         default:
-            // Affiche un tableau de bord générique pour les autres rôles.
-            return res.render('dashboard', { title: 'Tableau de bord | EducOS-pro', user: req.user });
+            // Pour tous les autres rôles, on crée un tableau de bord générique avec des widgets spécifiques.
+            const allWidgets = [
+                // --- PARENT ---
+                { title: "Choix de l'enfant", link: '/students', icon: 'users', description: "Sélectionner l'enfant à suivre.", roles: [ROLES.PARENT] },
+                { title: "Notes de l'enfant", link: '/student/grades', icon: 'award', description: "Consulter les notes et appréciations.", roles: [ROLES.PARENT] },
+                { title: "Documents Scolaires", link: '/student/documents', icon: 'file-text', description: "Télécharger les certificats et autres documents.", roles: [ROLES.PARENT] },
+
+                // --- VIE SCOLAIRE ---
+                { title: "Gestion du Calendrier", link: '/school-life/calendar', icon: 'calendar', description: "Définir les événements et vacances.", roles: [ROLES.SCHOOL_LIFE_MANAGER] },
+                { title: "Emplois du Temps", link: '/school-life/timetables', icon: 'clock', description: "Gérer les emplois du temps des classes.", roles: [ROLES.SCHOOL_LIFE_MANAGER] },
+                { title: "Gestion des Absences", link: '/school-life/absences', icon: 'user-x', description: "Suivre et justifier les absences des élèves.", roles: [ROLES.SCHOOL_LIFE_MANAGER] },
+
+                // --- SECRETAIRE ---
+                { title: "Liste des Élèves", link: '/students', icon: 'users', description: "Consulter et gérer la liste des élèves.", roles: [ROLES.SECRETARY] },
+                { title: "Suivi des Paiements", link: '/secretary/payments', icon: 'dollar-sign', description: "Suivre les frais de scolarité et paiements.", roles: [ROLES.SECRETARY] },
+                { title: "Documents Scolaires", link: '/secretary/documents', icon: 'archive', description: "Générer et archiver les certificats.", roles: [ROLES.SECRETARY] },
+
+                // --- PROFESSEUR ---
+                { title: "Saisie des Notes", link: '/professor/grades', icon: 'edit', description: "Entrer et modifier les notes des élèves.", roles: [ROLES.PROFESSOR] },
+                { title: "Ressources Pédagogiques", link: '/professor/resources', icon: 'book-open', description: "Partager des cours et des exercices.", roles: [ROLES.PROFESSOR] },
+                { title: "Cahier de Texte", link: '/professor/logbook', icon: 'book', description: "Renseigner le contenu des séances.", roles: [ROLES.PROFESSOR] },
+
+                // --- ELEVE ---
+                { title: "Mes Notes", link: '/student/grades', icon: 'award', description: "Consulter mes notes et classements.", roles: [ROLES.STUDENT] },
+                { title: "Ressources de Cours", link: '/student/resources', icon: 'book-open', description: "Accéder aux documents partagés par les professeurs.", roles: [ROLES.STUDENT] },
+                { title: "Mon Emploi du Temps", link: '/student/timetable', icon: 'clock', description: "Voir mon emploi du temps de la semaine.", roles: [ROLES.STUDENT] },
+            ];
+
+            const availableWidgets = allWidgets.filter(widget => widget.roles.includes(user.role));
+
+            return res.render('dashboard', { 
+                title: 'Tableau de bord | EducOS-pro', 
+                user: req.user,
+                widgets: availableWidgets 
+            });
     }
 };
 
