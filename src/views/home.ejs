@@ -829,20 +829,39 @@
         }
       });
 
-      // Gestion du bouton "Retour en haut"
+      // Gestion du bouton "Retour en haut" et de la navbar
       const backToTopBtn = document.getElementById('backToTopBtn');
+      const navbar = document.querySelector('.navbar');
+      let lastScrollY = window.scrollY; // On garde en mémoire la dernière position de scroll
 
-      if (backToTopBtn) {
+      if (backToTopBtn && navbar) {
         window.addEventListener('scroll', () => {
+          // Gère l'affichage du bouton "Retour en haut"
           if (window.scrollY > 300) {
             backToTopBtn.classList.add('visible');
           } else {
             backToTopBtn.classList.remove('visible');
           }
+
+          // Gère l'affichage de la barre de navigation
+          // Si on défile vers le bas ET qu'on n'est pas tout en haut (plus de 100px)
+          if (window.scrollY > lastScrollY && window.scrollY > 100) {
+            navbar.classList.add('hidden');
+          } else { // Si on défile vers le haut
+            navbar.classList.remove('hidden');
+          }
+
+          // Met à jour la dernière position de scroll pour la prochaine comparaison
+          // On met une petite condition pour éviter les faux positifs sur les appareils tactiles
+          if (Math.abs(window.scrollY - lastScrollY) > 5) {
+            lastScrollY = window.scrollY;
+          }
         });
 
         backToTopBtn.addEventListener('click', (e) => {
           e.preventDefault();
+          // On s'assure que la navbar est visible avant de remonter
+          navbar.classList.remove('hidden');
           window.scrollTo({
             top: 0,
             behavior: 'smooth'
