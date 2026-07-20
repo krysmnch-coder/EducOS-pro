@@ -182,22 +182,42 @@ app.use(forcePasswordChange);
 // à l'ancienne API boguée et renvoyer la bonne réponse.
 app.get('/api/dashboard-stats', async (req, res) => {
   try {
-    const totalUserCountResult = await db('users').where('approved', true).count('id as count').first();
-    const professorCount = await userModel.countUsersByRole('professeur');
-    const establishmentCountResult = await db('establishments').count('id as count').first();
-    const pendingCount = await userModel.countPendingUsers();
-
-    res.json({
-        totalUserCount: totalUserCountResult ? Number(totalUserCountResult.count) : 0,
-        professorCount,
-        establishmentCount: establishmentCountResult ? Number(establishmentCountResult.count) : 0,
-        pendingCount
-    });
+    const stats = await getDashboardStats();
+    res.json(stats);
   } catch (error) {
     console.error('Erreur dans l\'intercepteur pour /api/dashboard-stats:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
+/**
+ * Récupère les statistiques pour le tableau de bord.
+ * Centralise la logique pour l'API et la diffusion Socket.IO.
+ */
+async function getDashboardStats() {
+  const totalUserCountResult = await db('users').where('approved', true).count('id as count').first();
+  const professorCount = await userModel.countUsersByRole('professeur');
+  const establishmentCountResult = await db('establishments').count('id as count').first();
+  const pendingCount = await userModel.countPendingUsers();
+
+  return {
+    totalUserCount: totalUserCountResult ? Number(totalUserCountResult.count) : 0,
+    professorCount,
+    establishmentCount: establishmentCountResult ? Number(establishmentCountResult.count) : 0,
+    pendingCount
+  };
+}
+
+async function broadcastDashboardStats() {
+  try {
+    // Correction : La colonne 'status' n'existe pas. On utilise la colonne 'approved'
+    // pour compter les utilisateurs actifs. Knex gère la différence entre `true` et `1`.
+    const stats = await getDashboardStats();
+    publicNamespace.emit('dashboardUpdate', stats);
+  } catch (error) {
+    console.error('Erreur broadcastDashboardStats:', error);
+  }
+}
 
 // Routes
 app.use('/', authRoutes);
@@ -213,26 +233,6 @@ const wrap = (middleware) => (socket, next) => middleware(socket.request, {}, ne
 
 const publicNamespace = io.of('/public');
 const authNamespace = io.of('/');
-
-async function broadcastDashboardStats() {
-  try {
-    // Correction : La colonne 'status' n'existe pas. On utilise la colonne 'approved'
-    // pour compter les utilisateurs actifs. Knex gère la différence entre `true` et `1`.
-    const totalUserCountResult = await db('users').where('approved', true).count('id as count').first();
-    const professorCount = await userModel.countUsersByRole('professeur');
-    const establishmentCountResult = await db('establishments').count('id as count').first();
-    const pendingCount = await userModel.countPendingUsers();
-
-    publicNamespace.emit('dashboardUpdate', {
-      totalUserCount: totalUserCountResult ? totalUserCountResult.count : 0,
-      professorCount,
-      establishmentCount: establishmentCountResult ? establishmentCountResult.count : 0,
-      pendingCount
-    });
-  } catch (error) {
-    console.error('Erreur broadcastDashboardStats:', error);
-  }
-}
 
 publicNamespace.on('connection', (socket) => {
   console.log('Client public connecté à /public');
