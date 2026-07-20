@@ -47,23 +47,40 @@
     border: none;
     box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
     animation: fadeIn 0.8s ease-out forwards;
-    overflow-y: auto;
-    padding: 2rem;
+    overflow: hidden; /* Le conteneur principal ne défile plus */
+    padding: 0; /* Le padding est géré par les enfants */
     max-height: 95vh; /* Limite la hauteur pour s'adapter à la fenêtre */
+    display: flex;
+    flex-direction: column;
+  }
+
+  .auth-card-header {
+    padding: 2rem 2rem 1.5rem 2rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
+  }
+
+  body[data-theme="dark"] .auth-card-header {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .auth-card-body {
+    padding: 1.5rem 2rem 2rem 2rem;
+    overflow-y: auto;
   }
 
   /* Barre de défilement personnalisée pour Webkit (Chrome, Safari) */
-  .auth-card::-webkit-scrollbar {
+  .auth-card-body::-webkit-scrollbar {
     width: 8px;
   }
-  .auth-card::-webkit-scrollbar-track {
+  .auth-card-body::-webkit-scrollbar-track {
     background: transparent;
   }
-  .auth-card::-webkit-scrollbar-thumb {
+  .auth-card-body::-webkit-scrollbar-thumb {
     background-color: rgba(0, 0, 0, 0.2);
     border-radius: 10px;
   }
-  body[data-theme="dark"] .auth-card::-webkit-scrollbar-thumb {
+  body[data-theme="dark"] .auth-card-body::-webkit-scrollbar-thumb {
     background-color: rgba(255, 255, 255, 0.2);
   }
 
@@ -191,9 +208,12 @@
     color: #ffffff;
   }
 
-  /* Assure que le texte du placeholder du select est visible en mode sombre */
-  body[data-theme="dark"] .form-select:invalid {
-    color: #ffffff !important;
+  /* Styles pour les listes déroulantes en mode sombre.
+     NOTE : Le style des options (<option>) est très limité et dépend
+     fortement du navigateur et du système d'exploitation. Ces styles
+     peuvent ne pas s'appliquer partout. */
+  body[data-theme="dark"] .form-select {
+    color: #ffffff !important; /* Texte de l'option sélectionnée et du placeholder */
   }
 
   body[data-theme="light"] .form-control, body[data-theme="light"] .form-select {
@@ -236,7 +256,7 @@
   
 </a>
 <div class="auth-card" style="max-width: 960px;">
-      <div class="mb-4">
+      <div class="auth-card-header">
         <div class="d-flex justify-content-between align-items-center mb-2">
           <h1 class="h3 fw-bold mb-0">Inscription</h1>
           <span class="h2 fw-bold">
@@ -246,6 +266,7 @@
         <p class="text-muted mb-0">Créez votre compte en quelques secondes.</p>
       </div>
 
+      <div class="auth-card-body">
       <div class="row">
         <!-- Colonne du formulaire avec bordure responsive -->
         <div class="col-md-7 border-bottom border-md-0 border-end-md pe-md-4 pb-4 mb-4 pb-md-0 mb-md-0">
@@ -351,6 +372,7 @@
       <p class="auth-text text-center mt-4 mb-0">
         Vous avez déjà un compte ? <a href="/login">Connexion</a>
       </p>
+    </div>
 </div>
 
 <script>
@@ -421,15 +443,14 @@
         </div>
       </div>
       <div class="row g-3 mt-2">
-        <div class="col-md-4">
+        <div class="col-md-3">
             <label class="form-label">Matricule</label>
             <input type="text" name="children[${index}][matricule]" class="form-control" placeholder="Matricule" required />
         </div>
-        <div class="col-md-8">
-          <label class="form-label">Classe</label>
-          <div class="d-flex gap-2">
+        <div class="col-md-5">
+          <label class="form-label">Niveau</label>
             <select class="form-select form-select-sm class-level-select" data-index="${index}" required>
-              <option value="" disabled selected>-- Niveau --</option>
+              <option value="" disabled selected>-- Choisir --</option>
               <optgroup label="Lycée">
                 <option value="Terminale">Terminale</option>
                 <option value="Première">Première</option>
@@ -451,18 +472,23 @@
                 <option value="Toute Petite Section">Toute Petite Section</option>
               </optgroup>
             </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Lettre</label>
             <select class="form-select form-select-sm class-suffix-letter-select" data-index="${index}">
-              <option value="" selected>Lettre</option>
+              <option value="" selected>Aucune</option>
               ${'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(l => `<option value="${l}">${l}</option>`).join('')}
             </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">N°</label>
             <select class="form-select form-select-sm class-suffix-number-select" data-index="${index}">
-              <option value="" selected>N°</option>
+              <option value="" selected>Aucun</option>
               ${Array.from({length: 20}, (_, i) => i + 1).map(n => `<option value="${n}">${n}</option>`).join('')}
             </select>
-          </div>
-          <input type="hidden" name="children[${index}][student_class]" class="student-class-hidden-input" />
         </div>
       </div>
+      <input type="hidden" name="children[${index}][student_class]" class="student-class-hidden-input" />
     `;
     const classSelects = entry.querySelectorAll('.class-level-select, .class-suffix-letter-select, .class-suffix-number-select');
     classSelects.forEach(select => select.addEventListener('change', () => updateHiddenClassInput(index)));
