@@ -308,6 +308,41 @@ body { /* Ceci doit être ajusté en fonction de la hauteur réelle de la navbar
     transform: scale(1.1) rotate(5deg);
     background-color: rgba(var(--bs-primary-rgb), 0.15);
 }
+/* Animation de pulsation pour les raccourcis */
+.dashboard-stat.is-pulsing {
+    animation: pulse-animation 1.2s ease-in-out;
+}
+
+@keyframes pulse-animation {
+    0% {
+        transform: translateY(0);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    40% {
+        transform: translateY(-6px);
+        box-shadow: 0 12px 30px rgba(var(--bs-primary-rgb), 0.3);
+    }
+    100% {
+        transform: translateY(0);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+}
+
+/* Style pour les raccourcis désactivés (parent sans enfant sélectionné) */
+.shortcut-link.disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
+}
+.shortcut-link.disabled .dashboard-stat:hover {
+    transform: none;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important; /* Utilise le box-shadow par défaut */
+    border-color: var(--dashboard-stat-border-color) !important;
+}
+
+/* Style pour le sélecteur d'enfant */
+.child-selector-wrapper {
+    background-color: rgba(var(--bs-primary-rgb), 0.05);
+}
 .stat-icon svg {
   color: var(--stat-icon-color) !important;
   stroke: currentColor;

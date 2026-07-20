@@ -140,42 +140,94 @@ exports.renderDashboard = (req, res) => {
             // Affiche le tableau de bord dédié aux administrateurs.
             return adminController.renderAdminDashboard(req, res);
         default:
-            // Pour tous les autres rôles, on crée un tableau de bord générique avec des widgets spécifiques.
+            // Pour tous les autres rôles, on prépare un tableau de bord avec des widgets spécifiques.
+            let parentData = {};
+
+            if (user.role === ROLES.PARENT) {
+                try {
+                    // Cette fonction est à créer dans userModel.js
+                    parentData.children = await userModel.getLinkedChildrenForParent(user.id);
+
+                    if (req.session.selectedChildId) {
+                        const selectedChild = parentData.children.find(c => c.id === req.session.selectedChildId);
+                        if (selectedChild) {
+                            parentData.selectedChild = selectedChild;
+                        } else {
+                            delete req.session.selectedChildId; // Nettoie une session invalide
+                        }
+                    }
+                } catch (error) {
+                    console.error("Erreur lors de la récupération des enfants du parent:", error);
+                    parentData.children = [];
+                }
+            }
+
             const allWidgets = [
                 // --- PARENT ---
-                { title: "Choix de l'enfant", link: '/students', icon: 'users', description: "Sélectionner l'enfant à suivre.", roles: [ROLES.PARENT] },
-                { title: "Notes de l'enfant", link: '/student/grades', icon: 'award', description: "Consulter les notes et appréciations.", roles: [ROLES.PARENT] },
-                { title: "Documents Scolaires", link: '/student/documents', icon: 'file-text', description: "Télécharger les certificats et autres documents.", roles: [ROLES.PARENT] },
+                { key: 'grades', title: "Notes de l'enfant", link: '/student/grades', icon: 'award', description: "Consulter les notes et appréciations.", roles: [ROLES.PARENT] },
+                { key: 'absences', title: "Suivi des Absences", link: '/student/absences', icon: 'user-x', description: "Voir les absences et retards.", roles: [ROLES.PARENT] },
+                { key: 'documents', title: "Documents Scolaires", link: '/student/documents', icon: 'file-text', description: "Télécharger les certificats et bulletins.", roles: [ROLES.PARENT] },
 
                 // --- VIE SCOLAIRE ---
-                { title: "Gestion du Calendrier", link: '/school-life/calendar', icon: 'calendar', description: "Définir les événements et vacances.", roles: [ROLES.SCHOOL_LIFE_MANAGER] },
-                { title: "Emplois du Temps", link: '/school-life/timetables', icon: 'clock', description: "Gérer les emplois du temps des classes.", roles: [ROLES.SCHOOL_LIFE_MANAGER] },
-                { title: "Gestion des Absences", link: '/school-life/absences', icon: 'user-x', description: "Suivre et justifier les absences des élèves.", roles: [ROLES.SCHOOL_LIFE_MANAGER] },
+                { key: 'calendar', title: "Gestion du Calendrier", link: '/school-life/calendar', icon: 'calendar', description: "Définir les événements et vacances.", roles: [ROLES.SCHOOL_LIFE_MANAGER] },
+                { key: 'timetables', title: "Emplois du Temps", link: '/school-life/timetables', icon: 'clock', description: "Gérer les emplois du temps des classes.", roles: [ROLES.SCHOOL_LIFE_MANAGER] },
+                { key: 'school_absences', title: "Gestion des Absences", link: '/school-life/absences', icon: 'user-x', description: "Suivre et justifier les absences des élèves.", roles: [ROLES.SCHOOL_LIFE_MANAGER] },
 
                 // --- SECRETAIRE ---
-                { title: "Liste des Élèves", link: '/students', icon: 'users', description: "Consulter et gérer la liste des élèves.", roles: [ROLES.SECRETARY] },
-                { title: "Suivi des Paiements", link: '/secretary/payments', icon: 'dollar-sign', description: "Suivre les frais de scolarité et paiements.", roles: [ROLES.SECRETARY] },
-                { title: "Documents Scolaires", link: '/secretary/documents', icon: 'archive', description: "Générer et archiver les certificats.", roles: [ROLES.SECRETARY] },
+                { key: 'students_list', title: "Liste des Élèves", link: '/students', icon: 'users', description: "Consulter et gérer la liste des élèves.", roles: [ROLES.SECRETARY] },
+                { key: 'payments', title: "Suivi des Paiements", link: '/secretary/payments', icon: 'dollar-sign', description: "Suivre les frais de scolarité et paiements.", roles: [ROLES.SECRETARY] },
+                { key: 'school_documents', title: "Documents Scolaires", link: '/secretary/documents', icon: 'archive', description: "Générer et archiver les certificats.", roles: [ROLES.SECRETARY] },
 
                 // --- PROFESSEUR ---
-                { title: "Saisie des Notes", link: '/professor/grades', icon: 'edit', description: "Entrer et modifier les notes des élèves.", roles: [ROLES.PROFESSOR] },
-                { title: "Ressources Pédagogiques", link: '/professor/resources', icon: 'book-open', description: "Partager des cours et des exercices.", roles: [ROLES.PROFESSOR] },
-                { title: "Cahier de Texte", link: '/professor/logbook', icon: 'book', description: "Renseigner le contenu des séances.", roles: [ROLES.PROFESSOR] },
+                { key: 'professor_grades', title: "Saisie des Notes", link: '/professor/grades', icon: 'edit', description: "Entrer et modifier les notes des élèves.", roles: [ROLES.PROFESSOR] },
+                { key: 'professor_resources', title: "Ressources Pédagogiques", link: '/professor/resources', icon: 'book-open', description: "Partager des cours et des exercices.", roles: [ROLES.PROFESSOR] },
+                { key: 'logbook', title: "Cahier de Texte", link: '/professor/logbook', icon: 'book', description: "Renseigner le contenu des séances.", roles: [ROLES.PROFESSOR] },
 
                 // --- ELEVE ---
-                { title: "Mes Notes", link: '/student/grades', icon: 'award', description: "Consulter mes notes et classements.", roles: [ROLES.STUDENT] },
-                { title: "Ressources de Cours", link: '/student/resources', icon: 'book-open', description: "Accéder aux documents partagés par les professeurs.", roles: [ROLES.STUDENT] },
-                { title: "Mon Emploi du Temps", link: '/student/timetable', icon: 'clock', description: "Voir mon emploi du temps de la semaine.", roles: [ROLES.STUDENT] },
+                { key: 'student_grades', title: "Mes Notes", link: '/student/grades', icon: 'award', description: "Consulter mes notes et classements.", roles: [ROLES.STUDENT] },
+                { key: 'student_resources', title: "Ressources de Cours", link: '/student/resources', icon: 'book-open', description: "Accéder aux documents partagés par les professeurs.", roles: [ROLES.STUDENT] },
+                { key: 'student_timetable', title: "Mon Emploi du Temps", link: '/student/timetable', icon: 'clock', description: "Voir mon emploi du temps de la semaine.", roles: [ROLES.STUDENT] },
             ];
 
             const availableWidgets = allWidgets.filter(widget => widget.roles.includes(user.role));
 
+            // Si un enfant est sélectionné, mettre à jour les liens des widgets du parent
+            if (user.role === ROLES.PARENT && parentData.selectedChild) {
+                availableWidgets.forEach(widget => {
+                    // Remplace le lien générique par un lien spécifique à l'enfant
+                    widget.link = widget.link.replace('/student/', `/student/${parentData.selectedChild.id}/`);
+                });
+            }
+
             return res.render('dashboard', { 
                 title: 'Tableau de bord | EducOS-pro', 
                 user: req.user,
-                widgets: availableWidgets 
+                widgets: availableWidgets,
+                parentData
             });
     }
+};
+
+/**
+ * Gère la sélection de l'enfant à suivre pour un parent.
+ */
+exports.selectChild = async (req, res) => {
+    const { childId } = req.body;
+    if (req.user && req.user.role === ROLES.PARENT) {
+        try {
+            // Vérification de sécurité : s'assurer que l'enfant appartient bien au parent connecté
+            const children = await userModel.getLinkedChildrenForParent(req.user.id);
+            const isValidChild = children.some(child => child.id === parseInt(childId, 10));
+            
+            if (isValidChild) {
+                req.session.selectedChildId = parseInt(childId, 10);
+            }
+        } catch (error) {
+            console.error("Erreur lors de la vérification de l'enfant pour la session:", error);
+            req.flash('error_msg', "Une erreur est survenue.");
+        }
+    }
+    res.redirect('/dashboard');
 };
 
 /**
@@ -340,6 +392,7 @@ exports.socialLogin = (req, res) => {
  * Placeholder for API token retrieval.
  */
 exports.getApiToken = (req, res) => {
+    exports.selectChild = exports.selectChild;
     res.status(501).send('API token not implemented.');
 };
 

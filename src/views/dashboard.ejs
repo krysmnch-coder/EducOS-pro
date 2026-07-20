@@ -8,25 +8,49 @@
 
         <%# --- Section de bienvenue --- %>
         <div class="d-flex align-items-center mb-5">
-            <% if (user.avatar_url) { %>
-                <img src="<%= user.avatar_url %>" alt="Avatar" class="rounded-circle me-4" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid var(--card-border-color);">
-            <% } else { %>
-                <div class="rounded-circle me-4 d-flex align-items-center justify-content-center bg-primary text-white" style="width: 80px; height: 80px; font-size: 2.5rem; font-weight: 500;">
+            <div class="rounded-circle me-4 d-flex align-items-center justify-content-center bg-primary text-white" style="width: 80px; height: 80px; font-size: 2.5rem; font-weight: 500; background-image: url('<%= user.avatar_url %>'); background-size: cover; background-position: center;">
+                <% if (!user.avatar_url) { %>
                     <%= user.name.charAt(0).toUpperCase() %>
-                </div>
-            <% } %>
+                <% } %>
+            </div>
             <div>
                 <h1 class="h2 mb-0">Bonjour, <%= user.name %> !</h1>
-                <p class="lead text-muted mb-0">Ravi de vous revoir. Voici vos raccourcis.</p>
+                <% if (typeof parentData !== 'undefined' && parentData.selectedChild) { %>
+                    <p class="lead text-muted mb-0">Vous consultez le profil de : <strong><%= parentData.selectedChild.name %></strong>.</p>
+                <% } else { %>
+                    <p class="lead text-muted mb-0">Ravi de vous revoir. Voici vos raccourcis.</p>
+                <% } %>
             </div>
         </div>
 
+        <%# --- Section de sélection de l'enfant pour les parents --- %>
+        <% if (user.role === 'PARENT') { %>
+            <div class="child-selector-wrapper card mb-5">
+                <div class="card-body d-md-flex align-items-center justify-content-between">
+                    <% if (typeof parentData !== 'undefined' && parentData.children && parentData.children.length > 0) { %>
+                        <form action="/select-child" method="POST" class="d-flex align-items-center gap-3 flex-wrap">
+                            <label for="childSelector" class="form-label mb-0 fw-bold">Suivre un enfant :</label>
+                            <select name="childId" id="childSelector" class="form-select" style="min-width: 250px;" onchange="this.form.submit()">
+                                <% parentData.children.forEach(child => { %>
+                                    <option value="<%= child.id %>" <%= (parentData.selectedChild && parentData.selectedChild.id === child.id) ? 'selected' : '' %>>
+                                        <%= child.name %>
+                                    </option>
+                                <% }); %>
+                            </select>
+                        </form>
+                    <% } else { %>
+                        <p class="text-muted mb-0">Aucun enfant n'est actuellement lié à votre compte. Vous pouvez en ajouter depuis l'administration de votre établissement.</p>
+                    <% } %>
+                </div>
+            </div>
+        <% } %>
+
         <%# --- Section des Raccourcis (Widgets) --- %>
         <% if (typeof widgets !== 'undefined' && widgets.length > 0) { %>
-            <div class="row">
+            <div class="row g-4">
                 <% widgets.forEach(widget => { %>
                 <div class="col-xl-3 col-md-6 mb-4">
-                    <a href="<%= widget.link %>" class="text-decoration-none">
+                    <a href="<%= (user.role === 'PARENT' && (typeof parentData === 'undefined' || !parentData.selectedChild)) ? '#' : widget.link %>" class="text-decoration-none shortcut-link <%= (user.role === 'PARENT' && (typeof parentData === 'undefined' || !parentData.selectedChild)) ? 'disabled' : '' %>" data-shortcut-key="<%= widget.key %>">
                     <div class="card dashboard-stat h-100">
                         <div class="card-body text-center">
                         <div class="stat-icon mb-3">
@@ -53,6 +77,22 @@
         if (typeof feather !== 'undefined') {
             feather.replace();
         }
+
+        // Animation des raccourcis
+        const socket = io(); // Connexion au namespace par défaut
+        socket.on('shortcutHighlight', function(data) {
+            if (data.shortcutKey) {
+                const shortcut = document.querySelector(`.shortcut-link[data-shortcut-key="${data.shortcutKey}"]`);
+                if (shortcut) {
+                    const card = shortcut.querySelector('.dashboard-stat');
+                    if (card) {
+                        card.classList.add('is-pulsing');
+                        // Retirer la classe après l'animation pour qu'elle puisse rejouer
+                        setTimeout(() => { card.classList.remove('is-pulsing'); }, 1200); // Durée de l'animation
+                    }
+                }
+            }
+        });
     });
 </script>
 

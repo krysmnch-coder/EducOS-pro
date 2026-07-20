@@ -211,6 +211,13 @@ const completeStudentRegistration = async (req, res) => {
             avatar_url: '/img/user.png'
         });
 
+        // --- Animation du raccourci ---
+        // On notifie le parent pour faire briller le raccourci "Documents"
+        const authIo = req.app.get('authIo');
+        if (authIo) {
+            authIo.to(`user_${parent_id}`).emit('shortcutHighlight', { shortcutKey: 'documents' });
+        }
+
         // Envoyer un message interne au parent avec les identifiants
         const messageBody = `Bonjour,
 Le dossier de votre enfant ${name} a été finalisé par l'administration.
