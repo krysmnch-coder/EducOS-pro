@@ -130,30 +130,34 @@
         if (userRole === 'SUPER_ADMIN') {
             const ctx = document.getElementById('globalStatsChart');
             if (ctx) {
-                const maxStatValue = Math.max(stats.totalUserCount, stats.professorCount, stats.establishmentCount, 1);
-                const yStepSize = Math.max(1, Math.ceil(maxStatValue / 5));
+                if (stats.totalUserCount > 0 || stats.professorCount > 0 || stats.establishmentCount > 0) {
+                    const maxStatValue = Math.max(stats.totalUserCount, stats.professorCount, stats.establishmentCount, 1);
+                    const yStepSize = Math.max(1, Math.ceil(maxStatValue / 5));
 
-                new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: ['Utilisateurs Actifs', 'Professeurs', 'Établissements'],
-                        datasets: [{
-                            label: 'Statistiques Globales',
-                            data: [stats.totalUserCount, stats.professorCount, stats.establishmentCount],
-                            backgroundColor: ['rgba(153, 102, 255, 0.6)', 'rgba(255, 159, 64, 0.6)', 'rgba(255, 99, 132, 0.6)'],
-                            borderColor: ['rgba(153, 102, 255, 1)', 'rgba(255, 159, 64, 1)', 'rgba(255, 99, 132, 1)'],
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        scales: {
-                            y: { beginAtZero: true, ticks: { color: textColor, stepSize: yStepSize }, grid: { color: gridColor } },
-                            x: { ticks: { color: textColor }, grid: { color: gridColor } }
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['Utilisateurs Actifs', 'Professeurs', 'Établissements'],
+                            datasets: [{
+                                label: 'Statistiques Globales',
+                                data: [stats.totalUserCount, stats.professorCount, stats.establishmentCount],
+                                backgroundColor: ['rgba(153, 102, 255, 0.6)', 'rgba(255, 159, 64, 0.6)', 'rgba(255, 99, 132, 0.6)'],
+                                borderColor: ['rgba(153, 102, 255, 1)', 'rgba(255, 159, 64, 1)', 'rgba(255, 99, 132, 1)'],
+                                borderWidth: 1
+                            }]
                         },
-                        plugins: { legend: { display: false } }
-                    }
-                });
+                        options: {
+                            responsive: true,
+                            scales: {
+                                y: { beginAtZero: true, ticks: { color: textColor, stepSize: yStepSize }, grid: { color: gridColor } },
+                                x: { ticks: { color: textColor }, grid: { color: gridColor } }
+                            },
+                            plugins: { legend: { display: false } }
+                        }
+                    });
+                } else {
+                    ctx.parentElement.innerHTML = '<div class="text-center text-muted p-5">Aucune donnée statistique globale à afficher.</div>';
+                }
             }
         }
     });
