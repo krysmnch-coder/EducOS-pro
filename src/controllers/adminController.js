@@ -6,9 +6,20 @@ const db = require('../models/db');
  * Affiche le tableau de bord principal pour les administrateurs avec les statistiques et les raccourcis.
  */
 const renderAdminDashboard = async (req, res) => {
+  const user = req.user;
+  // Définition des widgets/raccourcis en dehors du bloc try/catch pour être accessible en cas d'erreur.
+  const allWidgets = [
+    { title: 'Gestion des Utilisateurs', link: '/admin', icon: 'users', description: 'Approuver, modifier ou supprimer des comptes.', roles: [ROLES.SUPER_ADMIN, ROLES.ADMINISTRATOR] },
+    { title: 'Gestion des Établissements', link: '/establishments', icon: 'briefcase', description: 'Ajouter ou gérer les établissements scolaires.', roles: [ROLES.SUPER_ADMIN] },
+    { title: 'Gestion des Élèves', link: '/students', icon: 'user-check', description: 'Gérer les dossiers des élèves et leurs inscriptions.', roles: [ROLES.ADMINISTRATOR] },
+    { title: 'Communication de masse', link: '/communications', icon: 'send', description: 'Envoyer des messages à des groupes d\'utilisateurs.', roles: [ROLES.SUPER_ADMIN, ROLES.ADMINISTRATOR] },
+    { title: 'Gestion des Paiements', link: '#', icon: 'credit-card', description: 'Suivre les frais de scolarité. (Bientôt disponible)', roles: [ROLES.ADMINISTRATOR] },
+    { title: 'Paramètres', link: '#', icon: 'settings', description: 'Configurer les paramètres. (Bientôt disponible)', roles: [ROLES.SUPER_ADMIN, ROLES.ADMINISTRATOR] }
+  ];
+  const availableWidgets = allWidgets.filter(widget => widget.roles.includes(user.role));
+
   try {
     let stats = {};
-    const user = req.user;
 
     // Calcul des statistiques en fonction du rôle
     if (user.role === ROLES.ADMINISTRATOR) {
@@ -43,32 +54,21 @@ const renderAdminDashboard = async (req, res) => {
       };
     }
 
-    // Définition des widgets/raccourcis
-    const allWidgets = [
-      { title: 'Gestion des Utilisateurs', link: '/admin', icon: 'users', description: 'Approuver, modifier ou supprimer des comptes.', roles: [ROLES.SUPER_ADMIN, ROLES.ADMINISTRATOR] },
-      { title: 'Gestion des Établissements', link: '/establishments', icon: 'briefcase', description: 'Ajouter ou gérer les établissements scolaires.', roles: [ROLES.SUPER_ADMIN] },
-      { title: 'Gestion des Élèves', link: '/students', icon: 'user-check', description: 'Gérer les dossiers des élèves et leurs inscriptions.', roles: [ROLES.ADMINISTRATOR] },
-      { title: 'Communication de masse', link: '/communications', icon: 'send', description: 'Envoyer des messages à des groupes d\'utilisateurs.', roles: [ROLES.SUPER_ADMIN, ROLES.ADMINISTRATOR] },
-      { title: 'Gestion des Paiements', link: '#', icon: 'credit-card', description: 'Suivre les frais de scolarité. (Bientôt disponible)', roles: [ROLES.ADMINISTRATOR] },
-      { title: 'Paramètres', link: '#', icon: 'settings', description: 'Configurer les paramètres. (Bientôt disponible)', roles: [ROLES.SUPER_ADMIN, ROLES.ADMINISTRATOR] }
-    ];
-
-    const availableWidgets = allWidgets.filter(widget => widget.roles.includes(user.role));
-
     res.render('admin-dashboard', {
       title: 'Tableau de bord Administrateur',
       currentUser: user,
       widgets: availableWidgets,
       stats: stats
     });
-
   } catch (error) {
     console.error('Erreur lors du chargement du tableau de bord admin:', error);
     req.flash('error_msg', "Impossible de charger le tableau de bord.");
     // Fallback vers un dashboard simple en cas d'erreur
-    res.status(500).render('dashboard', {
+    res.status(500).render('admin-dashboard', {
       title: 'Erreur',
-      user: req.user
+      currentUser: user,
+      widgets: availableWidgets,
+      stats: null // En passant null, la vue n'essaiera pas d'afficher la section des stats
     });
   }
 };
@@ -178,16 +178,6 @@ const approveUser = async (req, res) => {
     const broadcastDashboardStats = req.app.get('broadcastDashboardStats');
     if (broadcastDashboardStats) {
       broadcastDashboardStats();
-    }
-
-    // --- Mise à jour en temps réel pour le super-admin ---
-    if (userToApprove.establishment_id) {
-      const establishmentId = userToApprove.establishment_id;
-      const counts = await userModel.countApprovedUsersInEstablishments([establishmentId]);
-      const count = counts[establishmentId] || 0;
-      
-      const io = req.app.get('io');
-      io.emit('establishmentUserCountUpdate', { establishmentId, count });
     }
 
     req.flash('success_msg', `Le compte de ${userToApprove.name} a été approuvé.`);

@@ -117,25 +117,30 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // On se connecte au namespace global car l'event est émis globalement
-            const socket = io();
+            const socket = io(); // Se connecte au namespace par défaut '/'
 
-            socket.on('establishmentUserCountUpdate', function(data) {
-                const { establishmentId, count } = data;
-                const countElement = document.getElementById(`user-count-${establishmentId}`);
-                if (countElement) {
-                    const oldValue = parseInt(countElement.textContent, 10);
-                    countElement.textContent = count;
+            socket.on('adminStatsUpdate', function(data) {
+                // Cette page (pour le SUPER_ADMIN) est intéressée par les stats globales
+                if (data.superAdminStats && data.superAdminStats.establishmentsWithCounts) {
+                    data.superAdminStats.establishmentsWithCounts.forEach(est => {
+                        // Il peut y avoir plusieurs admins pour le même établissement, donc on met à jour tous les badges correspondants.
+                        const countElements = document.querySelectorAll(`#user-count-${est.id}`);
+                        countElements.forEach(el => {
+                            const oldValue = parseInt(el.textContent, 10);
+                            el.textContent = est.userCount;
 
-                    // Animation pour mettre en évidence le changement
-                    let animationClass = 'flash-increase';
-                    if (count < oldValue) {
-                        animationClass = 'flash-decrease';
-                    }
-                    
-                    countElement.classList.remove('flash-increase', 'flash-decrease');
-                    // Force le reflow pour que l'animation puisse rejouer
-                    void countElement.offsetWidth; 
-                    countElement.classList.add(animationClass);
+                            // Animation pour mettre en évidence le changement
+                            let animationClass = 'flash-increase';
+                            if (est.userCount < oldValue) {
+                                animationClass = 'flash-decrease';
+                            }
+                            
+                            el.classList.remove('flash-increase', 'flash-decrease');
+                            // Force le reflow pour que l'animation puisse rejouer
+                            void el.offsetWidth; 
+                            el.classList.add(animationClass);
+                        });
+                    });
                 }
             });
         });
