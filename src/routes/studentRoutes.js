@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { ensureAuthenticated, ensureRole } = require('../../authMiddleware');
+const { ensureAuthenticated, ensureRole } = require('../middleware/authMiddleware');
 const studentController = require('../controllers/studentController');
 const { ROLES } = require('../../constants');
 
@@ -24,5 +24,11 @@ router.get('/:id/edit', ensureAuthenticated, ensureRole([ROLES.ADMINISTRATOR, RO
 
 // Route pour traiter la modification d'un élève
 router.post('/:id/edit', ensureAuthenticated, ensureRole([ROLES.ADMINISTRATOR, ROLES.SECRETARY, ROLES.SCHOOL_LIFE_MANAGER]), studentController.updateStudent);
+
+// Route pour afficher le formulaire d'ajout d'enfant par un parent
+router.get('/add-child', ensureAuthenticated, ensureRole([ROLES.PARENT]), studentController.renderAddChildForm);
+
+// Route pour traiter la soumission du formulaire
+router.post('/add-child', ensureAuthenticated, ensureRole([ROLES.PARENT]), studentController.postAddChild);
 
 module.exports = router;

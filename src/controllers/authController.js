@@ -163,6 +163,7 @@ exports.renderDashboard = async (req, res) => {
 
             const allWidgets = [
                 // --- PARENT ---
+                { key: 'add_child', title: "Inscrire un enfant", link: '/students/add-child', icon: 'user-plus', description: "Initier l'inscription d'un nouvel enfant.", roles: [ROLES.PARENT] },
                 { key: 'grades', title: "Notes de l'enfant", link: '/student/grades', icon: 'award', description: "Consulter les notes et appréciations.", roles: [ROLES.PARENT] },
                 { key: 'absences', title: "Suivi des Absences", link: '/student/absences', icon: 'user-x', description: "Voir les absences et retards.", roles: [ROLES.PARENT] },
                 { key: 'documents', title: "Documents Scolaires", link: '/student/documents', icon: 'file-text', description: "Télécharger les certificats et bulletins.", roles: [ROLES.PARENT] },
@@ -251,7 +252,7 @@ exports.renderRegister = async (req, res) => {
  */
 exports.postRegister = async (req, res) => {
   // On récupère l'ID de l'établissement pour une architecture multi-tenant
-  const { name, email, password, establishment_id } = req.body;
+  const { name, email, password, establishment_id, role } = req.body;
 
   try {
     // ÉTAPE 0 : Valider l'adresse e-mail avec Mailboxlayer
@@ -259,6 +260,12 @@ exports.postRegister = async (req, res) => {
     // On bloque si l'e-mail est invalide, mais on laisse passer en cas d'erreur de l'API pour ne pas pénaliser l'utilisateur.
     if (!emailValidation.isValid && emailValidation.reason !== 'api_error' && emailValidation.reason !== 'request_failed') {
         req.flash('error_msg', `L'adresse e-mail est invalide : ${emailValidation.reason}`);
+        return res.redirect('/register');
+    }
+
+    // Étape 0.5 : Valider le rôle pour des raisons de sécurité
+    if (!role || ![ROLES.PARENT, ROLES.PROFESSOR, ROLES.STUDENT].includes(role)) {
+        req.flash('error_msg', 'Un rôle valide doit être sélectionné.');
         return res.redirect('/register');
     }
 
@@ -280,7 +287,7 @@ exports.postRegister = async (req, res) => {
       name: name,
       email: email,
       password: hashedPassword,
-      role: ROLES.PROFESSOR, // Utilisation de la constante depuis `constants.js`
+      role: role, // Le rôle est maintenant dynamique et vient du formulaire
       approved: false,      // Knex gère les booléens correctement
       establishment_id: establishment_id // Crucial pour séparer les données par établissement
     });

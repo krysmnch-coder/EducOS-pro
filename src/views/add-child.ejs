@@ -1,0 +1,41 @@
+<%- include('partials/head') %>
+<%- include('partials/navbar') %>
+
+<div class="container page-shell py-4">
+    <div class="themed-container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3 mb-0"><%= title %></h1>
+            <a href="/dashboard" class="btn btn-outline-primary d-flex align-items-center">
+                <i data-feather="arrow-left" class="me-2" style="width: 18px; height: 18px;"></i> Retour au tableau de bord
+            </a>
+        </div>
+
+        <%- include('partials/messages') %>
+
+        <p class="text-muted mb-4">Veuillez remplir les informations ci-dessous pour initier l'inscription de votre enfant. L'administration de l'établissement finalisera le dossier.</p>
+
+        <form action="/students/add-child" method="POST">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="name" class="form-label">Nom complet de l'enfant</label>
+                    <input type="text" class="form-control" id="name" name="name" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="matricule" class="form-label">Matricule de l'enfant</label>
+                    <input type="text" class="form-control" id="matricule" name="matricule" required>
+                    <div class="form-text">Le matricule est fourni par l'établissement scolaire.</div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="student_class" class="form-label">Classe</label>
+                    <input type="text" class="form-control" id="student_class" name="student_class" required>
+                </div>
+            </div>
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">Envoyer la demande d'inscription</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<%- include('partials/page-end-scripts') %>
+<%- include('partials/footer') %>

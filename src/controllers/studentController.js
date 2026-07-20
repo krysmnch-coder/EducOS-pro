@@ -336,6 +336,59 @@ const updateStudent = async (req, res) => {
     }
 };
 
+/**
+ * Affiche le formulaire permettant à un parent d'initier l'inscription de son enfant.
+ */
+const renderAddChildForm = (req, res) => {
+    if (req.user.role !== ROLES.PARENT) {
+        req.flash('error_msg', 'Action non autorisée.');
+        return res.redirect('/dashboard');
+    }
+    res.render('add-child', {
+        title: 'Inscrire un enfant'
+    });
+};
+
+/**
+ * Gère la soumission du formulaire d'inscription d'enfant par un parent.
+ * Crée un "placeholder" dans la base de données.
+ */
+const postAddChild = async (req, res) => {
+    if (req.user.role !== ROLES.PARENT) {
+        req.flash('error_msg', 'Action non autorisée.');
+        return res.redirect('/dashboard');
+    }
+
+    const { name, matricule, student_class } = req.body;
+    const parent_id = req.user.id;
+
+    try {
+        // Vérifier si un élève avec ce matricule existe déjà
+        const existingStudent = await userModel.getUserByMatricule(matricule);
+        if (existingStudent) {
+            req.flash('error_msg', 'Un élève avec ce matricule existe déjà dans le système.');
+            return res.redirect('/students/add-child');
+        }
+
+        // Créer le lien d'inscription en attente
+        await userModel.initiateChildRegistration({
+            parent_id: parent_id,
+            student_matricule: matricule,
+            student_first_name: name.split(' ')[0] || '',
+            student_last_name: name.split(' ').slice(1).join(' ') || '',
+            student_class: student_class
+        });
+
+        req.flash('success_msg', `La demande d'inscription pour ${name} a été envoyée à l'administration. Vous serez notifié lorsque le dossier sera finalisé.`);
+        res.redirect('/dashboard');
+
+    } catch (error) {
+        console.error("Erreur lors de l'initiation de l'inscription par le parent:", error);
+        req.flash('error_msg', "Une erreur est survenue.");
+        res.redirect('/students/add-child');
+    }
+};
+
 module.exports = {
   listStudents,
   renderNewStudentForm,
@@ -344,5 +397,7 @@ module.exports = {
   completeStudentRegistration,
   renderEditStudentForm,
   updateStudent,
-  createParentFromStudentForm
+  createParentFromStudentForm,
+  renderAddChildForm,
+  postAddChild
 };

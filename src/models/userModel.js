@@ -276,6 +276,47 @@ async function getLinkedParentIdsForStudent(studentMatricule) {
     return parentIds;
 }
 
+/**
+ * Récupère les enfants (utilisateurs existants) liés à un parent.
+ * @param {number} parentId - L'ID du parent.
+ */
+function getLinkedChildrenForParent(parentId) {
+    const studentMatriculesQuery = db('parent_student_links')
+        .where('parent_id', parentId)
+        .select('student_matricule');
+    
+    return db('users')
+        .where('role', ROLES.STUDENT)
+        .whereIn('matricule', studentMatriculesQuery);
+}
+
+/**
+ * Crée un lien "placeholder" pour un enfant initié par un parent.
+ * @param {object} data - Les données de l'enfant.
+ */
+function initiateChildRegistration(data) {
+    // Vérifie si une demande pour ce matricule existe déjà pour éviter les doublons
+    return db('parent_student_links')
+        .where('student_matricule', data.student_matricule)
+        .first()
+        .then(existing => {
+            if (existing) {
+                // On pourrait choisir de lever une erreur ou simplement de ne rien faire.
+                // Lever une erreur est plus informatif.
+                throw new Error('Une demande pour ce matricule existe déjà.');
+            }
+            return db('parent_student_links').insert(data);
+        });
+}
+
+/**
+ * Récupère les administrateurs d'un établissement spécifique.
+ * @param {number} establishmentId - L'ID de l'établissement.
+ */
+function getAdminsByEstablishment(establishmentId) {
+  return db('users').where({ role: ROLES.ADMINISTRATOR, establishment_id: establishmentId });
+}
+
 module.exports = {
   getUserByEmail,
   getUserById,
@@ -303,5 +344,8 @@ module.exports = {
   countApprovedUsersInEstablishments,
   countUsersInEstablishment,
   getStudentsAndPlaceholders,
-  getLinkedParentIdsForStudent
+  getLinkedParentIdsForStudent,
+  getLinkedChildrenForParent,
+  initiateChildRegistration,
+  getAdminsByEstablishment
 };
