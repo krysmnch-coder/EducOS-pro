@@ -26,7 +26,7 @@ const {
   postResetPassword
 } = require('../controllers/authController');
 
-const { ensureAuthenticated } = require('../../authMiddleware');
+const { ensureAuthenticated } = require('../middleware/authMiddleware');
 
 // Limiteur pour les tentatives de connexion
 const loginLimiter = rateLimit({

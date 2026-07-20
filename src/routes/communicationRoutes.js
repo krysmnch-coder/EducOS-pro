@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { ensureAuthenticated } = require('../../authMiddleware');
+const { ensureAuthenticated } = require('../middleware/authMiddleware');
 const communicationController = require('../controllers/communicationController');
 
 // La route principale pour afficher la page des communications
