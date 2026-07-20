@@ -20,13 +20,13 @@ const renderAdminDashboard = async (req, res) => {
         pendingCount: establishmentUsers.filter(u => !u.approved).length
       };
     } else if (user.role === ROLES.SUPER_ADMIN) {
-      const totalUserCountResult = await db('users').where('approved', true).count('id as count').first();
-      const professorCount = await userModel.countUsersByRole(ROLES.PROFESSOR);
+      const totalUserCount = await userModel.countAllUsers();
+      const adminCount = await userModel.countUsersByRole(ROLES.ADMINISTRATOR);
       const establishmentCountResult = await db('establishments').count('id as count').first();
       const pendingCount = await userModel.countPendingUsers();
       stats = {
-          totalUserCount: totalUserCountResult ? Number(totalUserCountResult.count) : 0,
-          professorCount,
+          totalUserCount: totalUserCount,
+          adminCount: adminCount,
           establishmentCount: establishmentCountResult ? Number(establishmentCountResult.count) : 0,
           pendingCount
       };
