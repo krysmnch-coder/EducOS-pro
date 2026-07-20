@@ -67,6 +67,10 @@
     background-color: rgba(255, 255, 255, 0.2);
   }
 
+  body[data-theme="dark"] .form-select:invalid {
+    color: rgba(255, 255, 255, 0.6) !important;
+  }
+
   body[data-theme="light"] .auth-card {
     background: rgba(255, 255, 255, 0.4);
     border-color: rgba(255, 255, 255, 0.6);
@@ -188,6 +192,7 @@
   }
   body[data-theme="dark"] option {
     background-color: #16213e;
+    color: #e0e0e0;
   }
 
   body[data-theme="light"] .form-control, body[data-theme="light"] .form-select {
@@ -371,6 +376,29 @@
   const childrenList = document.getElementById('children-list');
   let childIndex = 0;
 
+  function updateHiddenClassInput(index) {
+    const entry = document.querySelector(`.child-entry[data-index="${index}"]`);
+    if (!entry) return;
+
+    const levelSelect = entry.querySelector('.class-level-select');
+    const letterSelect = entry.querySelector('.class-suffix-letter-select');
+    const numberSelect = entry.querySelector('.class-suffix-number-select');
+    const hiddenInput = entry.querySelector('.student-class-hidden-input');
+
+    const level = levelSelect.value;
+    const letter = letterSelect.value;
+    const number = numberSelect.value;
+
+    // Priorité à la lettre si les deux suffixes sont choisis
+    let suffix = '';
+    if (letter) {
+      suffix = letter;
+    } else if (number) {
+      suffix = number;
+    }
+
+    hiddenInput.value = `${level} ${suffix}`.trim();
+  }
   function addChildEntry() {
     const index = childIndex++;
     const entry = document.createElement('div');
@@ -391,17 +419,41 @@
           <input type="text" name="children[${index}][last_name]" class="form-control" placeholder="Nom de l'enfant" required />
         </div>
       </div>
-      <div class="row g-3 mt-3">
+      <div class="row g-3 mt-2">
         <div class="col-md-6">
-          <label class="form-label">Classe</label>
-          <input type="text" name="children[${index}][student_class]" class="form-control" placeholder="Classe de l'enfant" required />
+            <label class="form-label">Matricule</label>
+            <input type="text" name="children[${index}][matricule]" class="form-control" placeholder="Matricule" required />
         </div>
         <div class="col-md-6">
-          <label class="form-label">Matricule</label>
-          <input type="text" name="children[${index}][matricule]" class="form-control" placeholder="Matricule de l'enfant" required />
+          <label class="form-label">Classe</label>
+          <div class="d-flex gap-2">
+            <select class="form-select form-select-sm class-level-select" data-index="${index}" required>
+              <option value="" disabled selected>Niveau</option>
+              <option value="Terminale">Terminale</option>
+              <option value="Première">Première</option>
+              <option value="Seconde">Seconde</option>
+              <option value="Troisième">Troisième</option>
+              <option value="Quatrième">Quatrième</option>
+              <option value="Cinquième">Cinquième</option>
+              <option value="Sixième">Sixième</option>
+              <option value="TP">TP</option>
+            </select>
+            <select class="form-select form-select-sm class-suffix-letter-select" data-index="${index}">
+              <option value="" selected>Lettre</option>
+              ${'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(l => `<option value="${l}">${l}</option>`).join('')}
+            </select>
+            <select class="form-select form-select-sm class-suffix-number-select" data-index="${index}">
+              <option value="" selected>N°</option>
+              ${Array.from({length: 20}, (_, i) => i + 1).map(n => `<option value="${n}">${n}</option>`).join('')}
+            </select>
+          </div>
+          <input type="hidden" name="children[${index}][student_class]" class="student-class-hidden-input" />
         </div>
       </div>
     `;
+    const classSelects = entry.querySelectorAll('.class-level-select, .class-suffix-letter-select, .class-suffix-number-select');
+    classSelects.forEach(select => select.addEventListener('change', () => updateHiddenClassInput(index)));
+
     const removeBtn = entry.querySelector('.remove-child-btn');
     removeBtn.addEventListener('click', () => {
       if (childrenList.children.length > 1) {
@@ -415,6 +467,9 @@
 
   function updateChildNames() {
     Array.from(childrenList.children).forEach((entry, idx) => {
+      // Mettre à jour l'index principal de l'entrée
+      entry.dataset.index = idx;
+
       const title = entry.querySelector('h6');
       if (title) title.textContent = `Enfant ${idx + 1}`;
       const inputs = entry.querySelectorAll('input');
@@ -423,6 +478,11 @@
         if (nameParts) {
           input.name = `children[${idx}][${nameParts[2]}]`;
         }
+      });
+      // Mettre à jour l'index des selects de classe
+      const selects = entry.querySelectorAll('select');
+      selects.forEach(select => {
+        select.dataset.index = idx;
       });
     });
   }
