@@ -89,6 +89,15 @@ body .navbar {
     box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Ajoute une légère ombre pour la distinguer */
 }
 
+/* Ajout de la transition et de la classe pour masquer la navbar au défilement */
+body .navbar {
+    transition: transform 0.4s ease-in-out;
+}
+/* La navbar de home.ejs a son propre style pour .hidden */
+.navbar.hidden {
+    transform: translateY(-100%);
+}
+
 /* Ajustement pour le contenu sous la barre de navigation fixe */
 body { /* Ceci doit être ajusté en fonction de la hauteur réelle de la navbar */
     padding-top: 70px; /* Ajustez cette valeur en fonction de la hauteur de votre navbar */
@@ -1202,4 +1211,47 @@ body .chat-panel {
 /* Rendre les lignes du tableau des élèves cliquables */
 .student-row {
     cursor: pointer;
+}
+
+/* =================================
+   Bouton Retour en Haut
+==================================== */
+.back-to-top-btn {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 50px;
+  height: 50px;
+  border-radius: 16px;
+  background: var(--auth-card-bg);
+  color: var(--body-color);
+  border: 1px solid var(--auth-card-border-color);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  cursor: pointer;
+  transition: opacity 0.3s ease, transform 0.3s ease, background-color 0.3s ease;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: translateY(20px);
+  pointer-events: none;
+  text-decoration: none;
+}
+.back-to-top-btn.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.back-to-top-btn:hover {
+  transform: scale(1.1);
+  color: var(--primary-color);
+}
+
+/* Thème clair spécifique pour le survol */
+:root[data-theme="light"] .back-to-top-btn:hover {
+    background: rgba(255, 255, 255, 0.5);
+    color: var(--primary-color);
 }

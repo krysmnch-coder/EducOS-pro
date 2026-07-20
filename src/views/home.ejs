@@ -416,50 +416,6 @@
       html[data-theme="dark"] #themeToggle .sun-icon { display: block; }
 
       /* Bouton Retour en Haut */
-      .back-to-top-btn {
-        position: fixed;
-        bottom: 30px;
-        right: 30px;
-        width: 50px;
-        height: 50px;
-        border-radius: 16px; /* Plus moderne */
-        background: rgba(17, 24, 39, 0.3); /* Fond transparent comme la navbar */
-        color: white;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-        cursor: pointer;
-        transition: opacity 0.3s ease, transform 0.3s ease, background-color 0.3s ease;
-        z-index: 1000;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        opacity: 0;
-        transform: translateY(20px);
-        pointer-events: none;
-        text-decoration: none;
-      }
-      .back-to-top-btn.visible {
-        opacity: 1;
-        transform: translateY(0);
-        pointer-events: auto;
-      }
-      .back-to-top-btn:hover {
-        background: rgba(17, 24, 39, 0.5); /* Plus opaque au survol */
-        transform: scale(1.1);
-        color: white;
-      }
-      html[data-theme="light"] .back-to-top-btn {
-          background: rgba(255, 255, 255, 0.3);
-          color: #1a1a2e;
-          border: 1px solid rgba(0,0,0,0.08);
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-      }
-      html[data-theme="light"] .back-to-top-btn:hover {
-          background: rgba(255, 255, 255, 0.5);
-          color: #0d6efd;
-      }
 
       /* Animations */
       @keyframes fadeInUp {
@@ -768,6 +724,8 @@
       </svg>
     </a>
 
+    <%- include('partials/page-end-scripts') %>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script>
@@ -828,46 +786,6 @@
           });
         }
       });
-
-      // Gestion du bouton "Retour en haut" et de la navbar
-      const backToTopBtn = document.getElementById('backToTopBtn');
-      const navbar = document.querySelector('.navbar');
-      let lastScrollY = window.scrollY; // On garde en mémoire la dernière position de scroll
-
-      if (backToTopBtn && navbar) {
-        window.addEventListener('scroll', () => {
-          // Gère l'affichage du bouton "Retour en haut"
-          if (window.scrollY > 300) {
-            backToTopBtn.classList.add('visible');
-          } else {
-            backToTopBtn.classList.remove('visible');
-          }
-
-          // Gère l'affichage de la barre de navigation
-          // Si on défile vers le bas ET qu'on n'est pas tout en haut (plus de 100px)
-          if (window.scrollY > lastScrollY && window.scrollY > 100) {
-            navbar.classList.add('hidden');
-          } else { // Si on défile vers le haut
-            navbar.classList.remove('hidden');
-          }
-
-          // Met à jour la dernière position de scroll pour la prochaine comparaison
-          // On met une petite condition pour éviter les faux positifs sur les appareils tactiles
-          if (Math.abs(window.scrollY - lastScrollY) > 5) {
-            lastScrollY = window.scrollY;
-          }
-        });
-
-        backToTopBtn.addEventListener('click', (e) => {
-          e.preventDefault();
-          // On s'assure que la navbar est visible avant de remonter
-          navbar.classList.remove('hidden');
-          window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-          });
-        });
-      }
     </script>
   </body>
 </html>

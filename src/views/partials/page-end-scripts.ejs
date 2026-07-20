@@ -1,0 +1,47 @@
+<!-- Bouton Retour en Haut (commun à toutes les pages) -->
+<a href="#" id="backToTopBtn" class="back-to-top-btn" aria-label="Retour en haut">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 19V5M5 12l7-7 7 7"/>
+  </svg>
+</a>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Gestion du bouton "Retour en haut" et de la navbar dynamique
+  const backToTopBtn = document.getElementById('backToTopBtn');
+  const navbar = document.querySelector('.navbar');
+  let lastScrollY = window.scrollY;
+
+  if (navbar) { // On vérifie que la navbar existe
+    window.addEventListener('scroll', () => {
+      // Gère l'affichage du bouton "Retour en haut"
+      if (backToTopBtn) {
+        if (window.scrollY > 300) {
+          backToTopBtn.classList.add('visible');
+        } else {
+          backToTopBtn.classList.remove('visible');
+        }
+      }
+
+      // Gère l'affichage de la barre de navigation
+      if (window.scrollY > lastScrollY && window.scrollY > 100) {
+        navbar.classList.add('hidden');
+      } else {
+        navbar.classList.remove('hidden');
+      }
+
+      if (Math.abs(window.scrollY - lastScrollY) > 5) {
+        lastScrollY = window.scrollY;
+      }
+    });
+
+    if (backToTopBtn) {
+      backToTopBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        navbar.classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+  }
+});
+</script>
