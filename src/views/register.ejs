@@ -186,14 +186,14 @@
   body[data-theme="dark"] .form-select {
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
   }
-  body[data-theme="dark"] option {
+  body[data-theme="dark"] .form-select option {
     background-color: #16213e;
     color: #ffffff;
   }
 
   /* Assure que le texte du placeholder du select est visible en mode sombre */
   body[data-theme="dark"] .form-select:invalid {
-    color: rgba(255, 255, 255, 0.7) !important;
+    color: #ffffff !important;
   }
 
   body[data-theme="light"] .form-control, body[data-theme="light"] .form-select {
@@ -421,11 +421,11 @@
         </div>
       </div>
       <div class="row g-3 mt-2">
-        <div class="col-md-6">
+        <div class="col-md-4">
             <label class="form-label">Matricule</label>
             <input type="text" name="children[${index}][matricule]" class="form-control" placeholder="Matricule" required />
         </div>
-        <div class="col-md-6">
+        <div class="col-md-8">
           <label class="form-label">Classe</label>
           <div class="d-flex gap-2">
             <select class="form-select form-select-sm class-level-select" data-index="${index}" required>
