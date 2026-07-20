@@ -543,18 +543,9 @@
             <span>EducOS-pro</span>
         </a>
           
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
-          <span class="navbar-toggler-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="3" y1="6" x2="21" y2="6" />
-              <line x1="3" y1="12" x2="21" y2="12" />
-              <line x1="3" y1="18" x2="21" y2="18" />
-            </svg>
-          </span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="mainNavbar">
-          <ul class="navbar-nav ms-auto align-items-center">
+        <!-- Le menu de navigation est simplifié pour la page d'accueil, sans bouton "hamburger" -->
+        <div class="ms-auto">
+          <ul class="navbar-nav flex-row align-items-center">
             <li class="nav-item">
               <button id="themeToggle" class="nav-icon-btn" aria-label="Toggle theme">
                 <svg class="sun-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -567,7 +558,7 @@
             </li>
             <% if (user) { %>
               <!-- Menu déroulant de l'utilisateur -->
-              <li class="nav-item dropdown">
+              <li class="nav-item dropdown ms-2">
                 <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" id="navbarUserDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                   <% if (user.avatar_url) { %>
                     <img src="<%= user.avatar_url %>" alt="Avatar" class="navbar-avatar">
@@ -576,7 +567,7 @@
                       <%= user.name.charAt(0).toUpperCase() %>
                     </div>
                   <% } %>
-                  <span class="d-none d-lg-inline text-white-75"><%= user.name %></span>
+                  <span class="text-white-75"><%= user.name %></span>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarUserDropdown">
                   <li>
@@ -625,6 +616,10 @@
             </svg>
             EducOS-pro  v 1.0.0
           </span>
+          <!-- Footer pour la vue mobile, centré sous le badge -->
+          <div class="d-block d-md-none text-muted small mt-2 mb-4">
+            <span>© 2026 EducOS-pro ver 1.0.0. Tous droits réservés.</span>
+          </div>
           <h1 class="display-3">La plateforme scolaire unifiée que vous attendiez.</h1>
           <p class="lead">Gérez la vie scolaire, de la communication aux notes, en un seul endroit. Simple, puissant et accessible pour tous.</p>
           <div class="d-flex flex-wrap justify-content-center gap-3">
@@ -750,7 +745,8 @@
           </div>
         </section>
 
-        <footer class="py-4 text-center text-muted small">
+        <!-- Footer pour la vue desktop -->
+        <footer class="py-4 text-center text-muted small d-none d-md-block">
           <span>© 2026 EducOS-pro ver 1.0.0. Tous droits réservés.</span>
         </footer>
       </div>

@@ -47,8 +47,24 @@
     border: none;
     box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
     animation: fadeIn 0.8s ease-out forwards;
-    overflow: hidden;
+    overflow-y: auto;
     padding: 2rem;
+    max-height: 95vh; /* Limite la hauteur pour s'adapter à la fenêtre */
+  }
+
+  /* Barre de défilement personnalisée pour Webkit (Chrome, Safari) */
+  .auth-card::-webkit-scrollbar {
+    width: 8px;
+  }
+  .auth-card::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .auth-card::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+  }
+  body[data-theme="dark"] .auth-card::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2);
   }
 
   body[data-theme="light"] .auth-card {
@@ -224,15 +240,9 @@
         <p class="text-muted mb-0">Créez votre compte en quelques secondes.</p>
       </div>
 
-      <% if (success_msg) { %>
-      <div class="alert alert-success"><%= success_msg %></div>
-      <% } %>
-      <% if (error_msg) { %>
-      <div class="alert alert-danger"><%= error_msg %></div>
-      <% } %>
-
       <div class="row">
-        <div class="col-md-7 border-end pe-4">
+        <!-- Colonne du formulaire avec bordure responsive -->
+        <div class="col-md-7 border-bottom border-md-0 border-end-md pe-md-4 pb-4 mb-4 pb-md-0 mb-md-0">
           <form action="/register" method="POST" class="auth-form">
             
             <% if (typeof establishments !== 'undefined' && establishments.length > 0) { %>
@@ -316,7 +326,8 @@
             <button type="submit" class="btn btn-primary w-100">Créer mon compte</button>
           </form>
         </div>
-        <div class="col-md-5 ps-4 d-flex flex-column justify-content-center">
+        <!-- Colonne des boutons sociaux avec padding responsive -->
+        <div class="col-md-5 ps-md-4 pt-4 pt-md-0 d-flex flex-column justify-content-center">
           <p class="text-muted text-center small mb-3">Ou inscrivez-vous avec :</p>
           <div class="social-buttons d-grid gap-3">
             <a href="/auth/google" class="btn btn-outline-secondary d-flex align-items-center justify-content-center gap-2 w-100">
