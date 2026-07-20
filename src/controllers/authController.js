@@ -130,7 +130,7 @@ exports.renderLogin = async (req, res) => {
 /**
  * Redirige l'utilisateur vers le tableau de bord approprié en fonction de son rôle.
  */
-exports.renderDashboard = (req, res) => {
+exports.renderDashboard = async (req, res) => {
     const user = req.user;
     // Le middleware ensureAuthenticated gère déjà le cas où l'utilisateur n'est pas connecté.
 
@@ -144,8 +144,7 @@ exports.renderDashboard = (req, res) => {
             let parentData = {};
 
             if (user.role === ROLES.PARENT) {
-                try {
-                    // Cette fonction est à créer dans userModel.js
+                try { // Cette fonction est à créer dans userModel.js
                     parentData.children = await userModel.getLinkedChildrenForParent(user.id);
 
                     if (req.session.selectedChildId) {
@@ -290,6 +289,23 @@ exports.postRegister = async (req, res) => {
     const broadcastAdminStats = req.app.get('broadcastAdminStats');
     if (broadcastAdminStats) {
       broadcastAdminStats({ establishmentId: establishment_id });
+    }
+
+    // --- Animation du raccourci pour les admins concernés ---
+    const authIo = req.app.get('authIo');
+    if (authIo) {
+        // Notifier les admins de l'établissement.
+        // Note : la fonction getAdminsByEstablishment est à ajouter dans userModel.js
+        const establishmentAdmins = await userModel.getAdminsByEstablishment(establishment_id);
+        establishmentAdmins.forEach(admin => {
+            authIo.to(`user_${admin.id}`).emit('shortcutHighlight', { shortcutKey: 'user_management' });
+        });
+
+        // Notifier tous les super admins.
+        const superAdmins = await userModel.getUsersByRole(ROLES.SUPER_ADMIN);
+        superAdmins.forEach(superAdmin => {
+            authIo.to(`user_${superAdmin.id}`).emit('shortcutHighlight', { shortcutKey: 'user_management' });
+        });
     }
 
     req.flash('success_msg', 'Inscription réussie ! Votre compte est en attente d\'approbation.');

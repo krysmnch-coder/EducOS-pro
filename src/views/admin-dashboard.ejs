@@ -3,11 +3,21 @@
 
 <div class="container page-shell py-4">
     <div class="themed-container">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="h3 mb-0"><%= title %></h1>
-        </div>
 
         <%- include('partials/messages') %>
+
+        <%# --- Section de bienvenue --- %>
+        <div class="d-flex align-items-center mb-5">
+            <div class="rounded-circle me-4 d-flex align-items-center justify-content-center bg-primary text-white" style="width: 80px; height: 80px; font-size: 2.5rem; font-weight: 500; background-image: url('<%= currentUser.avatar_url %>'); background-size: cover; background-position: center;">
+                <% if (!currentUser.avatar_url) { %>
+                    <%= currentUser.name.charAt(0).toUpperCase() %>
+                <% } %>
+            </div>
+            <div>
+                <h1 class="h2 mb-0">Bonjour, <%= currentUser.name %> !</h1>
+                <p class="lead text-muted mb-0">Bienvenue sur votre tableau de bord d'administration.</p>
+            </div>
+        </div>
 
         <%# --- Section des Raccourcis (Widgets) --- %>
         <% if (widgets && widgets.length > 0) { %>
@@ -15,7 +25,7 @@
             <div class="row">
                 <% widgets.forEach(widget => { %>
                 <div class="col-xl-3 col-md-6 mb-4">
-                    <a href="<%= widget.link %>" class="text-decoration-none">
+                    <a href="<%= widget.link %>" class="text-decoration-none shortcut-link" data-shortcut-key="<%= widget.key %>">
                     <div class="card dashboard-stat h-100">
                         <div class="card-body text-center">
                         <div class="stat-icon mb-3">
@@ -124,6 +134,20 @@
 
         // Connexion au namespace authentifié par défaut
         const socket = io();
+
+        socket.on('shortcutHighlight', function(data) {
+            if (data.shortcutKey) {
+                const shortcut = document.querySelector(`.shortcut-link[data-shortcut-key="${data.shortcutKey}"]`);
+                if (shortcut) {
+                    const card = shortcut.querySelector('.dashboard-stat');
+                    if (card) {
+                        card.classList.add('is-pulsing');
+                        // Retirer la classe après l'animation pour qu'elle puisse rejouer
+                        setTimeout(() => { card.classList.remove('is-pulsing'); }, 1200); // Durée de l'animation
+                    }
+                }
+            }
+        });
 
         socket.on('adminStatsUpdate', function(data) {
             if (currentUserData.role === 'SUPER_ADMIN' && data.superAdminStats) {

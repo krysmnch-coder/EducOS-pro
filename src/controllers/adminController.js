@@ -9,12 +9,12 @@ const renderAdminDashboard = async (req, res) => {
   const user = req.user;
   // Définition des widgets/raccourcis en dehors du bloc try/catch pour être accessible en cas d'erreur.
   const allWidgets = [
-    { title: 'Gestion des Utilisateurs', link: '/admin', icon: 'users', description: 'Approuver, modifier ou supprimer des comptes.', roles: [ROLES.SUPER_ADMIN, ROLES.ADMINISTRATOR] },
-    { title: 'Gestion des Établissements', link: '/establishments', icon: 'briefcase', description: 'Ajouter ou gérer les établissements scolaires.', roles: [ROLES.SUPER_ADMIN] },
-    { title: 'Gestion des Élèves', link: '/students', icon: 'user-check', description: 'Gérer les dossiers des élèves et leurs inscriptions.', roles: [ROLES.ADMINISTRATOR] },
-    { title: 'Communication de masse', link: '/communications', icon: 'send', description: 'Envoyer des messages à des groupes d\'utilisateurs.', roles: [ROLES.SUPER_ADMIN, ROLES.ADMINISTRATOR] },
-    { title: 'Gestion des Paiements', link: '#', icon: 'credit-card', description: 'Suivre les frais de scolarité. (Bientôt disponible)', roles: [ROLES.ADMINISTRATOR] },
-    { title: 'Paramètres', link: '#', icon: 'settings', description: 'Configurer les paramètres. (Bientôt disponible)', roles: [ROLES.SUPER_ADMIN, ROLES.ADMINISTRATOR] }
+    { key: 'user_management', title: 'Gestion des Utilisateurs', link: '/admin', icon: 'users', description: 'Approuver, modifier ou supprimer des comptes.', roles: [ROLES.SUPER_ADMIN, ROLES.ADMINISTRATOR] },
+    { key: 'establishment_management', title: 'Gestion des Établissements', link: '/establishments', icon: 'briefcase', description: 'Ajouter ou gérer les établissements scolaires.', roles: [ROLES.SUPER_ADMIN] },
+    { key: 'student_management', title: 'Gestion des Élèves', link: '/students', icon: 'user-check', description: 'Gérer les dossiers des élèves et leurs inscriptions.', roles: [ROLES.ADMINISTRATOR] },
+    { key: 'mass_communication', title: 'Communication de masse', link: '/communications', icon: 'send', description: 'Envoyer des messages à des groupes d\'utilisateurs.', roles: [ROLES.SUPER_ADMIN, ROLES.ADMINISTRATOR] },
+    { key: 'payment_management', title: 'Gestion des Paiements', link: '#', icon: 'credit-card', description: 'Suivre les frais de scolarité. (Bientôt disponible)', roles: [ROLES.ADMINISTRATOR] },
+    { key: 'settings', title: 'Paramètres', link: '#', icon: 'settings', description: 'Configurer les paramètres. (Bientôt disponible)', roles: [ROLES.SUPER_ADMIN, ROLES.ADMINISTRATOR] }
   ];
   const availableWidgets = allWidgets.filter(widget => widget.roles.includes(user.role));
 
