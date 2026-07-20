@@ -219,6 +219,54 @@ async function broadcastDashboardStats() {
   }
 }
 
+/**
+ * Diffuse les statistiques mises à jour aux tableaux de bord des administrateurs.
+ * @param {object} [options] - Options pour cibler la diffusion.
+ * @param {number} [options.establishmentId] - ID de l'établissement affecté par le changement.
+ */
+async function broadcastAdminStats(options = {}) {
+  try {
+    // Toujours diffuser les statistiques du Super Admin, car tout changement peut les affecter.
+    const totalUserCount = await userModel.countAllUsers();
+    const adminCount = await userModel.countUsersByRole(ROLES.ADMINISTRATOR);
+    const establishmentCountResult = await db('establishments').count('id as count').first();
+    const pendingCountGlobal = await userModel.countPendingUsers();
+    const establishmentsWithCounts = await db('establishments as e')
+      .select('e.id', 'e.name')
+      .count('u.id as userCount')
+      .leftJoin('users as u', function() {
+          this.on('e.id', '=', 'u.establishment_id').andOn('u.approved', '=', db.raw('true'));
+      })
+      .groupBy('e.id', 'e.name')
+      .orderBy('e.name');
+
+    const superAdminStats = {
+      totalUserCount,
+      adminCount,
+      establishmentCount: establishmentCountResult ? Number(establishmentCountResult.count) : 0,
+      pendingCount: pendingCountGlobal,
+      establishmentsWithCounts
+    };
+    authNamespace.emit('adminStatsUpdate', { superAdminStats });
+
+    // Si un établissement spécifique a été affecté, diffuser également ses statistiques.
+    if (options.establishmentId) {
+        const establishmentId = options.establishmentId;
+        const establishmentUsers = await userModel.getUsersByEstablishmentId(establishmentId);
+        const adminStats = {
+            establishmentId: establishmentId,
+            studentCount: establishmentUsers.filter(u => u.role === ROLES.STUDENT && u.approved).length,
+            professorCount: establishmentUsers.filter(u => u.role === ROLES.PROFESSOR && u.approved).length,
+            parentCount: establishmentUsers.filter(u => u.role === ROLES.PARENT && u.approved).length,
+            pendingCount: establishmentUsers.filter(u => !u.approved).length
+        };
+        authNamespace.emit('adminStatsUpdate', { adminStats });
+    }
+  } catch (error) {
+    console.error('Erreur broadcastAdminStats:', error);
+  }
+}
+
 // Routes
 app.use('/', authRoutes);
 app.use('/chat', chatRoutes);
@@ -392,6 +440,7 @@ app.set('io', io);
 app.set('authIo', authNamespace); // Rendre le namespace authentifié accessible
 app.set('publicIo', publicNamespace);
 app.set('broadcastDashboardStats', broadcastDashboardStats);
+app.set('broadcastAdminStats', broadcastAdminStats);
 
 /**
  * Fonction de démarrage asynchrone pour s'assurer que la base de données

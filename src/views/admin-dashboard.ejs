@@ -36,130 +36,119 @@
             <h2 class="mb-4 mt-5">Statistiques</h2>
             <div class="row">
                 <% if (currentUser.role === 'ADMINISTRATOR') { %>
-                    <div class="col-lg-8 mb-4">
-                        <div class="card h-100">
-                            <div class="card-header">Répartition des utilisateurs</div>
-                            <div class="card-body d-flex justify-content-center align-items-center p-4">
-                                <canvas id="userDistributionChart" style="max-height: 300px;"></canvas>
-                            </div>
-                        </div>
+                    <div class="col-md-6 col-lg-3 mb-4">
+                        <div class="card h-100"><div class="card-body text-center d-flex flex-column justify-content-center"><h5 class="card-title text-muted">Élèves</h5><p class="display-4 fw-bold my-2" id="adminStudentCount"><%= stats.studentCount %></p></div></div>
                     </div>
-                    <div class="col-lg-4 mb-4">
+                    <div class="col-md-6 col-lg-3 mb-4">
+                        <div class="card h-100"><div class="card-body text-center d-flex flex-column justify-content-center"><h5 class="card-title text-muted">Professeurs</h5><p class="display-4 fw-bold my-2" id="adminProfessorCount"><%= stats.professorCount %></p></div></div>
+                    </div>
+                    <div class="col-md-6 col-lg-3 mb-4">
+                        <div class="card h-100"><div class="card-body text-center d-flex flex-column justify-content-center"><h5 class="card-title text-muted">Parents</h5><p class="display-4 fw-bold my-2" id="adminParentCount"><%= stats.parentCount %></p></div></div>
+                    </div>
+                    <div class="col-md-6 col-lg-3 mb-4">
                         <div class="card h-100 text-center bg-warning bg-opacity-10 border-warning">
                             <div class="card-body d-flex flex-column justify-content-center">
                                 <h5 class="card-title">Comptes en attente</h5>
-                                <p class="display-4 fw-bold my-3"><%= stats.pendingCount %></p>
-                                <p class="text-muted">Utilisateurs attendant une approbation.</p>
-                                <a href="/admin" class="btn btn-warning">Gérer les approbations</a>
+                                <p class="display-4 fw-bold my-3" id="adminPendingCount"><%= stats.pendingCount %></p>
+                                <a href="/admin" class="btn btn-sm btn-warning">Gérer</a>
                             </div>
                         </div>
                     </div>
                 <% } %>
                 <% if (currentUser.role === 'SUPER_ADMIN') { %>
-                    <div class="col-lg-8 mb-4">
-                        <div class="card h-100">
-                            <div class="card-header">Statistiques globales</div>
-                            <div class="card-body p-4">
-                                <canvas id="globalStatsChart"></canvas>
-                            </div>
-                        </div>
+                    <div class="col-md-6 col-lg-3 mb-4">
+                        <div class="card h-100"><div class="card-body text-center d-flex flex-column justify-content-center"><h5 class="card-title text-muted">Utilisateurs (Total)</h5><p class="display-4 fw-bold my-2" id="superAdminTotalUsers"><%= stats.totalUserCount %></p></div></div>
                     </div>
-                    <div class="col-lg-4 mb-4">
+                    <div class="col-md-6 col-lg-3 mb-4">
+                        <div class="card h-100"><div class="card-body text-center d-flex flex-column justify-content-center"><h5 class="card-title text-muted">Admins Scolaires</h5><p class="display-4 fw-bold my-2" id="superAdminAdminCount"><%= stats.adminCount %></p></div></div>
+                    </div>
+                    <div class="col-md-6 col-lg-3 mb-4">
+                        <div class="card h-100"><div class="card-body text-center d-flex flex-column justify-content-center"><h5 class="card-title text-muted">Établissements</h5><p class="display-4 fw-bold my-2" id="superAdminEstablishmentCount"><%= stats.establishmentCount %></p></div></div>
+                    </div>
+                    <div class="col-md-6 col-lg-3 mb-4">
                         <div class="card h-100 text-center bg-warning bg-opacity-10 border-warning">
                             <div class="card-body d-flex flex-column justify-content-center">
                                 <h5 class="card-title">Comptes en attente</h5>
-                                <p class="display-4 fw-bold my-3"><%= stats.pendingCount %></p>
-                                <p class="text-muted">Nouveaux utilisateurs sur la plateforme.</p>
-                                <a href="/admin" class="btn btn-warning">Gérer les approbations</a>
+                                <p class="display-4 fw-bold my-3" id="superAdminPendingCount"><%= stats.pendingCount %></p>
+                                <a href="/admin" class="btn btn-sm btn-warning">Gérer</a>
                             </div>
                         </div>
                     </div>
+
+                    <% if (stats.establishmentsWithCounts && stats.establishmentsWithCounts.length > 0) { %>
+                        <div class="col-12">
+                            <h3 class="mb-4 mt-5">Utilisateurs par Établissement</h3>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Établissement</th>
+                                            <th class="text-end">Utilisateurs Approuvés</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% stats.establishmentsWithCounts.forEach(est => { %>
+                                            <tr>
+                                                <td><%= est.name %></td>
+                                                <td class="text-end fw-bold" id="establishment-count-<%= est.id %>"><%= est.userCount %></td>
+                                            </tr>
+                                        <% }); %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    <% } %>
                 <% } %>
             </div>
         <% } %>
     </div>
 </div>
 
-<!-- Données pour le script, injectées de manière sécurisée -->
-<script id="dashboard-data" type="application/json">
-    <%- JSON.stringify({ stats: stats || {}, userRole: currentUser.role }) %>
+<!-- Données pour le script, injectées de manière sécurisée pour éviter les erreurs de linter -->
+<script id="admin-dashboard-data" type="application/json">
+    <%- JSON.stringify({
+        role: currentUser.role,
+        establishment_id: currentUser.establishment_id
+    }) %>
 </script>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="/socket.io/socket.io.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         if (typeof feather !== 'undefined') {
             feather.replace();
         }
 
-        const dataElement = document.getElementById('dashboard-data');
-        const { stats, userRole } = JSON.parse(dataElement.textContent);
+        const dataElement = document.getElementById('admin-dashboard-data');
+        const currentUserData = JSON.parse(dataElement.textContent);
 
-        const isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
-        const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
-        const textColor = isDarkMode ? '#e0e0e0' : '#1a1a2e';
+        // Connexion au namespace authentifié par défaut
+        const socket = io();
 
-        if (userRole === 'ADMINISTRATOR') {
-            const ctx = document.getElementById('userDistributionChart');
-            if (ctx) {
-                if (stats.studentCount > 0 || stats.professorCount > 0 || stats.parentCount > 0) {
-                    new Chart(ctx, {
-                        type: 'doughnut',
-                        data: {
-                            labels: ['Élèves', 'Professeurs', 'Parents'],
-                            datasets: [{
-                                label: 'Nombre d\'utilisateurs',
-                                data: [stats.studentCount, stats.professorCount, stats.parentCount],
-                                backgroundColor: ['rgba(54, 162, 235, 0.7)', 'rgba(255, 206, 86, 0.7)', 'rgba(75, 192, 192, 0.7)'],
-                                borderColor: isDarkMode ? '#16213e' : '#fff',
-                                borderWidth: 2
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: { legend: { position: 'top', labels: { color: textColor } } }
-                        }
+        socket.on('adminStatsUpdate', function(data) {
+            if (currentUserData.role === 'SUPER_ADMIN' && data.superAdminStats) {
+                const stats = data.superAdminStats;
+                document.getElementById('superAdminTotalUsers').textContent = stats.totalUserCount;
+                document.getElementById('superAdminAdminCount').textContent = stats.adminCount;
+                document.getElementById('superAdminEstablishmentCount').textContent = stats.establishmentCount;
+                document.getElementById('superAdminPendingCount').textContent = stats.pendingCount;
+
+                if (stats.establishmentsWithCounts) {
+                    stats.establishmentsWithCounts.forEach(est => {
+                        const el = document.getElementById(`establishment-count-${est.id}`);
+                        if (el) el.textContent = est.userCount;
                     });
-                } else {
-                    ctx.parentElement.innerHTML = '<div class="text-center text-muted p-5">Aucune donnée à afficher pour le graphique.</div>';
                 }
             }
-        }
 
-        if (userRole === 'SUPER_ADMIN') {
-            const ctx = document.getElementById('globalStatsChart');
-            if (ctx) {
-                if (stats.totalUserCount > 0 || stats.adminCount > 0 || stats.establishmentCount > 0) {
-                    const maxStatValue = Math.max(stats.totalUserCount, stats.adminCount, stats.establishmentCount, 1);
-                    const yStepSize = Math.max(1, Math.ceil(maxStatValue / 5));
-
-                    new Chart(ctx, {
-                        type: 'bar',
-                        data: {
-                            labels: ['Utilisateurs (Total)', 'Admins Scolaires', 'Établissements'],
-                            datasets: [{
-                                label: 'Statistiques Globales',
-                                data: [stats.totalUserCount, stats.adminCount, stats.establishmentCount],
-                                backgroundColor: ['rgba(153, 102, 255, 0.6)', 'rgba(255, 159, 64, 0.6)', 'rgba(255, 99, 132, 0.6)'],
-                                borderColor: ['rgba(153, 102, 255, 1)', 'rgba(255, 159, 64, 1)', 'rgba(255, 99, 132, 1)'],
-                                borderWidth: 1
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            scales: {
-                                y: { beginAtZero: true, ticks: { color: textColor, stepSize: yStepSize }, grid: { color: gridColor } },
-                                x: { ticks: { color: textColor }, grid: { color: gridColor } }
-                            },
-                            plugins: { legend: { display: false } }
-                        }
-                    });
-                } else {
-                    ctx.parentElement.innerHTML = '<div class="text-center text-muted p-5">Aucune donnée statistique globale à afficher.</div>';
-                }
+            if (currentUserData.role === 'ADMINISTRATOR' && data.adminStats && data.adminStats.establishmentId === currentUserData.establishment_id) {
+                const stats = data.adminStats;
+                document.getElementById('adminStudentCount').textContent = stats.studentCount;
+                document.getElementById('adminProfessorCount').textContent = stats.professorCount;
+                document.getElementById('adminParentCount').textContent = stats.parentCount;
+                document.getElementById('adminPendingCount').textContent = stats.pendingCount;
             }
-        }
+        });
     });
 </script>
 

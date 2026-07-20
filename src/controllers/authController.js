@@ -201,6 +201,12 @@ exports.postRegister = async (req, res) => {
       establishment_id: establishment_id // Crucial pour séparer les données par établissement
     });
 
+    // --- Mise à jour en temps réel pour les tableaux de bord admin ---
+    const broadcastAdminStats = req.app.get('broadcastAdminStats');
+    if (broadcastAdminStats) {
+      broadcastAdminStats({ establishmentId: establishment_id });
+    }
+
     req.flash('success_msg', 'Inscription réussie ! Votre compte est en attente d\'approbation.');
     res.redirect('/login');
 

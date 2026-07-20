@@ -24,11 +24,22 @@ const renderAdminDashboard = async (req, res) => {
       const adminCount = await userModel.countUsersByRole(ROLES.ADMINISTRATOR);
       const establishmentCountResult = await db('establishments').count('id as count').first();
       const pendingCount = await userModel.countPendingUsers();
+      
+      const establishmentsWithCounts = await db('establishments as e')
+        .select('e.id', 'e.name')
+        .count('u.id as userCount')
+        .leftJoin('users as u', function() {
+            this.on('e.id', '=', 'u.establishment_id').andOn('u.approved', '=', db.raw('true'));
+        })
+        .groupBy('e.id', 'e.name')
+        .orderBy('e.name');
+
       stats = {
           totalUserCount: totalUserCount,
           adminCount: adminCount,
           establishmentCount: establishmentCountResult ? Number(establishmentCountResult.count) : 0,
-          pendingCount
+          pendingCount,
+          establishmentsWithCounts: establishmentsWithCounts
       };
     }
 
@@ -155,6 +166,12 @@ const approveUser = async (req, res) => {
       return res.redirect('/admin');
     }
 
+    // --- Mise à jour en temps réel pour les tableaux de bord admin ---
+    const broadcastAdminStats = req.app.get('broadcastAdminStats');
+    if (broadcastAdminStats) {
+      broadcastAdminStats({ establishmentId: userToApprove.establishment_id });
+    }
+
     await userModel.approveUserById(id);
 
     // --- Mise à jour en temps réel pour la page d'accueil ---
@@ -203,6 +220,12 @@ const deleteUser = async (req, res) => {
             req.flash('error_msg', `Impossible de supprimer le dernier administrateur (${userToDelete.name}) de cet établissement.`);
             return res.redirect(req.get('Referrer') || '/admin');
         }
+    }
+
+    // --- Mise à jour en temps réel pour les tableaux de bord admin ---
+    const broadcastAdminStats = req.app.get('broadcastAdminStats');
+    if (broadcastAdminStats) {
+      broadcastAdminStats({ establishmentId: userToDelete.establishment_id });
     }
 
     await userModel.deleteUserById(id);
