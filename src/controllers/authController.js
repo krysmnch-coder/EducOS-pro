@@ -252,10 +252,16 @@ exports.renderRegister = async (req, res) => {
  */
 exports.postRegister = async (req, res) => {
   // On récupère l'ID de l'établissement pour une architecture multi-tenant
-  const { name, email, password, establishment_id, role, subject, student_class, matricule, children } = req.body;
+  const { name, email, password, password2, establishment_id, role, subject, student_class, matricule, children } = req.body;
 
   try {
-    // ÉTAPE 0 : Valider l'adresse e-mail avec Mailboxlayer
+    // ÉTAPE 0 : Valider la correspondance des mots de passe
+    if (password !== password2) {
+      req.flash('error_msg', 'Les mots de passe ne correspondent pas.');
+      return res.redirect('/register');
+    }
+
+    // ÉTAPE 0.1 : Valider l'adresse e-mail avec Mailboxlayer
     const emailValidation = await validateEmail(email);
     // On bloque si l'e-mail est invalide, mais on laisse passer en cas d'erreur de l'API pour ne pas pénaliser l'utilisateur.
     if (!emailValidation.isValid && emailValidation.reason !== 'api_error' && emailValidation.reason !== 'request_failed') {
@@ -263,7 +269,7 @@ exports.postRegister = async (req, res) => {
         return res.redirect('/register');
     }
 
-    // Étape 0.5 : Valider le rôle pour des raisons de sécurité
+    // Étape 0.2 : Valider le rôle pour des raisons de sécurité
     const allowedRegistrationRoles = [
         ROLES.ADMINISTRATOR, ROLES.SCHOOL_LIFE_MANAGER, ROLES.SECRETARY,
         ROLES.PROFESSOR, ROLES.PARENT, ROLES.STUDENT
@@ -298,6 +304,7 @@ exports.postRegister = async (req, res) => {
             subject: role === ROLES.PROFESSOR ? subject : null,
             student_class: role === ROLES.STUDENT ? student_class : null,
             matricule: role === ROLES.STUDENT ? matricule : null,
+            avatar_url: '/img/user.png' // Ajout d'un avatar par défaut pour éviter une erreur de base de données
         }).returning('id');
 
         const newUserId = newUserIdObj.id || newUserIdObj;
