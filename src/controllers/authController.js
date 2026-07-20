@@ -331,6 +331,10 @@ exports.postRegister = async (req, res) => {
         const establishmentAdmins = await userModel.getAdminsByEstablishment(establishment_id);
         establishmentAdmins.forEach(admin => {
             authIo.to(`user_${admin.id}`).emit('shortcutHighlight', { shortcutKey: 'user_management' });
+            // Si un parent vient de s'inscrire avec des enfants, on notifie aussi pour la gestion des élèves.
+            if (role === ROLES.PARENT && children && children.some(c => c.matricule)) {
+                authIo.to(`user_${admin.id}`).emit('shortcutHighlight', { shortcutKey: 'student_management' });
+            }
         });
 
         // Notifier tous les super admins.
