@@ -3,21 +3,26 @@
 
 <div class="container page-shell py-4">
     <div class="themed-container">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="h3 mb-0"><%= title %></h1>
-        </div>
 
         <%- include('partials/messages') %>
 
         <%# --- Section de bienvenue --- %>
-        <div class="mb-5">
-            <h2 class="mb-1">Bonjour, <%= user.name %> !</h2>
-            <p class="lead text-muted">Voici les actions rapides disponibles pour votre rôle.</p>
+        <div class="d-flex align-items-center mb-5">
+            <% if (user.avatar_url) { %>
+                <img src="<%= user.avatar_url %>" alt="Avatar" class="rounded-circle me-4" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid var(--card-border-color);">
+            <% } else { %>
+                <div class="rounded-circle me-4 d-flex align-items-center justify-content-center bg-primary text-white" style="width: 80px; height: 80px; font-size: 2.5rem; font-weight: 500;">
+                    <%= user.name.charAt(0).toUpperCase() %>
+                </div>
+            <% } %>
+            <div>
+                <h1 class="h2 mb-0">Bonjour, <%= user.name %> !</h1>
+                <p class="lead text-muted mb-0">Ravi de vous revoir. Voici vos raccourcis.</p>
+            </div>
         </div>
 
         <%# --- Section des Raccourcis (Widgets) --- %>
         <% if (typeof widgets !== 'undefined' && widgets.length > 0) { %>
-            <h3 class="mb-4">Vos raccourcis</h3>
             <div class="row">
                 <% widgets.forEach(widget => { %>
                 <div class="col-xl-3 col-md-6 mb-4">
@@ -25,7 +30,7 @@
                     <div class="card dashboard-stat h-100">
                         <div class="card-body text-center">
                         <div class="stat-icon mb-3">
-                            <i data-feather="<%= widget.icon %>" width="36" height="36"></i>
+                            <i data-feather="<%= widget.icon %>"></i>
                         </div>
                         <h5 class="card-title mb-2"><%= widget.title %></h5>
                         <p class="card-text text-muted small"><%= widget.description %></p>
