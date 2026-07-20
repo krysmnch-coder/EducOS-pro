@@ -70,15 +70,78 @@ const renderAdmin = async (req, res) => {
           isDeletable: !isLastAdmin // Ajout de la propriété pour la vue
         };
       });
+
+      // Calculer les statistiques globales pour le super-admin
+      const totalUserCountResult = await db('users').where('approved', true).count('id as count').first();
+      const professorCount = await userModel.countUsersByRole('professeur');
+      const establishmentCountResult = await db('establishments').count('id as count').first();
+      const pendingCount = await userModel.countPendingUsers();
+      stats = {
+          totalUserCount: totalUserCountResult ? Number(totalUserCountResult.count) : 0,
+          professorCount,
+          establishmentCount: establishmentCountResult ? Number(establishmentCountResult.count) : 0,
+          pendingCount
+      };
+
     } else {
       // Pour tout autre rôle non autorisé, on renvoie une liste vide par sécurité.
       users = [];
     }
 
+    // Définition des widgets/raccourcis pour le tableau de bord de l'administrateur
+    const allWidgets = [
+      {
+        title: 'Gestion des Utilisateurs',
+        link: '/admin',
+        icon: 'users',
+        description: 'Approuver, modifier ou supprimer des comptes.',
+        roles: [ROLES.SUPER_ADMIN, ROLES.ADMINISTRATOR]
+      },
+      {
+        title: 'Gestion des Établissements',
+        link: '/establishments',
+        icon: 'briefcase',
+        description: 'Ajouter ou gérer les établissements scolaires.',
+        roles: [ROLES.SUPER_ADMIN]
+      },
+      {
+        title: 'Gestion des Élèves',
+        link: '/students',
+        icon: 'user-check',
+        description: 'Gérer les dossiers des élèves et leurs inscriptions.',
+        roles: [ROLES.ADMINISTRATOR]
+      },
+      {
+        title: 'Communication de masse',
+        link: '/communications',
+        icon: 'send',
+        description: 'Envoyer des messages à des groupes d\'utilisateurs.',
+        roles: [ROLES.SUPER_ADMIN, ROLES.ADMINISTRATOR]
+      },
+      {
+        title: 'Gestion des Paiements',
+        link: '#', // Lien temporaire
+        icon: 'credit-card',
+        description: 'Suivre les frais de scolarité. (Bientôt disponible)',
+        roles: [ROLES.ADMINISTRATOR]
+      },
+      {
+        title: 'Paramètres',
+        link: '#', // Lien temporaire
+        icon: 'settings',
+        description: 'Configurer les paramètres. (Bientôt disponible)',
+        roles: [ROLES.SUPER_ADMIN, ROLES.ADMINISTRATOR]
+      }
+    ];
+
+    const availableWidgets = allWidgets.filter(widget => widget.roles.includes(req.user.role));
+
     res.render('admin', {
-      title: 'Administration des utilisateurs',
+      title: 'Tableau de bord Administrateur',
       users: users,
-      currentUser: req.user
+      currentUser: req.user,
+      widgets: availableWidgets,
+      stats: stats
     });
   } catch (error) {
     console.error('Erreur lors du chargement de la page admin:', error);

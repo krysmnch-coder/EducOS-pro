@@ -15,9 +15,11 @@ const { sendPasswordResetEmail } = require('../utils/emailService');
  * Affiche la page d'accueil ou redirige vers le tableau de bord si l'utilisateur est connecté.
  */
 exports.renderHome = (req, res) => {
-  if (req.isAuthenticated()) {
-    return res.redirect('/dashboard');
-  }
+  // Modification : La page d'accueil publique est maintenant accessible même si l'utilisateur est connecté,
+  // pour répondre à la demande de ne pas être systématiquement redirigé vers le tableau de bord.
+  // if (req.isAuthenticated()) {
+  //   return res.redirect('/dashboard');
+  // }
   res.render('home', {
       title: 'Accueil | EducOS-pro'
   });
