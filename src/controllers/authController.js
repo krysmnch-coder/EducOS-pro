@@ -252,7 +252,7 @@ exports.renderRegister = async (req, res) => {
  */
 exports.postRegister = async (req, res) => {
   // On récupère l'ID de l'établissement pour une architecture multi-tenant
-  const { name, email, password, establishment_id, role } = req.body;
+  const { name, email, password, establishment_id, role, subject, student_class, matricule, children } = req.body;
 
   try {
     // ÉTAPE 0 : Valider l'adresse e-mail avec Mailboxlayer
@@ -264,7 +264,11 @@ exports.postRegister = async (req, res) => {
     }
 
     // Étape 0.5 : Valider le rôle pour des raisons de sécurité
-    if (!role || ![ROLES.PARENT, ROLES.PROFESSOR, ROLES.STUDENT].includes(role)) {
+    const allowedRegistrationRoles = [
+        ROLES.ADMINISTRATOR, ROLES.SCHOOL_LIFE_MANAGER, ROLES.SECRETARY,
+        ROLES.PROFESSOR, ROLES.PARENT, ROLES.STUDENT
+    ];
+    if (!role || !allowedRegistrationRoles.includes(role)) {
         req.flash('error_msg', 'Un rôle valide doit être sélectionné.');
         return res.redirect('/register');
     }
@@ -283,13 +287,34 @@ exports.postRegister = async (req, res) => {
 
     // Étape 3 : Insérer le nouvel utilisateur.
     // Knex gère la protection contre les injections SQL.
-    await db('users').insert({
-      name: name,
-      email: email,
-      password: hashedPassword,
-      role: role, // Le rôle est maintenant dynamique et vient du formulaire
-      approved: false,      // Knex gère les booléens correctement
-      establishment_id: establishment_id // Crucial pour séparer les données par établissement
+    await db.transaction(async trx => {
+        const [newUserIdObj] = await trx('users').insert({
+            name: name,
+            email: email,
+            password: hashedPassword,
+            role: role,
+            approved: false,
+            establishment_id: establishment_id,
+            subject: role === ROLES.PROFESSOR ? subject : null,
+            student_class: role === ROLES.STUDENT ? student_class : null,
+            matricule: role === ROLES.STUDENT ? matricule : null,
+        }).returning('id');
+
+        const newUserId = newUserIdObj.id || newUserIdObj;
+
+        // Si le rôle est PARENT et qu'il y a des enfants, on crée les liens.
+        if (role === ROLES.PARENT && children && Array.isArray(children)) {
+            const childrenLinks = children.map(child => ({
+                parent_id: newUserId,
+                student_matricule: child.matricule,
+                student_first_name: child.first_name,
+                student_last_name: child.last_name,
+                student_class: child.student_class
+            })).filter(link => link.student_matricule); // Filtrer les entrées sans matricule
+            if (childrenLinks.length > 0) {
+                await trx('parent_student_links').insert(childrenLinks);
+            }
+        }
     });
 
     // --- Mise à jour en temps réel pour les tableaux de bord admin ---
