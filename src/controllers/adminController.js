@@ -1,5 +1,6 @@
 const userModel = require('../models/userModel');
 const { ROLES } = require('../../constants');
+const db = require('../models/db');
 
 /**
  * Affiche la page d'administration avec la liste des utilisateurs et les statistiques.
@@ -7,10 +8,24 @@ const { ROLES } = require('../../constants');
 const renderAdmin = async (req, res) => {
   try {
     let users;
+    let stats = {};
+
     // Si l'utilisateur est un administrateur, il ne voit que les utilisateurs de son établissement.
     if (req.user.role === ROLES.ADMINISTRATOR) {
-      users = await userModel.getUsersByEstablishmentId(req.user.establishment_id);
+      const establishmentUsers = await userModel.getUsersByEstablishmentId(req.user.establishment_id);
+      users = establishmentUsers; // La liste principale reste celle des utilisateurs à gérer
 
+      // Calculer les statistiques pour l'administrateur de l'établissement
+      stats = {
+        studentCount: establishmentUsers.filter(u => u.role === ROLES.STUDENT && u.approved).length,
+        professorCount: establishmentUsers.filter(u => u.role === ROLES.PROFESSOR && u.approved).length,
+        parentCount: establishmentUsers.filter(u => u.role === ROLES.PARENT && u.approved).length,
+        pendingCount: establishmentUsers.filter(u => !u.approved).length
+      };
+
+      // La liste des utilisateurs à gérer inclut tout le monde dans l'établissement
+      users = establishmentUsers;
+      
       // Déterminer qui peut être supprimé
       const adminCount = users.filter(u => u.role === ROLES.ADMINISTRATOR).length;
       users = users.map(user => {
@@ -68,7 +83,13 @@ const renderAdmin = async (req, res) => {
   } catch (error) {
     console.error('Erreur lors du chargement de la page admin:', error);
     req.flash('error_msg', "Impossible de charger la page d'administration.");
-    res.redirect('/dashboard');
+    // En cas d'erreur, on affiche le tableau de bord générique avec un message d'erreur
+    // au lieu de rediriger, pour éviter les boucles de redirection.
+    res.status(500).render('dashboard', {
+      title: 'Erreur',
+      user: req.user,
+      widgets: []
+    });
   }
 };
 

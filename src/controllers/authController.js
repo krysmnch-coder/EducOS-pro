@@ -7,6 +7,7 @@ const { ROLES } = require('../../constants'); // Bonne pratique : utiliser des c
 const establishmentModel = require('../models/establishmentModel');
 const userModel = require('../models/userModel');
 const crypto = require('crypto');
+const adminController = require('./adminController');
 const { validateEmail } = require('../utils/emailValidationService');
 const { sendPasswordResetEmail } = require('../utils/emailService');
 
@@ -134,8 +135,8 @@ exports.renderDashboard = (req, res) => {
     switch (user.role) {
         case ROLES.SUPER_ADMIN:
         case ROLES.ADMINISTRATOR:
-            // Redirige les administrateurs vers leur page de gestion dédiée.
-            return res.redirect('/admin');
+            // Affiche la page d'administration directement pour que l'URL reste /dashboard.
+            return adminController.renderAdmin(req, res);
         default:
             // Affiche un tableau de bord générique pour les autres rôles.
             return res.render('dashboard', { title: 'Tableau de bord | EducOS-pro', user: req.user });
