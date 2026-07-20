@@ -67,10 +67,6 @@
     background-color: rgba(255, 255, 255, 0.2);
   }
 
-  body[data-theme="dark"] .form-select:invalid {
-    color: rgba(255, 255, 255, 0.6) !important;
-  }
-
   body[data-theme="light"] .auth-card {
     background: rgba(255, 255, 255, 0.4);
     border-color: rgba(255, 255, 255, 0.6);
@@ -192,7 +188,12 @@
   }
   body[data-theme="dark"] option {
     background-color: #16213e;
-    color: #e0e0e0;
+    color: #ffffff;
+  }
+
+  /* Assure que le texte du placeholder du select est visible en mode sombre */
+  body[data-theme="dark"] .form-select:invalid {
+    color: rgba(255, 255, 255, 0.7) !important;
   }
 
   body[data-theme="light"] .form-control, body[data-theme="light"] .form-select {

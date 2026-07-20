@@ -67,10 +67,6 @@
     background-color: rgba(255, 255, 255, 0.2);
   }
 
-  body[data-theme="dark"] .form-select:invalid {
-    color: rgba(255, 255, 255, 0.6) !important;
-  }
-
   body[data-theme="light"] .auth-card {
     background: rgba(255, 255, 255, 0.4);
     border-color: rgba(255, 255, 255, 0.6);
@@ -192,7 +188,12 @@
   }
   body[data-theme="dark"] option {
     background-color: #16213e;
-    color: #e0e0e0;
+    color: #ffffff;
+  }
+
+  /* Assure que le texte du placeholder du select est visible en mode sombre */
+  body[data-theme="dark"] .form-select:invalid {
+    color: rgba(255, 255, 255, 0.7) !important;
   }
 
   body[data-theme="light"] .form-control, body[data-theme="light"] .form-select {
@@ -428,15 +429,27 @@
           <label class="form-label">Classe</label>
           <div class="d-flex gap-2">
             <select class="form-select form-select-sm class-level-select" data-index="${index}" required>
-              <option value="" disabled selected>Niveau</option>
-              <option value="Terminale">Terminale</option>
-              <option value="Première">Première</option>
-              <option value="Seconde">Seconde</option>
-              <option value="Troisième">Troisième</option>
-              <option value="Quatrième">Quatrième</option>
-              <option value="Cinquième">Cinquième</option>
-              <option value="Sixième">Sixième</option>
-              <option value="TP">TP</option>
+              <option value="" disabled selected>-- Niveau --</option>
+              <optgroup label="Lycée">
+                <option value="Terminale">Terminale</option>
+                <option value="Première">Première</option>
+                <option value="Seconde">Seconde</option>
+              </optgroup>
+              <optgroup label="Collège">
+                <option value="Troisième">Troisième</option>
+                <option value="Quatrième">Quatrième</option>
+                <option value="Cinquième">Cinquième</option>
+                <option value="Sixième">Sixième</option>
+              </optgroup>
+              <optgroup label="Primaire">
+                <option value="CM2">CM2</option><option value="CM1">CM1</option><option value="CE2">CE2</option><option value="CE1">CE1</option><option value="CP">CP</option>
+              </optgroup>
+              <optgroup label="Maternelle">
+                <option value="Grande Section">Grande Section</option>
+                <option value="Moyenne Section">Moyenne Section</option>
+                <option value="Petite Section">Petite Section</option>
+                <option value="Toute Petite Section">Toute Petite Section</option>
+              </optgroup>
             </select>
             <select class="form-select form-select-sm class-suffix-letter-select" data-index="${index}">
               <option value="" selected>Lettre</option>
