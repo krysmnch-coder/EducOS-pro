@@ -3,25 +3,75 @@ const { ROLES } = require('../../constants');
 const db = require('../models/db');
 
 /**
- * Affiche la page d'administration avec la liste des utilisateurs et les statistiques.
+ * Affiche le tableau de bord principal pour les administrateurs avec les statistiques et les raccourcis.
  */
-const renderAdmin = async (req, res) => {
+const renderAdminDashboard = async (req, res) => {
   try {
-    let users;
     let stats = {};
+    const user = req.user;
 
-    // Si l'utilisateur est un administrateur, il ne voit que les utilisateurs de son établissement.
-    if (req.user.role === ROLES.ADMINISTRATOR) {
-      const establishmentUsers = await userModel.getUsersByEstablishmentId(req.user.establishment_id);
-      users = establishmentUsers; // La liste principale reste celle des utilisateurs à gérer
-
-      // Calculer les statistiques pour l'administrateur de l'établissement
+    // Calcul des statistiques en fonction du rôle
+    if (user.role === ROLES.ADMINISTRATOR) {
+      const establishmentUsers = await userModel.getUsersByEstablishmentId(user.establishment_id);
       stats = {
         studentCount: establishmentUsers.filter(u => u.role === ROLES.STUDENT && u.approved).length,
         professorCount: establishmentUsers.filter(u => u.role === ROLES.PROFESSOR && u.approved).length,
         parentCount: establishmentUsers.filter(u => u.role === ROLES.PARENT && u.approved).length,
         pendingCount: establishmentUsers.filter(u => !u.approved).length
       };
+    } else if (user.role === ROLES.SUPER_ADMIN) {
+      const totalUserCountResult = await db('users').where('approved', true).count('id as count').first();
+      const professorCount = await userModel.countUsersByRole('professeur');
+      const establishmentCountResult = await db('establishments').count('id as count').first();
+      const pendingCount = await userModel.countPendingUsers();
+      stats = {
+          totalUserCount: totalUserCountResult ? Number(totalUserCountResult.count) : 0,
+          professorCount,
+          establishmentCount: establishmentCountResult ? Number(establishmentCountResult.count) : 0,
+          pendingCount
+      };
+    }
+
+    // Définition des widgets/raccourcis
+    const allWidgets = [
+      { title: 'Gestion des Utilisateurs', link: '/admin', icon: 'users', description: 'Approuver, modifier ou supprimer des comptes.', roles: [ROLES.SUPER_ADMIN, ROLES.ADMINISTRATOR] },
+      { title: 'Gestion des Établissements', link: '/establishments', icon: 'briefcase', description: 'Ajouter ou gérer les établissements scolaires.', roles: [ROLES.SUPER_ADMIN] },
+      { title: 'Gestion des Élèves', link: '/students', icon: 'user-check', description: 'Gérer les dossiers des élèves et leurs inscriptions.', roles: [ROLES.ADMINISTRATOR] },
+      { title: 'Communication de masse', link: '/communications', icon: 'send', description: 'Envoyer des messages à des groupes d\'utilisateurs.', roles: [ROLES.SUPER_ADMIN, ROLES.ADMINISTRATOR] },
+      { title: 'Gestion des Paiements', link: '#', icon: 'credit-card', description: 'Suivre les frais de scolarité. (Bientôt disponible)', roles: [ROLES.ADMINISTRATOR] },
+      { title: 'Paramètres', link: '#', icon: 'settings', description: 'Configurer les paramètres. (Bientôt disponible)', roles: [ROLES.SUPER_ADMIN, ROLES.ADMINISTRATOR] }
+    ];
+
+    const availableWidgets = allWidgets.filter(widget => widget.roles.includes(user.role));
+
+    res.render('admin-dashboard', {
+      title: 'Tableau de bord Administrateur',
+      currentUser: user,
+      widgets: availableWidgets,
+      stats: stats
+    });
+
+  } catch (error) {
+    console.error('Erreur lors du chargement du tableau de bord admin:', error);
+    req.flash('error_msg', "Impossible de charger le tableau de bord.");
+    // Fallback vers un dashboard simple en cas d'erreur
+    res.status(500).render('dashboard', {
+      title: 'Erreur',
+      user: req.user
+    });
+  }
+};
+
+/**
+ * Affiche la page de gestion des utilisateurs (anciennement la page admin principale).
+ */
+const renderAdmin = async (req, res) => {
+  try {
+    let users;
+
+    // Si l'utilisateur est un administrateur, il ne voit que les utilisateurs de son établissement.
+    if (req.user.role === ROLES.ADMINISTRATOR) {
+      const establishmentUsers = await userModel.getUsersByEstablishmentId(req.user.establishment_id);
 
       // La liste des utilisateurs à gérer inclut tout le monde dans l'établissement
       users = establishmentUsers;
@@ -71,77 +121,15 @@ const renderAdmin = async (req, res) => {
         };
       });
 
-      // Calculer les statistiques globales pour le super-admin
-      const totalUserCountResult = await db('users').where('approved', true).count('id as count').first();
-      const professorCount = await userModel.countUsersByRole('professeur');
-      const establishmentCountResult = await db('establishments').count('id as count').first();
-      const pendingCount = await userModel.countPendingUsers();
-      stats = {
-          totalUserCount: totalUserCountResult ? Number(totalUserCountResult.count) : 0,
-          professorCount,
-          establishmentCount: establishmentCountResult ? Number(establishmentCountResult.count) : 0,
-          pendingCount
-      };
-
     } else {
       // Pour tout autre rôle non autorisé, on renvoie une liste vide par sécurité.
       users = [];
     }
 
-    // Définition des widgets/raccourcis pour le tableau de bord de l'administrateur
-    const allWidgets = [
-      {
-        title: 'Gestion des Utilisateurs',
-        link: '/admin',
-        icon: 'users',
-        description: 'Approuver, modifier ou supprimer des comptes.',
-        roles: [ROLES.SUPER_ADMIN, ROLES.ADMINISTRATOR]
-      },
-      {
-        title: 'Gestion des Établissements',
-        link: '/establishments',
-        icon: 'briefcase',
-        description: 'Ajouter ou gérer les établissements scolaires.',
-        roles: [ROLES.SUPER_ADMIN]
-      },
-      {
-        title: 'Gestion des Élèves',
-        link: '/students',
-        icon: 'user-check',
-        description: 'Gérer les dossiers des élèves et leurs inscriptions.',
-        roles: [ROLES.ADMINISTRATOR]
-      },
-      {
-        title: 'Communication de masse',
-        link: '/communications',
-        icon: 'send',
-        description: 'Envoyer des messages à des groupes d\'utilisateurs.',
-        roles: [ROLES.SUPER_ADMIN, ROLES.ADMINISTRATOR]
-      },
-      {
-        title: 'Gestion des Paiements',
-        link: '#', // Lien temporaire
-        icon: 'credit-card',
-        description: 'Suivre les frais de scolarité. (Bientôt disponible)',
-        roles: [ROLES.ADMINISTRATOR]
-      },
-      {
-        title: 'Paramètres',
-        link: '#', // Lien temporaire
-        icon: 'settings',
-        description: 'Configurer les paramètres. (Bientôt disponible)',
-        roles: [ROLES.SUPER_ADMIN, ROLES.ADMINISTRATOR]
-      }
-    ];
-
-    const availableWidgets = allWidgets.filter(widget => widget.roles.includes(req.user.role));
-
     res.render('admin', {
-      title: 'Tableau de bord Administrateur',
+      title: 'Gestion des Utilisateurs',
       users: users,
-      currentUser: req.user,
-      widgets: availableWidgets,
-      stats: stats
+      currentUser: req.user
     });
   } catch (error) {
     console.error('Erreur lors du chargement de la page admin:', error);
@@ -150,8 +138,7 @@ const renderAdmin = async (req, res) => {
     // au lieu de rediriger, pour éviter les boucles de redirection.
     res.status(500).render('dashboard', {
       title: 'Erreur',
-      user: req.user,
-      widgets: []
+      user: req.user
     });
   }
 };
@@ -236,6 +223,7 @@ const deleteUser = async (req, res) => {
 };
 
 module.exports = {
+  renderAdminDashboard,
   renderAdmin,
   approveUser,
   deleteUser

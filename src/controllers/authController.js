@@ -137,8 +137,8 @@ exports.renderDashboard = (req, res) => {
     switch (user.role) {
         case ROLES.SUPER_ADMIN:
         case ROLES.ADMINISTRATOR:
-            // Affiche la page d'administration directement pour que l'URL reste /dashboard.
-            return adminController.renderAdmin(req, res);
+            // Affiche le tableau de bord dédié aux administrateurs.
+            return adminController.renderAdminDashboard(req, res);
         default:
             // Affiche un tableau de bord générique pour les autres rôles.
             return res.render('dashboard', { title: 'Tableau de bord | EducOS-pro', user: req.user });
