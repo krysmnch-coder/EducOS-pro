@@ -531,9 +531,16 @@
 
   function updateRoleFields() {
     const role = roleSelect.value;
+    // Gère la visibilité des sections
     teacherFields.classList.toggle('d-none', role !== 'professeur');
     studentFields.classList.toggle('d-none', role !== 'eleve');
     parentFields.classList.toggle('d-none', role !== 'parent');
+
+    // Désactive les champs des sections masquées pour qu'ils ne soient pas soumis avec le formulaire.
+    teacherFields.querySelectorAll('input, select').forEach(el => el.disabled = (role !== 'professeur'));
+    studentFields.querySelectorAll('input, select').forEach(el => el.disabled = (role !== 'eleve'));
+    parentFields.querySelectorAll('input, select').forEach(el => el.disabled = (role !== 'parent'));
+
     if (role === 'parent' && childrenList && childrenList.children.length === 0) {
       addChildEntry();
     }
