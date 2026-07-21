@@ -163,7 +163,6 @@ exports.renderDashboard = async (req, res) => {
 
             const allWidgets = [
                 // --- PARENT ---
-                { key: 'add_child', title: "Inscrire un enfant", link: '/students/add-child', icon: 'user-plus', description: "Initier l'inscription d'un nouvel enfant.", roles: [ROLES.PARENT] },
                 { key: 'grades', title: "Notes de l'enfant", link: '/student/grades', icon: 'award', description: "Consulter les notes et appréciations.", roles: [ROLES.PARENT] },
                 { key: 'absences', title: "Suivi des Absences", link: '/student/absences', icon: 'user-x', description: "Voir les absences et retards.", roles: [ROLES.PARENT] },
                 { key: 'documents', title: "Documents Scolaires", link: '/student/documents', icon: 'file-text', description: "Télécharger les certificats et bulletins.", roles: [ROLES.PARENT] },
