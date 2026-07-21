@@ -336,9 +336,23 @@ const updateStudent = async (req, res) => {
     }
 };
 
-// Les fonctions `renderAddChildForm` et `postAddChild` ont été supprimées car la fonctionnalité
-// d'ajout d'enfant par un parent depuis son tableau de bord a été retirée. L'ajout
-// se fait maintenant exclusivement lors de l'inscription initiale du parent.
+/**
+ * Placeholder pour l'ancienne route d'ajout d'enfant (GET).
+ * Redirige vers le tableau de bord pour éviter un crash de l'application,
+ * car la route est probablement toujours définie dans studentRoutes.js.
+ * C'est une mesure de sécurité pour assurer la stabilité du démarrage.
+ */
+const renderAddChildForm = (req, res) => {
+    req.flash('info_msg', "L'ajout d'un enfant se fait désormais uniquement lors de l'inscription du parent.");
+    res.redirect('/dashboard');
+};
+
+/**
+ * Placeholder pour l'ancienne route d'ajout d'enfant (POST).
+ */
+const postAddChild = (req, res) => {
+    res.redirect('/dashboard');
+};
 
 module.exports = {
   listStudents,
@@ -349,4 +363,6 @@ module.exports = {
   renderEditStudentForm,
   updateStudent,
   createParentFromStudentForm,
+  renderAddChildForm,
+  postAddChild,
 };
