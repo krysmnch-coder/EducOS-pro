@@ -359,10 +359,24 @@ const postAddChild = async (req, res) => {
         return res.redirect('/dashboard');
     }
 
-    const { name, matricule, student_class } = req.body;
+    const { name, matricule, student_class } = req.body; // 'name' est une chaîne unique ici
     const parent_id = req.user.id;
 
     try {
+        // --- VALIDATION ROBUSTE ---
+        const nameParts = name ? name.trim().split(/\s+/) : [];
+        const student_first_name = nameParts.shift() || '';
+        const student_last_name = nameParts.join(' ');
+
+        if (!student_first_name || !student_last_name) {
+            req.flash('error_msg', "Veuillez fournir au moins un prénom et un nom pour l'enfant.");
+            return res.redirect('/students/add-child');
+        }
+        if (!matricule || !student_class) {
+            req.flash('error_msg', "Le matricule et la classe de l'enfant sont obligatoires.");
+            return res.redirect('/students/add-child');
+        }
+
         // Vérifier si un élève avec ce matricule existe déjà
         const existingStudent = await userModel.getUserByMatricule(matricule);
         if (existingStudent) {
@@ -374,8 +388,8 @@ const postAddChild = async (req, res) => {
         await userModel.initiateChildRegistration({
             parent_id: parent_id,
             student_matricule: matricule,
-            student_first_name: name.split(' ')[0] || '',
-            student_last_name: name.split(' ').slice(1).join(' ') || '',
+            student_first_name: student_first_name,
+            student_last_name: student_last_name,
             student_class: student_class
         });
 

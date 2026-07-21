@@ -493,9 +493,7 @@
       </div>
       <input type="hidden" name="children[${index}][student_class]" class="student-class-hidden-input" />
     `;
-    // Correction du bug : L'écouteur d'événement doit utiliser l'index actuel de l'élément (stocké dans `data-index`)
-    // plutôt que l'index capturé lors de la création (closure). Cela garantit que le bon champ caché est mis à jour
-    // même après la suppression d'un enfant du milieu de la liste.
+    
     const classSelects = entry.querySelectorAll('.class-level-select, .class-suffix-letter-select, .class-suffix-number-select');
     classSelects.forEach(select => select.addEventListener('change', (event) => updateHiddenClassInput(event.target.dataset.index)));
 

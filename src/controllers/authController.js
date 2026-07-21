@@ -311,14 +311,23 @@ exports.postRegister = async (req, res) => {
 
         // Si le rôle est PARENT et qu'il y a des enfants, on crée les liens.
         if (role === ROLES.PARENT && children && Array.isArray(children)) {
-            const childrenLinks = children.map(child => ({
-                parent_id: newUserId,
-                student_matricule: child.matricule,
-                student_first_name: child.first_name,
-                student_last_name: child.last_name,
-                student_class: child.student_class
-            })).filter(link => link.student_matricule); // Filtrer les entrées sans matricule
-            if (childrenLinks.length > 0) {
+            // Ajout d'une validation backend robuste pour s'assurer que toutes les données des enfants sont présentes.
+            // Cela empêche une erreur de base de données si le formulaire est soumis avec des champs vides.
+            for (const [index, child] of children.entries()) {
+                if (!child.matricule || !child.first_name || !child.last_name || !child.student_class) {
+                    req.flash('error_msg', `Veuillez remplir toutes les informations pour l'enfant ${index + 1}.`);
+                    return res.redirect('/register');
+                }
+            }
+
+            if (children.length > 0) {
+                const childrenLinks = children.map(child => ({
+                    parent_id: newUserId,
+                    student_matricule: child.matricule,
+                    student_first_name: child.first_name,
+                    student_last_name: child.last_name,
+                    student_class: child.student_class
+                }));
                 await trx('parent_student_links').insert(childrenLinks);
             }
         }
