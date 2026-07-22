@@ -176,22 +176,38 @@ const createStudent = async (req, res) => {
  * Affiche le formulaire pour compléter un dossier d'élève initié par un parent.
  */
 const renderCompleteStudentForm = async (req, res) => {
-    const { name, matricule, parent_id, parent_name, parent_phone_number } = req.query;
-    let { student_class } = req.query; // On le rend mutable pour pouvoir le corriger.
+    // On ne récupère que le nom et le matricule depuis l'URL.
+    const { name, matricule } = req.query;
 
     try {
-        // Correctif demandé : si la classe n'est pas pré-remplie (ex: "Non classé"),
-        // on la récupère depuis les "détails" de l'élève (la table de liaison).
-        // Cela rend le formulaire plus robuste si le paramètre de l'URL est manquant.
-        if (!student_class) {
-            const linkDetails = await db('parent_student_links').where({ student_matricule: matricule }).first();
-            if (linkDetails && linkDetails.student_class) {
-                student_class = linkDetails.student_class;
-            }
+        // On récupère les informations de liaison directement depuis la base de données
+        // pour garantir que les données (classe, nom du parent, téléphone) sont correctes.
+        const linkDetails = await db('parent_student_links as psl')
+            .join('users as p', 'psl.parent_id', 'p.id')
+            .where('psl.student_matricule', matricule)
+            .select(
+                'psl.student_class',
+                'psl.parent_id',
+                'p.name as parent_name',
+                'p.phone_number as parent_phone_number'
+            )
+            .orderBy('psl.created_at', 'asc')
+            .first();
+
+        if (!linkDetails) {
+            req.flash('error_msg', "Dossier de liaison introuvable pour cet élève.");
+            return res.redirect('/students');
         }
 
         // Créer un objet "student" partiel pour pré-remplir le formulaire
-        const student = { name, matricule, student_class, parent_id, parent_name, parent_phone_number, parent_profession: null };
+        const student = { 
+            name, matricule, 
+            student_class: linkDetails.student_class, 
+            parent_id: linkDetails.parent_id, 
+            parent_name: linkDetails.parent_name, 
+            parent_phone_number: linkDetails.parent_phone_number, 
+            parent_profession: null 
+        };
 
         res.render('studentForm', {
             title: `Compléter le dossier de ${name}`,
