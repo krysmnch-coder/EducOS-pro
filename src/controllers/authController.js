@@ -278,6 +278,13 @@ exports.postRegister = async (req, res) => {
         return res.redirect('/register');
     }
 
+    // Étape 0.2.1 : Valider la présence de l'établissement.
+    // C'est la cause la plus probable de l'erreur "générique" : si establishment_id est manquant,
+    // l'insertion dans la base de données échoue à cause d'une contrainte NOT NULL.
+    if (!establishment_id) {
+        req.flash('error_msg', 'Veuillez sélectionner un établissement valide.');
+        return res.redirect('/register');
+    }
     // Étape 0.3 : Valider les données des enfants AVANT la transaction
     if (role === ROLES.PARENT && children && Array.isArray(children)) {
         for (const [index, child] of children.entries()) {
@@ -313,9 +320,6 @@ exports.postRegister = async (req, res) => {
             email: email,
             password: hashedPassword,
             role: role,
-            // Correction : La base de données semble utiliser 0/1 pour le statut d'approbation.
-            // L'utilisation de `false` pouvait causer l'échec de l'insertion et le message d'erreur,
-            // même si les données étaient correctes. On utilise `0` pour être cohérent.
             approved: 0,
             establishment_id: establishment_id,
             subject: role === ROLES.PROFESSOR ? subject : null,
@@ -373,7 +377,7 @@ exports.postRegister = async (req, res) => {
             authIo.to(`user_${superAdmin.id}`).emit('shortcutHighlight', { shortcutKey: 'user_management' });
         });
     }
-
++
     req.flash('success_msg', 'Inscription réussie ! Votre compte est en attente d\'approbation.');
     res.redirect('/login');
 
