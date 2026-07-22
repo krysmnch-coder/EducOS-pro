@@ -280,11 +280,16 @@ Vous pouvez les lui communiquer. Cordialement.`;
  */
 const renderEditStudentForm = async (req, res) => {
     try {
-        const student = await userModel.getUserById(req.params.id);
-        if (!student || student.role !== ROLES.STUDENT) {
+        // On applique la même méthode de récupération directe que pour les autres formulaires
+        // pour garantir que les données affichées sont toujours les plus à jour.
+        const student = await db('users').where({ id: req.params.id, role: ROLES.STUDENT }).first();
+
+        if (!student) {
             req.flash('error_msg', 'Élève non trouvé.');
             return res.redirect('/students');
         }
+        // Les informations personnelles (classe, date de naissance, etc.) sont déjà
+        // dans l'objet 'student' et sont utilisées par la vue pour remplir le formulaire.
         const parents = await userModel.getApprovedParents(); // Tous les parents pour le dropdown
 
         // Récupérer les informations complètes des parents déjà liés pour les afficher.
@@ -346,24 +351,29 @@ const updateStudent = async (req, res) => {
                 name, matricule, student_class, date_of_birth, place_of_birth, address
             }, trx);
 
-            // 2. Mettre à jour les liens parents
-            // D'abord, supprimer les anciens liens pour cet élève (basé sur l'ancien matricule)
-            await trx('parent_student_links').where('student_matricule', student.matricule).del();
-            // Si le matricule a changé, on s'assure de nettoyer les liens potentiels sur le nouveau matricule aussi
-            if (matricule !== student.matricule) {
-                await trx('parent_student_links').where('student_matricule', matricule).del();
-            }
+            // 2. Mettre à jour les liens parents, SEULEMENT si le champ parent_ids est présent dans la requête.
+            // S'il est absent (undefined), cela signifie que l'utilisateur n'a pas touché à la sélection des parents,
+            // et nous ne devons PAS supprimer les liens existants. C'était la source du bug.
+            if (parent_ids !== undefined) {
+                // D'abord, supprimer les anciens liens pour cet élève (basé sur l'ancien matricule)
+                await trx('parent_student_links').where('student_matricule', student.matricule).del();
+                // Si le matricule a changé, on s'assure de nettoyer les liens potentiels sur le nouveau matricule aussi
+                if (matricule !== student.matricule) {
+                    await trx('parent_student_links').where('student_matricule', matricule).del();
+                }
 
-            // Créer les nouveaux liens
-            if (parent_ids && parent_ids.length > 0) {
-                const links = [].concat(parent_ids).map(parentId => ({
-                    parent_id: parentId,
-                    student_matricule: matricule,
-                    student_first_name: name.split(' ')[0] || '',
-                    student_last_name: name.split(' ').slice(1).join(' ') || '',
-                    student_class: student_class
-                }));
-                await trx('parent_student_links').insert(links);
+                // Créer les nouveaux liens. `parent_ids` peut être un tableau vide pour tout délier.
+                const parentIdsArray = [].concat(parent_ids || []);
+                if (parentIdsArray.length > 0) {
+                    const links = parentIdsArray.map(parentId => ({
+                        parent_id: parentId,
+                        student_matricule: matricule,
+                        student_first_name: name.split(' ')[0] || '',
+                        student_last_name: name.split(' ').slice(1).join(' ') || '',
+                        student_class: student_class
+                    }));
+                    await trx('parent_student_links').insert(links);
+                }
             }
         });
 
