@@ -144,16 +144,24 @@
             }
         });
 
-        // Ajoute un écouteur de clic sur chaque raccourci pour retirer la surbrillance
-        const shortcuts = document.querySelectorAll('.shortcut-link');
-        shortcuts.forEach(shortcut => {
-            shortcut.addEventListener('click', function() {
-                const card = this.querySelector('.dashboard-stat');
-                if (card && card.classList.contains('is-highlighted')) {
-                    card.classList.remove('is-highlighted');
+        // Logique de clic pour retirer la surbrillance (méthode corrigée avec délégation d'événement)
+        // On attache un seul écouteur au conteneur des raccourcis pour plus de robustesse.
+        const shortcutsContainer = document.querySelector('.themed-container');
+        if (shortcutsContainer) {
+            shortcutsContainer.addEventListener('click', function(event) {
+                // On cherche le lien (<a>) le plus proche de l'élément qui a été cliqué.
+                const clickedLink = event.target.closest('.shortcut-link');
+
+                // Si on a bien cliqué à l'intérieur d'un lien de raccourci...
+                if (clickedLink) {
+                    const card = clickedLink.querySelector('.dashboard-stat');
+                    // On ne retire la surbrillance que si la carte de CE raccourci est surlignée.
+                    if (card && card.classList.contains('is-highlighted')) {
+                        card.classList.remove('is-highlighted');
+                    }
                 }
             });
-        });
+        }
 
         socket.on('adminStatsUpdate', function(data) {
             if (currentUserData.role === 'SUPER_ADMIN' && data.superAdminStats) {
