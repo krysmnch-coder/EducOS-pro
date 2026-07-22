@@ -210,7 +210,7 @@ const renderCompleteStudentForm = async (req, res) => {
  * Finalise la création d'un compte élève et envoie une notification au parent.
  */
 const completeStudentRegistration = async (req, res) => {
-    const { name, matricule, parent_id, student_class, date_of_birth, place_of_birth, address } = req.body;
+    const { name, matricule, parent_id, student_class, date_of_birth, place_of_birth, address, parent_phone_number, parent_profession } = req.body;
     const creatorId = req.user.id; // L'expéditeur du message est l'utilisateur connecté (l'admin)
     try {
         const existingStudent = await userModel.getUserByMatricule(matricule);
@@ -223,15 +223,25 @@ const completeStudentRegistration = async (req, res) => {
         const hashedPassword = await bcrypt.hash(defaultPassword, 10);
         const email = `${matricule.toLowerCase().replace(/\s+/g, '')}@educos.local`;
 
-        // On ne touche pas à la table parent_student_links, le lien existe déjà.
-        // On crée juste l'utilisateur élève.
-        await userModel.createUser({
-            name, email, password: hashedPassword,
-            role: ROLES.STUDENT, approved: 1,
-            establishment_id: req.user.establishment_id, password_reset_required: true,
-            matricule, student_class, date_of_birth, place_of_birth, address,
-            created_by: creatorId,
-            avatar_url: '/img/user.png'
+        // Utilisation d'une transaction pour garantir que la mise à jour du parent et la création de l'élève sont atomiques.
+        await db.transaction(async trx => {
+            // 1. Mettre à jour les informations du parent si elles sont fournies
+            if (parent_id) {
+                await trx('users').where({ id: parent_id }).update({
+                    phone_number: parent_phone_number,
+                    profession: parent_profession
+                });
+            }
+
+            // 2. On crée l'utilisateur élève.
+            await userModel.createUser({
+                name, email, password: hashedPassword,
+                role: ROLES.STUDENT, approved: 1,
+                establishment_id: req.user.establishment_id, password_reset_required: true,
+                matricule, student_class, date_of_birth, place_of_birth, address,
+                created_by: creatorId,
+                avatar_url: '/img/user.png'
+            }, trx);
         });
 
         // --- Animation du raccourci ---
@@ -244,7 +254,7 @@ const completeStudentRegistration = async (req, res) => {
         // Envoyer un message interne au parent avec les identifiants
         const messageBody = `Bonjour,
 Le dossier de votre enfant ${name} a été finalisé par l'administration.
-Voici ses informations de connexion à la plateforme EducOS-pro :<br>
+Voici ses informations de connexion à la plateforme EducOS-pro :<br />
 - <strong>Identifiant :</strong> ${email}<br>
 - <strong>Mot de passe :</strong> ${defaultPassword}
 
@@ -284,8 +294,8 @@ const renderEditStudentForm = async (req, res) => {
         const linkedParents = await db('parent_student_links as psl')
             .join('users as u', 'psl.parent_id', 'u.id')
             .where('psl.student_matricule', student.matricule)
-            // La colonne 'profession' est retirée pour éviter un crash si elle n'existe pas dans la DB.
-            .select('u.id', 'u.name', 'u.phone_number');
+            // On réactive la récupération de la profession.
+            .select('u.id', 'u.name', 'u.phone_number', 'u.profession');
 
         // Extraire les IDs pour pré-sélectionner les options dans le dropdown.
         const linkedParentIds = linkedParents.map(p => p.id);

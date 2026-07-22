@@ -90,17 +90,16 @@
                         <!-- Pour la complétion, on affiche le parent initiateur unique et ses infos -->
                         <div class="mb-3">
                             <label class="form-label">Dossier initié par le parent</label>
-                            <div class="card bg-light">
-                                <div class="card-body">
-                                    <h6 class="card-title mb-1"><%= student.parent_name %></h6>
-                                    <div class="card-text small text-muted">
-                                        <p class="mb-1">
-                                            <strong>Téléphone :</strong> <%= student.parent_phone_number || 'Non renseigné' %>
-                                        </p>
-                                        <p class="mb-0">
-                                            <strong>Profession :</strong> <%= student.parent_profession || 'Non renseignée' %>
-                                        </p>
-                                    </div>
+                            <input type="text" class="form-control mb-2" value="<%= student.parent_name %>" disabled>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-2">
+                                    <label for="parent_phone_number" class="form-label small">Téléphone</label>
+                                    <input type="tel" class="form-control" id="parent_phone_number" name="parent_phone_number" value="<%= student.parent_phone_number || '' %>">
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <label for="parent_profession" class="form-label small">Profession</label>
+                                    <input type="text" class="form-control" id="parent_profession" name="parent_profession" value="<%= student.parent_profession || '' %>">
                                 </div>
                             </div>
                             <div class="form-text">Ce parent est déjà lié à l'élève.</div>
