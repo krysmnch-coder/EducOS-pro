@@ -176,38 +176,22 @@ const createStudent = async (req, res) => {
  * Affiche le formulaire pour compléter un dossier d'élève initié par un parent.
  */
 const renderCompleteStudentForm = async (req, res) => {
-    // On ne récupère que le nom et le matricule depuis l'URL.
-    const { name, matricule } = req.query;
+    const { name, matricule, parent_id, parent_name, parent_phone_number } = req.query;
+    let { student_class } = req.query; // On le rend mutable pour pouvoir le corriger.
 
     try {
-        // On récupère les informations de liaison directement depuis la base de données
-        // pour garantir que les données (classe, nom du parent, téléphone) sont correctes.
-        const linkDetails = await db('parent_student_links as psl')
-            .join('users as p', 'psl.parent_id', 'p.id')
-            .where('psl.student_matricule', matricule)
-            .select(
-                'psl.student_class',
-                'psl.parent_id',
-                'p.name as parent_name',
-                'p.phone_number as parent_phone_number'
-            )
-            .orderBy('psl.created_at', 'asc')
-            .first();
-
-        if (!linkDetails) {
-            req.flash('error_msg', "Dossier de liaison introuvable pour cet élève.");
-            return res.redirect('/students');
+        // Correctif demandé : si la classe n'est pas pré-remplie (ex: "Non classé"),
+        // on la récupère depuis les "détails" de l'élève (la table de liaison).
+        // Cela rend le formulaire plus robuste si le paramètre de l'URL est manquant.
+        if (!student_class) {
+            const linkDetails = await db('parent_student_links').where({ student_matricule: matricule }).first();
+            if (linkDetails && linkDetails.student_class) {
+                student_class = linkDetails.student_class;
+            }
         }
 
         // Créer un objet "student" partiel pour pré-remplir le formulaire
-        const student = { 
-            name, matricule, 
-            student_class: linkDetails.student_class, 
-            parent_id: linkDetails.parent_id, 
-            parent_name: linkDetails.parent_name, 
-            parent_phone_number: linkDetails.parent_phone_number, 
-            parent_profession: null 
-        };
+        const student = { name, matricule, student_class, parent_id, parent_name, parent_phone_number, parent_profession: null };
 
         res.render('studentForm', {
             title: `Compléter le dossier de ${name}`,
@@ -362,29 +346,24 @@ const updateStudent = async (req, res) => {
                 name, matricule, student_class, date_of_birth, place_of_birth, address
             }, trx);
 
-            // 2. Mettre à jour les liens parents, SEULEMENT si le champ parent_ids est présent dans la requête.
-            // S'il est absent, cela signifie que l'utilisateur n'a pas touché à la sélection des parents,
-            // et nous ne devons pas supprimer les liens existants.
-            if (parent_ids !== undefined) {
-                // D'abord, supprimer les anciens liens pour cet élève (basé sur l'ancien matricule)
-                await trx('parent_student_links').where('student_matricule', student.matricule).del();
-                // Si le matricule a changé, on s'assure de nettoyer les liens potentiels sur le nouveau matricule aussi
-                if (matricule !== student.matricule) {
-                    await trx('parent_student_links').where('student_matricule', matricule).del();
-                }
+            // 2. Mettre à jour les liens parents
+            // D'abord, supprimer les anciens liens pour cet élève (basé sur l'ancien matricule)
+            await trx('parent_student_links').where('student_matricule', student.matricule).del();
+            // Si le matricule a changé, on s'assure de nettoyer les liens potentiels sur le nouveau matricule aussi
+            if (matricule !== student.matricule) {
+                await trx('parent_student_links').where('student_matricule', matricule).del();
+            }
 
-                // Créer les nouveaux liens. `parent_ids` peut être un tableau vide pour tout délier.
-                const parentIdsArray = [].concat(parent_ids || []);
-                if (parentIdsArray.length > 0) {
-                    const links = parentIdsArray.map(parentId => ({
-                        parent_id: parentId,
-                        student_matricule: matricule,
-                        student_first_name: name.split(' ')[0] || '',
-                        student_last_name: name.split(' ').slice(1).join(' ') || '',
-                        student_class: student_class
-                    }));
-                    await trx('parent_student_links').insert(links);
-                }
+            // Créer les nouveaux liens
+            if (parent_ids && parent_ids.length > 0) {
+                const links = [].concat(parent_ids).map(parentId => ({
+                    parent_id: parentId,
+                    student_matricule: matricule,
+                    student_first_name: name.split(' ')[0] || '',
+                    student_last_name: name.split(' ').slice(1).join(' ') || '',
+                    student_class: student_class
+                }));
+                await trx('parent_student_links').insert(links);
             }
         });
 
