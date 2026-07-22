@@ -236,7 +236,14 @@ async function getStudentsAndPlaceholders() {
   const allPlaceholderLinks = await db('parent_student_links as psl')
     .join('users as p', 'psl.parent_id', 'p.id')
     .select(
-      'psl.*',
+      // Remplacement de 'psl.*' par une sélection explicite pour éviter les ambiguïtés de colonnes (ex: 'id')
+      // qui peuvent causer des erreurs avec SQLite.
+      'psl.student_matricule',
+      'psl.student_first_name',
+      'psl.student_last_name',
+      'psl.student_class',
+      'psl.parent_id',
+      'psl.created_at', // Nécessaire pour le tri
       'p.name as parent_name',
       'p.phone_number as parent_phone_number',
       'p.profession as parent_profession'
