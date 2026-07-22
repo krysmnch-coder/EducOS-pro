@@ -103,6 +103,20 @@
                             <div class="form-text">Ce(s) parent(s) est/sont déjà lié(s) à l'élève.</div>
                         </div>
                     <% } else { %>
+                        <!-- Affichage des parents déjà liés pour le mode édition -->
+                        <% if (typeof linkedParents !== 'undefined' && linkedParents.length > 0) { %>
+                            <div class="mb-3">
+                                <label class="form-label">Parent(s) actuellement lié(s)</label>
+                                <ul class="list-group">
+                                    <% linkedParents.forEach(parent => { %>
+                                        <li class="list-group-item"><%= parent.name %></li>
+                                    <% }) %>
+                                </ul>
+                            </div>
+                        <% } else { %>
+                            <div class="alert alert-info">Aucun parent n'est actuellement lié à cet élève.</div>
+                        <% } %>
+
                         <!-- Pour la création/modification, on peut lier un ou plusieurs parents existants -->
                         <div class="mb-3">
                             <div class="d-flex justify-content-between align-items-center mb-1">
