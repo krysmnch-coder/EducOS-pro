@@ -278,6 +278,21 @@ exports.postRegister = async (req, res) => {
         return res.redirect('/register');
     }
 
+    // Étape 0.3 : Valider les données des enfants AVANT la transaction
+    if (role === ROLES.PARENT && children && Array.isArray(children)) {
+        for (const [index, child] of children.entries()) {
+            const isRowPartiallyFilled = child.matricule || child.first_name || child.last_name || child.student_class;
+            const isRowFullyFilled = child.matricule && child.first_name && child.last_name && child.student_class;
+
+            // Si une ligne est partiellement remplie mais pas entièrement, c'est une erreur.
+            // Les lignes complètement vides sont simplement ignorées.
+            if (isRowPartiallyFilled && !isRowFullyFilled) {
+                req.flash('error_msg', `Veuillez remplir toutes les informations pour l'enfant ${index + 1}.`);
+                return res.redirect('/register');
+            }
+        }
+    }
+
     // Étape 1 : Vérifier si l'utilisateur existe déjà.
     // .first() récupère le premier résultat ou undefined, c'est très pratique.
     const existingUser = await db('users').where({ email: email }).first();
@@ -310,17 +325,11 @@ exports.postRegister = async (req, res) => {
 
         // Si le rôle est PARENT et qu'il y a des enfants, on crée les liens.
         if (role === ROLES.PARENT && children && Array.isArray(children)) {
-            // Ajout d'une validation backend robuste pour s'assurer que toutes les données des enfants sont présentes.
-            // Cela empêche une erreur de base de données si le formulaire est soumis avec des champs vides.
-            for (const [index, child] of children.entries()) {
-                if (!child.matricule || !child.first_name || !child.last_name || !child.student_class) {
-                    req.flash('error_msg', `Veuillez remplir toutes les informations pour l'enfant ${index + 1}.`);
-                    return res.redirect('/register');
-                }
-            }
+            // Filtrer les enfants pour ne garder que ceux qui sont complètement remplis.
+            const validChildren = children.filter(child => child.matricule && child.first_name && child.last_name && child.student_class);
 
-            if (children.length > 0) {
-                const childrenLinks = children.map(child => ({
+            if (validChildren.length > 0) {
+                const childrenLinks = validChildren.map(child => ({
                     parent_id: newUserId,
                     student_matricule: child.matricule,
                     student_first_name: child.first_name,
