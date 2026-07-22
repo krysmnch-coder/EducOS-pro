@@ -87,9 +87,8 @@ const createParentFromStudentForm = async (req, res) => {
             role: ROLES.PARENT, approved: 1, // Approuvé automatiquement
             establishment_id: establishmentId,
             phone_number: phone_number, // Enregistre le vrai numéro de téléphone
+            profession: profession,
             avatar_url: '/img/user.png'
-            // Le champ 'profession' n'est pas enregistré car il n'existe pas dans la table 'users'.
-            // Une migration de base de données serait nécessaire pour l'ajouter.
         });
         
         const newParentId = newUserIdObj.id || newUserIdObj;
@@ -178,23 +177,27 @@ const createStudent = async (req, res) => {
  * Affiche le formulaire pour compléter un dossier d'élève initié par un parent.
  */
 const renderCompleteStudentForm = async (req, res) => {
-    const { name, matricule, student_class, parent_id, parent_name } = req.query;
-
-    // Créer un objet "student" partiel pour pré-remplir le formulaire
-    const student = { name, matricule, student_class, parent_id, parent_name };
+    const { name, matricule, parent_id, parent_name, parent_phone_number, parent_profession } = req.query;
+    let { student_class } = req.query; // On le rend mutable pour pouvoir le corriger.
 
     try {
-        // Récupérer tous les parents liés à ce matricule pour un affichage complet
-        const linkedParents = await db('parent_student_links as psl')
-            .join('users as u', 'psl.parent_id', 'u.id')
-            .where('psl.student_matricule', matricule)
-            .select('u.name');
+        // Correctif demandé : si la classe n'est pas pré-remplie (ex: "Non classé"),
+        // on la récupère depuis les "détails" de l'élève (la table de liaison).
+        // Cela rend le formulaire plus robuste si le paramètre de l'URL est manquant.
+        if (!student_class) {
+            const linkDetails = await db('parent_student_links').where({ student_matricule: matricule }).first();
+            if (linkDetails && linkDetails.student_class) {
+                student_class = linkDetails.student_class;
+            }
+        }
+
+        // Créer un objet "student" partiel pour pré-remplir le formulaire
+        const student = { name, matricule, student_class, parent_id, parent_name, parent_phone_number, parent_profession };
 
         res.render('studentForm', {
             title: `Compléter le dossier de ${name}`,
             student: student,
-            isCompletion: true, // Indique au formulaire qu'il s'agit d'une complétion
-            linkedParents: linkedParents // Passe la liste des parents à la vue
+            isCompletion: true // Indique au formulaire qu'il s'agit d'une complétion
         });
     } catch (error) {
         console.error("Erreur lors du chargement du formulaire de complétion:", error);
@@ -275,15 +278,24 @@ const renderEditStudentForm = async (req, res) => {
             req.flash('error_msg', 'Élève non trouvé.');
             return res.redirect('/students');
         }
-        const parents = await userModel.getApprovedParents();
-        const linkedParentIds = await userModel.getLinkedParentIdsForStudent(student.matricule);
+        const parents = await userModel.getApprovedParents(); // Tous les parents pour le dropdown
+
+        // Récupérer les informations complètes des parents déjà liés pour les afficher.
+        const linkedParents = await db('parent_student_links as psl')
+            .join('users as u', 'psl.parent_id', 'u.id')
+            .where('psl.student_matricule', student.matricule)
+            .select('u.id', 'u.name', 'u.phone_number', 'u.profession');
+
+        // Extraire les IDs pour pré-sélectionner les options dans le dropdown.
+        const linkedParentIds = linkedParents.map(p => p.id);
 
         res.render('studentForm', {
             title: `Modifier le dossier de ${student.name}`,
             student: student,
             isCompletion: false,
             parents: parents,
-            linkedParentIds: linkedParentIds
+            linkedParentIds: linkedParentIds,
+            linkedParents: linkedParents // On passe aussi les objets parents complets à la vue.
         });
     } catch (error) {
         console.error("Erreur lors du chargement du formulaire de modification:", error);
