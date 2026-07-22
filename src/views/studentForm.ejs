@@ -89,9 +89,18 @@
                     <% if (isCompletion) { %>
                         <!-- Pour la complétion, le parent est fixe et non modifiable -->
                         <div class="mb-3">
-                            <label class="form-label">Parent initiateur du dossier</label>
-                            <input type="text" class="form-control" value="<%= student.parent_name %>" disabled>
-                            <div class="form-text">Ce parent est déjà lié à l'élève.</div>
+                            <label class="form-label">Parent(s) initiateur(s) du dossier</label>
+                            <% if (typeof linkedParents !== 'undefined' && linkedParents.length > 0) { %>
+                                <ul class="list-group">
+                                    <% linkedParents.forEach(parent => { %>
+                                        <li class="list-group-item"><%= parent.name %></li>
+                                    <% }) %>
+                                </ul>
+                            <% } else { %>
+                                <!-- Fallback si la liste n'est pas disponible, affiche le parent de la query -->
+                                <input type="text" class="form-control" value="<%= student.parent_name %>" disabled>
+                            <% } %>
+                            <div class="form-text">Ce(s) parent(s) est/sont déjà lié(s) à l'élève.</div>
                         </div>
                     <% } else { %>
                         <!-- Pour la création/modification, on peut lier un ou plusieurs parents existants -->

@@ -231,18 +231,20 @@ async function getStudentsAndPlaceholders() {
   const realStudentMatricules = realStudents.map(s => s.matricule).filter(Boolean);
 
   // 2. Récupérer les dossiers à compléter (liens) pour les matricules qui N'ONT PAS de compte complet.
-  const placeholderLinks = await db('parent_student_links as psl')
-    .join('users as p', 'psl.parent_id', 'p.id') // Jointure pour obtenir le nom du parent
-    .whereNotIn('psl.student_matricule', realStudentMatricules)
-    .distinct('psl.student_matricule') // Éviter les doublons si plusieurs parents inscrivent le même enfant
+  // L'ancienne requête avec DISTINCT pouvait retourner des données incohérentes (ex: la classe d'un parent, le nom d'un autre).
+  // On utilise une sous-requête avec une fonction de fenêtrage pour sélectionner de manière déterministe
+  // la première demande de liaison pour chaque élève (la plus ancienne), ce qui garantit que la classe affichée est cohérente.
+  const subquery = db('parent_student_links as psl')
+    .join('users as p', 'psl.parent_id', 'p.id')
     .select(
-      'psl.student_first_name',
-      'psl.student_last_name',
-      'psl.student_matricule',
-      'psl.student_class',
-      'psl.parent_id',
-      'p.name as parent_name'
-    );
+      'psl.*',
+      'p.name as parent_name',
+      db.raw('ROW_NUMBER() OVER (PARTITION BY psl.student_matricule ORDER BY psl.created_at ASC) as rn')
+    )
+    .whereNotIn('psl.student_matricule', realStudentMatricules)
+    .as('ranked_links');
+
+  const placeholderLinks = await db.from(subquery).where('rn', 1);
 
   // 3. Transformer les données des dossiers à compléter pour qu'elles correspondent à la structure attendue.
   const placeholderStudents = placeholderLinks.map(p => ({

@@ -177,17 +177,30 @@ const createStudent = async (req, res) => {
 /**
  * Affiche le formulaire pour compléter un dossier d'élève initié par un parent.
  */
-const renderCompleteStudentForm = (req, res) => {
+const renderCompleteStudentForm = async (req, res) => {
     const { name, matricule, student_class, parent_id, parent_name } = req.query;
 
     // Créer un objet "student" partiel pour pré-remplir le formulaire
     const student = { name, matricule, student_class, parent_id, parent_name };
 
-    res.render('studentForm', {
-        title: `Compléter le dossier de ${name}`,
-        student: student,
-        isCompletion: true // Indique au formulaire qu'il s'agit d'une complétion
-    });
+    try {
+        // Récupérer tous les parents liés à ce matricule pour un affichage complet
+        const linkedParents = await db('parent_student_links as psl')
+            .join('users as u', 'psl.parent_id', 'u.id')
+            .where('psl.student_matricule', matricule)
+            .select('u.name');
+
+        res.render('studentForm', {
+            title: `Compléter le dossier de ${name}`,
+            student: student,
+            isCompletion: true, // Indique au formulaire qu'il s'agit d'une complétion
+            linkedParents: linkedParents // Passe la liste des parents à la vue
+        });
+    } catch (error) {
+        console.error("Erreur lors du chargement du formulaire de complétion:", error);
+        req.flash('error_msg', "Une erreur est survenue.");
+        res.redirect('/students');
+    }
 };
 
 /**
