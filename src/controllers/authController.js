@@ -313,7 +313,10 @@ exports.postRegister = async (req, res) => {
             email: email,
             password: hashedPassword,
             role: role,
-            approved: false,
+            // Correction : La base de données semble utiliser 0/1 pour le statut d'approbation.
+            // L'utilisation de `false` pouvait causer l'échec de l'insertion et le message d'erreur,
+            // même si les données étaient correctes. On utilise `0` pour être cohérent.
+            approved: 0,
             establishment_id: establishment_id,
             subject: role === ROLES.PROFESSOR ? subject : null,
             student_class: role === ROLES.STUDENT ? student_class : null,
