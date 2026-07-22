@@ -25,8 +25,8 @@
             <div class="row">
                 <% widgets.forEach(widget => { %>
                 <div class="col-xl-3 col-md-6 mb-4">
-                    <a href="<%= widget.link %>" class="text-decoration-none shortcut-link" data-shortcut-key="<%= widget.key %>">
-                    <div class="card dashboard-stat h-100">
+                    <a href="<%= widget.link %>" class="text-decoration-none shortcut-link">
+                    <div class="card dashboard-stat h-100" data-shortcut-key="<%= widget.key %>">
                         <div class="card-body text-center">
                         <div class="stat-icon mb-3">
                             <i data-feather="<%= widget.icon %>"></i>
@@ -137,16 +137,22 @@
 
         socket.on('shortcutHighlight', function(data) {
             if (data.shortcutKey) {
-                const shortcut = document.querySelector(`.shortcut-link[data-shortcut-key="${data.shortcutKey}"]`);
-                if (shortcut) {
-                    const card = shortcut.querySelector('.dashboard-stat');
-                    if (card) {
-                        card.classList.add('is-pulsing');
-                        // Retirer la classe après l'animation pour qu'elle puisse rejouer
-                        setTimeout(() => { card.classList.remove('is-pulsing'); }, 1200); // Durée de l'animation
-                    }
+                const card = document.querySelector(`.dashboard-stat[data-shortcut-key="${data.shortcutKey}"]`);
+                if (card) {
+                    card.classList.add('is-highlighted'); // Ajoute la classe de surbrillance persistante
                 }
             }
+        });
+
+        // Ajoute un écouteur de clic sur chaque raccourci pour retirer la surbrillance
+        const shortcuts = document.querySelectorAll('.shortcut-link');
+        shortcuts.forEach(shortcut => {
+            shortcut.addEventListener('click', function() {
+                const card = this.querySelector('.dashboard-stat');
+                if (card && card.classList.contains('is-highlighted')) {
+                    card.classList.remove('is-highlighted');
+                }
+            });
         });
 
         socket.on('adminStatsUpdate', function(data) {

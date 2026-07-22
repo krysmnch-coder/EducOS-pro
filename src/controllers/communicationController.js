@@ -2,6 +2,7 @@ const communicationModel = require('../models/communicationModel');
 const userModel = require('../models/userModel');
 const notificationModel = require('../models/notificationModel');
 const { ROLES } = require('../../constants');
+const db = require('../models/db');
 
 const listMessages = async (req, res) => {
   try {
@@ -46,34 +47,41 @@ const sendMessage = async (req, res) => {
       return res.redirect('/communications');
     }
 
-    const result = await communicationModel.sendCommunication({
+    const { recipientIds } = await communicationModel.sendCommunication({
       senderId: sender.id,
       subject,
       message,
       ...recipientInfo
     });
 
-    // Créer les notifications pour les destinataires
-    const notificationTitle = `Nouveau message de ${sender.name}`;
-    const notificationLink = '/communications';
+    // Créer les notifications et animer les raccourcis pour les destinataires
+    if (recipientIds && recipientIds.length > 0) {
+        const notificationTitle = `Nouveau message de ${sender.name}`;
+        const notificationLink = '/communications';
 
-    if (result.recipientType === 'user') {
-        await notificationModel.createNotification({
-            user_id: result.recipientUserId,
+        // 1. Créer les notifications en masse
+        const notifications = recipientIds.map(id => ({
+            user_id: id,
             type: 'message',
             title: notificationTitle,
             body: subject,
             link: notificationLink
-        });
-    } else if (result.recipientType === 'role') {
-        // 'user_role' peut être 'all' ou un rôle spécifique
-        await notificationModel.createNotification({
-            user_role: result.recipientRole,
-            type: 'message',
-            title: notificationTitle,
-            body: subject,
-            link: notificationLink
-        });
+        }));
+        await notificationModel.createBulkNotifications(notifications);
+
+        // 2. Animer le raccourci pour les administrateurs qui ont reçu le message
+        const authIo = req.app.get('authIo');
+        if (authIo) {
+            const admins = await db('users')
+                .whereIn('id', recipientIds)
+                .andWhere(function() {
+                    this.where('role', ROLES.ADMINISTRATOR).orWhere('role', ROLES.SUPER_ADMIN)
+                });
+            
+            admins.forEach(admin => {
+                authIo.to(`user_${admin.id}`).emit('shortcutHighlight', { shortcutKey: 'mass_communication' });
+            });
+        }
     }
 
     req.flash('success_msg', 'Votre communication a été envoyée avec succès.');

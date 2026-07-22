@@ -38,7 +38,7 @@ async function sendCommunication({ senderId, subject, message, recipientType, re
       await trx('communication_recipients').insert(recipientsData);
     }
 
-    return { communicationId, recipientType, recipientRole, recipientUserId: recipientId };
+    return { communicationId, recipientIds };
   });
 }
 

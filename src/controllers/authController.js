@@ -372,7 +372,7 @@ exports.postRegister = async (req, res) => {
         });
 
         // Notifier tous les super admins.
-        const superAdmins = await userModel.getUsersByRole(ROLES.SUPER_ADMIN);
+        const superAdmins = await db('users').where({ role: ROLES.SUPER_ADMIN });
         superAdmins.forEach(superAdmin => {
             authIo.to(`user_${superAdmin.id}`).emit('shortcutHighlight', { shortcutKey: 'user_management' });
         });

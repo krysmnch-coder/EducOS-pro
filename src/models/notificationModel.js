@@ -38,6 +38,17 @@ async function createNotification({ user_id = null, user_role = 'all', type, tit
   }
 }
 
+/**
+ * Crée plusieurs notifications en une seule requête.
+ * @param {Array<object>} notifications - Un tableau d'objets de notification à insérer.
+ */
+async function createBulkNotifications(notifications) {
+  if (!notifications || notifications.length === 0) {
+    return;
+  }
+  return db('notifications').insert(notifications);
+}
+
 function getNotificationsForUser(user) {
   return db('notifications')
     .where({ user_id: user.id })
@@ -79,6 +90,7 @@ function createSystemNotification({ userId = null, userRole = 'all', type, title
 
 module.exports = {
   createNotification,
+  createBulkNotifications,
   createSystemNotification,
   getNotificationsForUser,
   getUnreadNotificationCountForUser,
