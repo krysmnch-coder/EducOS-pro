@@ -231,22 +231,29 @@ async function getStudentsAndPlaceholders() {
   const realStudentMatricules = realStudents.map(s => s.matricule).filter(Boolean);
 
   // 2. Récupérer les dossiers à compléter (liens) pour les matricules qui N'ONT PAS de compte complet.
-  // L'ancienne requête avec DISTINCT pouvait retourner des données incohérentes (ex: la classe d'un parent, le nom d'un autre).
-  // On utilise une sous-requête avec une fonction de fenêtrage pour sélectionner de manière déterministe
-  // la première demande de liaison pour chaque élève (la plus ancienne), ce qui garantit que la classe affichée est cohérente.
-  const subquery = db('parent_student_links as psl')
+  // La requête utilise une jointure et un tri, mais évite les fonctions de fenêtrage (window functions)
+  // qui ne sont pas supportées par toutes les versions de SQLite, ce qui causait l'erreur "Impossible de charger la liste des élèves".
+  const allPlaceholderLinks = await db('parent_student_links as psl')
     .join('users as p', 'psl.parent_id', 'p.id')
     .select(
       'psl.*',
       'p.name as parent_name',
       'p.phone_number as parent_phone_number',
-      'p.profession as parent_profession',
-      db.raw('ROW_NUMBER() OVER (PARTITION BY psl.student_matricule ORDER BY psl.created_at ASC) as rn')
+      'p.profession as parent_profession'
     )
     .whereNotIn('psl.student_matricule', realStudentMatricules)
-    .as('ranked_links');
+    .orderBy('psl.created_at', 'asc');
 
-  const placeholderLinks = await db.from(subquery).where('rn', 1);
+  // On filtre en JavaScript pour ne garder que la première entrée pour chaque matricule,
+  // ce qui est l'équivalent de la logique de fenêtrage précédente mais compatible avec SQLite.
+  const seenMatricules = new Set();
+  const placeholderLinks = allPlaceholderLinks.filter(link => {
+      if (seenMatricules.has(link.student_matricule)) {
+          return false;
+      }
+      seenMatricules.add(link.student_matricule);
+      return true;
+  });
 
   // 3. Transformer les données des dossiers à compléter pour qu'elles correspondent à la structure attendue.
   const placeholderStudents = placeholderLinks.map(p => ({
