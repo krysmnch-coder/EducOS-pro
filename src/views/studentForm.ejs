@@ -103,36 +103,21 @@
                     <% } else { %>
                         <!-- Affichage des parents déjà liés pour le mode édition -->
                         <% if (typeof linkedParents !== 'undefined' && linkedParents.length > 0) { %>
-                            <% const initiatingParent = linkedParents[0]; %>
-                            <% const otherParents = linkedParents.slice(1); %>
-
-                            <!-- Afficher le parent initiateur -->
                             <div class="mb-3">
-                                <label class="form-label">Dossier initié par</label>
-                                <div class="card">
-                                    <div class="card-body">
-                                        <h6 class="card-title mb-1"><%= initiatingParent.name %></h6>
-                                        <p class="card-text small text-muted mb-0">
-                                            <strong>Téléphone :</strong> <%= initiatingParent.phone_number || 'Non renseigné' %>
-                                        </p>
-                                    </div>
+                                <label class="form-label">Parent(s) actuellement lié(s)</label>
+                                <div class="list-group">
+                                    <% linkedParents.forEach(parent => { %>
+                                        <div class="list-group-item">
+                                            <div class="d-flex w-100 justify-content-between">
+                                                <h6 class="mb-1"><%= parent.name %></h6>
+                                            </div>
+                                            <p class="mb-1">
+                                                <small><strong>Téléphone :</strong> <%= parent.phone_number || 'Non renseigné' %></small>
+                                            </p>
+                                        </div>
+                                    <% }) %>
                                 </div>
                             </div>
-
-                            <!-- Afficher les autres parents s'il y en a -->
-                            <% if (otherParents.length > 0) { %>
-                                <div class="mb-3">
-                                    <label class="form-label">Autres parents liés</label>
-                                    <div class="list-group">
-                                        <% otherParents.forEach(parent => { %>
-                                            <div class="list-group-item">
-                                                <h6 class="mb-1"><%= parent.name %></h6>
-                                                <p class="mb-1"><small><strong>Téléphone :</strong> <%= parent.phone_number || 'Non renseigné' %></small></p>
-                                            </div>
-                                        <% }) %>
-                                        </div>
-                                </div>
-                            <% } %>
                         <% } else { %>
                             <div class="alert alert-info">Aucun parent n'est actuellement lié à cet élève.</div>
                         <% } %>
