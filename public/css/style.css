@@ -313,18 +313,18 @@ body { /* Ceci doit être ajusté en fonction de la hauteur réelle de la navbar
     animation: pulse-animation 1.2s ease-in-out;
 }
 
-/* NOUVEAU: Style pour la surbrillance persistante jusqu'au clic */
+/* Style pour la surbrillance persistante jusqu'au clic */
 .dashboard-stat.is-highlighted {
-    border-color: rgba(var(--bs-primary-rgb), 0.6);
-    animation: slow-glow 2.5s infinite alternate;
+    border-color: rgba(var(--bs-primary-rgb), 0.7); /* Bordure plus visible */
+    animation: slow-glow 1.8s infinite alternate; /* Animation plus rapide */
 }
 
 @keyframes slow-glow {
     from {
-        box-shadow: 0 0 8px rgba(var(--bs-primary-rgb), 0.2);
+        box-shadow: 0 0 10px rgba(var(--bs-primary-rgb), 0.3);
     }
     to {
-        box-shadow: 0 0 25px rgba(var(--bs-primary-rgb), 0.5);
+        box-shadow: 0 0 30px rgba(var(--bs-primary-rgb), 0.6); /* Lueur plus intense */
     }
 }
 
