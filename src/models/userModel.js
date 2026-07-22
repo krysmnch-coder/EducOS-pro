@@ -233,21 +233,28 @@ async function getStudentsAndPlaceholders() {
   // 2. Récupérer les dossiers à compléter (liens) pour les matricules qui N'ONT PAS de compte complet.
   // La requête utilise une jointure et un tri, mais évite les fonctions de fenêtrage (window functions)
   // qui ne sont pas supportées par toutes les versions de SQLite, ce qui causait l'erreur "Impossible de charger la liste des élèves".
+
+  // CORRECTIF DÉFINITIF : Vérifier si la colonne 'profession' existe avant de l'utiliser pour éviter un crash.
+  const hasProfessionColumn = await db.schema.hasColumn('users', 'profession');
+
+  const selectColumns = [
+    'psl.student_matricule',
+    'psl.student_first_name',
+    'psl.student_last_name',
+    'psl.student_class',
+    'psl.parent_id',
+    'psl.created_at', // Nécessaire pour le tri
+    'p.name as parent_name',
+    'p.phone_number as parent_phone_number',
+  ];
+
+  if (hasProfessionColumn) {
+    selectColumns.push('p.profession as parent_profession');
+  }
+
   const allPlaceholderLinks = await db('parent_student_links as psl')
     .join('users as p', 'psl.parent_id', 'p.id')
-    .select(
-      // Remplacement de 'psl.*' par une sélection explicite pour éviter les ambiguïtés de colonnes (ex: 'id')
-      // qui peuvent causer des erreurs avec SQLite.
-      'psl.student_matricule',
-      'psl.student_first_name',
-      'psl.student_last_name',
-      'psl.student_class',
-      'psl.parent_id',
-      'psl.created_at', // Nécessaire pour le tri
-      'p.name as parent_name',
-      'p.phone_number as parent_phone_number',
-      'p.profession as parent_profession'
-    )
+    .select(selectColumns)
     .whereNotIn('psl.student_matricule', realStudentMatricules)
     .orderBy('psl.created_at', 'asc');
 
@@ -272,7 +279,7 @@ async function getStudentsAndPlaceholders() {
     parent_id: p.parent_id,
     parent_name: p.parent_name,
     parent_phone_number: p.parent_phone_number,
-    parent_profession: p.parent_profession,
+    parent_profession: p.parent_profession || null, // S'assure que la propriété existe même si la colonne est absente
     avatar_url: '/img/user.png'
     // Ajoutez d'autres champs avec des valeurs par défaut si nécessaire pour la vue
   }));

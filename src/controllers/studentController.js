@@ -225,12 +225,18 @@ const completeStudentRegistration = async (req, res) => {
 
         // Utilisation d'une transaction pour garantir que la mise à jour du parent et la création de l'élève sont atomiques.
         await db.transaction(async trx => {
-            // 1. Mettre à jour les informations du parent si elles sont fournies
+            // 1. Mettre à jour les informations du parent si elles sont fournies.
+            // CORRECTIF DÉFINITIF : On ne met à jour la profession que si la colonne existe.
             if (parent_id) {
-                await trx('users').where({ id: parent_id }).update({
-                    phone_number: parent_phone_number,
-                    profession: parent_profession
-                });
+                const parentUpdateData = { phone_number: parent_phone_number };
+                
+                // Vérifier si la colonne 'profession' existe avant de tenter de la mettre à jour.
+                const hasProfessionColumn = await trx.schema.hasColumn('users', 'profession');
+                if (hasProfessionColumn) {
+                    parentUpdateData.profession = parent_profession;
+                }
+
+                await trx('users').where({ id: parent_id }).update(parentUpdateData);
             }
 
             // 2. On crée l'utilisateur élève.
@@ -291,11 +297,17 @@ const renderEditStudentForm = async (req, res) => {
         const parents = await userModel.getApprovedParents(); // Tous les parents pour le dropdown
 
         // Récupérer les informations complètes des parents déjà liés pour les afficher.
+        // CORRECTIF DÉFINITIF : Vérifier si la colonne 'profession' existe avant de la sélectionner.
+        const hasProfessionColumn = await db.schema.hasColumn('users', 'profession');
+        const selectColumns = ['u.id', 'u.name', 'u.phone_number'];
+        if (hasProfessionColumn) {
+            selectColumns.push('u.profession');
+        }
+
         const linkedParents = await db('parent_student_links as psl')
             .join('users as u', 'psl.parent_id', 'u.id')
             .where('psl.student_matricule', student.matricule)
-            // On réactive la récupération de la profession.
-            .select('u.id', 'u.name', 'u.phone_number', 'u.profession');
+            .select(selectColumns);
 
         // Extraire les IDs pour pré-sélectionner les options dans le dropdown.
         const linkedParentIds = linkedParents.map(p => p.id);
