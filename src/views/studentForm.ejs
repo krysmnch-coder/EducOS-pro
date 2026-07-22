@@ -88,7 +88,6 @@
 
                     <% if (isCompletion) { %>
                         <!-- Pour la complétion, le parent est fixe et non modifiable -->
-                        <!-- Pour la complétion, on affiche le parent initiateur unique et ses infos -->
                         <div class="mb-3">
                             <label class="form-label">Parent(s) initiateur(s) du dossier</label>
                             <% if (typeof linkedParents !== 'undefined' && linkedParents.length > 0) { %>
@@ -102,50 +101,8 @@
                                 <input type="text" class="form-control" value="<%= student.parent_name %>" disabled>
                             <% } %>
                             <div class="form-text">Ce(s) parent(s) est/sont déjà lié(s) à l'élève.</div>
-                            <label class="form-label">Dossier initié par le parent</label>
-                            <div class="card bg-light">
-                                <div class="card-body">
-                                    <h6 class="card-title mb-1"><%= student.parent_name %></h6>
-                                    <div class="card-text small text-muted">
-                                        <p class="mb-1">
-                                            <strong>Téléphone :</strong> <%= student.parent_phone_number || 'Non renseigné' %>
-                                        </p>
-                                        <p class="mb-0">
-                                            <strong>Profession :</strong> <%= student.parent_profession || 'Non renseignée' %>
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-text">Ce parent est déjà lié à l'élève.</div>
                         </div>
                     <% } else { %>
-                        <!-- Affichage des parents déjà liés pour le mode édition -->
-                        <% if (typeof linkedParents !== 'undefined' && linkedParents.length > 0) { %>
-                            <div class="mb-3">
-                                <label class="form-label">Parent(s) actuellement lié(s)</label>
-                                <ul class="list-group">
-                                <div class="list-group">
-                                    <% linkedParents.forEach(parent => { %>
-                                        <li class="list-group-item"><%= parent.name %></li>
-                                        <div class="list-group-item">
-                                            <div class="d-flex w-100 justify-content-between">
-                                                <h6 class="mb-1"><%= parent.name %></h6>
-                                            </div>
-                                            <p class="mb-1">
-                                                <small><strong>Téléphone :</strong> <%= parent.phone_number || 'Non renseigné' %></small>
-                                            </p>
-                                            <p class="mb-0">
-                                                <small><strong>Profession :</strong> <%= parent.profession || 'Non renseignée' %></small>
-                                            </p>
-                                        </div>
-                                    <% }) %>
-                                </ul>
-                                </div>
-                            </div>
-                        <% } else { %>
-                            <div class="alert alert-info">Aucun parent n'est actuellement lié à cet élève.</div>
-                        <% } %>
-
                         <!-- Pour la création/modification, on peut lier un ou plusieurs parents existants -->
                         <div class="mb-3">
                             <div class="d-flex justify-content-between align-items-center mb-1">
