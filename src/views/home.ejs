@@ -416,6 +416,44 @@
       html[data-theme="dark"] #themeToggle .sun-icon { display: block; }
 
       /* Bouton Retour en Haut */
+      .back-to-top-btn {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 50px;
+        height: 50px;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        cursor: pointer;
+        transition: opacity 0.3s ease, transform 0.3s ease, background-color 0.3s ease;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transform: translateY(20px);
+        pointer-events: none;
+        text-decoration: none;
+      }
+      .back-to-top-btn.visible {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto;
+      }
+      .back-to-top-btn:hover {
+        transform: scale(1.1);
+      }
+      html[data-theme="light"] .back-to-top-btn {
+        background: rgba(255, 255, 255, 0.75); color: #1a1a2e; border: 1px solid rgba(0,0,0,0.08);
+      }
+      html[data-theme="light"] .back-to-top-btn:hover { background: rgba(255, 255, 255, 0.9); color: #0d6efd; }
+      html[data-theme="dark"] .back-to-top-btn {
+        background: rgba(22, 27, 34, 0.75); color: #e0e0e0; border: 1px solid rgba(255,255,255,0.1);
+      }
+      html[data-theme="dark"] .back-to-top-btn:hover { background: rgba(22, 27, 34, 0.9); color: #ffffff; }
+
 
       /* Animations */
       @keyframes fadeInUp {
@@ -783,6 +821,25 @@
           // Fallback pour les navigateurs plus anciens qui ne supportent pas IntersectionObserver
           animatedElements.forEach(el => {
             el.classList.add('is-visible');
+          });
+        }
+
+        // Logique pour le bouton "Retour en Haut"
+        const backToTopBtn = document.getElementById('backToTopBtn');
+        if (backToTopBtn) {
+          // Afficher/masquer le bouton au défilement
+          window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) { // Afficher après 300px de défilement
+              backToTopBtn.classList.add('visible');
+            } else {
+              backToTopBtn.classList.remove('visible');
+            }
+          });
+
+          // Remonter en haut au clic
+          backToTopBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
           });
         }
       });
