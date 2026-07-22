@@ -62,17 +62,21 @@ function generateSecurePassword(length = 8) {
  * Le compte est automatiquement approuvé.
  */
 const createParentFromStudentForm = async (req, res) => {
-    const { name, email } = req.body;
+    const { name, phone_number, profession } = req.body; // profession est récupéré mais non utilisé pour l'instant
     const establishmentId = req.user.establishment_id;
 
-    if (!name || !email) {
-        return res.status(400).json({ success: false, message: 'Le nom et l\'email sont requis.' });
+    if (!name || !phone_number) {
+        return res.status(400).json({ success: false, message: 'Le nom et le numéro de téléphone sont requis.' });
     }
 
     try {
+        // Création d'un email factice et unique pour permettre la connexion,
+        // puisque le formulaire ne demande que le numéro de téléphone.
+        const email = `${phone_number.replace(/\s+/g, '')}@educos.parent.local`;
+
         const existingUser = await userModel.getUserByEmail(email);
         if (existingUser) {
-            return res.status(409).json({ success: false, message: 'Cette adresse e-mail est déjà utilisée.' });
+            return res.status(409).json({ success: false, message: 'Un utilisateur avec un identifiant similaire (basé sur le numéro de téléphone) existe déjà.' });
         }
 
         const defaultPassword = generateSecurePassword(8);
@@ -82,7 +86,10 @@ const createParentFromStudentForm = async (req, res) => {
             name, email, password: hashedPassword,
             role: ROLES.PARENT, approved: 1, // Approuvé automatiquement
             establishment_id: establishmentId,
+            phone_number: phone_number, // Enregistre le vrai numéro de téléphone
             avatar_url: '/img/user.png'
+            // Le champ 'profession' n'est pas enregistré car il n'existe pas dans la table 'users'.
+            // Une migration de base de données serait nécessaire pour l'ajouter.
         });
         
         const newParentId = newUserIdObj.id || newUserIdObj;

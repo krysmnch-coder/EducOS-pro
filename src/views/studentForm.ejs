@@ -154,8 +154,12 @@
                     <input type="text" class="form-control" id="new-parent-name" required>
                 </div>
                 <div class="mb-3">
-                    <label for="new-parent-email" class="form-label">Adresse e-mail</label>
-                    <input type="email" class="form-control" id="new-parent-email" required>
+                    <label for="new-parent-phone" class="form-label">Numéro de téléphone</label>
+                    <input type="tel" class="form-control" id="new-parent-phone" required>
+                </div>
+                <div class="mb-3">
+                    <label for="new-parent-profession" class="form-label">Profession</label>
+                    <input type="text" class="form-control" id="new-parent-profession">
                 </div>
             </form>
             <div id="new-parent-credentials" class="alert alert-success" style="display: none;"></div>
@@ -202,14 +206,14 @@
                 const alertEl = document.getElementById('add-parent-alert');
                 const credentialsEl = document.getElementById('new-parent-credentials');
                 const nameInput = document.getElementById('new-parent-name');
-                const emailInput = document.getElementById('new-parent-email');
 
                 saveParentBtn.addEventListener('click', async () => {
                     const name = nameInput.value.trim();
-                    const email = emailInput.value.trim();
+                    const phone_number = document.getElementById('new-parent-phone').value.trim();
+                    const profession = document.getElementById('new-parent-profession').value.trim();
 
-                    if (!name || !email) {
-                        showAlert('Veuillez remplir le nom et l\'email.');
+                    if (!name || !phone_number) {
+                        showAlert('Veuillez remplir le nom et le numéro de téléphone.');
                         return;
                     }
                     
@@ -220,7 +224,7 @@
                         const response = await fetch('/students/create-parent', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                            body: JSON.stringify({ name, email })
+                            body: JSON.stringify({ name, phone_number, profession })
                         });
 
                         const result = await response.json();
@@ -235,9 +239,9 @@
                         
                         credentialsEl.innerHTML = `
                             <strong>Succès !</strong> Le compte a été créé.<br>
-                            <strong>Identifiant :</strong> ${newParent.email}<br>
+                            <strong>Identifiant (email) :</strong> ${newParent.email}<br>
                             <strong>Mot de passe :</strong> ${newParent.defaultPassword}<br>
-                            <small>Veuillez communiquer ces informations au parent.</small>
+                            <small>Veuillez communiquer ces informations au parent. Un email factice a été créé pour la connexion.</small>
                         `;
                         credentialsEl.style.display = 'block';
                         addParentForm.style.display = 'none';
