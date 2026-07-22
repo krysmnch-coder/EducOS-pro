@@ -97,10 +97,6 @@
                                     <label for="parent_phone_number" class="form-label small">Téléphone</label>
                                     <input type="tel" class="form-control" id="parent_phone_number" name="parent_phone_number" value="<%= student.parent_phone_number || '' %>">
                                 </div>
-                                <div class="col-md-6 mb-2">
-                                    <label for="parent_profession" class="form-label small">Profession</label>
-                                    <input type="text" class="form-control" id="parent_profession" name="parent_profession" value="<%= student.parent_profession || '' %>">
-                                </div>
                             </div>
                             <div class="form-text">Ce parent est déjà lié à l'élève.</div>
                         </div>
@@ -117,9 +113,6 @@
                                             </div>
                                             <p class="mb-1">
                                                 <small><strong>Téléphone :</strong> <%= parent.phone_number || 'Non renseigné' %></small>
-                                            </p>
-                                            <p class="mb-0">
-                                                <small><strong>Profession :</strong> <%= parent.profession || 'Non renseignée' %></small>
                                             </p>
                                         </div>
                                     <% }) %>
@@ -192,10 +185,6 @@
                     <label for="new-parent-phone" class="form-label">Numéro de téléphone</label>
                     <input type="tel" class="form-control" id="new-parent-phone" required>
                 </div>
-                <div class="mb-3">
-                    <label for="new-parent-profession" class="form-label">Profession</label>
-                    <input type="text" class="form-control" id="new-parent-profession">
-                </div>
             </form>
             <div id="new-parent-credentials" class="alert alert-success" style="display: none;"></div>
           </div>
@@ -245,7 +234,6 @@
                 saveParentBtn.addEventListener('click', async () => {
                     const name = nameInput.value.trim();
                     const phone_number = document.getElementById('new-parent-phone').value.trim();
-                    const profession = document.getElementById('new-parent-profession').value.trim();
 
                     if (!name || !phone_number) {
                         showAlert('Veuillez remplir le nom et le numéro de téléphone.');
@@ -259,7 +247,7 @@
                         const response = await fetch('/students/create-parent', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                            body: JSON.stringify({ name, phone_number, profession })
+                            body: JSON.stringify({ name, phone_number })
                         });
 
                         const result = await response.json();

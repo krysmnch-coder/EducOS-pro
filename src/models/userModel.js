@@ -16,12 +16,15 @@ function getUserByMatricule(matricule) {
   return db('users').where({ matricule }).first();
 }
 
-function createUser({ name, email, password, role, establishment_id, approved = 0, subject = null, student_class = null, matricule = null, children, avatar_url = null, phone_number = null, date_of_birth = null, place_of_birth = null, address = null, parent_info, created_by = null, password_reset_required = false, profession = null }, trx = db) {
+async function createUser({ name, email, password, role, establishment_id, approved = 0, subject = null, student_class = null, matricule = null, children, avatar_url = null, phone_number = null, date_of_birth = null, place_of_birth = null, address = null, parent_info, created_by = null, password_reset_required = false }, trx = db) {
   // Les propriétés 'children' et 'parent_info' sont maintenant obsolètes et gérées par la table 'parent_student_links'.
   // Elles sont conservées dans la signature pour la compatibilité mais ne sont pas insérées.
-  return trx('users').insert({
-    name, email, password, role, establishment_id, approved, subject, student_class, matricule, avatar_url, phone_number, date_of_birth, place_of_birth, address, created_by, password_reset_required, profession
-  }).returning('id');
+  
+  const userData = {
+    name, email, password, role, establishment_id, approved, subject, student_class, matricule, avatar_url, phone_number, date_of_birth, place_of_birth, address, created_by, password_reset_required
+  };
+
+  return trx('users').insert(userData).returning('id');
 }
 
 function getAllUsers() {
@@ -234,9 +237,6 @@ async function getStudentsAndPlaceholders() {
   // La requête utilise une jointure et un tri, mais évite les fonctions de fenêtrage (window functions)
   // qui ne sont pas supportées par toutes les versions de SQLite, ce qui causait l'erreur "Impossible de charger la liste des élèves".
 
-  // CORRECTIF DÉFINITIF : Vérifier si la colonne 'profession' existe avant de l'utiliser pour éviter un crash.
-  const hasProfessionColumn = await db.schema.hasColumn('users', 'profession');
-
   const selectColumns = [
     'psl.student_matricule',
     'psl.student_first_name',
@@ -247,10 +247,6 @@ async function getStudentsAndPlaceholders() {
     'p.name as parent_name',
     'p.phone_number as parent_phone_number',
   ];
-
-  if (hasProfessionColumn) {
-    selectColumns.push('p.profession as parent_profession');
-  }
 
   const allPlaceholderLinks = await db('parent_student_links as psl')
     .join('users as p', 'psl.parent_id', 'p.id')
@@ -279,7 +275,7 @@ async function getStudentsAndPlaceholders() {
     parent_id: p.parent_id,
     parent_name: p.parent_name,
     parent_phone_number: p.parent_phone_number,
-    parent_profession: p.parent_profession || null, // S'assure que la propriété existe même si la colonne est absente
+    parent_profession: null, // La profession est retirée pour assurer la stabilité.
     avatar_url: '/img/user.png'
     // Ajoutez d'autres champs avec des valeurs par défaut si nécessaire pour la vue
   }));

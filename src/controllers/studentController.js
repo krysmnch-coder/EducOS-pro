@@ -62,7 +62,7 @@ function generateSecurePassword(length = 8) {
  * Le compte est automatiquement approuvé.
  */
 const createParentFromStudentForm = async (req, res) => {
-    const { name, phone_number, profession } = req.body; // profession est récupéré mais non utilisé pour l'instant
+    const { name, phone_number } = req.body;
     const establishmentId = req.user.establishment_id;
 
     if (!name || !phone_number) {
@@ -87,7 +87,6 @@ const createParentFromStudentForm = async (req, res) => {
             role: ROLES.PARENT, approved: 1, // Approuvé automatiquement
             establishment_id: establishmentId,
             phone_number: phone_number, // Enregistre le vrai numéro de téléphone
-            profession: profession,
             avatar_url: '/img/user.png'
         });
         
@@ -177,7 +176,7 @@ const createStudent = async (req, res) => {
  * Affiche le formulaire pour compléter un dossier d'élève initié par un parent.
  */
 const renderCompleteStudentForm = async (req, res) => {
-    const { name, matricule, parent_id, parent_name, parent_phone_number, parent_profession } = req.query;
+    const { name, matricule, parent_id, parent_name, parent_phone_number } = req.query;
     let { student_class } = req.query; // On le rend mutable pour pouvoir le corriger.
 
     try {
@@ -192,7 +191,7 @@ const renderCompleteStudentForm = async (req, res) => {
         }
 
         // Créer un objet "student" partiel pour pré-remplir le formulaire
-        const student = { name, matricule, student_class, parent_id, parent_name, parent_phone_number, parent_profession };
+        const student = { name, matricule, student_class, parent_id, parent_name, parent_phone_number, parent_profession: null };
 
         res.render('studentForm', {
             title: `Compléter le dossier de ${name}`,
@@ -210,7 +209,7 @@ const renderCompleteStudentForm = async (req, res) => {
  * Finalise la création d'un compte élève et envoie une notification au parent.
  */
 const completeStudentRegistration = async (req, res) => {
-    const { name, matricule, parent_id, student_class, date_of_birth, place_of_birth, address, parent_phone_number, parent_profession } = req.body;
+    const { name, matricule, parent_id, student_class, date_of_birth, place_of_birth, address, parent_phone_number } = req.body;
     const creatorId = req.user.id; // L'expéditeur du message est l'utilisateur connecté (l'admin)
     try {
         const existingStudent = await userModel.getUserByMatricule(matricule);
@@ -225,17 +224,9 @@ const completeStudentRegistration = async (req, res) => {
 
         // Utilisation d'une transaction pour garantir que la mise à jour du parent et la création de l'élève sont atomiques.
         await db.transaction(async trx => {
-            // 1. Mettre à jour les informations du parent si elles sont fournies.
-            // CORRECTIF DÉFINITIF : On ne met à jour la profession que si la colonne existe.
+            // 1. Mettre à jour le numéro de téléphone du parent.
             if (parent_id) {
                 const parentUpdateData = { phone_number: parent_phone_number };
-                
-                // Vérifier si la colonne 'profession' existe avant de tenter de la mettre à jour.
-                const hasProfessionColumn = await trx.schema.hasColumn('users', 'profession');
-                if (hasProfessionColumn) {
-                    parentUpdateData.profession = parent_profession;
-                }
-
                 await trx('users').where({ id: parent_id }).update(parentUpdateData);
             }
 
@@ -297,12 +288,7 @@ const renderEditStudentForm = async (req, res) => {
         const parents = await userModel.getApprovedParents(); // Tous les parents pour le dropdown
 
         // Récupérer les informations complètes des parents déjà liés pour les afficher.
-        // CORRECTIF DÉFINITIF : Vérifier si la colonne 'profession' existe avant de la sélectionner.
-        const hasProfessionColumn = await db.schema.hasColumn('users', 'profession');
         const selectColumns = ['u.id', 'u.name', 'u.phone_number'];
-        if (hasProfessionColumn) {
-            selectColumns.push('u.profession');
-        }
 
         const linkedParents = await db('parent_student_links as psl')
             .join('users as u', 'psl.parent_id', 'u.id')
