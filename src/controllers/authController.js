@@ -342,8 +342,11 @@ exports.postRegister = async (req, res) => {
     const authIo = req.app.get('authIo');
     if (authIo) {
         // Notifier les admins de l'établissement.
-        // Note : la fonction getAdminsByEstablishment est à ajouter dans userModel.js
-        const establishmentAdmins = await userModel.getAdminsByEstablishment(establishment_id);
+        // La fonction getAdminsByEstablishment n'existait pas dans le modèle, ce qui causait une erreur.
+        // On la remplace par une requête directe pour corriger le problème.
+        const establishmentAdmins = await db('users').where({
+            establishment_id: establishment_id, role: ROLES.ADMINISTRATOR
+        });
         establishmentAdmins.forEach(admin => {
             authIo.to(`user_${admin.id}`).emit('shortcutHighlight', { shortcutKey: 'user_management' });
             // Si un parent vient de s'inscrire avec des enfants, on notifie aussi pour la gestion des élèves.
