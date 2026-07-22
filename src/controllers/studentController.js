@@ -284,7 +284,8 @@ const renderEditStudentForm = async (req, res) => {
         const linkedParents = await db('parent_student_links as psl')
             .join('users as u', 'psl.parent_id', 'u.id')
             .where('psl.student_matricule', student.matricule)
-            .select('u.id', 'u.name', 'u.phone_number', 'u.profession');
+            // La colonne 'profession' est retirée pour éviter un crash si elle n'existe pas dans la DB.
+            .select('u.id', 'u.name', 'u.phone_number');
 
         // Extraire les IDs pour pré-sélectionner les options dans le dropdown.
         const linkedParentIds = linkedParents.map(p => p.id);

@@ -246,7 +246,7 @@ async function getStudentsAndPlaceholders() {
       'psl.created_at', // Nécessaire pour le tri
       'p.name as parent_name',
       'p.phone_number as parent_phone_number',
-      'p.profession as parent_profession'
+      // La colonne 'profession' a été retirée de la requête car elle causait une erreur fatale si elle n'existait pas dans la base de données.
     )
     .whereNotIn('psl.student_matricule', realStudentMatricules)
     .orderBy('psl.created_at', 'asc');
@@ -272,7 +272,7 @@ async function getStudentsAndPlaceholders() {
     parent_id: p.parent_id,
     parent_name: p.parent_name,
     parent_phone_number: p.parent_phone_number,
-    parent_profession: p.parent_profession,
+    parent_profession: null, // La profession est mise à null pour éviter de casser la vue.
     avatar_url: '/img/user.png'
     // Ajoutez d'autres champs avec des valeurs par défaut si nécessaire pour la vue
   }));
