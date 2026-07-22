@@ -16,11 +16,11 @@ function getUserByMatricule(matricule) {
   return db('users').where({ matricule }).first();
 }
 
-function createUser({ name, email, password, role, establishment_id, approved = 0, subject = null, student_class = null, matricule = null, children, avatar_url = null, phone_number = null, date_of_birth = null, place_of_birth = null, address = null, parent_info, created_by = null, password_reset_required = false }, trx = db) {
+function createUser({ name, email, password, role, establishment_id, approved = 0, subject = null, student_class = null, matricule = null, children, avatar_url = null, phone_number = null, date_of_birth = null, place_of_birth = null, address = null, parent_info, created_by = null, password_reset_required = false, profession = null }, trx = db) {
   // Les propriétés 'children' et 'parent_info' sont maintenant obsolètes et gérées par la table 'parent_student_links'.
   // Elles sont conservées dans la signature pour la compatibilité mais ne sont pas insérées.
   return trx('users').insert({
-    name, email, password, role, establishment_id, approved, subject, student_class, matricule, avatar_url, phone_number, date_of_birth, place_of_birth, address, created_by, password_reset_required
+    name, email, password, role, establishment_id, approved, subject, student_class, matricule, avatar_url, phone_number, date_of_birth, place_of_birth, address, created_by, password_reset_required, profession
   }).returning('id');
 }
 
@@ -239,6 +239,8 @@ async function getStudentsAndPlaceholders() {
     .select(
       'psl.*',
       'p.name as parent_name',
+      'p.phone_number as parent_phone_number',
+      'p.profession as parent_profession',
       db.raw('ROW_NUMBER() OVER (PARTITION BY psl.student_matricule ORDER BY psl.created_at ASC) as rn')
     )
     .whereNotIn('psl.student_matricule', realStudentMatricules)
@@ -255,6 +257,8 @@ async function getStudentsAndPlaceholders() {
     is_placeholder: 1,
     parent_id: p.parent_id,
     parent_name: p.parent_name,
+    parent_phone_number: p.parent_phone_number,
+    parent_profession: p.parent_profession,
     avatar_url: '/img/user.png'
     // Ajoutez d'autres champs avec des valeurs par défaut si nécessaire pour la vue
   }));
