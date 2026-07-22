@@ -87,8 +87,21 @@
                     <h5 class="mb-3">Liaison Parent</h5>
 
                     <% if (isCompletion) { %>
+                        <!-- Pour la complétion, le parent est fixe et non modifiable -->
                         <!-- Pour la complétion, on affiche le parent initiateur unique et ses infos -->
                         <div class="mb-3">
+                            <label class="form-label">Parent(s) initiateur(s) du dossier</label>
+                            <% if (typeof linkedParents !== 'undefined' && linkedParents.length > 0) { %>
+                                <ul class="list-group">
+                                    <% linkedParents.forEach(parent => { %>
+                                        <li class="list-group-item"><%= parent.name %></li>
+                                    <% }) %>
+                                </ul>
+                            <% } else { %>
+                                <!-- Fallback si la liste n'est pas disponible, affiche le parent de la query -->
+                                <input type="text" class="form-control" value="<%= student.parent_name %>" disabled>
+                            <% } %>
+                            <div class="form-text">Ce(s) parent(s) est/sont déjà lié(s) à l'élève.</div>
                             <label class="form-label">Dossier initié par le parent</label>
                             <div class="card bg-light">
                                 <div class="card-body">
@@ -110,8 +123,10 @@
                         <% if (typeof linkedParents !== 'undefined' && linkedParents.length > 0) { %>
                             <div class="mb-3">
                                 <label class="form-label">Parent(s) actuellement lié(s)</label>
+                                <ul class="list-group">
                                 <div class="list-group">
                                     <% linkedParents.forEach(parent => { %>
+                                        <li class="list-group-item"><%= parent.name %></li>
                                         <div class="list-group-item">
                                             <div class="d-flex w-100 justify-content-between">
                                                 <h6 class="mb-1"><%= parent.name %></h6>
@@ -124,6 +139,7 @@
                                             </p>
                                         </div>
                                     <% }) %>
+                                </ul>
                                 </div>
                             </div>
                         <% } else { %>
