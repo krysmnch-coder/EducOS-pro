@@ -304,12 +304,14 @@ const renderEditStudentForm = async (req, res) => {
         const parents = await userModel.getApprovedParents(); // Tous les parents pour le dropdown
 
         // Récupérer les informations complètes des parents déjà liés pour les afficher.
-        const selectColumns = ['u.id', 'u.name', 'u.phone_number'];
+        // On trie par date de création pour identifier le parent initiateur.
+        const selectColumns = ['u.id', 'u.name', 'u.phone_number', 'psl.created_at'];
 
         const linkedParents = await db('parent_student_links as psl')
             .join('users as u', 'psl.parent_id', 'u.id')
             .where('psl.student_matricule', student.matricule)
-            .select(selectColumns);
+            .select(selectColumns)
+            .orderBy('psl.created_at', 'asc');
 
         // Extraire les IDs pour pré-sélectionner les options dans le dropdown.
         const linkedParentIds = linkedParents.map(p => p.id);
