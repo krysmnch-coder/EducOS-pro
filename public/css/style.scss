@@ -1,0 +1,42 @@
+// Fichier principal SCSS pour EducOS-pro
+
+// 1. Base
+// Contient les variables, les mixins, et les styles de base.
+@import 'base/variables';
+
+// Génération des variables CSS pour les thèmes
+:root {
+  // Couleurs de base qui ne changent pas avec le thème
+  --primary-color: #{$primary-color};
+  --danger-color: #{$danger-color};
+  --success-color: #{$success-color};
+  --white-color: #{$white-color};
+  --black-color: #{$black-color};
+
+  // Thème clair par défaut
+  @each $key, $value in $theme-light {
+    --#{$key}: #{$value};
+  }
+}
+
+:root[data-theme="dark"] {
+  @each $key, $value in $theme-dark {
+    --#{$key}: #{$value};
+  }
+}
+
+@import 'base/typography';
+
+// 2. Layout
+@import 'layout/page';
+
+// 3. Components
+// Chaque fichier correspond à un composant de l'interface.
+@import 'components/navbar';
+@import 'components/cards';
+@import 'components/buttons';
+@import 'components/chat';
+@import 'components/communication';
+@import 'components/forms';
+@import 'components/tables';
+@import 'components/profile';
