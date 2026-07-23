@@ -1,0 +1,23 @@
+// Fichier pour les styles de typographie de base (h1, h2, p, a, etc.)
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  // Les variables CSS sont utilisées ici, elles seront définies dans le style.css compilé
+  background-color: var(--body-bg);
+  color: var(--body-color);
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+  transition: background 0.3s ease, color 0.3s ease;
+
+  // Styles de fond qui étaient dans style.css
+  padding-top: 70px; /* Ajustez cette valeur en fonction de la hauteur de votre navbar */
+  background-image: url('/img/bg.png');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-blend-mode: overlay;
+}

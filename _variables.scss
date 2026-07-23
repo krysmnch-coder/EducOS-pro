@@ -1,0 +1,68 @@
+// Fichier pour les variables SCSS (couleurs, polices, espacements, etc.)
+
+// Couleurs de base
+$primary-color: #0d6efd;
+$danger-color: #dc3545;
+$success-color: #198754;
+$white-color: #ffffff;
+$black-color: #000000;
+
+// Variables pour le thème clair (par défaut)
+$theme-light: (
+  "body-bg": rgba(240, 242, 245, 0.8),
+  "body-color": #1a1a2e,
+  "navbar-bg": rgba(255, 255, 255, 0.2),
+  "nav-link-color": #1a1a2e,
+  "nav-link-hover-color": #000,
+  "nav-divider-color": #dee2e6,
+  "card-bg": $white-color,
+  "card-border-color": #dee2e6,
+  "card-color": #1a1a2e,
+  "text-muted-color": #6c757d,
+  "auth-card-bg": rgba(255, 255, 255, 0.75),
+  "auth-card-border-color": rgba(0,0,0,0.08),
+  "dashboard-stat-bg": $white-color,
+  "dashboard-stat-border-color": #e9ecef,
+  "stat-icon-color": $primary-color,
+  "chat-panel-bg": $white-color,
+  "chat-panel-body-bg": #f8f9fa,
+  "chat-message-received-bg": $white-color,
+  "chat-message-received-color": #212529,
+  "chat-panel-footer-bg": $white-color,
+  "chat-panel-footer-border-color": #e9ecef,
+  "chat-input-bg": $white-color,
+  "chat-input-border-color": #dee2e6,
+  "chat-input-color": #212529,
+  "chat-input-placeholder-color": #6c757d,
+  "online-status-border-color": $white-color
+);
+
+// Variables pour le thème sombre
+$theme-dark: (
+  "body-bg": rgba(10, 10, 26, 0.8),
+  "body-color": $white-color,
+  "navbar-bg": rgba(22, 33, 62, 0.2),
+  "nav-link-color": #e0e0e0,
+  "nav-link-hover-color": $white-color,
+  "nav-divider-color": #3d3d5c,
+  "card-bg": #16213e,
+  "card-border-color": #2d2d44,
+  "card-color": #e0e0e0,
+  "text-muted-color": #a0a0b8,
+  "auth-card-bg": rgba(22, 27, 34, 0.75),
+  "auth-card-border-color": rgba(255,255,255,0.1),
+  "dashboard-stat-bg": #1a1a2e,
+  "dashboard-stat-border-color": #2d2d44,
+  "stat-icon-color": #4d9aff,
+  "chat-panel-bg": #1a1a2e,
+  "chat-panel-body-bg": #16213e,
+  "chat-message-received-bg": #2d2d44,
+  "chat-message-received-color": #e0e0e0,
+  "chat-panel-footer-bg": #1a1a2e,
+  "chat-panel-footer-border-color": #2d2d44,
+  "chat-input-bg": #2d2d44,
+  "chat-input-border-color": #3d3d5c,
+  "chat-input-color": #e0e0e0,
+  "chat-input-placeholder-color": #8888aa,
+  "online-status-border-color": #16213e
+);

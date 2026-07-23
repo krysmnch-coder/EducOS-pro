@@ -122,6 +122,24 @@ const renderNewStudentForm = async (req, res) => {
 };
 
 /**
+ * Crée un tableau d'objets de liaison parent-élève pour l'insertion en base de données.
+ * @param {string|string[]} parent_ids - Un ou plusieurs IDs de parents.
+ * @param {object} studentData - Données de l'élève { name, matricule, student_class }.
+ * @returns {Array<object>}
+ */
+function createParentLinkObjects(parent_ids, studentData) {
+    const { name, matricule, student_class } = studentData;
+    const parentIdsArray = [].concat(parent_ids || []);
+    return parentIdsArray.map(parentId => ({
+        parent_id: parentId,
+        student_matricule: matricule,
+        student_first_name: name.split(' ')[0] || '',
+        student_last_name: name.split(' ').slice(1).join(' ') || '',
+        student_class: student_class
+    }));
+}
+
+/**
  * Gère la création d'un nouvel élève et la liaison avec ses parents.
  */
 const createStudent = async (req, res) => {
@@ -151,14 +169,8 @@ const createStudent = async (req, res) => {
 
             // 2. Créer les liens avec les parents
             if (parent_ids && parent_ids.length > 0) {
-                const links = [].concat(parent_ids).map(parentId => ({
-                    parent_id: parentId,
-                    student_matricule: matricule,
-                    student_first_name: name.split(' ')[0] || '',
-                    student_last_name: name.split(' ').slice(1).join(' ') || '',
-                    student_class: student_class
-                }));
-                await trx('parent_student_links').insert(links);
+                const links = createParentLinkObjects(parent_ids, { name, matricule, student_class });
+                if (links.length > 0) await trx('parent_student_links').insert(links);
             }
         });
 
@@ -363,17 +375,8 @@ const updateStudent = async (req, res) => {
                 }
 
                 // Créer les nouveaux liens. `parent_ids` peut être un tableau vide pour tout délier.
-                const parentIdsArray = [].concat(parent_ids || []);
-                if (parentIdsArray.length > 0) {
-                    const links = parentIdsArray.map(parentId => ({
-                        parent_id: parentId,
-                        student_matricule: matricule,
-                        student_first_name: name.split(' ')[0] || '',
-                        student_last_name: name.split(' ').slice(1).join(' ') || '',
-                        student_class: student_class
-                    }));
-                    await trx('parent_student_links').insert(links);
-                }
+                const links = createParentLinkObjects(parent_ids, { name, matricule, student_class });
+                if (links.length > 0) await trx('parent_student_links').insert(links);
             }
         });
 

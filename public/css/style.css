@@ -1,76 +1,3 @@
-html {
-  scroll-behavior: smooth;
-}
-
-/* =================================
-   Variables de Thème CSS
-==================================== */
-:root {
-  /* Couleurs de base */
-  --primary-color: #0d6efd;
-  --danger-color: #dc3545;
-  --success-color: #198754;
-  --white-color: #ffffff;
-  --black-color: #000000;
-
-  /* Thème Clair */
-  --body-bg: rgba(240, 242, 245, 0.8);
-  --body-color: #1a1a2e;
-  --navbar-bg: rgba(255, 255, 255, 0.2);
-  --nav-link-color: #1a1a2e;
-  --nav-link-hover-color: #000;
-  --nav-divider-color: #dee2e6;
-  --card-bg: var(--white-color);
-  --card-border-color: #dee2e6;
-  --card-color: #1a1a2e;
-  --text-muted-color: #6c757d;
-  --auth-card-bg: rgba(255, 255, 255, 0.75);
-  --auth-card-border-color: rgba(0,0,0,0.08);
-  --dashboard-stat-bg: var(--white-color);
-  --dashboard-stat-border-color: #e9ecef;
-  --stat-icon-color: var(--primary-color);
-  --chat-panel-bg: var(--white-color);
-  --chat-panel-body-bg: #f8f9fa;
-  --chat-message-received-bg: var(--white-color);
-  --chat-message-received-color: #212529;
-  --chat-panel-footer-bg: var(--white-color);
-  --chat-panel-footer-border-color: #e9ecef;
-  --chat-input-bg: var(--white-color);
-  --chat-input-border-color: #dee2e6;
-  --chat-input-color: #212529;
-  --chat-input-placeholder-color: #6c757d;
-  --online-status-border-color: var(--white-color);
-}
-
-:root[data-theme="dark"] {
-  --body-bg: rgba(10, 10, 26, 0.8);
-  --body-color: var(--white-color);
-  --navbar-bg: rgba(22, 33, 62, 0.2);
-  --nav-link-color: #e0e0e0;
-  --nav-link-hover-color: var(--white-color);
-  --nav-divider-color: #3d3d5c;
-  --card-bg: #16213e;
-  --card-border-color: #2d2d44;
-  --card-color: #e0e0e0;
-  --text-muted-color: #a0a0b8;
-  --auth-card-bg: rgba(22, 27, 34, 0.75);
-  --auth-card-border-color: rgba(255,255,255,0.1);
-  --dashboard-stat-bg: #1a1a2e;
-  --dashboard-stat-border-color: #2d2d44;
-  --stat-icon-color: #4d9aff;
-  --chat-panel-bg: #1a1a2e;
-  --chat-panel-body-bg: #16213e;
-  --chat-message-received-bg: #2d2d44;
-  --chat-message-received-color: #e0e0e0;
-  --chat-panel-footer-bg: #1a1a2e;
-  --chat-panel-footer-border-color: #2d2d44;
-  --chat-input-bg: #2d2d44;
-  --chat-input-border-color: #3d3d5c;
-  --chat-input-color: #e0e0e0;
-  --chat-input-placeholder-color: #8888aa;
-  --online-status-border-color: #16213e;
-}
-
 /* Styles pour la barre de navigation */
 body .navbar {
     position: fixed; /* Rend la barre de navigation fixe */
@@ -96,22 +23,6 @@ body .navbar {
 /* La navbar de home.ejs a son propre style pour .hidden */
 .navbar.hidden {
     transform: translateY(-100%);
-}
-
-/* Ajustement pour le contenu sous la barre de navigation fixe */
-body { /* Ceci doit être ajusté en fonction de la hauteur réelle de la navbar */
-    padding-top: 70px; /* Ajustez cette valeur en fonction de la hauteur de votre navbar */
-    background-color: var(--body-bg);
-    color: var(--body-color);
-    background-image: url('/img/bg.png');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-    background-repeat: no-repeat;
-    background-blend-mode: overlay;
-    font-family: 'Inter', sans-serif;
-    min-height: 100vh;
-    transition: background 0.3s ease, color 0.3s ease;
 }
 
 /* Espacement des icônes/liens dans la barre de navigation */
