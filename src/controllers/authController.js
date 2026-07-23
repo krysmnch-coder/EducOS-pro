@@ -377,7 +377,6 @@ exports.postRegister = async (req, res) => {
             authIo.to(`user_${superAdmin.id}`).emit('shortcutHighlight', { shortcutKey: 'user_management' });
         });
     }
-+
     req.flash('success_msg', 'Inscription réussie ! Votre compte est en attente d\'approbation.');
     res.redirect('/login');
 
