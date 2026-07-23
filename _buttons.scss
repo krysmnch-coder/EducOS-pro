@@ -1,0 +1,41 @@
+// Styles pour les boutons de l'application
+// .btn { ... }
+
+// =================================
+// Bouton Retour en Haut
+// =================================
+.back-to-top-btn {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 50px;
+  height: 50px;
+  border-radius: 16px;
+  background: var(--auth-card-bg);
+  color: var(--body-color);
+  border: 1px solid var(--auth-card-border-color);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  cursor: pointer;
+  transition: opacity 0.3s ease, transform 0.3s ease, background-color 0.3s ease;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: translateY(20px);
+  pointer-events: none;
+  text-decoration: none;
+
+  &.visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  &:hover {
+    transform: scale(1.1);
+    color: var(--primary-color);
+  }
+}

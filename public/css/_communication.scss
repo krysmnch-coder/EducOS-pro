@@ -1,0 +1,89 @@
+// Styles pour les composants de la page de Communication
+
+.communication-layout {
+  .card {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card-body {
+    overflow-y: auto;
+  }
+}
+
+.communication-list {
+  .accordion-item {
+    background-color: var(--card-bg);
+    border: 1px solid var(--card-border-color);
+    color: var(--card-color);
+    margin-bottom: 0.5rem;
+    border-radius: 0.5rem !important;
+    overflow: hidden;
+  }
+
+  .accordion-button {
+    background-color: transparent;
+    color: var(--card-color);
+
+    &:not(.collapsed) {
+      background-color: rgba(var(--bs-primary-rgb), 0.1);
+      color: var(--primary-color);
+      box-shadow: none;
+    }
+
+    &:focus {
+      box-shadow: none;
+      border-color: transparent;
+    }
+  }
+
+  .accordion-body {
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+}
+
+.communication-actions {
+  border-top: 1px solid var(--card-border-color);
+  padding-top: 1rem;
+  margin-top: 1rem;
+  text-align: right;
+}
+
+.communication-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding-right: 1.5rem;
+}
+
+.communication-subject {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 1rem;
+}
+
+.communication-meta {
+  font-size: 0.8rem;
+  color: var(--text-muted-color);
+  font-weight: 400;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.communication-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-left: 8px;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+.sender-name {
+  font-weight: 500;
+}
