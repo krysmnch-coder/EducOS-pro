@@ -1,0 +1,164 @@
+// Styles spécifiques au composant Navbar
+
+// Le sélecteur `body .navbar` augmente la spécificité pour surcharger Bootstrap
+body .navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1030;
+  background-color: var(--navbar-bg);
+  border-radius: 0;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: transform 0.4s ease-in-out;
+
+  // Classe pour masquer la navbar au défilement
+  &.hidden {
+    transform: translateY(-100%);
+  }
+}
+
+.navbar-nav {
+  display: flex;
+  align-items: center;
+
+  .nav-item {
+    text-align: center;
+
+    // Espacement pour les éléments après le séparateur
+    &:not(.nav-item-spaced):not(:last-child) {
+      margin-right: 15px;
+    }
+  }
+}
+
+// Espacement pour le groupe "Accueil" à "Admin"
+.nav-item-spaced {
+  margin-right: 15px !important;
+}
+
+// Espacement pour le séparateur
+.nav-divider {
+  margin-left: 25px !important;
+  margin-right: 25px !important;
+  color: var(--nav-divider-color) !important;
+  font-size: 20px;
+  font-weight: 300;
+  opacity: 0.5;
+}
+
+.nav-link {
+  color: var(--nav-link-color) !important;
+
+  &:hover {
+    color: var(--nav-link-hover-color) !important;
+    svg {
+      color: var(--nav-link-hover-color) !important;
+    }
+  }
+
+  &.active {
+    color: #0d6efd !important;
+    svg {
+      color: #0d6efd !important;
+    }
+  }
+
+  svg {
+    color: var(--nav-link-color) !important;
+  }
+
+  // Masquer et faire apparaître les noms des icônes
+  .nav-text.small {
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: opacity 0.3s ease, max-height 0.3s ease, transform 0.3s ease;
+    transform: translateY(5px);
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  // Afficher le nom de l'icône au survol ou si l'élément est actif
+  &:hover .nav-text.small,
+  &.active .nav-text.small {
+    opacity: 1;
+    max-height: 20px;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+}
+
+// Style des boutons sans texte
+.nav-icon-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--nav-link-color) !important;
+
+  &:hover {
+    background-color: rgba(13, 110, 253, 0.15) !important;
+    transform: scale(1.05);
+    color: var(--nav-link-hover-color) !important;
+  }
+}
+
+// Correction du bouton hamburger pour mobile
+.navbar-toggler {
+  border: none !important;
+  padding: 8px !important;
+
+  &:focus {
+    box-shadow: none !important;
+  }
+
+  svg {
+    stroke: var(--nav-link-color) !important;
+  }
+}
+
+.navbar-toggler-icon {
+  background-image: none !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// Styles pour l'avatar dans la barre de navigation
+.navbar-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.navbar-avatar-placeholder {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  background-color: var(--bs-primary);
+  color: white;
+  font-size: 1rem;
+}
+
+// Theme toggle button icons
+#themeToggle {
+  .moon-icon { display: block; }
+  .sun-icon { display: none; }
+}
+
+// En thème sombre, on inverse les icônes
+:root[data-theme="dark"] #themeToggle {
+  .moon-icon { display: none; }
+  .sun-icon { display: block; }
+}
