@@ -1,108 +1,157 @@
-// d:\EducOS-pro ver 1.0.0\public\css\components\_navbar.scss
+// ==========================================================================
+// Navbar - Style Ultra Moderne (Refonte)
+// ==========================================================================
 
 .navbar {
-  // Styles pour rendre la navbar transparente et floue
   position: fixed;
-  display: flex; // Ajouté pour aligner les éléments de la navbar sur une seule ligne
-  align-items: center; // Centre verticalement les éléments
-  justify-content: space-between; // Distribue l'espace entre les éléments
   top: 0;
   left: 0;
   right: 0;
-  z-index: 1030; // Assure que la navbar est au-dessus du contenu
-  padding: 0.5rem 1rem; // Ajustez le padding selon vos besoins
-  background-color: var(--navbar-bg); // Utilise la variable transparente
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--nav-divider-color); // Bordure subtile
-  transition: background-color 0.3s ease, border-color 0.3s ease; // Transition pour le thème
+  z-index: 1030;
+  
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  
+  padding: 0.75rem 1.5rem; // Plus d'espace vertical et horizontal
+  
+  // Effet "Glassmorphism"
+  background-color: var(--navbar-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  
+  // Remplacer la bordure par une ombre subtile pour un effet de profondeur
+  border-bottom: 1px solid var(--nav-divider-color); // Gardons une ligne très fine pour la compatibilité
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
-// Assure l'alignement horizontal des éléments de la navbar
+// Conteneur pour les liens de navigation (généralement à droite)
 .navbar-nav {
   display: flex;
   align-items: center;
+  gap: 0.5rem; // Espace entre chaque item
 }
 
-// Styles pour les liens/boutons de la navbar qui affichent le texte au survol
+// Style de chaque lien/bouton
 .navbar-nav .nav-item .nav-link {
   display: flex;
   align-items: center;
-  padding: 0.5rem 0.75rem; // Ajustez le padding
+  gap: 0.6rem; // Espace entre icône et texte
+  padding: 0.5rem 1rem;
   color: var(--nav-link-color);
-  transition: all 0.3s ease; // Transition fluide pour toutes les propriétés
-  border-radius: 0.375rem; // Arrondi léger
-  background-color: transparent; // Assure un fond transparent par défaut
-  white-space: nowrap; // Empêche le texte de passer à la ligne
+  background-color: transparent;
+  border-radius: 0.5rem; // Bords arrondis modernes
+  transition: color 0.3s ease, background-color 0.3s ease;
+  white-space: nowrap;
+  position: relative;
+  z-index: 2; // Au-dessus de l'indicateur de survol
 
   &:hover {
     color: var(--nav-link-hover-color);
-    background-color: var(--bs-tertiary-bg); // Ajoute un fond subtil au survol
+    // Le fond est géré par l'indicateur, mais on peut en mettre un léger pour le fallback
+    background-color: rgba(128, 128, 128, 0.1);
   }
 
-  // Styles spécifiques pour les icônes
+  // Icônes
   > i {
-    font-size: 1.25rem; // Taille de l'icône
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+  }
+  
+  &:hover > i {
+    transform: scale(1.1); // Animation subtile sur l'icône
   }
 
-  // Styles spécifiques pour les avatars
+  // Avatar
   > img {
     width: 32px;
     height: 32px;
     border-radius: 50%;
     object-fit: cover;
+    transition: transform 0.3s ease;
+    border: 2px solid var(--card-bg);
+  }
+  
+  &:hover > img {
+    transform: scale(1.1);
   }
 
-  // Style pour le texte (initialement caché, affiché au survol)
+  // Texte du lien (toujours visible)
   > span {
-    opacity: 0;
-    width: 0; // Le texte est toujours caché
-    overflow: hidden;
-    transition: none; // Pas de transition car le texte ne doit pas apparaître
-    display: inline-block;
-    vertical-align: middle; // Alignement avec l'icône
+    font-size: 0.9rem;
+    font-weight: 500;
+    display: inline-block; // Assure que le span est un bloc pour les animations futures
   }
 }
 
-// Ajustement pour les badges (comme le badge de chat) dans la navbar
+// --- Nouvelle approche de survol (100% CSS) ---
+.navbar-nav .nav-item .nav-link::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 0.5rem;
+  background-color: var(--bs-tertiary-bg);
+  transform: scale(0);
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  z-index: -1;
+}
+
+.navbar-nav .nav-item .nav-link:hover::before {
+  transform: scale(1);
+}
+
+// Masquer le texte sur mobile pour garder une interface propre
+@media (max-width: 768px) {
+  .navbar {
+    padding: 0.5rem 1rem;
+  }
+  .navbar-nav .nav-item .nav-link {
+    padding: 0.75rem;
+    border-radius: 50%; // Boutons ronds sur mobile
+    > span {
+      display: none;
+    }
+    &::before {
+      border-radius: 50%;
+    }
+  }
+}
+
+
+// Badge de chat
 .navbar-nav .nav-item .nav-link .icon-badge-wrapper {
   position: relative;
-  display: flex; // Pour aligner l'icône et le badge
+  display: flex;
   align-items: center;
   justify-content: center;
 
   .chat-badge {
     position: absolute;
-    top: -5px; // Ajustez la position
-    right: -5px; // Ajustez la position
-    transform: none; // Réinitialise la transformation du _chat.scss si elle est appliquée ici
-    border: 1px solid var(--white-color); // Bordure pour contraster avec le fond de la navbar
+    top: -5px;
+    right: -10px;
+    border: 2px solid var(--navbar-bg);
+    transform: none;
   }
 }
 
-// Styles pour le bouton de changement de thème (sombre/clair)
-// S'attend à une structure HTML avec deux icônes à l'intérieur du bouton
+// Bouton de thème
 #theme-toggle-btn {
-  // Par défaut (thème clair), on cache l'icône de lune
-  .theme-icon-dark {
+  .theme-icon-dark, .theme-icon-light {
     display: none;
   }
-  // et on montre l'icône de soleil
-  .theme-icon-light {
-    display: inline-block;
-  }
 }
 
-// Quand le thème sombre est actif
-[data-theme="dark"] {
-  #theme-toggle-btn {
-    // on montre l'icône de lune
-    .theme-icon-dark {
-      display: inline-block;
-    }
-    // et on cache l'icône de soleil
-    .theme-icon-light {
-      display: none;
-    }
+html:not([data-theme="dark"]) #theme-toggle-btn .theme-icon-light {
+  display: inline-block;
+}
+
+[data-theme="dark"] #theme-toggle-btn {
+  .theme-icon-dark {
+    display: inline-block;
   }
 }
