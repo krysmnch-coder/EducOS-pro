@@ -40,21 +40,6 @@
     background-color: var(--bs-tertiary-bg); // Ajoute un fond subtil au survol
   }
 
-  // Styles communs pour la partie visuelle "icône" (icône, avatar ou wrapper de badge)
-  > i,
-  > img,
-  > .icon-badge-wrapper {
-    flex-shrink: 0; // Empêche l'icône/avatar de rétrécir
-    transition: margin-right 0.3s ease;
-    margin-right: 0; // Pas de marge au début
-  }
-
-  &:hover > i,
-  &:hover > img,
-  &:hover > .icon-badge-wrapper {
-    margin-right: 0.5rem; // Ajoute une marge lorsque le texte apparaît
-  }
-
   // Styles spécifiques pour les icônes
   > i {
     font-size: 1.25rem; // Taille de l'icône
@@ -71,16 +56,11 @@
   // Style pour le texte (initialement caché, affiché au survol)
   > span {
     opacity: 0;
-    width: 0;
+    width: 0; // Le texte est toujours caché
     overflow: hidden;
-    transition: opacity 0.3s ease, width 0.3s ease;
-    display: inline-block; // Nécessaire pour que la transition de largeur fonctionne bien
+    transition: none; // Pas de transition car le texte ne doit pas apparaître
+    display: inline-block;
     vertical-align: middle; // Alignement avec l'icône
-  }
-
-  &:hover > span {
-    opacity: 1;
-    width: auto; // Permet au texte de prendre sa largeur naturelle
   }
 }
 
