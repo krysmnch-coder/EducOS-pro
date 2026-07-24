@@ -1,10 +1,28 @@
 // Fichier principal SCSS pour EducOS-pro
 
 // 1. Base
-// Contient les variables, les mixins, et les styles de base.
-@import 'base/variables';
+// On utilise @use pour charger les variables. L'étoile (*) les rend disponibles globalement.
+// Toutes les règles @use doivent être au début du fichier.
+@use 'base/variables' as *;
+// On utilise @use pour les autres fichiers. Cela les inclut dans le CSS final.
+@use 'base/typography';
+
+// 2. Layout
+@use 'layout/page';
+
+// 3. Components
+// Chaque fichier correspond à un composant de l'interface.
+@use 'components/navbar';
+@use 'components/cards';
+@use 'components/buttons';
+@use 'components/chat';
+@use 'components/communication';
+@use 'components/forms';
+@use 'components/tables';
+@use 'components/profile';
 
 // Génération des variables CSS pour les thèmes
+// Ce bloc doit venir APRÈS toutes les règles @use.
 :root {
   // Couleurs de base qui ne changent pas avec le thème
   --primary-color: #{$primary-color};
@@ -22,21 +40,5 @@
 :root[data-theme="dark"] {
   @each $key, $value in $theme-dark {
     --#{$key}: #{$value};
-  }
+    }
 }
-
-@import 'base/typography';
-
-// 2. Layout
-@import 'layout/page';
-
-// 3. Components
-// Chaque fichier correspond à un composant de l'interface.
-@import 'components/navbar';
-@import 'components/cards';
-@import 'components/buttons';
-@import 'components/chat';
-@import 'components/communication';
-@import 'components/forms';
-@import 'components/tables';
-@import 'components/profile';
