@@ -41,17 +41,16 @@
   gap: 0.6rem; // Espace entre icône et texte
   padding: 0.5rem 1rem;
   color: var(--nav-link-color);
-  background-color: transparent;
+  background-color: transparent; // Le fond est géré par les pseudo-éléments
   border-radius: 0.5rem; // Bords arrondis modernes
-  transition: color 0.3s ease, background-color 0.3s ease;
+  transition: color 0.3s ease;
   white-space: nowrap;
   position: relative;
-  z-index: 2; // Au-dessus de l'indicateur de survol
+  z-index: 1; // Au-dessus des couches de fond
+  overflow: hidden; // Crucial pour l'effet de bordure
 
   &:hover {
     color: var(--nav-link-hover-color);
-    // Un fond très léger peut servir de fallback si le pseudo-élément ne s'affiche pas.
-    background-color: rgba(128, 128, 128, 0.1);
   }
 
   // Icônes
@@ -86,23 +85,47 @@
   }
 }
 
-// --- Nouvelle approche de survol (100% CSS) ---
+// --- NOUVEL EFFET DE SURBRILLANCE : BORDURE GRADIENTE ANIMÉE ---
+
+// 1. La bordure animée (la couche la plus en arrière)
 .navbar-nav .nav-item .nav-link::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  border-radius: 0.5rem;
-  background-color: var(--bs-tertiary-bg); // Rétablit le fond en forme de pilule pour le survol.
-  transform: scale(0);
-  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-  z-index: -1;
+  top: 50%;
+  left: 50%;
+  width: 150%;
+  height: 300%;
+  background: conic-gradient(from 0deg, transparent, var(--bs-primary), var(--bs-info));
+  transform: translate(-50%, -50%);
+  animation: rotate-glow 4s linear infinite;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  z-index: -2; // Couche du fond
 }
 
+// 2. Le fond du bouton (couche intermédiaire)
+.navbar-nav .nav-item .nav-link::after {
+  content: '';
+  position: absolute;
+  inset: 2px; // Laisse un espace de 2px pour que la bordure (::before) soit visible
+  background: var(--navbar-bg);
+  border-radius: calc(0.5rem - 2px); // Ajuster le radius intérieur
+  z-index: -1; // Entre la bordure et le texte
+  transition: background-color 0.3s ease;
+}
+
+// 3. Au survol, on révèle la bordure et on ajuste le fond
 .navbar-nav .nav-item .nav-link:hover::before {
-  transform: scale(1);
+  opacity: 1;
+}
+.navbar-nav .nav-item .nav-link:hover::after {
+  background: var(--bs-body-bg);
+}
+
+@keyframes rotate-glow {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
 }
 
 // Masquer le texte sur mobile pour garder une interface propre
@@ -115,6 +138,13 @@
     border-radius: 50%; // Boutons ronds sur mobile
     > span {
       display: none;
+    }
+    // Sur mobile, on désactive l'effet complexe pour la performance et la simplicité
+    &::before, &::after {
+      display: none;
+    }
+    &:hover {
+      background-color: var(--bs-tertiary-bg); // On revient à un fond simple
     }
     &::before {
       border-radius: 50%;
