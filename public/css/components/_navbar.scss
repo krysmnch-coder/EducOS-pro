@@ -38,62 +38,65 @@
   align-items: center;
   gap: 0.6rem;
   padding: 0.5rem 1rem;
-  color: var(--nav-link-color);
+  color: #6c757d; // Gris par défaut
   background-color: transparent;
   border-radius: 0.5rem;
-  transition: color 0.3s ease;
+  transition: color 0.3s ease, transform 0.3s ease;
   white-space: nowrap;
   position: relative;
   z-index: 1;
   overflow: hidden;
 
-  // Effet de surbrillance sur l'icône et le texte
+  // Icônes - Gris par défaut
   > i {
     font-size: 1.2rem;
-    transition: transform 0.3s ease, color 0.3s ease, text-shadow 0.3s ease;
+    color: #6c757d; // Gris par défaut
+    transition: color 0.3s ease, transform 0.3s ease, text-shadow 0.3s ease;
   }
   
+  // Texte - Gris par défaut
   > span {
     font-size: 0.9rem;
     font-weight: 500;
     display: inline-block;
+    color: #6c757d; // Gris par défaut
     transition: color 0.3s ease, text-shadow 0.3s ease;
   }
 
+  // Avatar
   > img {
     width: 32px;
     height: 32px;
     border-radius: 50%;
     object-fit: cover;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    border: 2px solid var(--card-bg);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    border: 2px solid #6c757d; // Bordure grise par défaut
   }
 
-  // Effet de surbrillance au survol
+  // Effet de surbrillance au survol - TOUT EN BLANC
   &:hover {
-    color: var(--nav-link-hover-color);
+    color: #ffffff !important; // Blanc au survol
     
     > i {
-      transform: scale(1.1);
-      color: var(--bs-primary);
-      text-shadow: 0 0 20px rgba(var(--bs-primary-rgb), 0.5);
+      transform: scale(1.15);
+      color: #ffffff !important; // Icône blanche
+      text-shadow: 0 0 25px rgba(255, 255, 255, 0.4), 0 0 50px rgba(255, 255, 255, 0.2);
     }
     
     > span {
-      color: var(--bs-primary);
-      text-shadow: 0 0 20px rgba(var(--bs-primary-rgb), 0.3);
+      color: #ffffff !important; // Texte blanc
+      text-shadow: 0 0 25px rgba(255, 255, 255, 0.3), 0 0 50px rgba(255, 255, 255, 0.1);
     }
     
     > img {
       transform: scale(1.1);
-      box-shadow: 0 0 20px rgba(var(--bs-primary-rgb), 0.3);
+      border-color: #ffffff; // Bordure blanche
+      box-shadow: 0 0 25px rgba(255, 255, 255, 0.3), 0 0 50px rgba(255, 255, 255, 0.1);
     }
   }
 }
 
-// --- EFFET DE SURBRILLANCE UNIQUEMENT SUR L'ICÔNE ET LE TEXTE ---
-
-// Suppression de l'effet de bordure animée pour un fond complètement transparent
+// Suppression des pseudo-éléments pour fond transparent
 .navbar-nav .nav-item .nav-link::before,
 .navbar-nav .nav-item .nav-link::after {
   display: none;
@@ -101,13 +104,7 @@
 
 // Garder le fond transparent au survol
 .navbar-nav .nav-item .nav-link:hover {
-  background-color: transparent;
-}
-
-@keyframes rotate-glow {
-  to {
-    transform: translate(-50%, -50%) rotate(360deg);
-  }
+  background-color: transparent !important;
 }
 
 // Masquer le texte sur mobile pour garder une interface propre
@@ -122,11 +119,16 @@
       display: none;
     }
     &:hover {
-      background-color: transparent;
+      background-color: transparent !important;
+      
+      > i {
+        transform: scale(1.2);
+        color: #ffffff !important;
+        text-shadow: 0 0 30px rgba(255, 255, 255, 0.5), 0 0 60px rgba(255, 255, 255, 0.2);
+      }
     }
   }
 }
-
 
 // Badge de chat
 .navbar-nav .nav-item .nav-link .icon-badge-wrapper {
@@ -141,7 +143,16 @@
     right: -10px;
     border: 2px solid var(--navbar-bg);
     transform: none;
+    background-color: #6c757d; // Badge gris par défaut
+    color: #ffffff;
+    transition: background-color 0.3s ease;
   }
+}
+
+// Le badge devient blanc au survol du parent
+.navbar-nav .nav-item .nav-link:hover .chat-badge {
+  background-color: #ffffff;
+  color: #6c757d;
 }
 
 // Bouton de thème
