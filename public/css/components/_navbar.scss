@@ -86,27 +86,28 @@
   margin: 0 0.15rem;
 }
 
-// Style de chaque lien/bouton
+// Style de chaque lien/bouton - AGRANDI
 .navbar-nav .nav-item .nav-link {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.25rem;
-  padding: 0.5rem 0.75rem;
+  gap: 0.3rem;
+  padding: 0.6rem 1rem; // AGRANDI: padding augmenté
   color: #6c757d;
   background-color: transparent;
-  border-radius: 0.5rem;
+  border-radius: 0.75rem; // AGRANDI: radius augmenté
   transition: color 0.3s ease, transform 0.3s ease;
   white-space: nowrap;
   position: relative;
   z-index: 1;
   overflow: hidden;
   text-decoration: none;
+  min-width: 60px; // AGRANDI: largeur minimale
 
-  // Icônes SVG - Gris par défaut
+  // Icônes SVG - Gris par défaut - AGRANDI
   svg {
-    width: 22px;
-    height: 22px;
+    width: 26px; // AGRANDI: de 22px à 26px
+    height: 26px; // AGRANDI: de 22px à 26px
     color: #6c757d;
     transition: color 0.3s ease, transform 0.3s ease, filter 0.3s ease;
     stroke: currentColor;
@@ -116,9 +117,9 @@
     stroke-linejoin: round;
   }
   
-  // Texte - Gris par défaut
+  // Texte - Gris par défaut - AGRANDI
   .nav-text {
-    font-size: 0.65rem;
+    font-size: 0.7rem; // AGRANDI: de 0.65rem à 0.7rem
     font-weight: 500;
     display: inline-block;
     color: #6c757d;
@@ -144,17 +145,17 @@
   // Effet de surbrillance au survol - TOUT EN BLANC
   &:hover {
     color: #ffffff !important;
-    transform: translateY(-1px);
+    transform: translateY(-2px); // AGRANDI: effet plus prononcé
     
     svg {
-      transform: scale(1.15);
+      transform: scale(1.2); // AGRANDI: de 1.15 à 1.2
       color: #ffffff !important;
-      filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.4));
+      filter: drop-shadow(0 0 25px rgba(255, 255, 255, 0.4)); // AGRANDI
     }
     
     .nav-text {
       color: #ffffff !important;
-      text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+      text-shadow: 0 0 25px rgba(255, 255, 255, 0.3); // AGRANDI
     }
   }
 }
@@ -179,25 +180,26 @@
   user-select: none;
 }
 
-// Boutons d'icônes (Notifications, Thème)
+// Boutons d'icônes (Notifications, Thème) - AGRANDI
 .nav-icon-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.5rem 0.75rem;
+  padding: 0.6rem 1rem; // AGRANDI: padding augmenté
   color: #6c757d;
   background-color: transparent !important;
   border: none !important;
-  border-radius: 0.5rem;
+  border-radius: 0.75rem; // AGRANDI: radius augmenté
   transition: color 0.3s ease, transform 0.3s ease;
   cursor: pointer;
   position: relative;
   z-index: 1;
   text-decoration: none;
+  min-width: 60px; // AGRANDI: largeur minimale
 
   svg {
-    width: 22px;
-    height: 22px;
+    width: 26px; // AGRANDI: de 22px à 26px
+    height: 26px; // AGRANDI: de 22px à 26px
     color: #6c757d;
     transition: color 0.3s ease, transform 0.3s ease, filter 0.3s ease;
     stroke: currentColor;
@@ -220,12 +222,12 @@
   // Effet de surbrillance au survol - TOUT EN BLANC
   &:hover {
     color: #ffffff !important;
-    transform: translateY(-1px);
+    transform: translateY(-2px); // AGRANDI: effet plus prononcé
     
     svg {
-      transform: scale(1.15);
+      transform: scale(1.2); // AGRANDI: de 1.15 à 1.2
       color: #ffffff !important;
-      filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.4));
+      filter: drop-shadow(0 0 25px rgba(255, 255, 255, 0.4)); // AGRANDI
     }
   }
 }
@@ -300,10 +302,10 @@ html:not([data-theme="dark"]) #theme-toggle-btn .theme-icon-dark {
   display: none;
 }
 
-// Avatar
+// Avatar - AGRANDI
 .navbar-avatar {
-  width: 32px;
-  height: 32px;
+  width: 36px; // AGRANDI: de 32px à 36px
+  height: 36px; // AGRANDI: de 32px à 36px
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid #6c757d;
@@ -311,8 +313,8 @@ html:not([data-theme="dark"]) #theme-toggle-btn .theme-icon-dark {
 }
 
 .navbar-avatar-placeholder {
-  width: 32px;
-  height: 32px;
+  width: 36px; // AGRANDI: de 32px à 36px
+  height: 36px; // AGRANDI: de 32px à 36px
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -320,7 +322,7 @@ html:not([data-theme="dark"]) #theme-toggle-btn .theme-icon-dark {
   background: linear-gradient(135deg, var(--bs-primary), var(--bs-info));
   color: #ffffff;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 1rem; // AGRANDI: de 0.9rem à 1rem
   border: 2px solid #6c757d;
   transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
 }
@@ -332,14 +334,28 @@ html:not([data-theme="dark"]) #theme-toggle-btn .theme-icon-dark {
   box-shadow: 0 0 25px rgba(255, 255, 255, 0.3);
 }
 
-// Dropdown
+// Dropdown - AVATAR DEVANT LE NOM
 .dropdown-toggle {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
   
+  // L'avatar est déjà devant dans le HTML, on garde l'ordre
   &::after {
     margin-left: 0.25rem;
+  }
+}
+
+// Style pour le dropdown user
+#navbarUserDropdown {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  
+  .navbar-avatar,
+  .navbar-avatar-placeholder {
+    order: -1; // Force l'avatar à être devant
   }
 }
 
@@ -396,14 +412,15 @@ html:not([data-theme="dark"]) #theme-toggle-btn .theme-icon-dark {
     gap: 0.75rem;
     width: 100%;
     border-radius: 0.5rem;
+    min-width: auto;
     
     .nav-text {
       font-size: 0.85rem;
     }
     
     svg {
-      width: 20px;
-      height: 20px;
+      width: 22px;
+      height: 22px;
     }
   }
   
@@ -416,10 +433,11 @@ html:not([data-theme="dark"]) #theme-toggle-btn .theme-icon-dark {
     width: 100%;
     justify-content: flex-start;
     gap: 0.75rem;
+    min-width: auto;
     
     svg {
-      width: 20px;
-      height: 20px;
+      width: 22px;
+      height: 22px;
     }
   }
   
@@ -434,9 +452,9 @@ html:not([data-theme="dark"]) #theme-toggle-btn .theme-icon-dark {
   
   .navbar-avatar,
   .navbar-avatar-placeholder {
-    width: 28px;
-    height: 28px;
-    font-size: 0.8rem;
+    width: 30px;
+    height: 30px;
+    font-size: 0.85rem;
   }
 }
 
@@ -456,6 +474,13 @@ html:not([data-theme="dark"]) #theme-toggle-btn .theme-icon-dark {
         height: 24px;
       }
     }
+  }
+  
+  .navbar-avatar,
+  .navbar-avatar-placeholder {
+    width: 28px;
+    height: 28px;
+    font-size: 0.8rem;
   }
 }
 
