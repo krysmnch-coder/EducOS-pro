@@ -1,27 +1,46 @@
-<!-- =============================================== -->
-<!--                  SCRIPTS                        -->
-<!-- =============================================== -->
+<!-- Bouton de chat flottant -->
+<button class="chat-float-btn" id="chatFloatBtn">
+    <div class="icon-badge-wrapper">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+        <span class="chat-badge" id="chatBadge"></span>
+    </div>
+</button>
 
-<!-- Socket.IO Client Library -->
+<!-- Panneau de chat flottant -->
+<div class="chat-panel" id="chatPanel">
+    <!-- Écran 1: Liste des conversations -->
+    <div id="chat-widget-list-view" class="chat-widget-screen">
+        <div class="chat-panel-header">
+            <h6>Chat</h6>
+            <button class="chat-panel-close" id="chatCloseBtn">&times;</button>
+        </div>
+        <div class="chat-panel-body" id="chat-widget-user-list">
+            <!-- Les conversations seront chargées ici -->
+            <div class="text-center p-4"><div class="spinner-border spinner-border-sm" role="status"></div></div>
+        </div>
+    </div>
+
+    <!-- Écran 2: Fenêtre de chat active (cachée par défaut) -->
+    <div id="chat-widget-conversation-view" class="chat-widget-screen" style="display: none;">
+        <div class="chat-panel-header">
+            <button class="chat-panel-back" id="chat-widget-back-btn">&larr;</button>
+            <h6 id="chat-widget-header-name"></h6>
+            <button class="chat-panel-close" id="chat-widget-close-btn-alt">&times;</button>
+        </div>
+        <div class="chat-panel-body" id="chat-widget-messages">
+            <!-- Les messages seront chargés ici -->
+        </div>
+        <div class="chat-panel-footer">
+            <input type="text" id="chat-widget-input" placeholder="Écrivez un message..." autocomplete="off">
+            <button id="chat-widget-send-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
 <script src="/socket.io/socket.io.js"></script>
-
-<!-- Bootstrap JS Bundle (nécessaire pour les dropdowns, modales, etc.) -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
-
-<!-- Feather Icons (utilisé pour les icônes de la navbar) -->
-<script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
-<script>
-  // Initialise les icônes Feather sur la page
-  feather.replace();
-</script>
-
-<!-- Logique de chat partagée (utilisée par le widget et la page de chat) -->
-<script src="/js/chat-logic.js"></script>
-
-<!-- Script du widget de chat (ne s'exécute pas sur la page de chat elle-même) -->
-<% if (currentPath !== '/chat') { %>
-  <script src="/js/chat-widget.js"></script>
-<% } %>
-
-<!-- NOUVEAU: Script pour les améliorations de l'interface (scroll navbar, etc.) -->
-<script src="/js/ui-enhancements.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/theme.js"></script>
+<script src="/js/chat-widget.js"></script>
