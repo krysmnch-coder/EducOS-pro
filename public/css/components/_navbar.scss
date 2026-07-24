@@ -39,30 +39,24 @@
   // Style pour l'icône
   i {
     font-size: 1.25rem; // Taille de l'icône
-    margin-right: 0; // Pas de marge par défaut
-    transition: margin-right 0.2s ease;
+    margin-right: 0.5rem; // Marge permanente entre l'icône et le texte
   }
 
-  // Style pour le texte (caché par défaut)
+  // Style pour l'avatar (image) dans la navbar
+  img {
+    width: 32px; // Taille souhaitée pour l'avatar
+    height: 32px; // Taille souhaitée pour l'avatar
+    border-radius: 50%; // Pour rendre l'avatar rond
+    object-fit: cover; // Assure que l'image remplit l'espace sans déformation
+    margin-right: 0.5rem; // Marge entre l'avatar et le texte
+  }
+
+  // Style pour le texte (maintenant toujours visible)
   span {
-    max-width: 0; // Cache le texte
-    overflow: hidden;
     white-space: nowrap;
-    transition: max-width 0.2s ease, margin-left 0.2s ease, opacity 0.2s ease;
-    opacity: 0;
   }
 
-  // Au survol, affiche le texte
-  &:hover {
-    i {
-      margin-right: 0.5rem; // Ajoute une marge entre l'icône et le texte
-    }
-    span {
-      max-width: 150px; // Affiche le texte (valeur arbitraire, ajustez si besoin)
-      margin-left: 0.5rem; // Ajoute une marge à gauche du texte
-      opacity: 1;
-    }
-  }
+  // L'effet de survol pour afficher le texte a été retiré.
 }
 
 // Ajustement pour les badges (comme le badge de chat) dans la navbar
