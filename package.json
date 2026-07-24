@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "watch:css": "sass --watch public/scss/style.scss:public/css/style.css"
+    "watch:css": "sass --watch public/css:public/css"
   },
   "keywords": [
     "educos",
