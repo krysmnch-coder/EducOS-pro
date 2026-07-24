@@ -13,115 +13,96 @@
   align-items: center;
   justify-content: space-between;
   
-  padding: 0.75rem 1.5rem; // Plus d'espace vertical et horizontal
+  padding: 0.75rem 1.5rem;
   
-  // Effet "Glassmorphism"
   background-color: var(--navbar-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   
-  // Remplacer la bordure par une ombre subtile pour un effet de profondeur
-  border-bottom: 1px solid var(--nav-divider-color); // Gardons une ligne très fine pour la compatibilité
+  border-bottom: 1px solid var(--nav-divider-color);
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   
   transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
-// Conteneur pour les liens de navigation (généralement à droite)
+// Conteneur pour les liens de navigation
 .navbar-nav {
   display: flex;
   align-items: center;
-  gap: 0.5rem; // Espace entre chaque item
+  gap: 0.5rem;
 }
 
 // Style de chaque lien/bouton
 .navbar-nav .nav-item .nav-link {
   display: flex;
   align-items: center;
-  gap: 0.6rem; // Espace entre icône et texte
+  gap: 0.6rem;
   padding: 0.5rem 1rem;
   color: var(--nav-link-color);
-  background-color: transparent; // Le fond est géré par les pseudo-éléments
-  border-radius: 0.5rem; // Bords arrondis modernes
+  background-color: transparent;
+  border-radius: 0.5rem;
   transition: color 0.3s ease;
   white-space: nowrap;
   position: relative;
-  z-index: 1; // Au-dessus des couches de fond
-  overflow: hidden; // Crucial pour l'effet de bordure
+  z-index: 1;
+  overflow: hidden;
 
-  &:hover {
-    color: var(--nav-link-hover-color);
-  }
-
-  // Icônes
+  // Effet de surbrillance sur l'icône et le texte
   > i {
     font-size: 1.2rem;
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease, color 0.3s ease, text-shadow 0.3s ease;
   }
   
-  &:hover > i {
-    transform: scale(1.1); // Animation subtile sur l'icône
+  > span {
+    font-size: 0.9rem;
+    font-weight: 500;
+    display: inline-block;
+    transition: color 0.3s ease, text-shadow 0.3s ease;
   }
 
-  // Avatar
   > img {
     width: 32px;
     height: 32px;
     border-radius: 50%;
     object-fit: cover;
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
     border: 2px solid var(--card-bg);
   }
-  
-  &:hover > img {
-    transform: scale(1.1);
-  }
 
-  // Texte du lien (toujours visible)
-  > span {
-    font-size: 0.9rem;
-    font-weight: 500;
-    display: inline-block; // Assure que le span est un bloc pour les animations futures
+  // Effet de surbrillance au survol
+  &:hover {
+    color: var(--nav-link-hover-color);
+    
+    > i {
+      transform: scale(1.1);
+      color: var(--bs-primary);
+      text-shadow: 0 0 20px rgba(var(--bs-primary-rgb), 0.5);
+    }
+    
+    > span {
+      color: var(--bs-primary);
+      text-shadow: 0 0 20px rgba(var(--bs-primary-rgb), 0.3);
+    }
+    
+    > img {
+      transform: scale(1.1);
+      box-shadow: 0 0 20px rgba(var(--bs-primary-rgb), 0.3);
+    }
   }
 }
 
-// --- NOUVEL EFFET DE SURBRILLANCE : BORDURE GRADIENTE ANIMÉE ---
+// --- EFFET DE SURBRILLANCE UNIQUEMENT SUR L'ICÔNE ET LE TEXTE ---
 
-// 1. La bordure animée (la couche la plus en arrière)
-.navbar-nav .nav-item .nav-link::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 150%;
-  height: 300%;
-  background: conic-gradient(from 0deg, transparent, var(--bs-primary), var(--bs-info));
-  transform: translate(-50%, -50%);
-  animation: rotate-glow 4s linear infinite;
-  opacity: 0;
-  transition: opacity 0.4s ease;
-  z-index: -2; // Couche du fond
-}
-
-// 2. Le fond du bouton (couche intermédiaire)
+// Suppression de l'effet de bordure animée pour un fond complètement transparent
+.navbar-nav .nav-item .nav-link::before,
 .navbar-nav .nav-item .nav-link::after {
-  content: '';
-  position: absolute;
-  inset: 2px; // Laisse un espace de 2px pour que la bordure (::before) soit visible
-  background: var(--navbar-bg);
-  border-radius: calc(0.5rem - 2px); // Ajuster le radius intérieur
-  z-index: -1; // Entre la bordure et le texte
-  transition: background-color 0.3s ease;
+  display: none;
 }
 
-// 3. Au survol, on révèle la bordure et on ajuste le fond
-.navbar-nav .nav-item .nav-link:hover::after {
-  background: transparent; // Le fond reste transparent au survol
+// Garder le fond transparent au survol
+.navbar-nav .nav-item .nav-link:hover {
+  background-color: transparent;
 }
-
-// L'effet de bordure animée (::before) ne doit pas apparaître au survol pour un fond transparent.
-// Son opacité par défaut est déjà 0, donc pas besoin de le modifier ici.
-
 
 @keyframes rotate-glow {
   to {
@@ -136,19 +117,12 @@
   }
   .navbar-nav .nav-item .nav-link {
     padding: 0.75rem;
-    border-radius: 50%; // Boutons ronds sur mobile
+    border-radius: 50%;
     > span {
       display: none;
     }
-    // Sur mobile, on désactive l'effet complexe pour la performance et la simplicité
-    &::before, &::after {
-      display: none;
-    }
     &:hover {
-      background-color: var(--bs-tertiary-bg); // On revient à un fond simple
-    }
-    &::before {
-      border-radius: 50%;
+      background-color: transparent;
     }
   }
 }
