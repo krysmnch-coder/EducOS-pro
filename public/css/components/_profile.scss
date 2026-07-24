@@ -45,6 +45,10 @@
 .avatar-container {
   position: relative;
   flex-shrink: 0;
+  // Image de fond par défaut pour les avatars (visible si l'image src est vide ou absente)
+  background-image: url('/img/user.png');
+  background-size: cover;
+  background-position: center;
 
   &.online::after {
     content: '';

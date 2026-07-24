@@ -15,6 +15,12 @@
   transition: background-color 0.3s ease, border-color 0.3s ease; // Transition pour le thème
 }
 
+// Assure l'alignement horizontal des éléments de la navbar
+.navbar-nav {
+  display: flex;
+  align-items: center;
+}
+
 // Styles pour les liens/boutons de la navbar qui affichent le texte au survol
 .navbar-nav .nav-item .nav-link {
   display: flex;
