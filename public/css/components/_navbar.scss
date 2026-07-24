@@ -13,7 +13,7 @@
   align-items: center;
   justify-content: space-between;
   
-  padding: 0.75rem 1.5rem;
+  padding: 0.4rem 1.5rem; // RÉDUIT: de 0.75rem à 0.4rem
   
   background-color: var(--navbar-bg);
   backdrop-filter: blur(12px);
@@ -23,6 +23,7 @@
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   
   transition: background-color 0.3s ease, border-color 0.3s ease;
+  min-height: 60px; // RÉDUIT: hauteur minimale
 }
 
 .app-header {
@@ -35,11 +36,11 @@
 .navbar-brand {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.6rem; // RÉDUIT: de 0.75rem à 0.6rem
   font-weight: 700;
   text-decoration: none;
   color: var(--bs-primary);
-  font-size: 1.25rem;
+  font-size: 1.1rem; // RÉDUIT: de 1.25rem à 1.1rem
   transition: transform 0.3s ease;
 
   .bg-primary {
@@ -48,8 +49,13 @@
     justify-content: center;
     border-radius: 0.5rem;
     background-color: var(--bs-primary) !important;
-    padding: 0.5rem;
+    padding: 0.35rem; // RÉDUIT: de 0.5rem à 0.35rem
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    
+    svg {
+      width: 24px; // RÉDUIT: de 28px à 24px
+      height: 24px;
+    }
   }
 
   &:hover .bg-primary {
@@ -61,7 +67,7 @@
 // Navbar Toggler
 .navbar-toggler {
   border: none;
-  padding: 0.5rem;
+  padding: 0.35rem; // RÉDUIT
   color: #6c757d;
   transition: color 0.3s ease, transform 0.3s ease;
   
@@ -79,35 +85,35 @@
 .navbar-nav {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.3rem; // RÉDUIT: de 0.5rem à 0.3rem
 }
 
 .nav-item-spaced {
-  margin: 0 0.15rem;
+  margin: 0 0.1rem; // RÉDUIT
 }
 
-// Style de chaque lien/bouton - AGRANDI
+// Style de chaque lien/bouton
 .navbar-nav .nav-item .nav-link {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.3rem;
-  padding: 0.6rem 1rem; // AGRANDI: padding augmenté
+  gap: 0.15rem; // RÉDUIT: de 0.3rem à 0.15rem
+  padding: 0.35rem 0.7rem; // RÉDUIT: de 0.6rem 1rem à 0.35rem 0.7rem
   color: #6c757d;
   background-color: transparent;
-  border-radius: 0.75rem; // AGRANDI: radius augmenté
+  border-radius: 0.5rem; // RÉDUIT: de 0.75rem à 0.5rem
   transition: color 0.3s ease, transform 0.3s ease;
   white-space: nowrap;
   position: relative;
   z-index: 1;
   overflow: hidden;
   text-decoration: none;
-  min-width: 60px; // AGRANDI: largeur minimale
+  min-width: 50px; // RÉDUIT: de 60px à 50px
 
-  // Icônes SVG - Gris par défaut - AGRANDI
+  // Icônes SVG - Gris par défaut
   svg {
-    width: 26px; // AGRANDI: de 22px à 26px
-    height: 26px; // AGRANDI: de 22px à 26px
+    width: 22px; // RÉDUIT: de 26px à 22px
+    height: 22px; // RÉDUIT: de 26px à 22px
     color: #6c757d;
     transition: color 0.3s ease, transform 0.3s ease, filter 0.3s ease;
     stroke: currentColor;
@@ -117,14 +123,15 @@
     stroke-linejoin: round;
   }
   
-  // Texte - Gris par défaut - AGRANDI
+  // Texte - Gris par défaut
   .nav-text {
-    font-size: 0.7rem; // AGRANDI: de 0.65rem à 0.7rem
+    font-size: 0.6rem; // RÉDUIT: de 0.7rem à 0.6rem
     font-weight: 500;
     display: inline-block;
     color: #6c757d;
     transition: color 0.3s ease, text-shadow 0.3s ease;
     letter-spacing: 0.02em;
+    line-height: 1.1; // RÉDUIT
   }
 
   // État actif
@@ -145,17 +152,17 @@
   // Effet de surbrillance au survol - TOUT EN BLANC
   &:hover {
     color: #ffffff !important;
-    transform: translateY(-2px); // AGRANDI: effet plus prononcé
+    transform: translateY(-1px); // RÉDUIT: de -2px à -1px
     
     svg {
-      transform: scale(1.2); // AGRANDI: de 1.15 à 1.2
+      transform: scale(1.1); // RÉDUIT: de 1.2 à 1.1
       color: #ffffff !important;
-      filter: drop-shadow(0 0 25px rgba(255, 255, 255, 0.4)); // AGRANDI
+      filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.4));
     }
     
     .nav-text {
       color: #ffffff !important;
-      text-shadow: 0 0 25px rgba(255, 255, 255, 0.3); // AGRANDI
+      text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
     }
   }
 }
@@ -174,32 +181,32 @@
 // Séparateur
 .nav-divider {
   color: rgba(255, 255, 255, 0.1);
-  padding: 0 0.5rem;
-  font-size: 1.2rem;
+  padding: 0 0.3rem; // RÉDUIT
+  font-size: 1rem; // RÉDUIT
   font-weight: 100;
   user-select: none;
 }
 
-// Boutons d'icônes (Notifications, Thème) - AGRANDI
+// Boutons d'icônes (Notifications, Thème)
 .nav-icon-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.6rem 1rem; // AGRANDI: padding augmenté
+  padding: 0.35rem 0.7rem; // RÉDUIT: de 0.6rem 1rem à 0.35rem 0.7rem
   color: #6c757d;
   background-color: transparent !important;
   border: none !important;
-  border-radius: 0.75rem; // AGRANDI: radius augmenté
+  border-radius: 0.5rem; // RÉDUIT: de 0.75rem à 0.5rem
   transition: color 0.3s ease, transform 0.3s ease;
   cursor: pointer;
   position: relative;
   z-index: 1;
   text-decoration: none;
-  min-width: 60px; // AGRANDI: largeur minimale
+  min-width: 50px; // RÉDUIT: de 60px à 50px
 
   svg {
-    width: 26px; // AGRANDI: de 22px à 26px
-    height: 26px; // AGRANDI: de 22px à 26px
+    width: 22px; // RÉDUIT: de 26px à 22px
+    height: 22px; // RÉDUIT: de 26px à 22px
     color: #6c757d;
     transition: color 0.3s ease, transform 0.3s ease, filter 0.3s ease;
     stroke: currentColor;
@@ -222,12 +229,12 @@
   // Effet de surbrillance au survol - TOUT EN BLANC
   &:hover {
     color: #ffffff !important;
-    transform: translateY(-2px); // AGRANDI: effet plus prononcé
+    transform: translateY(-1px); // RÉDUIT
     
     svg {
-      transform: scale(1.2); // AGRANDI: de 1.15 à 1.2
+      transform: scale(1.1); // RÉDUIT
       color: #ffffff !important;
-      filter: drop-shadow(0 0 25px rgba(255, 255, 255, 0.4)); // AGRANDI
+      filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.4));
     }
   }
 }
@@ -241,18 +248,18 @@
 
   .badge {
     position: absolute;
-    top: -5px;
-    right: -8px;
+    top: -4px; // RÉDUIT: de -5px à -4px
+    right: -6px; // RÉDUIT: de -8px à -6px
     border: 2px solid var(--navbar-bg);
     transform: none;
     background-color: #dc3545;
     color: #ffffff;
-    font-size: 0.6rem;
-    padding: 0.15rem 0.4rem;
+    font-size: 0.5rem; // RÉDUIT: de 0.6rem à 0.5rem
+    padding: 0.1rem 0.3rem; // RÉDUIT
     border-radius: 50%;
     transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
-    min-width: 18px;
-    height: 18px;
+    min-width: 16px; // RÉDUIT: de 18px à 16px
+    height: 16px; // RÉDUIT: de 18px à 16px
     display: none;
     align-items: center;
     justify-content: center;
@@ -302,10 +309,10 @@ html:not([data-theme="dark"]) #theme-toggle-btn .theme-icon-dark {
   display: none;
 }
 
-// Avatar - AGRANDI
+// Avatar
 .navbar-avatar {
-  width: 36px; // AGRANDI: de 32px à 36px
-  height: 36px; // AGRANDI: de 32px à 36px
+  width: 30px; // RÉDUIT: de 36px à 30px
+  height: 30px; // RÉDUIT: de 36px à 30px
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid #6c757d;
@@ -313,8 +320,8 @@ html:not([data-theme="dark"]) #theme-toggle-btn .theme-icon-dark {
 }
 
 .navbar-avatar-placeholder {
-  width: 36px; // AGRANDI: de 32px à 36px
-  height: 36px; // AGRANDI: de 32px à 36px
+  width: 30px; // RÉDUIT: de 36px à 30px
+  height: 30px; // RÉDUIT: de 36px à 30px
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -322,28 +329,27 @@ html:not([data-theme="dark"]) #theme-toggle-btn .theme-icon-dark {
   background: linear-gradient(135deg, var(--bs-primary), var(--bs-info));
   color: #ffffff;
   font-weight: 600;
-  font-size: 1rem; // AGRANDI: de 0.9rem à 1rem
+  font-size: 0.85rem; // RÉDUIT: de 1rem à 0.85rem
   border: 2px solid #6c757d;
   transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
 .nav-link:hover .navbar-avatar,
 .nav-link:hover .navbar-avatar-placeholder {
-  transform: scale(1.1);
+  transform: scale(1.08); // RÉDUIT: de 1.1 à 1.08
   border-color: #ffffff;
-  box-shadow: 0 0 25px rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
 }
 
 // Dropdown - AVATAR DEVANT LE NOM
 .dropdown-toggle {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.75rem;
+  gap: 0.4rem; // RÉDUIT: de 0.5rem à 0.4rem
+  padding: 0.35rem 0.7rem; // RÉDUIT
   
-  // L'avatar est déjà devant dans le HTML, on garde l'ordre
   &::after {
-    margin-left: 0.25rem;
+    margin-left: 0.15rem; // RÉDUIT
   }
 }
 
@@ -351,11 +357,15 @@ html:not([data-theme="dark"]) #theme-toggle-btn .theme-icon-dark {
 #navbarUserDropdown {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem; // RÉDUIT
   
   .navbar-avatar,
   .navbar-avatar-placeholder {
     order: -1; // Force l'avatar à être devant
+  }
+  
+  span {
+    font-size: 0.85rem; // RÉDUIT
   }
 }
 
@@ -371,9 +381,10 @@ html:not([data-theme="dark"]) #theme-toggle-btn .theme-icon-dark {
 
   .dropdown-item {
     color: var(--text-color);
-    padding: 0.6rem 1rem;
+    padding: 0.5rem 1rem; // RÉDUIT: de 0.6rem à 0.5rem
     border-radius: 0.5rem;
     transition: background-color 0.2s ease, color 0.2s ease;
+    font-size: 0.9rem; // RÉDUIT
     
     &:hover {
       background-color: rgba(var(--bs-primary-rgb), 0.1);
@@ -392,14 +403,18 @@ html:not([data-theme="dark"]) #theme-toggle-btn .theme-icon-dark {
 
   .dropdown-divider {
     border-color: var(--border-color);
-    margin: 0.25rem 0;
+    margin: 0.2rem 0; // RÉDUIT
   }
 }
 
 // Responsive
 @media (max-width: 992px) {
+  .navbar {
+    padding: 0.3rem 1rem; // RÉDUIT
+  }
+  
   .navbar-nav {
-    gap: 0.25rem;
+    gap: 0.15rem; // RÉDUIT
   }
   
   .nav-item-spaced {
@@ -408,8 +423,8 @@ html:not([data-theme="dark"]) #theme-toggle-btn .theme-icon-dark {
   
   .navbar-nav .nav-item .nav-link {
     flex-direction: row;
-    padding: 0.6rem 1rem;
-    gap: 0.75rem;
+    padding: 0.4rem 0.8rem; // RÉDUIT
+    gap: 0.6rem; // RÉDUIT
     width: 100%;
     border-radius: 0.5rem;
     min-width: auto;
@@ -419,8 +434,8 @@ html:not([data-theme="dark"]) #theme-toggle-btn .theme-icon-dark {
     }
     
     svg {
-      width: 22px;
-      height: 22px;
+      width: 20px; // RÉDUIT
+      height: 20px; // RÉDUIT
     }
   }
   
@@ -429,15 +444,15 @@ html:not([data-theme="dark"]) #theme-toggle-btn .theme-icon-dark {
   }
   
   .nav-icon-btn {
-    padding: 0.6rem 1rem;
+    padding: 0.4rem 0.8rem; // RÉDUIT
     width: 100%;
     justify-content: flex-start;
-    gap: 0.75rem;
+    gap: 0.6rem; // RÉDUIT
     min-width: auto;
     
     svg {
-      width: 22px;
-      height: 22px;
+      width: 20px; // RÉDUIT
+      height: 20px; // RÉDUIT
     }
   }
   
@@ -448,39 +463,51 @@ html:not([data-theme="dark"]) #theme-toggle-btn .theme-icon-dark {
   .dropdown-toggle {
     width: 100%;
     justify-content: flex-start;
+    padding: 0.4rem 0.8rem; // RÉDUIT
   }
   
   .navbar-avatar,
   .navbar-avatar-placeholder {
-    width: 30px;
-    height: 30px;
+    width: 28px; // RÉDUIT
+    height: 28px; // RÉDUIT
+    font-size: 0.8rem;
+  }
+  
+  #navbarUserDropdown span {
     font-size: 0.85rem;
   }
 }
 
 @media (max-width: 768px) {
   .navbar {
-    padding: 0.5rem 1rem;
+    padding: 0.25rem 0.75rem; // RÉDUIT
+    min-height: 50px; // RÉDUIT
   }
   
   .navbar-brand {
-    font-size: 1rem;
+    font-size: 0.95rem; // RÉDUIT
     
     .bg-primary {
-      padding: 0.4rem;
+      padding: 0.3rem; // RÉDUIT
       
       svg {
-        width: 24px;
-        height: 24px;
+        width: 22px; // RÉDUIT
+        height: 22px; // RÉDUIT
       }
     }
   }
   
   .navbar-avatar,
   .navbar-avatar-placeholder {
-    width: 28px;
-    height: 28px;
-    font-size: 0.8rem;
+    width: 26px; // RÉDUIT
+    height: 26px; // RÉDUIT
+    font-size: 0.75rem;
+  }
+  
+  .nav-icon-btn svg,
+  .navbar-nav .nav-item .nav-link svg {
+    width: 18px; // RÉDUIT
+    height: 18px; // RÉDUIT
   }
 }
 
