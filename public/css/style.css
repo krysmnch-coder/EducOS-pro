@@ -17,6 +17,10 @@ body {
   background-blend-mode: overlay;
 }
 
+.navbar {
+  border-bottom: 5px solid red !important;
+}
+
 body .chat-float-btn {
   position: fixed;
   bottom: 25px;
