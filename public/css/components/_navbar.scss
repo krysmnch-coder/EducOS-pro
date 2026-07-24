@@ -107,17 +107,114 @@
   background-color: transparent !important;
 }
 
+// Style spécifique pour le bouton de notification
+.navbar-nav .nav-item .nav-link .icon-badge-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -8px;
+    border: 2px solid var(--navbar-bg);
+    transform: none;
+    background-color: #6c757d; // Gris par défaut
+    color: #ffffff;
+    font-size: 0.6rem;
+    padding: 0.15rem 0.4rem;
+    border-radius: 50%;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    min-width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+// Le badge de notification devient blanc au survol
+.navbar-nav .nav-item .nav-link:hover .notification-badge {
+  background-color: #ffffff;
+  color: #6c757d;
+}
+
+// Style spécifique pour le bouton de thème
+#theme-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.5rem 1rem;
+  color: #6c757d;
+  background-color: transparent;
+  border: none;
+  border-radius: 0.5rem;
+  transition: color 0.3s ease, transform 0.3s ease;
+  white-space: nowrap;
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  cursor: pointer;
+
+  .theme-icon-dark, .theme-icon-light {
+    display: none;
+    font-size: 1.2rem;
+    transition: color 0.3s ease, transform 0.3s ease, text-shadow 0.3s ease;
+  }
+
+  // Afficher les icônes selon le thème
+  .theme-icon-light {
+    display: inline-block;
+  }
+  
+  // Effet de surbrillance au survol - TOUT EN BLANC
+  &:hover {
+    color: #ffffff !important;
+    
+    .theme-icon-dark, .theme-icon-light {
+      transform: scale(1.15);
+      color: #ffffff !important;
+      text-shadow: 0 0 25px rgba(255, 255, 255, 0.4), 0 0 50px rgba(255, 255, 255, 0.2);
+    }
+  }
+}
+
+// Mode sombre - afficher l'icône sombre
+[data-theme="dark"] #theme-toggle-btn {
+  .theme-icon-light {
+    display: none;
+  }
+  .theme-icon-dark {
+    display: inline-block;
+  }
+}
+
+// Mode clair - afficher l'icône claire
+html:not([data-theme="dark"]) #theme-toggle-btn {
+  .theme-icon-dark {
+    display: none;
+  }
+  .theme-icon-light {
+    display: inline-block;
+  }
+}
+
 // Masquer le texte sur mobile pour garder une interface propre
 @media (max-width: 768px) {
   .navbar {
     padding: 0.5rem 1rem;
   }
+  
   .navbar-nav .nav-item .nav-link {
     padding: 0.75rem;
     border-radius: 50%;
+    
     > span {
       display: none;
     }
+    
     &:hover {
       background-color: transparent !important;
       
@@ -128,46 +225,20 @@
       }
     }
   }
-}
 
-// Badge de chat
-.navbar-nav .nav-item .nav-link .icon-badge-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  .chat-badge {
-    position: absolute;
-    top: -5px;
-    right: -10px;
-    border: 2px solid var(--navbar-bg);
-    transform: none;
-    background-color: #6c757d; // Badge gris par défaut
-    color: #ffffff;
-    transition: background-color 0.3s ease;
-  }
-}
-
-// Le badge devient blanc au survol du parent
-.navbar-nav .nav-item .nav-link:hover .chat-badge {
-  background-color: #ffffff;
-  color: #6c757d;
-}
-
-// Bouton de thème
-#theme-toggle-btn {
-  .theme-icon-dark, .theme-icon-light {
-    display: none;
-  }
-}
-
-html:not([data-theme="dark"]) #theme-toggle-btn .theme-icon-light {
-  display: inline-block;
-}
-
-[data-theme="dark"] #theme-toggle-btn {
-  .theme-icon-dark {
-    display: inline-block;
+  // Bouton de thème sur mobile
+  #theme-toggle-btn {
+    padding: 0.75rem;
+    border-radius: 50%;
+    
+    &:hover {
+      background-color: transparent !important;
+      
+      .theme-icon-dark, .theme-icon-light {
+        transform: scale(1.2);
+        color: #ffffff !important;
+        text-shadow: 0 0 30px rgba(255, 255, 255, 0.5), 0 0 60px rgba(255, 255, 255, 0.2);
+      }
+    }
   }
 }
