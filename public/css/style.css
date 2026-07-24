@@ -51,6 +51,13 @@ body {
   color: var(--nav-link-hover-color);
   background-color: var(--bs-tertiary-bg);
 }
+.navbar-nav .nav-item .nav-link:hover i, .navbar-nav .nav-item .nav-link:hover img {
+  margin-right: 0.5rem;
+}
+.navbar-nav .nav-item .nav-link:hover span {
+  max-width: 150px;
+  opacity: 1;
+}
 .navbar-nav .nav-item .nav-link i {
   font-size: 1.25rem;
   margin-right: 0;
@@ -70,13 +77,6 @@ body {
   white-space: nowrap;
   transition: max-width 0.2s ease, opacity 0.2s ease;
   opacity: 0;
-}
-.navbar-nav .nav-item .nav-link:hover i, .navbar-nav .nav-item .nav-link:hover img {
-  margin-right: 0.5rem;
-}
-.navbar-nav .nav-item .nav-link:hover span {
-  max-width: 150px;
-  opacity: 1;
 }
 
 .navbar-nav .nav-item .nav-link .icon-badge-wrapper {

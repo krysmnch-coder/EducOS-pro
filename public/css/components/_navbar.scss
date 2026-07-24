@@ -36,6 +36,15 @@
   &:hover {
     color: var(--nav-link-hover-color);
     background-color: var(--bs-tertiary-bg); // Léger fond au survol pour indiquer la zone cliquable
+
+    // Au survol, affiche le texte
+    i, img {
+      margin-right: 0.5rem; // Ajoute une marge entre l'icône/avatar et le texte
+    }
+    span {
+      max-width: 150px; // Affiche le texte (valeur arbitraire, ajustez si besoin)
+      opacity: 1;
+    }
   }
 
   // Style pour l'icône
@@ -62,17 +71,6 @@
     white-space: nowrap;
     transition: max-width 0.2s ease, opacity 0.2s ease;
     opacity: 0;
-  }
-
-  // Au survol, affiche le texte
-  &:hover {
-    i, img {
-      margin-right: 0.5rem; // Ajoute une marge entre l'icône/avatar et le texte
-    }
-    span {
-      max-width: 150px; // Affiche le texte (valeur arbitraire, ajustez si besoin)
-      opacity: 1;
-    }
   }
 }
 
