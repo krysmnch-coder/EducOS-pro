@@ -1,4 +1,8 @@
-// Fichier : src/controllers/authController.js (APRÈS la migration)
+/**
+ * @file Manages all authentication-related logic, including registration, login, logout,
+ * password management, and profile updates.
+ * @author Your Name
+ */
 
 const passport = require('passport');
 const db = require('../models/db'); // NOUVELLE instance Knex partagée
@@ -12,7 +16,9 @@ const { validateEmail } = require('../utils/emailValidationService');
 const { sendPasswordResetEmail } = require('../utils/emailService');
 
 /**
- * Affiche la page d'accueil ou redirige vers le tableau de bord si l'utilisateur est connecté.
+ * Renders the public home page.
+ * @param {import('express').Request} req - The Express request object.
+ * @param {import('express').Response} res - The Express response object.
  */
 exports.renderHome = (req, res) => {
   // Modification : La page d'accueil publique est maintenant accessible même si l'utilisateur est connecté,
@@ -26,7 +32,9 @@ exports.renderHome = (req, res) => {
 };
 
 /**
- * Affiche la page "mot de passe oublié".
+ * Renders the "forgot password" page.
+ * @param {import('express').Request} req - The Express request object.
+ * @param {import('express').Response} res - The Express response object.
  */
 exports.renderForgotPassword = (req, res) => {
   res.render('forgot-password', {
@@ -35,7 +43,13 @@ exports.renderForgotPassword = (req, res) => {
 };
 
 /**
- * Gère la demande de réinitialisation de mot de passe.
+ * Handles a password reset request.
+ * Generates a secure token, saves it to the user's record with an expiration date,
+ * and sends a password reset email.
+ * For security, it always returns a success message, even if the email doesn't exist,
+ * to prevent email enumeration attacks.
+ * @param {import('express').Request} req - The Express request object.
+ * @param {import('express').Response} res - The Express response object.
  */
 exports.postForgotPassword = async (req, res) => {
   const { email } = req.body;
@@ -71,7 +85,9 @@ exports.postForgotPassword = async (req, res) => {
 };
 
 /**
- * Affiche la page pour entrer le nouveau mot de passe.
+ * Renders the password reset page if the provided token is valid and not expired.
+ * @param {import('express').Request} req - The Express request object, containing the token in params.
+ * @param {import('express').Response} res - The Express response object.
  */
 exports.renderResetPassword = async (req, res) => {
   try {
@@ -98,7 +114,10 @@ exports.renderResetPassword = async (req, res) => {
 };
 
 /**
- * Gère la soumission du nouveau mot de passe.
+ * Handles the submission of a new password from the reset page.
+ * It reuses the `postForceChangePassword` logic for consistency.
+ * @param {import('express').Request} req - The Express request object.
+ * @param {import('express').Response} res - The Express response object.
  */
 exports.postResetPassword = async (req, res) => {
   // Cette fonction est très similaire à `postForceChangePassword`.
@@ -107,7 +126,10 @@ exports.postResetPassword = async (req, res) => {
 };
 
 /**
- * Affiche la page de connexion.
+ * Renders the login page.
+ * If the user is already authenticated, they are redirected to the dashboard.
+ * @param {import('express').Request} req - The Express request object.
+ * @param {import('express').Response} res - The Express response object.
  */
 exports.renderLogin = async (req, res) => {
   // Si l'utilisateur est déjà connecté, on le redirige vers le tableau de bord.
@@ -128,7 +150,12 @@ exports.renderLogin = async (req, res) => {
 };
 
 /**
- * Redirige l'utilisateur vers le tableau de bord approprié en fonction de son rôle.
+ * Renders the appropriate dashboard based on the user's role.
+ * - Admins are sent to a dedicated admin dashboard.
+ * - Other roles get a dynamic dashboard with role-specific widgets.
+ * - For parents, it fetches data about their linked children.
+ * @param {import('express').Request} req - The Express request object.
+ * @param {import('express').Response} res - The Express response object.
  */
 exports.renderDashboard = async (req, res) => {
     const user = req.user;
@@ -208,7 +235,11 @@ exports.renderDashboard = async (req, res) => {
 };
 
 /**
- * Gère la sélection de l'enfant à suivre pour un parent.
+ * Handles a parent's selection of a child to view.
+ * The selected child's ID is stored in the session for subsequent requests.
+ * Includes a security check to ensure the selected child belongs to the logged-in parent.
+ * @param {import('express').Request} req - The Express request object.
+ * @param {import('express').Response} res - The Express response object.
  */
 exports.selectChild = async (req, res) => {
     const { childId } = req.body;
@@ -230,7 +261,9 @@ exports.selectChild = async (req, res) => {
 };
 
 /**
- * Affiche la page d'inscription avec la liste des établissements.
+ * Renders the user registration page, providing a list of establishments.
+ * @param {import('express').Request} req - The Express request object.
+ * @param {import('express').Response} res - The Express response object.
  */
 exports.renderRegister = async (req, res) => {
   try {
@@ -247,7 +280,15 @@ exports.renderRegister = async (req, res) => {
 };
 
 /**
- * Gère l'inscription d'un nouvel utilisateur en utilisant Knex et async/await.
+ * Handles new user registration.
+ * This process includes:
+ * 1. Validating input data (passwords, email, role, establishment).
+ * 2. Checking for existing users.
+ * 3. Hashing the password.
+ * 4. Creating the user and any associated data (like parent-child links) within a database transaction.
+ * 5. Broadcasting real-time updates to admin dashboards via Socket.IO.
+ * @param {import('express').Request} req - The Express request object.
+ * @param {import('express').Response} res - The Express response object.
  */
 exports.postRegister = async (req, res) => {
   // On récupère l'ID de l'établissement pour une architecture multi-tenant
@@ -388,7 +429,10 @@ exports.postRegister = async (req, res) => {
 };
 
 /**
- * Gère la déconnexion de l'utilisateur.
+ * Logs the user out, clears the session, and redirects to the login page.
+ * @param {import('express').Request} req - The Express request object.
+ * @param {import('express').Response} res - The Express response object.
+ * @param {import('express').NextFunction} next - The Express next middleware function.
  */
 exports.logout = (req, res, next) => {
   req.logout(function(err) {
@@ -399,7 +443,9 @@ exports.logout = (req, res, next) => {
 };
 
 /**
- * Affiche la page de changement de mot de passe forcé.
+ * Renders the page for a forced password change (e.g., for a new user).
+ * @param {import('express').Request} req - The Express request object.
+ * @param {import('express').Response} res - The Express response object.
  */
 exports.renderForceChangePassword = (req, res) => {
     res.render('force-change-password', {
@@ -408,7 +454,12 @@ exports.renderForceChangePassword = (req, res) => {
 };
 
 /**
- * Gère la soumission du formulaire de changement de mot de passe forcé.
+ * Handles the submission of a new password, either from a forced change or a password reset link.
+ * It identifies the user via session (if logged in) or via a URL token.
+ * After a successful password update, the user is logged out for security.
+ * @param {import('express').Request} req - The Express request object.
+ * @param {import('express').Response} res - The Express response object.
+ * @param {string} [redirectUrl='/force-change-password'] - The URL to redirect to on failure.
  */
 exports.postForceChangePassword = async (req, res, redirectUrl = '/force-change-password') => {
     const { password, confirm_password } = req.body;
@@ -467,14 +518,18 @@ exports.postForceChangePassword = async (req, res, redirectUrl = '/force-change-
 };
 
 /**
- * Placeholder for social login.
+ * Placeholder for social media login functionality. Not yet implemented.
+ * @param {import('express').Request} req - The Express request object.
+ * @param {import('express').Response} res - The Express response object.
  */
 exports.socialLogin = (req, res) => {
     res.status(501).send('Social login not implemented.');
 };
 
 /**
- * Placeholder for API token retrieval.
+ * Placeholder for API token generation. Not yet implemented.
+ * @param {import('express').Request} req - The Express request object.
+ * @param {import('express').Response} res - The Express response object.
  */
 exports.getApiToken = (req, res) => {
     exports.selectChild = exports.selectChild;
@@ -482,7 +537,9 @@ exports.getApiToken = (req, res) => {
 };
 
 /**
- * Renders the user profile page.
+ * Renders the user's profile page.
+ * @param {import('express').Request} req - The Express request object.
+ * @param {import('express').Response} res - The Express response object.
  */
 exports.renderProfile = (req, res) => {
     res.render('profile', {
@@ -492,7 +549,10 @@ exports.renderProfile = (req, res) => {
 };
 
 /**
- * Updates the user's profile picture.
+ * Handles the upload and update of a user's profile picture.
+ * The file is processed by `multer` middleware before this function is called.
+ * @param {import('express').Request} req - The Express request object, containing the uploaded file.
+ * @param {import('express').Response} res - The Express response object.
  */
 exports.updateProfilePicture = async (req, res) => {
     if (!req.file) {
@@ -513,7 +573,9 @@ exports.updateProfilePicture = async (req, res) => {
 };
 
 /**
- * Updates user's profile information.
+ * Handles updates to a user's profile information (e.g., name, phone number).
+ * @param {import('express').Request} req - The Express request object.
+ * @param {import('express').Response} res - The Express response object.
  */
 exports.updateProfileInfo = async (req, res) => {
     const { name, phone_number } = req.body;
