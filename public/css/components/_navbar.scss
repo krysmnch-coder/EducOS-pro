@@ -21,42 +21,63 @@
   align-items: center;
 }
 
-// Styles pour les liens/boutons de la navbar qui affichent le texte au survol
 .navbar-nav .nav-item .nav-link {
   display: flex;
   align-items: center;
   padding: 0.5rem 0.75rem; // Ajustez le padding
   color: var(--nav-link-color);
-  transition: color 0.2s ease, background-color 0.2s ease;
+  transition: all 0.3s ease; // Transition fluide pour toutes les propriétés
   border-radius: 0.375rem; // Arrondi léger
   background-color: transparent; // Assure un fond transparent par défaut
+  white-space: nowrap; // Empêche le texte de passer à la ligne
 
   &:hover {
     color: var(--nav-link-hover-color);
-    background-color: transparent; // Fond transparent même au survol
+    background-color: var(--bs-tertiary-bg); // Ajoute un fond subtil au survol
   }
 
-  // Style pour l'icône
-  i {
+  // Styles communs pour la partie visuelle "icône" (icône, avatar ou wrapper de badge)
+  > i,
+  > img,
+  > .icon-badge-wrapper {
+    flex-shrink: 0; // Empêche l'icône/avatar de rétrécir
+    transition: margin-right 0.3s ease;
+    margin-right: 0; // Pas de marge au début
+  }
+
+  &:hover > i,
+  &:hover > img,
+  &:hover > .icon-badge-wrapper {
+    margin-right: 0.5rem; // Ajoute une marge lorsque le texte apparaît
+  }
+
+  // Styles spécifiques pour les icônes
+  > i {
     font-size: 1.25rem; // Taille de l'icône
-    margin-right: 0.5rem; // Marge permanente entre l'icône et le texte
   }
 
-  // Style pour l'avatar (image) dans la navbar
-  img {
-    width: 32px; // Taille souhaitée pour l'avatar
-    height: 32px; // Taille souhaitée pour l'avatar
-    border-radius: 50%; // Pour rendre l'avatar rond
-    object-fit: cover; // Assure que l'image remplit l'espace sans déformation
-    margin-right: 0.5rem; // Marge entre l'avatar et le texte
+  // Styles spécifiques pour les avatars
+  > img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
   }
 
-  // Style pour le texte (maintenant toujours visible)
-  span {
-    white-space: nowrap;
+  // Style pour le texte (initialement caché, affiché au survol)
+  > span {
+    opacity: 0;
+    width: 0;
+    overflow: hidden;
+    transition: opacity 0.3s ease, width 0.3s ease;
+    display: inline-block; // Nécessaire pour que la transition de largeur fonctionne bien
+    vertical-align: middle; // Alignement avec l'icône
   }
 
-  // L'effet de survol pour afficher le texte a été retiré.
+  &:hover > span {
+    opacity: 1;
+    width: auto; // Permet au texte de prendre sa largeur naturelle
+  }
 }
 
 // Ajustement pour les badges (comme le badge de chat) dans la navbar
@@ -65,7 +86,6 @@
   display: flex; // Pour aligner l'icône et le badge
   align-items: center;
   justify-content: center;
-
   .chat-badge {
     position: absolute;
     top: -5px; // Ajustez la position

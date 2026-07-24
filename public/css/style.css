@@ -41,27 +41,45 @@ body {
   align-items: center;
   padding: 0.5rem 0.75rem;
   color: var(--nav-link-color);
-  transition: color 0.2s ease, background-color 0.2s ease;
+  transition: all 0.3s ease;
   border-radius: 0.375rem;
   background-color: transparent;
+  white-space: nowrap;
 }
 .navbar-nav .nav-item .nav-link:hover {
   color: var(--nav-link-hover-color);
-  background-color: transparent;
+  background-color: var(--bs-tertiary-bg);
 }
-.navbar-nav .nav-item .nav-link i {
-  font-size: 1.25rem;
+.navbar-nav .nav-item .nav-link > i,
+.navbar-nav .nav-item .nav-link > img,
+.navbar-nav .nav-item .nav-link > .icon-badge-wrapper {
+  flex-shrink: 0;
+  transition: margin-right 0.3s ease;
+  margin-right: 0;
+}
+.navbar-nav .nav-item .nav-link:hover > i, .navbar-nav .nav-item .nav-link:hover > img, .navbar-nav .nav-item .nav-link:hover > .icon-badge-wrapper {
   margin-right: 0.5rem;
 }
-.navbar-nav .nav-item .nav-link img {
+.navbar-nav .nav-item .nav-link > i {
+  font-size: 1.25rem;
+}
+.navbar-nav .nav-item .nav-link > img {
   width: 32px;
   height: 32px;
   border-radius: 50%;
   object-fit: cover;
-  margin-right: 0.5rem;
 }
-.navbar-nav .nav-item .nav-link span {
-  white-space: nowrap;
+.navbar-nav .nav-item .nav-link > span {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+  transition: opacity 0.3s ease, width 0.3s ease;
+  display: inline-block;
+  vertical-align: middle;
+}
+.navbar-nav .nav-item .nav-link:hover > span {
+  opacity: 1;
+  width: auto;
 }
 
 .navbar-nav .nav-item .nav-link .icon-badge-wrapper {
