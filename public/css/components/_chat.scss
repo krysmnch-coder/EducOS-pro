@@ -65,7 +65,7 @@ body .chat-float-btn {
     display: none;
     align-items: center;
     justify-content: center;
-    border: 2px solid white;
+    border: 2px solid var(--white-color);
 
     &.pulse {
       animation: pulse-badge 2s infinite;
