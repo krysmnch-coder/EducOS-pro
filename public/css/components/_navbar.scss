@@ -23,10 +23,11 @@
   color: var(--nav-link-color);
   transition: color 0.2s ease, background-color 0.2s ease;
   border-radius: 0.375rem; // Arrondi léger
+  background-color: transparent; // Assure un fond transparent par défaut
 
   &:hover {
     color: var(--nav-link-hover-color);
-    background-color: var(--bs-tertiary-bg); // Un léger fond au survol, utilise une variable Bootstrap
+    background-color: transparent; // Fond transparent même au survol
   }
 
   // Style pour l'icône
@@ -71,5 +72,32 @@
     right: -5px; // Ajustez la position
     transform: none; // Réinitialise la transformation du _chat.scss si elle est appliquée ici
     border: 1px solid var(--white-color); // Bordure pour contraster avec le fond de la navbar
+  }
+}
+
+// Styles pour le bouton de changement de thème (sombre/clair)
+// S'attend à une structure HTML avec deux icônes à l'intérieur du bouton
+#theme-toggle-btn {
+  // Par défaut (thème clair), on cache l'icône de lune
+  .theme-icon-dark {
+    display: none;
+  }
+  // et on montre l'icône de soleil
+  .theme-icon-light {
+    display: inline-block;
+  }
+}
+
+// Quand le thème sombre est actif
+[data-theme="dark"] {
+  #theme-toggle-btn {
+    // on montre l'icône de lune
+    .theme-icon-dark {
+      display: inline-block;
+    }
+    // et on cache l'icône de soleil
+    .theme-icon-light {
+      display: none;
+    }
   }
 }
