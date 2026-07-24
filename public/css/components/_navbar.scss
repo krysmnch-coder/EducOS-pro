@@ -18,14 +18,16 @@
 // Assure l'alignement horizontal des éléments de la navbar
 .navbar-nav {
   display: flex;
-  align-items: center;
+  flex-direction: row; // Assure l'alignement horizontal
+  align-items: center; // Centre verticalement tous les éléments
+  gap: 0.25rem; // Ajoute un petit espace entre les boutons pour une meilleure respiration
 }
 
 // Styles pour les liens/boutons de la navbar qui affichent le texte au survol
 .navbar-nav .nav-item .nav-link {
   display: flex;
   align-items: center;
-  padding: 0.5rem 0.75rem; // Ajustez le padding
+  padding: 0.5rem; // Padding uniforme
   color: var(--nav-link-color);
   transition: color 0.2s ease, background-color 0.2s ease;
   border-radius: 0.375rem; // Arrondi léger
@@ -33,13 +35,14 @@
 
   &:hover {
     color: var(--nav-link-hover-color);
-    background-color: transparent; // Fond transparent même au survol
+    background-color: var(--bs-tertiary-bg); // Léger fond au survol pour indiquer la zone cliquable
   }
 
   // Style pour l'icône
   i {
     font-size: 1.25rem; // Taille de l'icône
-    margin-right: 0.5rem; // Marge permanente entre l'icône et le texte
+    margin-right: 0; // Pas de marge par défaut
+    transition: margin-right 0.2s ease;
   }
 
   // Style pour l'avatar (image) dans la navbar
@@ -48,15 +51,29 @@
     height: 32px; // Taille souhaitée pour l'avatar
     border-radius: 50%; // Pour rendre l'avatar rond
     object-fit: cover; // Assure que l'image remplit l'espace sans déformation
-    margin-right: 0.5rem; // Marge entre l'avatar et le texte
+    margin-right: 0; // Pas de marge par défaut
+    transition: margin-right 0.2s ease;
   }
 
-  // Style pour le texte (maintenant toujours visible)
+  // Style pour le texte (caché par défaut)
   span {
+    max-width: 0;
+    overflow: hidden;
     white-space: nowrap;
+    transition: max-width 0.2s ease, opacity 0.2s ease;
+    opacity: 0;
   }
 
-  // L'effet de survol pour afficher le texte a été retiré.
+  // Au survol, affiche le texte
+  &:hover {
+    i, img {
+      margin-right: 0.5rem; // Ajoute une marge entre l'icône/avatar et le texte
+    }
+    span {
+      max-width: 150px; // Affiche le texte (valeur arbitraire, ajustez si besoin)
+      opacity: 1;
+    }
+  }
 }
 
 // Ajustement pour les badges (comme le badge de chat) dans la navbar
