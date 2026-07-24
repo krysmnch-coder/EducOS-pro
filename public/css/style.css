@@ -107,12 +107,8 @@ body {
   transition: background-color 0.3s ease;
 }
 
-.navbar-nav .nav-item .nav-link:hover::before {
-  opacity: 1;
-}
-
 .navbar-nav .nav-item .nav-link:hover::after {
-  background: var(--bs-body-bg);
+  background: transparent;
 }
 
 @keyframes rotate-glow {

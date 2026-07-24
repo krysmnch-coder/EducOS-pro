@@ -115,12 +115,13 @@
 }
 
 // 3. Au survol, on révèle la bordure et on ajuste le fond
-.navbar-nav .nav-item .nav-link:hover::before {
-  opacity: 1;
-}
 .navbar-nav .nav-item .nav-link:hover::after {
-  background: var(--bs-body-bg);
+  background: transparent; // Le fond reste transparent au survol
 }
+
+// L'effet de bordure animée (::before) ne doit pas apparaître au survol pour un fond transparent.
+// Son opacité par défaut est déjà 0, donc pas besoin de le modifier ici.
+
 
 @keyframes rotate-glow {
   to {
