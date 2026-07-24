@@ -52,8 +52,6 @@ body {
 .navbar-nav .nav-item .nav-link i {
   font-size: 1.25rem;
   margin-right: 0.5rem;
-  margin-right: 0;
-  transition: margin-right 0.2s ease;
 }
 .navbar-nav .nav-item .nav-link img {
   width: 32px;
@@ -61,23 +59,9 @@ body {
   border-radius: 50%;
   object-fit: cover;
   margin-right: 0.5rem;
-  margin-right: 0;
-  transition: margin-right 0.2s ease;
 }
 .navbar-nav .nav-item .nav-link span {
-  max-width: 0;
-  overflow: hidden;
   white-space: nowrap;
-  transition: max-width 0.2s ease, margin-left 0.2s ease, opacity 0.2s ease;
-  opacity: 0;
-}
-.navbar-nav .nav-item .nav-link:hover i, .navbar-nav .nav-item .nav-link:hover img {
-  margin-right: 0.5rem;
-}
-.navbar-nav .nav-item .nav-link:hover span {
-  max-width: 150px;
-  margin-left: 0.5rem;
-  opacity: 1;
 }
 
 .navbar-nav .nav-item .nav-link .icon-badge-wrapper {

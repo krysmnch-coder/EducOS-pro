@@ -40,8 +40,6 @@
   i {
     font-size: 1.25rem; // Taille de l'icône
     margin-right: 0.5rem; // Marge permanente entre l'icône et le texte
-    margin-right: 0; // Pas de marge par défaut pour l'icône
-    transition: margin-right 0.2s ease;
   }
 
   // Style pour l'avatar (image) dans la navbar
@@ -51,30 +49,13 @@
     border-radius: 50%; // Pour rendre l'avatar rond
     object-fit: cover; // Assure que l'image remplit l'espace sans déformation
     margin-right: 0.5rem; // Marge entre l'avatar et le texte
-    margin-right: 0; // Pas de marge par défaut pour l'avatar
-    transition: margin-right 0.2s ease;
   }
 
   // Style pour le texte (maintenant toujours visible)
   span {
-    max-width: 0; // Cache le texte
-    overflow: hidden;
     white-space: nowrap;
-    transition: max-width 0.2s ease, margin-left 0.2s ease, opacity 0.2s ease;
-    opacity: 0;
   }
 
-  // Au survol, affiche le texte
-  &:hover {
-    i, img {
-      margin-right: 0.5rem; // Ajoute une marge entre l'icône/avatar et le texte
-    }
-    span {
-      max-width: 150px; // Affiche le texte (valeur arbitraire, ajustez si besoin)
-      margin-left: 0.5rem; // Ajoute une marge à gauche du texte
-      opacity: 1;
-    }
-  }
   // L'effet de survol pour afficher le texte a été retiré.
 }
 
