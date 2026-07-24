@@ -51,6 +51,7 @@ body {
 }
 .navbar-nav .nav-item .nav-link i {
   font-size: 1.25rem;
+  margin-right: 0.5rem;
   margin-right: 0;
   transition: margin-right 0.2s ease;
 }
@@ -59,6 +60,7 @@ body {
   height: 32px;
   border-radius: 50%;
   object-fit: cover;
+  margin-right: 0.5rem;
   margin-right: 0;
   transition: margin-right 0.2s ease;
 }
