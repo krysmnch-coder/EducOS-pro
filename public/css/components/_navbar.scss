@@ -3,6 +3,9 @@
 .navbar {
   // Styles pour rendre la navbar transparente et floue
   position: fixed;
+  display: flex; // Ajouté pour aligner les éléments de la navbar sur une seule ligne
+  align-items: center; // Centre verticalement les éléments
+  justify-content: space-between; // Distribue l'espace entre les éléments
   top: 0;
   left: 0;
   right: 0;
