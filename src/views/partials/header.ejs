@@ -170,7 +170,6 @@
   --hover-color: var(--bs-primary, #0d6efd);
   --hover-text-color: var(--bs-primary, #0d6efd);
   --hover-shadow-color: rgba(13, 110, 253, 0.3);
-  --hover-bg: rgba(13, 110, 253, 0.08);
 }
 
 /* Variables de thème - Mode Sombre */
@@ -185,7 +184,6 @@
   --hover-color: #ffffff;
   --hover-text-color: #ffffff;
   --hover-shadow-color: rgba(255, 255, 255, 0.3);
-  --hover-bg: rgba(255, 255, 255, 0.08);
 }
 
 .navbar {
@@ -283,7 +281,7 @@
   margin: 0 0.1rem;
 }
 
-/* Style de chaque lien/bouton - AGRANDI */
+/* Style de chaque lien/bouton - AGRANDI - FOND TRANSPARENT */
 .navbar-nav .nav-item .nav-link {
   display: flex;
   flex-direction: column;
@@ -293,7 +291,7 @@
   color: #6c757d;
   background-color: transparent !important;
   border-radius: 0.7rem;
-  transition: color 0.3s ease, transform 0.3s ease, background-color 0.3s ease;
+  transition: color 0.3s ease, transform 0.3s ease;
   white-space: nowrap;
   position: relative;
   z-index: 1;
@@ -341,11 +339,11 @@
   font-weight: 600;
 }
 
-/* Effet de surbrillance au survol - ADAPTÉ AU THÈME */
+/* Effet de surbrillance au survol - FOND TRANSPARENT - ADAPTÉ AU THÈME */
 .navbar-nav .nav-item .nav-link:hover {
   color: var(--hover-text-color) !important;
   transform: translateY(-1px);
-  background-color: var(--hover-bg) !important;
+  background-color: transparent !important; /* FOND TOUJOURS TRANSPARENT */
 }
 
 .navbar-nav .nav-item .nav-link:hover svg {
@@ -374,7 +372,7 @@
   user-select: none;
 }
 
-/* Boutons d'icônes (Notifications, Thème) */
+/* Boutons d'icônes (Notifications, Thème) - FOND TRANSPARENT */
 .nav-icon-btn {
   display: flex;
   align-items: center;
@@ -384,7 +382,7 @@
   background-color: transparent !important;
   border: none !important;
   border-radius: 0.7rem;
-  transition: color 0.3s ease, transform 0.3s ease, background-color 0.3s ease;
+  transition: color 0.3s ease, transform 0.3s ease;
   cursor: pointer;
   position: relative;
   z-index: 1;
@@ -414,11 +412,11 @@
   filter: drop-shadow(0 0 6px rgba(13, 110, 253, 0.2));
 }
 
-/* Effet de surbrillance au survol - ADAPTÉ AU THÈME */
+/* Effet de surbrillance au survol - FOND TRANSPARENT - ADAPTÉ AU THÈME */
 .nav-icon-btn:hover {
   color: var(--hover-text-color) !important;
   transform: translateY(-1px);
-  background-color: var(--hover-bg) !important;
+  background-color: transparent !important; /* FOND TOUJOURS TRANSPARENT */
 }
 
 .nav-icon-btn:hover svg {
@@ -517,7 +515,7 @@ html:not([data-theme="dark"]) #themeToggle .moon-icon {
   transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
-/* Dropdown - AVATAR SUR LA MÊME LIGNE */
+/* Dropdown - AVATAR SUR LA MÊME LIGNE - FOND TRANSPARENT */
 .dropdown-toggle {
   display: flex;
   align-items: center;
@@ -525,18 +523,18 @@ html:not([data-theme="dark"]) #themeToggle .moon-icon {
   padding: 0.35rem 0.7rem;
   background-color: transparent !important;
   border-radius: 0.7rem;
-  transition: color 0.3s ease, transform 0.3s ease, background-color 0.3s ease;
+  transition: color 0.3s ease, transform 0.3s ease;
 }
 
 .dropdown-toggle::after {
   margin-left: 0.15rem;
 }
 
-/* Effet de surbrillance au survol - ADAPTÉ AU THÈME */
+/* Effet de surbrillance au survol - FOND TRANSPARENT - ADAPTÉ AU THÈME */
 .dropdown-toggle:hover {
   color: var(--hover-text-color) !important;
   transform: translateY(-1px);
-  background-color: var(--hover-bg) !important;
+  background-color: transparent !important; /* FOND TOUJOURS TRANSPARENT */
 }
 
 .dropdown-toggle:hover .navbar-avatar,
@@ -551,7 +549,7 @@ html:not([data-theme="dark"]) #themeToggle .moon-icon {
   text-shadow: 0 0 12px var(--hover-shadow-color);
 }
 
-/* Style pour le dropdown user */
+/* Style pour le dropdown user - FOND TRANSPARENT */
 #navbarUserDropdown {
   display: flex;
   align-items: center;
@@ -559,7 +557,7 @@ html:not([data-theme="dark"]) #themeToggle .moon-icon {
   background-color: transparent !important;
   padding: 0.35rem 0.7rem;
   border-radius: 0.7rem;
-  transition: color 0.3s ease, transform 0.3s ease, background-color 0.3s ease;
+  transition: color 0.3s ease, transform 0.3s ease;
 }
 
 #navbarUserDropdown .navbar-avatar,
@@ -576,7 +574,7 @@ html:not([data-theme="dark"]) #themeToggle .moon-icon {
 #navbarUserDropdown:hover {
   color: var(--hover-text-color) !important;
   transform: translateY(-1px);
-  background-color: var(--hover-bg) !important;
+  background-color: transparent !important; /* FOND TOUJOURS TRANSPARENT */
 }
 
 #navbarUserDropdown:hover .navbar-avatar,
@@ -611,7 +609,7 @@ html:not([data-theme="dark"]) #themeToggle .moon-icon {
 }
 
 .dropdown-menu .dropdown-item:hover {
-  background-color: var(--hover-bg);
+  background-color: rgba(255, 255, 255, 0.05);
   color: var(--hover-text-color) !important;
 }
 
@@ -620,7 +618,7 @@ html:not([data-theme="dark"]) #themeToggle .moon-icon {
 }
 
 .dropdown-menu .dropdown-item.text-danger:hover {
-  background-color: rgba(255, 107, 107, 0.15);
+  background-color: rgba(255, 107, 107, 0.1);
   color: #ff6b6b !important;
 }
 
