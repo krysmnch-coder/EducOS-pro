@@ -589,3 +589,39 @@ exports.updateProfileInfo = async (req, res) => {
         res.redirect('/profile');
     }
 };
+
+/**
+ * Deletes the user's profile picture.
+ * This function removes both the physical file from the server and the reference in the database.
+ * @param {import('express').Request} req - The Express request object.
+ * @param {import('express').Response} res - The Express response object.
+ */
+exports.deleteProfilePicture = async (req, res) => {
+    try {
+        const user = req.user;
+        
+        // Vérifier si l'utilisateur a une photo
+        if (user.avatar_url) {
+            const fs = require('fs');
+            const path = require('path');
+            
+            // Construire le chemin du fichier
+            const avatarPath = path.join(__dirname, '..', '..', 'uploads', 'avatars', path.basename(user.avatar_url));
+            
+            // Supprimer le fichier physique s'il existe
+            if (fs.existsSync(avatarPath)) {
+                fs.unlinkSync(avatarPath);
+            }
+        }
+        
+        // Mettre à jour la base de données
+        await userModel.updateUserAvatar(req.user.id, null);
+        
+        req.flash('success_msg', 'Photo de profil supprimée avec succès.');
+        res.redirect('/profile');
+    } catch (error) {
+        console.error('Erreur lors de la suppression de la photo de profil:', error);
+        req.flash('error_msg', 'Erreur lors de la suppression de la photo de profil.');
+        res.redirect('/profile');
+    }
+};

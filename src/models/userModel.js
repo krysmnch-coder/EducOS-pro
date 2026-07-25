@@ -117,8 +117,18 @@ function deleteUserById(id) {
   return db('users').where({ id }).del();
 }
 
+/**
+ * Met à jour l'avatar d'un utilisateur.
+ * @param {number} userId - L'ID de l'utilisateur.
+ * @param {string|null} avatarUrl - L'URL du nouvel avatar ou null pour le supprimer.
+ * @returns {Promise<number>} Le nombre de lignes mises à jour.
+ */
 function updateUserAvatar(userId, avatarUrl) {
-  return db('users').where({ id: userId }).update({ avatar_url: avatarUrl });
+  // Si avatarUrl est null ou undefined, on met à jour avec null
+  // Sinon, on met à jour avec la nouvelle URL
+  return db('users').where({ id: userId }).update({ 
+    avatar_url: avatarUrl || null 
+  });
 }
 
 function updateUserInfo(userId, { name, phone_number }) {
