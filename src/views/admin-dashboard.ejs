@@ -25,8 +25,8 @@
             <div class="row">
                 <% widgets.forEach(widget => { %>
                 <div class="col-xl-3 col-md-6 mb-4">
-                    <a href="<%= widget.link %>" class="text-decoration-none shortcut-link">
-                    <div class="card dashboard-stat h-100" data-shortcut-key="<%= widget.key %>">
+                    <a href="<%= widget.link %>" class="text-decoration-none shortcut-link" data-shortcut-key="<%= widget.key %>">
+                    <div class="card dashboard-stat h-100 glass-card">
                         <div class="card-body text-center">
                         <div class="stat-icon mb-3">
                             <i data-feather="<%= widget.icon %>"></i>
@@ -114,77 +114,281 @@
     </div>
 </div>
 
-<!-- Données pour le script, injectées de manière sécurisée pour éviter les erreurs de linter -->
-<script id="admin-dashboard-data" type="application/json">
-    <%- JSON.stringify({
-        role: currentUser.role,
-        establishment_id: currentUser.establishment_id
-    }) %>
-</script>
+<style>
+/* ==========================================================================
+   Raccourcis - Style Glassmorphism avec Animations
+   ========================================================================== */
 
-<script src="/socket.io/socket.io.js"></script>
+.glass-card {
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 1rem !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08) !important;
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+    position: relative !important;
+    overflow: hidden !important;
+    cursor: pointer !important;
+}
+
+/* Effet de fond animé derrière la carte */
+.glass-card::before {
+    content: '' !important;
+    position: absolute !important;
+    top: -50% !important;
+    left: -50% !important;
+    width: 200% !important;
+    height: 200% !important;
+    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.1), transparent 70%) !important;
+    opacity: 0 !important;
+    transition: opacity 0.6s ease !important;
+    pointer-events: none !important;
+    z-index: 0 !important;
+}
+
+.glass-card::after {
+    content: '' !important;
+    position: absolute !important;
+    top: -2px !important;
+    left: -2px !important;
+    right: -2px !important;
+    bottom: -2px !important;
+    background: linear-gradient(135deg, rgba(13, 110, 253, 0.3), rgba(13, 202, 240, 0.3), rgba(13, 110, 253, 0.3)) !important;
+    background-size: 300% 300% !important;
+    border-radius: 1.05rem !important;
+    z-index: -1 !important;
+    opacity: 0 !important;
+    transition: opacity 0.6s ease !important;
+    animation: gradient-shift 4s ease-in-out infinite !important;
+}
+
+/* Effet de brillance au survol */
+.glass-card:hover::before {
+    opacity: 1 !important;
+}
+
+.glass-card:hover::after {
+    opacity: 1 !important;
+}
+
+/* Mode sombre - adaptation */
+[data-theme="dark"] .glass-card {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+}
+
+[data-theme="dark"] .glass-card::after {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(100, 100, 255, 0.2), rgba(255, 255, 255, 0.2)) !important;
+}
+
+/* Animation de survol */
+.glass-card:hover {
+    transform: translateY(-10px) scale(1.02) !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15) !important;
+    border-color: rgba(255, 255, 255, 0.4) !important;
+}
+
+[data-theme="dark"] .glass-card:hover {
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Icône avec animation */
+.glass-card .stat-icon {
+    transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+    display: inline-block !important;
+}
+
+.glass-card .stat-icon svg {
+    width: 48px !important;
+    height: 48px !important;
+    stroke-width: 1.5 !important;
+    transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+    color: var(--bs-primary, #0d6efd) !important;
+}
+
+.glass-card:hover .stat-icon {
+    transform: scale(1.2) rotate(-5deg) !important;
+}
+
+.glass-card:hover .stat-icon svg {
+    color: var(--bs-primary, #0d6efd) !important;
+    filter: drop-shadow(0 0 20px rgba(13, 110, 253, 0.3)) !important;
+}
+
+/* Animation de l'icône au survol (pulsation) */
+@keyframes icon-pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+}
+
+.glass-card:hover .stat-icon {
+    animation: icon-pulse 1.2s ease-in-out infinite !important;
+}
+
+/* Titre avec effet */
+.glass-card .card-title {
+    transition: all 0.4s ease !important;
+    position: relative !important;
+    display: inline-block !important;
+}
+
+.glass-card:hover .card-title {
+    color: var(--bs-primary, #0d6efd) !important;
+    transform: scale(1.05) !important;
+}
+
+.glass-card .card-title::after {
+    content: '' !important;
+    position: absolute !important;
+    bottom: -2px !important;
+    left: 0 !important;
+    width: 0 !important;
+    height: 2px !important;
+    background: linear-gradient(90deg, var(--bs-primary, #0d6efd), var(--bs-info, #0dcaf0)) !important;
+    transition: width 0.4s ease !important;
+}
+
+.glass-card:hover .card-title::after {
+    width: 100% !important;
+}
+
+/* Texte avec effet */
+.glass-card .card-text {
+    transition: all 0.4s ease !important;
+}
+
+.glass-card:hover .card-text {
+    color: var(--text-color, #212529) !important;
+    opacity: 0.9 !important;
+}
+
+/* Animation de pulsation au clic (highlight) */
+.glass-card.is-pulsing {
+    animation: card-pulse 0.8s ease !important;
+}
+
+@keyframes card-pulse {
+    0% { transform: scale(1); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08); }
+    30% { transform: scale(1.05); box-shadow: 0 0 50px rgba(13, 110, 253, 0.3); }
+    60% { transform: scale(0.98); }
+    100% { transform: scale(1); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08); }
+}
+
+/* Animation de la bordure dégradée */
+@keyframes gradient-shift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Effet de brillance flottante */
+.glass-card .card-body {
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+/* Animation d'entrée des cartes */
+.glass-card {
+    animation: card-fade-in 0.6s ease forwards !important;
+    opacity: 0 !important;
+    transform: translateY(20px) !important;
+}
+
+@keyframes card-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Classes de délai - Appliquées via JavaScript */
+.glass-card.delay-1 { animation-delay: 0.1s !important; }
+.glass-card.delay-2 { animation-delay: 0.2s !important; }
+.glass-card.delay-3 { animation-delay: 0.3s !important; }
+.glass-card.delay-4 { animation-delay: 0.4s !important; }
+.glass-card.delay-5 { animation-delay: 0.5s !important; }
+.glass-card.delay-6 { animation-delay: 0.6s !important; }
+.glass-card.delay-7 { animation-delay: 0.7s !important; }
+.glass-card.delay-8 { animation-delay: 0.8s !important; }
+
+/* Effet de survol du lien */
+.shortcut-link {
+    display: block !important;
+    transition: all 0.3s ease !important;
+}
+
+.shortcut-link.disabled {
+    opacity: 0.6 !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+}
+
+.shortcut-link.disabled .glass-card {
+    filter: grayscale(0.5) !important;
+}
+
+/* Adaptation mobile */
+@media (max-width: 768px) {
+    .glass-card {
+        border-radius: 0.75rem !important;
+    }
+    
+    .glass-card .stat-icon svg {
+        width: 36px !important;
+        height: 36px !important;
+    }
+    
+    .glass-card:hover {
+        transform: translateY(-5px) scale(1.01) !important;
+    }
+}
+</style>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         if (typeof feather !== 'undefined') {
             feather.replace();
         }
 
-        const dataElement = document.getElementById('admin-dashboard-data');
-        const currentUserData = JSON.parse(dataElement.textContent);
-
-        // Connexion au namespace authentifié par défaut
-        const socket = io();
-
-        socket.on('shortcutHighlight', function(data) {
-            if (data.shortcutKey) {
-                const card = document.querySelector(`.dashboard-stat[data-shortcut-key="${data.shortcutKey}"]`);
-                if (card) {
-                    card.classList.add('is-highlighted'); // Ajoute la classe de surbrillance persistante
-                }
+        // Ajout des délais d'animation pour chaque carte
+        document.querySelectorAll('.glass-card').forEach((card, index) => {
+            const delay = index + 1;
+            if (delay <= 8) {
+                card.classList.add('delay-' + delay);
             }
         });
 
-        // Logique de clic pour retirer la surbrillance (méthode corrigée avec délégation d'événement)
-        // On attache un seul écouteur au conteneur des raccourcis pour plus de robustesse.
-        const shortcutsContainer = document.querySelector('.themed-container');
-        if (shortcutsContainer) {
-            shortcutsContainer.addEventListener('click', function(event) {
-                // On cherche le lien (<a>) le plus proche de l'élément qui a été cliqué.
-                const clickedLink = event.target.closest('.shortcut-link');
+        // Suivi de la souris pour l'effet de brillance
+        document.querySelectorAll('.glass-card').forEach(card => {
+            card.addEventListener('mousemove', function(e) {
+                const rect = this.getBoundingClientRect();
+                const x = ((e.clientX - rect.left) / rect.width) * 100;
+                const y = ((e.clientY - rect.top) / rect.height) * 100;
+                this.style.setProperty('--mouse-x', x + '%');
+                this.style.setProperty('--mouse-y', y + '%');
+            });
+        });
 
-                // Si on a bien cliqué à l'intérieur d'un lien de raccourci...
-                if (clickedLink) {
-                    const card = clickedLink.querySelector('.dashboard-stat');
-                    // On ne retire la surbrillance que si la carte de CE raccourci est surlignée.
-                    if (card && card.classList.contains('is-highlighted')) {
-                        card.classList.remove('is-highlighted');
+        // Animation des raccourcis
+        const socket = io(); // Connexion au namespace par défaut
+        socket.on('shortcutHighlight', function(data) {
+            if (data.shortcutKey) {
+                const shortcut = document.querySelector(`.shortcut-link[data-shortcut-key="${data.shortcutKey}"]`);
+                if (shortcut) {
+                    const card = shortcut.querySelector('.glass-card');
+                    if (card) {
+                        card.classList.add('is-pulsing');
+                        // Retirer la classe après l'animation pour qu'elle puisse rejouer
+                        setTimeout(() => { card.classList.remove('is-pulsing'); }, 1200);
                     }
                 }
-            });
-        }
-
-        socket.on('adminStatsUpdate', function(data) {
-            if (currentUserData.role === 'SUPER_ADMIN' && data.superAdminStats) {
-                const stats = data.superAdminStats;
-                document.getElementById('superAdminTotalUsers').textContent = stats.totalUserCount;
-                document.getElementById('superAdminAdminCount').textContent = stats.adminCount;
-                document.getElementById('superAdminEstablishmentCount').textContent = stats.establishmentCount;
-                document.getElementById('superAdminPendingCount').textContent = stats.pendingCount;
-
-                if (stats.establishmentsWithCounts) {
-                    stats.establishmentsWithCounts.forEach(est => {
-                        const el = document.getElementById(`establishment-count-${est.id}`);
-                        if (el) el.textContent = est.userCount;
-                    });
-                }
-            }
-
-            if (currentUserData.role === 'ADMINISTRATOR' && data.adminStats && data.adminStats.establishmentId === currentUserData.establishment_id) {
-                const stats = data.adminStats;
-                document.getElementById('adminStudentCount').textContent = stats.studentCount;
-                document.getElementById('adminProfessorCount').textContent = stats.professorCount;
-                document.getElementById('adminParentCount').textContent = stats.parentCount;
-                document.getElementById('adminPendingCount').textContent = stats.pendingCount;
             }
         });
     });
