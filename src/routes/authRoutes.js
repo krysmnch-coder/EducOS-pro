@@ -18,6 +18,7 @@ const {
   renderProfile,
   updateProfilePicture,
   updateProfileInfo,
+  deleteProfilePicture,
   renderForceChangePassword,
   postForceChangePassword,
   renderForgotPassword,
@@ -112,8 +113,9 @@ router.post('/force-change-password', ensureAuthenticated, postForceChangePasswo
 router.get('/profile', ensureAuthenticated, renderProfile);
 router.post('/profile/avatar', ensureAuthenticated, avatarUpload.single('avatar'), updateProfilePicture);
 router.post('/profile/update', ensureAuthenticated, updateProfileInfo);
+router.post('/profile/avatar/delete', ensureAuthenticated, deleteProfilePicture);
 
 // Route API pour le token
 router.get('/api/token', ensureAuthenticated, getApiToken);
 
-module.exports = router; 
+module.exports = router;
