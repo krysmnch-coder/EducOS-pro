@@ -85,35 +85,35 @@
 .navbar-nav {
   display: flex;
   align-items: center;
-  gap: 0.3rem;
+  gap: 0.4rem; // AGRANDI: de 0.3rem à 0.4rem
 }
 
 .nav-item-spaced {
   margin: 0 0.1rem;
 }
 
-// Style de chaque lien/bouton - AGRANDI
+// Style de chaque lien/bouton - ENCORE PLUS AGRANDI
 .navbar-nav .nav-item .nav-link {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.2rem; // AGRANDI: de 0.15rem à 0.2rem
-  padding: 0.5rem 1rem; // AGRANDI: de 0.35rem 0.7rem à 0.5rem 1rem
+  gap: 0.25rem; // AGRANDI: de 0.2rem à 0.25rem
+  padding: 0.6rem 1.2rem; // AGRANDI: de 0.5rem 1rem à 0.6rem 1.2rem
   color: #6c757d;
-  background-color: transparent !important; // Fond transparent
-  border-radius: 0.6rem; // AGRANDI: de 0.5rem à 0.6rem
+  background-color: transparent !important;
+  border-radius: 0.7rem; // AGRANDI: de 0.6rem à 0.7rem
   transition: color 0.3s ease, transform 0.3s ease;
   white-space: nowrap;
   position: relative;
   z-index: 1;
   overflow: hidden;
   text-decoration: none;
-  min-width: 60px; // AGRANDI: de 50px à 60px
+  min-width: 70px; // AGRANDI: de 60px à 70px
 
-  // Icônes SVG - Gris par défaut - AGRANDI
+  // Icônes SVG - Gris par défaut - ENCORE PLUS AGRANDI
   svg {
-    width: 24px; // AGRANDI: de 22px à 24px
-    height: 24px; // AGRANDI: de 22px à 24px
+    width: 28px; // AGRANDI: de 24px à 28px
+    height: 28px; // AGRANDI: de 24px à 28px
     color: #6c757d;
     transition: color 0.3s ease, transform 0.3s ease, filter 0.3s ease;
     stroke: currentColor;
@@ -123,9 +123,9 @@
     stroke-linejoin: round;
   }
   
-  // Texte - Gris par défaut - AGRANDI
+  // Texte - Gris par défaut - ENCORE PLUS AGRANDI
   .nav-text {
-    font-size: 0.65rem; // AGRANDI: de 0.6rem à 0.65rem
+    font-size: 0.7rem; // AGRANDI: de 0.65rem à 0.7rem
     font-weight: 500;
     display: inline-block;
     color: #6c757d;
@@ -152,18 +152,18 @@
   // Effet de surbrillance au survol - TOUT EN BLANC
   &:hover {
     color: #ffffff !important;
-    transform: translateY(-1px);
-    background-color: transparent !important; // Fond transparent au survol
+    transform: translateY(-2px); // AGRANDI: de -1px à -2px
+    background-color: transparent !important;
     
     svg {
-      transform: scale(1.15); // AGRANDI: de 1.1 à 1.15
+      transform: scale(1.2); // AGRANDI: de 1.15 à 1.2
       color: #ffffff !important;
-      filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.4));
+      filter: drop-shadow(0 0 25px rgba(255, 255, 255, 0.4)); // AGRANDI
     }
     
     .nav-text {
       color: #ffffff !important;
-      text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+      text-shadow: 0 0 25px rgba(255, 255, 255, 0.3); // AGRANDI
     }
   }
 }
@@ -231,7 +231,7 @@
   &:hover {
     color: #ffffff !important;
     transform: translateY(-1px);
-    background-color: transparent !important; // Fond transparent
+    background-color: transparent !important;
     
     svg {
       transform: scale(1.1);
@@ -311,10 +311,10 @@ html:not([data-theme="dark"]) #theme-toggle-btn .theme-icon-dark {
   display: none;
 }
 
-// Avatar
+// Avatar - SUR LA MÊME LIGNE QUE LES AUTRES BOUTONS
 .navbar-avatar {
-  width: 30px;
-  height: 30px;
+  width: 34px; // AGRANDI: de 30px à 34px
+  height: 34px; // AGRANDI: de 30px à 34px
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid #6c757d;
@@ -322,8 +322,8 @@ html:not([data-theme="dark"]) #theme-toggle-btn .theme-icon-dark {
 }
 
 .navbar-avatar-placeholder {
-  width: 30px;
-  height: 30px;
+  width: 34px; // AGRANDI: de 30px à 34px
+  height: 34px; // AGRANDI: de 30px à 34px
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -331,28 +331,42 @@ html:not([data-theme="dark"]) #theme-toggle-btn .theme-icon-dark {
   background: linear-gradient(135deg, var(--bs-primary), var(--bs-info));
   color: #ffffff;
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: 0.9rem; // AGRANDI: de 0.85rem à 0.9rem
   border: 2px solid #6c757d;
   transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
-.nav-link:hover .navbar-avatar,
-.nav-link:hover .navbar-avatar-placeholder {
-  transform: scale(1.08);
-  border-color: #ffffff;
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
-}
-
-// Dropdown - AVATAR DEVANT LE NOM
+// Dropdown - AVATAR SUR LA MÊME LIGNE
 .dropdown-toggle {
   display: flex;
   align-items: center;
   gap: 0.4rem;
   padding: 0.35rem 0.7rem;
-  background-color: transparent !important; // Fond transparent
+  background-color: transparent !important;
+  border-radius: 0.5rem;
+  transition: color 0.3s ease, transform 0.3s ease;
   
   &::after {
     margin-left: 0.15rem;
+  }
+  
+  // Effet de surbrillance au survol
+  &:hover {
+    color: #ffffff !important;
+    transform: translateY(-1px);
+    background-color: transparent !important;
+    
+    .navbar-avatar,
+    .navbar-avatar-placeholder {
+      transform: scale(1.1);
+      border-color: #ffffff;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+    }
+    
+    span {
+      color: #ffffff !important;
+      text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+    }
   }
 }
 
@@ -360,20 +374,39 @@ html:not([data-theme="dark"]) #theme-toggle-btn .theme-icon-dark {
 #navbarUserDropdown {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  background-color: transparent !important; // Fond transparent
+  gap: 0.5rem; // AGRANDI: de 0.4rem à 0.5rem
+  background-color: transparent !important;
+  padding: 0.35rem 0.7rem;
+  border-radius: 0.5rem;
+  transition: color 0.3s ease, transform 0.3s ease;
   
   .navbar-avatar,
   .navbar-avatar-placeholder {
-    order: -1; // Force l'avatar à être devant
+    order: 0; // Garde l'avatar à sa position naturelle (devant le nom)
   }
   
   span {
     font-size: 0.85rem;
+    color: #6c757d;
+    transition: color 0.3s ease, text-shadow 0.3s ease;
   }
   
   &:hover {
-    background-color: transparent !important; // Fond transparent au survol
+    color: #ffffff !important;
+    transform: translateY(-1px);
+    background-color: transparent !important;
+    
+    .navbar-avatar,
+    .navbar-avatar-placeholder {
+      transform: scale(1.1);
+      border-color: #ffffff;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+    }
+    
+    span {
+      color: #ffffff !important;
+      text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+    }
   }
 }
 
@@ -422,7 +455,7 @@ html:not([data-theme="dark"]) #theme-toggle-btn .theme-icon-dark {
   }
   
   .navbar-nav {
-    gap: 0.15rem;
+    gap: 0.25rem;
   }
   
   .nav-item-spaced {
@@ -431,8 +464,8 @@ html:not([data-theme="dark"]) #theme-toggle-btn .theme-icon-dark {
   
   .navbar-nav .nav-item .nav-link {
     flex-direction: row;
-    padding: 0.5rem 0.8rem; // AGRANDI: gardé
-    gap: 0.6rem;
+    padding: 0.6rem 1rem; // AGRANDI
+    gap: 0.75rem;
     width: 100%;
     border-radius: 0.5rem;
     min-width: auto;
@@ -442,8 +475,8 @@ html:not([data-theme="dark"]) #theme-toggle-btn .theme-icon-dark {
     }
     
     svg {
-      width: 22px; // AGRANDI
-      height: 22px; // AGRANDI
+      width: 24px; // AGRANDI
+      height: 24px; // AGRANDI
     }
   }
   
@@ -476,9 +509,9 @@ html:not([data-theme="dark"]) #theme-toggle-btn .theme-icon-dark {
   
   .navbar-avatar,
   .navbar-avatar-placeholder {
-    width: 28px;
-    height: 28px;
-    font-size: 0.8rem;
+    width: 32px; // AGRANDI
+    height: 32px; // AGRANDI
+    font-size: 0.85rem;
   }
   
   #navbarUserDropdown span {
@@ -507,15 +540,15 @@ html:not([data-theme="dark"]) #theme-toggle-btn .theme-icon-dark {
   
   .navbar-avatar,
   .navbar-avatar-placeholder {
-    width: 26px;
-    height: 26px;
-    font-size: 0.75rem;
+    width: 28px;
+    height: 28px;
+    font-size: 0.8rem;
   }
   
   .nav-icon-btn svg,
   .navbar-nav .nav-item .nav-link svg {
-    width: 20px; // AGRANDI
-    height: 20px; // AGRANDI
+    width: 22px; // AGRANDI
+    height: 22px; // AGRANDI
   }
 }
 
