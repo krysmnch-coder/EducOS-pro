@@ -2,6 +2,456 @@
 <html lang="fr">
 <head>
   <%- include('partials/head') %>
+  <style>
+    /* ==========================================================================
+       Page Chat - Style Glassmorphism
+       ========================================================================== */
+    
+    .chat-page-container {
+      display: flex;
+      gap: 1.5rem;
+      height: calc(100vh - 160px);
+      min-height: 500px;
+    }
+    
+    /* Sidebar Glassmorphism */
+    .chat-sidebar {
+      flex: 0 0 320px;
+      background: rgba(255, 255, 255, 0.08) !important;
+      backdrop-filter: blur(12px) !important;
+      -webkit-backdrop-filter: blur(12px) !important;
+      border: 1px solid rgba(255, 255, 255, 0.15) !important;
+      border-radius: 1rem !important;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06) !important;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    [data-theme="dark"] .chat-sidebar {
+      background: rgba(255, 255, 255, 0.03) !important;
+      border: 1px solid rgba(255, 255, 255, 0.06) !important;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+    }
+    
+    /* Chat Main Glassmorphism */
+    .chat-main {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.06) !important;
+      backdrop-filter: blur(12px) !important;
+      -webkit-backdrop-filter: blur(12px) !important;
+      border: 1px solid rgba(255, 255, 255, 0.15) !important;
+      border-radius: 1rem !important;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06) !important;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    [data-theme="dark"] .chat-main {
+      background: rgba(255, 255, 255, 0.03) !important;
+      border: 1px solid rgba(255, 255, 255, 0.06) !important;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+    }
+    
+    /* En-têtes des cartes */
+    .chat-sidebar .card-header,
+    .chat-main .card-header {
+      background: rgba(13, 110, 253, 0.06) !important;
+      border-bottom: 1px solid rgba(13, 110, 253, 0.08) !important;
+      padding: 0.85rem 1.25rem !important;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    
+    [data-theme="dark"] .chat-sidebar .card-header,
+    [data-theme="dark"] .chat-main .card-header {
+      background: rgba(255, 255, 255, 0.04) !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+    }
+    
+    .chat-sidebar .card-header span {
+      color: var(--text-color, #212529);
+    }
+    
+    /* Bouton nouveau Glassmorphism */
+    .chat-sidebar .btn-primary {
+      background: rgba(13, 110, 253, 0.15) !important;
+      border: 1px solid rgba(13, 110, 253, 0.2) !important;
+      border-radius: 0.5rem !important;
+      transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+      color: var(--bs-primary, #0d6efd) !important;
+    }
+    
+    .chat-sidebar .btn-primary:hover {
+      background: rgba(13, 110, 253, 0.25) !important;
+      transform: translateY(-2px) scale(1.02) !important;
+      box-shadow: 0 4px 20px rgba(13, 110, 253, 0.15) !important;
+    }
+    
+    [data-theme="dark"] .chat-sidebar .btn-primary {
+      color: #ffffff !important;
+      border-color: rgba(255, 255, 255, 0.15) !important;
+      background: rgba(255, 255, 255, 0.05) !important;
+    }
+    
+    [data-theme="dark"] .chat-sidebar .btn-primary:hover {
+      background: rgba(255, 255, 255, 0.1) !important;
+    }
+    
+    /* Liste des conversations */
+    .chat-sidebar .list-group {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0.5rem;
+    }
+    
+    .chat-sidebar .list-group-item {
+      background: transparent !important;
+      border: none !important;
+      border-radius: 0.5rem !important;
+      padding: 0.6rem 0.8rem !important;
+      margin-bottom: 0.25rem !important;
+      transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+      cursor: pointer;
+      animation: chat-fade-in 0.4s ease forwards !important;
+      opacity: 0;
+      transform: translateX(-10px);
+    }
+    
+    @keyframes chat-fade-in {
+      from {
+        opacity: 0;
+        transform: translateX(-10px) scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+      }
+    }
+    
+    .chat-sidebar .list-group-item:hover {
+      background: rgba(13, 110, 253, 0.06) !important;
+      transform: translateX(3px) !important;
+    }
+    
+    [data-theme="dark"] .chat-sidebar .list-group-item:hover {
+      background: rgba(255, 255, 255, 0.04) !important;
+    }
+    
+    .chat-sidebar .list-group-item.active {
+      background: rgba(13, 110, 253, 0.1) !important;
+      border-left: 3px solid var(--bs-primary, #0d6efd) !important;
+    }
+    
+    [data-theme="dark"] .chat-sidebar .list-group-item.active {
+      background: rgba(255, 255, 255, 0.06) !important;
+      border-left: 3px solid #ffffff !important;
+    }
+    
+    /* Avatar dans la liste */
+    .list-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid rgba(13, 110, 253, 0.15);
+      transition: all 0.3s ease;
+    }
+    
+    .list-avatar:hover {
+      transform: scale(1.08);
+      border-color: var(--bs-primary, #0d6efd);
+    }
+    
+    [data-theme="dark"] .list-avatar {
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+    
+    /* Fenêtre de chat */
+    #chat-window {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    
+    /* Corps du chat */
+    .chat-main .card-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.25rem !important;
+      background: transparent !important;
+    }
+    
+    /* Messages */
+    .message {
+      max-width: 75%;
+      margin-bottom: 0.75rem;
+      padding: 0.6rem 1rem;
+      border-radius: 0.75rem;
+      word-wrap: break-word;
+      animation: message-pop 0.3s ease forwards !important;
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    
+    @keyframes message-pop {
+      from {
+        opacity: 0;
+        transform: scale(0.9) translateY(5px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+    
+    .message.sent {
+      background: rgba(13, 110, 253, 0.15) !important;
+      margin-left: auto;
+      border-bottom-right-radius: 0.25rem !important;
+      border: 1px solid rgba(13, 110, 253, 0.1) !important;
+    }
+    
+    .message.received {
+      background: rgba(255, 255, 255, 0.08) !important;
+      margin-right: auto;
+      border-bottom-left-radius: 0.25rem !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+    
+    [data-theme="dark"] .message.sent {
+      background: rgba(13, 110, 253, 0.2) !important;
+      border: 1px solid rgba(13, 110, 253, 0.15) !important;
+    }
+    
+    [data-theme="dark"] .message.received {
+      background: rgba(255, 255, 255, 0.05) !important;
+      border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    }
+    
+    .message .message-meta {
+      font-size: 0.65rem;
+      opacity: 0.6;
+      margin-top: 0.25rem;
+    }
+    
+    /* Footer du chat */
+    .chat-main .card-footer {
+      background: rgba(255, 255, 255, 0.04) !important;
+      border-top: 1px solid rgba(13, 110, 253, 0.06) !important;
+      padding: 0.75rem 1.25rem !important;
+      flex-shrink: 0;
+    }
+    
+    [data-theme="dark"] .chat-main .card-footer {
+      background: rgba(255, 255, 255, 0.02) !important;
+      border-top: 1px solid rgba(255, 255, 255, 0.04) !important;
+    }
+    
+    /* Input de message */
+    #message-input {
+      background: rgba(255, 255, 255, 0.06) !important;
+      border: 1px solid rgba(255, 255, 255, 0.12) !important;
+      border-radius: 0.75rem !important;
+      color: var(--text-color, #212529) !important;
+      padding: 0.6rem 1rem !important;
+      transition: all 0.3s ease !important;
+    }
+    
+    #message-input:focus {
+      background: rgba(255, 255, 255, 0.1) !important;
+      border-color: var(--bs-primary, #0d6efd) !important;
+      box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15) !important;
+    }
+    
+    [data-theme="dark"] #message-input {
+      background: rgba(255, 255, 255, 0.04) !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+      color: #e4e4e4 !important;
+    }
+    
+    [data-theme="dark"] #message-input:focus {
+      background: rgba(255, 255, 255, 0.08) !important;
+      border-color: #ffffff !important;
+      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1) !important;
+    }
+    
+    /* Bouton d'envoi */
+    #message-form .btn-primary {
+      background: rgba(13, 110, 253, 0.15) !important;
+      border: 1px solid rgba(13, 110, 253, 0.2) !important;
+      border-radius: 0.75rem !important;
+      padding: 0.5rem 1rem !important;
+      transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+      color: var(--bs-primary, #0d6efd) !important;
+    }
+    
+    #message-form .btn-primary:hover:not(:disabled) {
+      background: rgba(13, 110, 253, 0.25) !important;
+      transform: translateY(-2px) scale(1.02) !important;
+      box-shadow: 0 4px 20px rgba(13, 110, 253, 0.15) !important;
+    }
+    
+    [data-theme="dark"] #message-form .btn-primary {
+      color: #ffffff !important;
+      border-color: rgba(255, 255, 255, 0.15) !important;
+      background: rgba(255, 255, 255, 0.05) !important;
+    }
+    
+    [data-theme="dark"] #message-form .btn-primary:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.1) !important;
+    }
+    
+    #message-form .btn-primary:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    
+    /* Placeholder */
+    #chat-placeholder {
+      color: var(--text-muted, #6c757d);
+    }
+    
+    #chat-placeholder svg {
+      opacity: 0.5;
+    }
+    
+    /* Modal Glassmorphism */
+    .modal-glass .modal-content {
+      background: rgba(255, 255, 255, 0.92) !important;
+      backdrop-filter: blur(20px) !important;
+      -webkit-backdrop-filter: blur(20px) !important;
+      border: 1px solid rgba(255, 255, 255, 0.2) !important;
+      border-radius: 1.25rem !important;
+      box-shadow: 0 25px 80px rgba(0, 0, 0, 0.2) !important;
+    }
+    
+    [data-theme="dark"] .modal-glass .modal-content {
+      background: rgba(25, 25, 45, 0.95) !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+      box-shadow: 0 25px 80px rgba(0, 0, 0, 0.5) !important;
+    }
+    
+    .modal-glass .modal-header {
+      border-bottom: 1px solid rgba(13, 110, 253, 0.08) !important;
+    }
+    
+    [data-theme="dark"] .modal-glass .modal-header {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+    }
+    
+    .modal-glass .modal-footer {
+      border-top: 1px solid rgba(13, 110, 253, 0.08) !important;
+    }
+    
+    [data-theme="dark"] .modal-glass .modal-footer {
+      border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
+    }
+    
+    .modal-glass .list-group-item {
+      background: transparent !important;
+      border: none !important;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.04) !important;
+      padding: 0.6rem 1rem !important;
+      transition: all 0.3s ease !important;
+      border-radius: 0 !important;
+    }
+    
+    [data-theme="dark"] .modal-glass .list-group-item {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+    }
+    
+    .modal-glass .list-group-item:hover {
+      background: rgba(13, 110, 253, 0.06) !important;
+    }
+    
+    [data-theme="dark"] .modal-glass .list-group-item:hover {
+      background: rgba(255, 255, 255, 0.04) !important;
+    }
+    
+    .modal-glass .list-group-item:last-child {
+      border-bottom: none !important;
+    }
+    
+    /* Indicateur de saisie */
+    #typing-indicator {
+      color: var(--text-muted, #6c757d);
+      font-style: italic;
+      min-height: 20px;
+    }
+    
+    [data-theme="dark"] #typing-indicator {
+      color: rgba(255, 255, 255, 0.5);
+    }
+    
+    /* Scrollbar personnalisée */
+    .chat-sidebar .list-group::-webkit-scrollbar,
+    .chat-main .card-body::-webkit-scrollbar {
+      width: 4px;
+    }
+    
+    .chat-sidebar .list-group::-webkit-scrollbar-track,
+    .chat-main .card-body::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    
+    .chat-sidebar .list-group::-webkit-scrollbar-thumb,
+    .chat-main .card-body::-webkit-scrollbar-thumb {
+      background: rgba(13, 110, 253, 0.3);
+      border-radius: 10px;
+    }
+    
+    [data-theme="dark"] .chat-sidebar .list-group::-webkit-scrollbar-thumb,
+    [data-theme="dark"] .chat-main .card-body::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    
+    /* Adaptation mobile */
+    @media (max-width: 992px) {
+      .chat-page-container {
+        flex-direction: column;
+        height: calc(100vh - 140px);
+        gap: 1rem;
+      }
+      
+      .chat-sidebar {
+        flex: 0 0 auto;
+        max-height: 300px;
+      }
+      
+      .chat-main {
+        flex: 1;
+        min-height: 300px;
+      }
+    }
+    
+    @media (max-width: 576px) {
+      .chat-page-container {
+        height: calc(100vh - 120px);
+      }
+      
+      .chat-sidebar {
+        max-height: 200px;
+      }
+      
+      .message {
+        max-width: 90%;
+        font-size: 0.9rem;
+        padding: 0.5rem 0.75rem;
+      }
+      
+      .list-avatar {
+        width: 32px;
+        height: 32px;
+      }
+      
+      .chat-sidebar .list-group-item {
+        padding: 0.4rem 0.6rem !important;
+        font-size: 0.9rem;
+      }
+    }
+  </style>
 </head>
 <body data-user-id="<%= user ? user.id : '' %>">
   <div class="page-shell container-xl py-4">
@@ -12,7 +462,10 @@
             <!-- Colonne de gauche : Liste des conversations -->
             <div class="chat-sidebar card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <span>Conversations</span>
+                    <span>
+                        <i data-feather="message-square" class="me-2" style="width: 18px; height: 18px;"></i>
+                        Conversations
+                    </span>
                     <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#new-chat-modal" aria-label="Nouvelle conversation">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2Z"/></svg>
                         <span class="d-none d-md-inline ms-1">Nouveau</span>
@@ -67,18 +520,21 @@
 
   <%- include('partials/footer') %>
 
-  <!-- New Chat Modal -->
-  <div class="modal fade" id="new-chat-modal" tabindex="-1" aria-labelledby="newChatModalLabel" aria-hidden="true">
+  <!-- New Chat Modal - Version Glassmorphism -->
+  <div class="modal fade modal-glass" id="new-chat-modal" tabindex="-1" aria-labelledby="newChatModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-scrollable">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="newChatModalLabel">Démarrer une nouvelle conversation</h5>
+          <h5 class="modal-title" id="newChatModalLabel">
+            <i data-feather="users" class="me-2" style="width: 18px; height: 18px;"></i>
+            Démarrer une nouvelle conversation
+          </h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
           <% if (otherUsers.length > 0) { %>
             <div class="list-group list-group-flush">
-              <% otherUsers.forEach(otherUser => { %>
+              <% otherUsers.forEach(function(otherUser, index) { %>
                 <a href="#" class="list-group-item list-group-item-action new-chat-user d-flex align-items-center" data-user-id="<%= otherUser.id %>" data-user-name="<%= otherUser.name %>">
                   <div class="avatar-container me-3">
                     <img src="<%= otherUser.avatar_url || '/img/user.png' %>" alt="<%= otherUser.name %>" class="list-avatar">
@@ -88,7 +544,10 @@
               <% }); %>
             </div>
           <% } else { %>
-            <p class="text-muted text-center">Aucun autre utilisateur à qui parler.</p>
+            <p class="text-muted text-center py-4">
+              <i data-feather="users" style="width: 32px; height: 32px; stroke-width: 1;"></i>
+              <br><span class="mt-2 d-block">Aucun autre utilisateur à qui parler.</span>
+            </p>
           <% } %>
         </div>
       </div>
@@ -98,5 +557,22 @@
   <!-- Scripts pour le chat -->
   <script src="/socket.io/socket.io.js"></script>
   <script src="/js/chat.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Remplacer les icônes Feather
+      if (typeof feather !== 'undefined') {
+        feather.replace();
+      }
+
+      // Ajouter les délais d'animation aux éléments de la liste
+      document.querySelectorAll('.new-chat-user').forEach(function(el, index) {
+        var delay = index * 0.05;
+        el.style.animationDelay = delay + 's';
+        el.style.animation = 'chat-fade-in 0.4s ease forwards';
+        el.style.opacity = '0';
+        el.style.transform = 'translateX(-10px)';
+      });
+    });
+  </script>
 </body>
 </html>
