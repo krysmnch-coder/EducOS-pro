@@ -21,13 +21,29 @@
 
         <%# --- Section des Raccourcis (Widgets) --- %>
         <% 
-        // Définir des widgets par défaut si non fournis
-        const defaultWidgets = [
+        // Définir des widgets par défaut pour l'administrateur
+        const adminWidgets = [
             { key: 'students', icon: 'users', title: 'Gestion des Élèves', link: '/students', description: 'Gérer les élèves' },
             { key: 'teachers', icon: 'user-check', title: 'Gestion des Professeurs', link: '/teachers', description: 'Gérer les professeurs' },
             { key: 'classes', icon: 'grid', title: 'Gestion des Classes', link: '/classes', description: 'Gérer les classes' },
             { key: 'admin', icon: 'settings', title: 'Paramètres', link: '/admin', description: 'Paramètres du système' }
         ];
+        
+        // Définir des widgets par défaut pour le super admin
+        const superAdminWidgets = [
+            { key: 'establishments', icon: 'home', title: 'Établissements', link: '/establishments', description: 'Gérer les établissements' },
+            { key: 'admins', icon: 'user-cog', title: 'Admins', link: '/admin', description: 'Gérer les administrateurs' },
+            { key: 'users', icon: 'users', title: 'Utilisateurs', link: '/admin/users', description: 'Gérer les utilisateurs' },
+            { key: 'settings', icon: 'settings', title: 'Paramètres', link: '/admin/settings', description: 'Paramètres du système' }
+        ];
+        
+        // Choisir les widgets selon le rôle
+        let defaultWidgets = adminWidgets;
+        if (currentUser.role === 'SUPER_ADMIN' || currentUser.role === 'superadmin') {
+            defaultWidgets = superAdminWidgets;
+        }
+        
+        // Utiliser les widgets fournis ou les widgets par défaut
         const displayWidgets = (typeof widgets !== 'undefined' && widgets && widgets.length > 0) ? widgets : defaultWidgets;
         %>
         
