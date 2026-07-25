@@ -217,7 +217,7 @@
 
 .navbar-brand:hover .brand-icon {
   transform: scale(1.05);
-  box-shadow: 0 0 30px rgba(13, 110, 253, 0.3);
+  box-shadow: 0 0 20px rgba(13, 110, 253, 0.2);
 }
 
 /* Navbar Toggler */
@@ -298,7 +298,7 @@
 
 .navbar-nav .nav-item .nav-link.active svg {
   color: var(--bs-primary, #0d6efd);
-  filter: drop-shadow(0 0 8px rgba(13, 110, 253, 0.3));
+  filter: drop-shadow(0 0 6px rgba(13, 110, 253, 0.2));
 }
 
 .navbar-nav .nav-item .nav-link.active .nav-text {
@@ -306,22 +306,22 @@
   font-weight: 600;
 }
 
-/* Effet de surbrillance au survol - TOUT EN BLANC */
+/* Effet de surbrillance au survol - BLANC LÉGER */
 .navbar-nav .nav-item .nav-link:hover {
   color: #ffffff !important;
-  transform: translateY(-2px);
+  transform: translateY(-1px);
   background-color: transparent !important;
 }
 
 .navbar-nav .nav-item .nav-link:hover svg {
-  transform: scale(1.2);
+  transform: scale(1.08);
   color: #ffffff !important;
-  filter: drop-shadow(0 0 25px rgba(255, 255, 255, 0.4));
+  filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.2));
 }
 
 .navbar-nav .nav-item .nav-link:hover .nav-text {
   color: #ffffff !important;
-  text-shadow: 0 0 25px rgba(255, 255, 255, 0.3);
+  text-shadow: 0 0 12px rgba(255, 255, 255, 0.15);
 }
 
 /* Suppression des pseudo-éléments pour fond transparent */
@@ -376,20 +376,20 @@
 
 .nav-icon-btn.active svg {
   color: var(--bs-primary, #0d6efd);
-  filter: drop-shadow(0 0 8px rgba(13, 110, 253, 0.3));
+  filter: drop-shadow(0 0 6px rgba(13, 110, 253, 0.2));
 }
 
-/* Effet de surbrillance au survol */
+/* Effet de surbrillance au survol - BLANC LÉGER */
 .nav-icon-btn:hover {
   color: #ffffff !important;
-  transform: translateY(-2px);
+  transform: translateY(-1px);
   background-color: transparent !important;
 }
 
 .nav-icon-btn:hover svg {
-  transform: scale(1.2);
+  transform: scale(1.08);
   color: #ffffff !important;
-  filter: drop-shadow(0 0 25px rgba(255, 255, 255, 0.4));
+  filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.2));
 }
 
 /* Container pour icône avec badge */
@@ -430,7 +430,7 @@
 .nav-icon-btn:hover .icon-badge-wrapper .badge {
   background-color: #ffffff;
   color: #6c757d;
-  transform: scale(1.1);
+  transform: scale(1.05);
 }
 
 /* Bouton de thème */
@@ -497,23 +497,23 @@ html:not([data-theme="dark"]) #themeToggle .moon-icon {
   margin-left: 0.15rem;
 }
 
-/* Effet de surbrillance au survol */
+/* Effet de surbrillance au survol - BLANC LÉGER */
 .dropdown-toggle:hover {
   color: #ffffff !important;
-  transform: translateY(-2px);
+  transform: translateY(-1px);
   background-color: transparent !important;
 }
 
 .dropdown-toggle:hover .navbar-avatar,
 .dropdown-toggle:hover .navbar-avatar-placeholder {
-  transform: scale(1.1);
+  transform: scale(1.05);
   border-color: #ffffff;
-  box-shadow: 0 0 25px rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.2);
 }
 
 .dropdown-toggle:hover span {
   color: #ffffff !important;
-  text-shadow: 0 0 25px rgba(255, 255, 255, 0.3);
+  text-shadow: 0 0 12px rgba(255, 255, 255, 0.15);
 }
 
 /* Style pour le dropdown user */
@@ -540,20 +540,20 @@ html:not([data-theme="dark"]) #themeToggle .moon-icon {
 
 #navbarUserDropdown:hover {
   color: #ffffff !important;
-  transform: translateY(-2px);
+  transform: translateY(-1px);
   background-color: transparent !important;
 }
 
 #navbarUserDropdown:hover .navbar-avatar,
 #navbarUserDropdown:hover .navbar-avatar-placeholder {
-  transform: scale(1.1);
+  transform: scale(1.05);
   border-color: #ffffff;
-  box-shadow: 0 0 25px rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.2);
 }
 
 #navbarUserDropdown:hover span {
   color: #ffffff !important;
-  text-shadow: 0 0 25px rgba(255, 255, 255, 0.3);
+  text-shadow: 0 0 12px rgba(255, 255, 255, 0.15);
 }
 
 .dropdown-menu {
@@ -568,7 +568,7 @@ html:not([data-theme="dark"]) #themeToggle .moon-icon {
 }
 
 .dropdown-menu .dropdown-item {
-  color: var(--text-color, #212529);
+  color: #ffffff !important; /* BLANC */
   padding: 0.5rem 1rem;
   border-radius: 0.5rem;
   transition: background-color 0.2s ease, color 0.2s ease;
@@ -576,13 +576,17 @@ html:not([data-theme="dark"]) #themeToggle .moon-icon {
 }
 
 .dropdown-menu .dropdown-item:hover {
-  background-color: rgba(13, 110, 253, 0.1);
-  color: var(--bs-primary, #0d6efd);
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff !important;
+}
+
+.dropdown-menu .dropdown-item.text-danger {
+  color: #ff6b6b !important;
 }
 
 .dropdown-menu .dropdown-item.text-danger:hover {
-  background-color: rgba(220, 53, 69, 0.1);
-  color: #dc3545;
+  background-color: rgba(255, 107, 107, 0.15);
+  color: #ff6b6b !important;
 }
 
 .dropdown-menu .dropdown-item svg {
@@ -590,7 +594,7 @@ html:not([data-theme="dark"]) #themeToggle .moon-icon {
 }
 
 .dropdown-menu .dropdown-divider {
-  border-color: var(--border-color, rgba(0,0,0,0.1));
+  border-color: rgba(255, 255, 255, 0.1);
   margin: 0.2rem 0;
 }
 
