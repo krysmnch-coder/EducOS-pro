@@ -28,6 +28,17 @@
                   <input type="file" name="avatar" id="avatarUpload" accept="image/png, image/jpeg, image/gif">
                 </div>
               </form>
+              
+              <!-- Bouton pour supprimer la photo de profil -->
+              <form action="/profile/avatar/delete" method="POST" id="deleteAvatarForm" class="mt-2">
+                <button type="submit" class="btn btn-outline-danger btn-sm" 
+                        onclick="return confirm('Êtes-vous sûr de vouloir supprimer votre photo de profil ?')"
+                        <%= user.avatar_url ? '' : 'disabled' %>>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                  Supprimer la photo
+                </button>
+              </form>
+              
               <h2 class="h4 fw-bold mt-3"><%= user.name %></h2>
               <p><span class="badge bg-primary bg-opacity-25 text-primary-emphasis rounded-pill fs-6"><%= user.role %></span></p>
               <p class="text-muted small mt-3">Membre depuis le <%= new Date(user.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) %></p>
