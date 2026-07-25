@@ -5,7 +5,7 @@
     <div class="themed-container">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1 class="h3 mb-0"><%= title %></h1>
-            <a href="/dashboard" class="btn btn-outline-primary d-flex align-items-center">
+            <a href="/dashboard" class="btn btn-outline-primary d-flex align-items-center glass-btn">
                 <i data-feather="arrow-left" class="me-2" style="width: 18px; height: 18px;"></i> Retour au tableau de bord
             </a>
         </div>
@@ -20,8 +20,8 @@
             <% } %>
         </h2>
 
-        <div class="table-responsive">
-            <table class="table table-hover align-middle">
+        <div class="table-responsive glass-table-container">
+            <table class="table table-hover align-middle glass-table">
                 <thead>
                     <tr>
                         <th>Utilisateur</th>
@@ -37,12 +37,12 @@
                 </thead>
                 <tbody>
                     <% if (typeof users !== 'undefined' && users.length > 0) { %>
-                        <% users.forEach(user => { %>
-                            <tr>
+                        <% users.forEach((user, index) => { %>
+                            <tr class="glass-row" data-delay="<%= index * 0.05 %>">
                                 <!-- Colonne Utilisateur -->
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        <img src="<%= user.avatar_url || '/img/user.png' %>" alt="Avatar" class="list-avatar me-3">
+                                        <img src="<%= user.avatar_url || '/img/user.png' %>" alt="Avatar" class="list-avatar me-3 glass-avatar">
                                         <div>
                                             <div class="fw-bold"><%= user.name %></div>
                                             <div class="text-muted small"><%= user.email %></div>
@@ -56,39 +56,39 @@
                                         <span class="text-muted"><%= user.establishment_name || 'Non affilié' %></span>
                                     </td>
                                     <td>
-                                        <span class="badge bg-primary rounded-pill fs-6" id="user-count-<%= user.establishment_id %>">
+                                        <span class="badge bg-primary rounded-pill fs-6 glass-badge" id="user-count-<%= user.establishment_id %>">
                                             <%= user.userCount %>
                                         </span>
                                     </td>
                                     <td class="text-end">
                                         <div class="d-flex gap-2 justify-content-end">
-                                            <button type="button" onclick="window.location.href='mailto:<%= user.email %>'" class="btn btn-sm btn-outline-secondary">Contacter</button>
+                                            <button type="button" onclick="window.location.href='mailto:<%= user.email %>'" class="btn btn-sm btn-outline-secondary glass-btn-small">Contacter</button>
                                             <form action="/admin/users/<%= user.id %>/delete" method="POST" class="d-inline mb-0">
-                                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet administrateur ? Cette action est irréversible.');">Supprimer</button>
+                                                <button type="submit" class="btn btn-sm btn-outline-danger glass-btn-small" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet administrateur ? Cette action est irréversible.');">Supprimer</button>
                                             </form>
                                         </div>
                                     </td>
                                 <% } else { %>
                                     <!-- Vue Admin d'école -->
                                     <td>
-                                        <span class="badge bg-secondary text-capitalize"><%= user.role %></span>
+                                        <span class="badge bg-secondary text-capitalize glass-badge"><%= user.role %></span>
                                     </td>
                                     <td>
                                         <% if (user.approved) { %>
-                                            <span class="badge bg-success">Approuvé</span>
+                                            <span class="badge bg-success glass-badge">Approuvé</span>
                                         <% } else { %>
-                                            <span class="badge bg-warning text-dark">En attente</span>
+                                            <span class="badge bg-warning text-dark glass-badge">En attente</span>
                                         <% } %>
                                     </td>
                                     <td class="text-end">
                                         <div class="d-flex gap-2 justify-content-end">
                                             <% if (!user.approved) { %>
                                                 <form action="/admin/users/<%= user.id %>/approve" method="POST" class="d-inline">
-                                                    <button type="submit" class="btn btn-sm btn-success">Approuver</button>
+                                                    <button type="submit" class="btn btn-sm btn-success glass-btn-small">Approuver</button>
                                                 </form>
                                             <% } %>
                                             <form action="/admin/users/<%= user.id %>/delete" method="POST" class="d-inline">
-                                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?');">Supprimer</button>
+                                                <button type="submit" class="btn btn-sm btn-outline-danger glass-btn-small" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?');">Supprimer</button>
                                             </form>
                                         </div>
                                     </td>
@@ -112,25 +112,287 @@
     </div>
 </div>
 
+<style>
+/* ==========================================================================
+   Page Gestion des Utilisateurs - Style Glassmorphism
+   ========================================================================== */
+
+/* Conteneur du tableau avec effet Glassmorphism */
+.glass-table-container {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 1rem;
+    padding: 0.5rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+}
+
+[data-theme="dark"] .glass-table-container {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* Tableau */
+.glass-table {
+    margin-bottom: 0;
+    border-radius: 0.75rem;
+    overflow: hidden;
+}
+
+.glass-table thead th {
+    background: rgba(13, 110, 253, 0.08);
+    color: var(--text-color, #212529);
+    font-weight: 600;
+    border-bottom: 2px solid rgba(13, 110, 253, 0.15);
+    padding: 1rem 0.75rem;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+}
+
+[data-theme="dark"] .glass-table thead th {
+    background: rgba(255, 255, 255, 0.05);
+    border-bottom: 2px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Lignes du tableau avec animation d'entrée */
+.glass-row {
+    background: transparent;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    animation: row-fade-in 0.5s ease forwards;
+    opacity: 0;
+    transform: translateX(-10px);
+}
+
+/* Les délais sont appliqués via JavaScript */
+
+@keyframes row-fade-in {
+    from {
+        opacity: 0;
+        transform: translateX(-15px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+.glass-row:hover {
+    background: rgba(13, 110, 253, 0.05);
+    transform: scale(1.005);
+}
+
+[data-theme="dark"] .glass-row:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.glass-row td {
+    padding: 0.85rem 0.75rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+    vertical-align: middle;
+}
+
+[data-theme="dark"] .glass-row td {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+/* Avatar */
+.glass-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(13, 110, 253, 0.2);
+    transition: all 0.3s ease;
+}
+
+.glass-avatar:hover {
+    transform: scale(1.1);
+    border-color: var(--bs-primary, #0d6efd);
+    box-shadow: 0 0 20px rgba(13, 110, 253, 0.2);
+}
+
+[data-theme="dark"] .glass-avatar {
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Badges */
+.glass-badge {
+    padding: 0.35rem 0.75rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glass-badge:hover {
+    transform: scale(1.05);
+}
+
+/* Boutons Glassmorphism */
+.glass-btn {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 0.75rem;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    color: var(--bs-primary, #0d6efd);
+}
+
+.glass-btn:hover {
+    background: rgba(13, 110, 253, 0.15);
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(13, 110, 253, 0.15);
+    border-color: var(--bs-primary, #0d6efd);
+}
+
+[data-theme="dark"] .glass-btn {
+    color: #ffffff;
+}
+
+[data-theme="dark"] .glass-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #ffffff;
+}
+
+/* Petits boutons dans le tableau */
+.glass-btn-small {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.5rem;
+    padding: 0.3rem 0.8rem;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    font-size: 0.8rem;
+}
+
+.glass-btn-small:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.btn-outline-secondary.glass-btn-small:hover {
+    background: rgba(108, 117, 125, 0.15);
+    border-color: #6c757d;
+}
+
+.btn-outline-danger.glass-btn-small:hover {
+    background: rgba(220, 53, 69, 0.15);
+    border-color: #dc3545;
+}
+
+.btn-success.glass-btn-small {
+    background: rgba(25, 135, 84, 0.15);
+    border-color: rgba(25, 135, 84, 0.3);
+    color: #198754;
+}
+
+.btn-success.glass-btn-small:hover {
+    background: rgba(25, 135, 84, 0.25);
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 4px 15px rgba(25, 135, 84, 0.2);
+}
+
+[data-theme="dark"] .glass-btn-small {
+    color: #ffffff;
+}
+
+[data-theme="dark"] .btn-outline-secondary.glass-btn-small {
+    color: #adb5bd;
+}
+
+[data-theme="dark"] .btn-outline-danger.glass-btn-small {
+    color: #ff6b6b;
+}
+
+[data-theme="dark"] .btn-success.glass-btn-small {
+    color: #51cf66;
+}
+
+/* Animations des badges de comptage */
+@keyframes flash-increase {
+    0% { background-color: var(--bs-primary); transform: scale(1); }
+    30% { background-color: var(--bs-success); transform: scale(1.25); box-shadow: 0 0 30px rgba(25, 135, 84, 0.3); }
+    60% { transform: scale(0.95); }
+    100% { background-color: var(--bs-primary); transform: scale(1); }
+}
+
+@keyframes flash-decrease {
+    0% { background-color: var(--bs-primary); transform: scale(1); }
+    30% { background-color: var(--bs-danger); transform: scale(1.25); box-shadow: 0 0 30px rgba(220, 53, 69, 0.3); }
+    60% { transform: scale(0.95); }
+    100% { background-color: var(--bs-primary); transform: scale(1); }
+}
+
+.flash-increase {
+    animation: flash-increase 0.8s ease-out;
+}
+
+.flash-decrease {
+    animation: flash-decrease 0.8s ease-out;
+}
+
+/* Adaptation mobile */
+@media (max-width: 768px) {
+    .glass-table-container {
+        padding: 0.25rem;
+        border-radius: 0.75rem;
+    }
+    
+    .glass-table thead th {
+        font-size: 0.65rem;
+        padding: 0.5rem 0.4rem;
+    }
+    
+    .glass-row td {
+        padding: 0.5rem 0.4rem;
+        font-size: 0.85rem;
+    }
+    
+    .glass-avatar {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .glass-btn-small {
+        padding: 0.2rem 0.5rem;
+        font-size: 0.7rem;
+    }
+}
+</style>
+
 <% if (currentUser.role === 'SUPER_ADMIN') { %>
     <script src="/socket.io/socket.io.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Appliquer les délais d'animation aux lignes
+            document.querySelectorAll('.glass-row').forEach(function(row) {
+                var delay = row.getAttribute('data-delay');
+                if (delay) {
+                    row.style.animationDelay = delay + 's';
+                }
+            });
+
             // On se connecte au namespace global car l'event est émis globalement
-            const socket = io(); // Se connecte au namespace par défaut '/'
+            const socket = io();
 
             socket.on('adminStatsUpdate', function(data) {
                 // Cette page (pour le SUPER_ADMIN) est intéressée par les stats globales
                 if (data.superAdminStats && data.superAdminStats.establishmentsWithCounts) {
-                    data.superAdminStats.establishmentsWithCounts.forEach(est => {
+                    data.superAdminStats.establishmentsWithCounts.forEach(function(est) {
                         // Il peut y avoir plusieurs admins pour le même établissement, donc on met à jour tous les badges correspondants.
-                        const countElements = document.querySelectorAll(`#user-count-${est.id}`);
-                        countElements.forEach(el => {
-                            const oldValue = parseInt(el.textContent, 10);
+                        var countElements = document.querySelectorAll('#user-count-' + est.id);
+                        countElements.forEach(function(el) {
+                            var oldValue = parseInt(el.textContent, 10);
                             el.textContent = est.userCount;
 
                             // Animation pour mettre en évidence le changement
-                            let animationClass = 'flash-increase';
+                            var animationClass = 'flash-increase';
                             if (est.userCount < oldValue) {
                                 animationClass = 'flash-decrease';
                             }
@@ -145,24 +407,6 @@
             });
         });
     </script>
-    <style>
-        @keyframes flash-increase {
-            0% { background-color: var(--bs-primary); transform: scale(1); }
-            50% { background-color: var(--bs-success); transform: scale(1.2); }
-            100% { background-color: var(--bs-primary); transform: scale(1); }
-        }
-        @keyframes flash-decrease {
-            0% { background-color: var(--bs-primary); transform: scale(1); }
-            50% { background-color: var(--bs-danger); transform: scale(1.2); }
-            100% { background-color: var(--bs-primary); transform: scale(1); }
-        }
-        .flash-increase {
-            animation: flash-increase 0.8s ease-out;
-        }
-        .flash-decrease {
-            animation: flash-decrease 0.8s ease-out;
-        }
-    </style>
 <% } %>
 
 <%- include('partials/page-end-scripts') %>
