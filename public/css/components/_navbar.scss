@@ -43,7 +43,7 @@
   font-size: 1.1rem;
   transition: transform 0.3s ease;
 
-  .bg-primary {
+  .brand-icon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -53,12 +53,12 @@
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     
     svg {
-      width: 24px !important;
-      height: 24px !important;
+      width: 24px;
+      height: 24px;
     }
   }
 
-  &:hover .bg-primary {
+  &:hover .brand-icon {
     transform: scale(1.05);
     box-shadow: 0 0 30px rgba(var(--bs-primary-rgb), 0.3);
   }
@@ -110,10 +110,10 @@
   text-decoration: none;
   min-width: 70px;
 
-  // Icônes SVG - FORCER LA TAILLE
+  // Icônes SVG - Gris par défaut
   svg {
-    width: 28px !important; // FORCER la taille
-    height: 28px !important; // FORCER la taille
+    width: 24px !important; // Force la taille
+    height: 24px !important;
     color: #6c757d;
     transition: color 0.3s ease, transform 0.3s ease, filter 0.3s ease;
     stroke: currentColor;
@@ -121,10 +121,9 @@
     stroke-width: 2;
     stroke-linecap: round;
     stroke-linejoin: round;
-    flex-shrink: 0; // Empêche le rétrécissement
   }
   
-  // Texte
+  // Texte - Gris par défaut
   .nav-text {
     font-size: 0.7rem;
     font-weight: 500;
@@ -150,7 +149,7 @@
     }
   }
 
-  // Effet de surbrillance au survol
+  // Effet de surbrillance au survol - TOUT EN BLANC
   &:hover {
     color: #ffffff !important;
     transform: translateY(-2px);
@@ -169,12 +168,13 @@
   }
 }
 
-// Suppression des pseudo-éléments
+// Suppression des pseudo-éléments pour fond transparent
 .navbar-nav .nav-item .nav-link::before,
 .navbar-nav .nav-item .nav-link::after {
   display: none;
 }
 
+// Garder le fond transparent au survol
 .navbar-nav .nav-item .nav-link:hover {
   background-color: transparent !important;
 }
@@ -193,11 +193,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.6rem 0.8rem; // AGRANDI pour correspondre
+  padding: 0.6rem 0.8rem; // Même padding que les autres
   color: #6c757d;
   background-color: transparent !important;
   border: none !important;
-  border-radius: 0.7rem;
+  border-radius: 0.7rem; // Même radius que les autres
   transition: color 0.3s ease, transform 0.3s ease;
   cursor: pointer;
   position: relative;
@@ -206,8 +206,8 @@
   min-width: 50px;
 
   svg {
-    width: 24px !important; // FORCER la taille
-    height: 24px !important; // FORCER la taille
+    width: 24px !important;
+    height: 24px !important;
     color: #6c757d;
     transition: color 0.3s ease, transform 0.3s ease, filter 0.3s ease;
     stroke: currentColor;
@@ -215,9 +215,9 @@
     stroke-width: 2;
     stroke-linecap: round;
     stroke-linejoin: round;
-    flex-shrink: 0;
   }
 
+  // État actif
   &.active {
     color: var(--bs-primary);
     
@@ -227,6 +227,7 @@
     }
   }
 
+  // Effet de surbrillance au survol - TOUT EN BLANC
   &:hover {
     color: #ffffff !important;
     transform: translateY(-2px);
@@ -249,8 +250,8 @@
 
   .badge {
     position: absolute;
-    top: -4px;
-    right: -6px;
+    top: -5px;
+    right: -8px;
     border: 2px solid var(--navbar-bg);
     transform: none;
     background-color: #dc3545;
@@ -273,6 +274,7 @@
   }
 }
 
+// Le badge devient blanc au survol du parent
 .nav-link:hover .icon-badge-wrapper .badge,
 .nav-icon-btn:hover .icon-badge-wrapper .badge {
   background-color: #ffffff;
@@ -281,35 +283,31 @@
 }
 
 // Bouton de thème
-#themeToggle, #theme-toggle-btn {
+#themeToggle {
   .sun-icon, .moon-icon {
     transition: color 0.3s ease, transform 0.3s ease, filter 0.3s ease;
   }
 }
 
 // Mode clair - afficher le soleil
-html:not([data-theme="dark"]) #themeToggle .sun-icon,
-html:not([data-theme="dark"]) #theme-toggle-btn .theme-icon-light {
+html:not([data-theme="dark"]) #themeToggle .sun-icon {
   display: inline-block;
 }
 
-html:not([data-theme="dark"]) #themeToggle .moon-icon,
-html:not([data-theme="dark"]) #theme-toggle-btn .theme-icon-dark {
+html:not([data-theme="dark"]) #themeToggle .moon-icon {
   display: none;
 }
 
 // Mode sombre - afficher la lune
-[data-theme="dark"] #themeToggle .moon-icon,
-[data-theme="dark"] #theme-toggle-btn .theme-icon-dark {
+[data-theme="dark"] #themeToggle .moon-icon {
   display: inline-block;
 }
 
-[data-theme="dark"] #themeToggle .sun-icon,
-[data-theme="dark"] #theme-toggle-btn .theme-icon-light {
+[data-theme="dark"] #themeToggle .sun-icon {
   display: none;
 }
 
-// Avatar
+// Avatar - SUR LA MÊME LIGNE QUE LES AUTRES BOUTONS
 .navbar-avatar {
   width: 34px;
   height: 34px;
@@ -317,7 +315,6 @@ html:not([data-theme="dark"]) #theme-toggle-btn .theme-icon-dark {
   object-fit: cover;
   border: 2px solid #6c757d;
   transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-  flex-shrink: 0;
 }
 
 .navbar-avatar-placeholder {
@@ -333,23 +330,23 @@ html:not([data-theme="dark"]) #theme-toggle-btn .theme-icon-dark {
   font-size: 0.9rem;
   border: 2px solid #6c757d;
   transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-  flex-shrink: 0;
 }
 
-// Dropdown
+// Dropdown - AVATAR SUR LA MÊME LIGNE
 .dropdown-toggle {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   padding: 0.35rem 0.7rem;
   background-color: transparent !important;
-  border-radius: 0.5rem;
+  border-radius: 0.7rem;
   transition: color 0.3s ease, transform 0.3s ease;
   
   &::after {
     margin-left: 0.15rem;
   }
   
+  // Effet de surbrillance au survol
   &:hover {
     color: #ffffff !important;
     transform: translateY(-2px);
@@ -359,12 +356,12 @@ html:not([data-theme="dark"]) #theme-toggle-btn .theme-icon-dark {
     .navbar-avatar-placeholder {
       transform: scale(1.1);
       border-color: #ffffff;
-      box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+      box-shadow: 0 0 25px rgba(255, 255, 255, 0.3);
     }
     
     span {
       color: #ffffff !important;
-      text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+      text-shadow: 0 0 25px rgba(255, 255, 255, 0.3);
     }
   }
 }
@@ -376,7 +373,7 @@ html:not([data-theme="dark"]) #theme-toggle-btn .theme-icon-dark {
   gap: 0.5rem;
   background-color: transparent !important;
   padding: 0.35rem 0.7rem;
-  border-radius: 0.5rem;
+  border-radius: 0.7rem;
   transition: color 0.3s ease, transform 0.3s ease;
   
   .navbar-avatar,
@@ -399,12 +396,12 @@ html:not([data-theme="dark"]) #theme-toggle-btn .theme-icon-dark {
     .navbar-avatar-placeholder {
       transform: scale(1.1);
       border-color: #ffffff;
-      box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+      box-shadow: 0 0 25px rgba(255, 255, 255, 0.3);
     }
     
     span {
       color: #ffffff !important;
-      text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+      text-shadow: 0 0 25px rgba(255, 255, 255, 0.3);
     }
   }
 }
@@ -474,8 +471,8 @@ html:not([data-theme="dark"]) #theme-toggle-btn .theme-icon-dark {
     }
     
     svg {
-      width: 24px !important;
-      height: 24px !important;
+      width: 22px !important;
+      height: 22px !important;
     }
   }
   
@@ -491,8 +488,8 @@ html:not([data-theme="dark"]) #theme-toggle-btn .theme-icon-dark {
     min-width: auto;
     
     svg {
-      width: 24px !important;
-      height: 24px !important;
+      width: 22px !important;
+      height: 22px !important;
     }
   }
   
@@ -503,7 +500,7 @@ html:not([data-theme="dark"]) #theme-toggle-btn .theme-icon-dark {
   .dropdown-toggle {
     width: 100%;
     justify-content: flex-start;
-    padding: 0.4rem 0.8rem;
+    padding: 0.6rem 1rem;
   }
   
   .navbar-avatar,
@@ -527,12 +524,12 @@ html:not([data-theme="dark"]) #theme-toggle-btn .theme-icon-dark {
   .navbar-brand {
     font-size: 0.95rem;
     
-    .bg-primary {
+    .brand-icon {
       padding: 0.3rem;
       
       svg {
-        width: 22px !important;
-        height: 22px !important;
+        width: 22px;
+        height: 22px;
       }
     }
   }
@@ -546,8 +543,8 @@ html:not([data-theme="dark"]) #theme-toggle-btn .theme-icon-dark {
   
   .nav-icon-btn svg,
   .navbar-nav .nav-item .nav-link svg {
-    width: 22px !important;
-    height: 22px !important;
+    width: 20px !important;
+    height: 20px !important;
   }
 }
 
