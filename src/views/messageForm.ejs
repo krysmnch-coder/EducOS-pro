@@ -1,31 +1,365 @@
 <%- include('partials/head') %>
+
+<style>
+  /* ==========================================================================
+     Page Envoi de Message - Style Glassmorphism
+     ========================================================================== */
+  
+  .page-section {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+  
+  /* Section header */
+  .section-header {
+    margin-bottom: 2rem;
+    animation: header-fade 0.6s ease forwards !important;
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  
+  @keyframes header-fade {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .section-header h1 {
+    font-weight: 700;
+    color: var(--text-color, #212529);
+  }
+  
+  [data-theme="dark"] .section-header h1 {
+    color: #ffffff;
+  }
+  
+  .section-header .text-muted {
+    color: var(--text-muted, #6c757d) !important;
+  }
+  
+  [data-theme="dark"] .section-header .text-muted {
+    color: rgba(255, 255, 255, 0.6) !important;
+  }
+  
+  /* Carte formulaire Glassmorphism */
+  .form-card {
+    background: rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 1.25rem !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06) !important;
+    padding: 2rem !important;
+    animation: card-fade-in 0.6s ease forwards !important;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  
+  @keyframes card-fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(20px) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+  
+  [data-theme="dark"] .form-card {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+  }
+  
+  /* Labels */
+  .form-label {
+    font-weight: 500;
+    color: var(--text-color, #212529);
+  }
+  
+  [data-theme="dark"] .form-label {
+    color: rgba(255, 255, 255, 0.8);
+  }
+  
+  /* Champs de formulaire Glassmorphism */
+  .form-control, .form-select {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 0.75rem !important;
+    padding: 0.7rem 1rem !important;
+    transition: all 0.3s ease !important;
+    color: var(--text-color, #212529) !important;
+    box-shadow: none !important;
+  }
+  
+  .form-control:focus, .form-select:focus {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-color: var(--bs-primary, #0d6efd) !important;
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.12) !important;
+  }
+  
+  .form-control-lg, .form-select-lg {
+    font-size: 1rem;
+    padding: 0.8rem 1.2rem !important;
+  }
+  
+  [data-theme="dark"] .form-control,
+  [data-theme="dark"] .form-select {
+    background: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    color: #ffffff !important;
+  }
+  
+  [data-theme="dark"] .form-control::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+  }
+  
+  [data-theme="dark"] .form-control:focus,
+  [data-theme="dark"] .form-select:focus {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-color: #ffffff !important;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.08) !important;
+  }
+  
+  [data-theme="dark"] .form-select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+  }
+  
+  [data-theme="dark"] .form-select option {
+    background-color: #16213e;
+    color: #ffffff;
+  }
+  
+  /* Boutons radio personnalisés */
+  .btn-outline-secondary {
+    background: rgba(255, 255, 255, 0.05) !important;
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 0.75rem !important;
+    padding: 0.5rem 1rem !important;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+    color: var(--text-color, #212529) !important;
+  }
+  
+  .btn-outline-secondary:hover {
+    transform: translateY(-2px) scale(1.02) !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06) !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+  }
+  
+  .btn-outline-secondary:has(input:checked) {
+    background: rgba(13, 110, 253, 0.12) !important;
+    border-color: var(--bs-primary, #0d6efd) !important;
+    color: var(--bs-primary, #0d6efd) !important;
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.08) !important;
+  }
+  
+  [data-theme="dark"] .btn-outline-secondary {
+    color: #ffffff !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+  }
+  
+  [data-theme="dark"] .btn-outline-secondary:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+  }
+  
+  [data-theme="dark"] .btn-outline-secondary:has(input:checked) {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-color: #ffffff !important;
+    color: #ffffff !important;
+  }
+  
+  .btn-outline-secondary input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  /* Texte des champs */
+  .text-muted {
+    color: var(--text-muted, #6c757d) !important;
+  }
+  
+  [data-theme="dark"] .text-muted {
+    color: rgba(255, 255, 255, 0.5) !important;
+  }
+  
+  /* Bouton d'envoi Glassmorphism */
+  .btn-primary {
+    background: linear-gradient(135deg, rgba(13, 110, 253, 0.2), rgba(13, 202, 240, 0.2)) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    border: 1px solid rgba(13, 110, 253, 0.25) !important;
+    border-radius: 0.75rem !important;
+    padding: 0.8rem !important;
+    font-weight: 600 !important;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+    color: var(--bs-primary, #0d6efd) !important;
+  }
+  
+  .btn-primary:hover {
+    transform: translateY(-2px) scale(1.01) !important;
+    box-shadow: 0 8px 30px rgba(13, 110, 253, 0.2) !important;
+    background: linear-gradient(135deg, rgba(13, 110, 253, 0.3), rgba(13, 202, 240, 0.3)) !important;
+    border-color: var(--bs-primary, #0d6efd) !important;
+  }
+  
+  [data-theme="dark"] .btn-primary {
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+  }
+  
+  [data-theme="dark"] .btn-primary:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 8px 30px rgba(255, 255, 255, 0.08) !important;
+    border-color: #ffffff !important;
+  }
+  
+  /* Input file personnalisé */
+  input[type="file"] {
+    color: var(--text-color, #212529) !important;
+    padding-top: 0.6rem !important;
+  }
+  
+  input[type="file"]::file-selector-button {
+    background: rgba(13, 110, 253, 0.08) !important;
+    border: 1px solid rgba(13, 110, 253, 0.15) !important;
+    border-radius: 0.5rem !important;
+    padding: 0.4rem 1rem !important;
+    margin-right: 1rem !important;
+    color: var(--bs-primary, #0d6efd) !important;
+    font-weight: 500 !important;
+    transition: all 0.3s ease !important;
+  }
+  
+  input[type="file"]::file-selector-button:hover {
+    background: rgba(13, 110, 253, 0.15) !important;
+    transform: translateY(-2px) !important;
+  }
+  
+  [data-theme="dark"] input[type="file"] {
+    color: #ffffff !important;
+  }
+  
+  [data-theme="dark"] input[type="file"]::file-selector-button {
+    color: #ffffff !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+  }
+  
+  [data-theme="dark"] input[type="file"]::file-selector-button:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+  }
+  
+  /* Animation des champs */
+  .form-group-animated {
+    animation: form-fade 0.5s ease forwards !important;
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  
+  @keyframes form-fade {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .form-group-animated:nth-child(1) { animation-delay: 0.05s; }
+  .form-group-animated:nth-child(2) { animation-delay: 0.10s; }
+  .form-group-animated:nth-child(3) { animation-delay: 0.15s; }
+  .form-group-animated:nth-child(4) { animation-delay: 0.20s; }
+  .form-group-animated:nth-child(5) { animation-delay: 0.25s; }
+  .form-group-animated:nth-child(6) { animation-delay: 0.30s; }
+  .form-group-animated:nth-child(7) { animation-delay: 0.35s; }
+  
+  /* Adaptation mobile */
+  @media (max-width: 768px) {
+    .page-section {
+      padding: 1rem 0.75rem;
+    }
+    
+    .form-card {
+      padding: 1.25rem !important;
+      border-radius: 1rem !important;
+    }
+    
+    .section-header h1 {
+      font-size: 1.4rem;
+    }
+    
+    .btn-outline-secondary {
+      font-size: 0.85rem;
+      padding: 0.4rem 0.8rem !important;
+    }
+    
+    .form-control-lg, .form-select-lg {
+      font-size: 0.95rem;
+      padding: 0.6rem 0.8rem !important;
+    }
+    
+    .btn-primary {
+      font-size: 0.95rem;
+      padding: 0.6rem !important;
+    }
+  }
+</style>
+
 <div class="page-section">
   <div class="section-header d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3">
     <div>
-      <h1>Envoyer un message</h1>
+      <h1>
+        <i data-feather="send" class="me-2" style="width: 28px; height: 28px;"></i>
+        Envoyer un message
+      </h1>
       <p class="text-muted">Choisissez comment envoyer votre message : à tous, par rôle ou à une personne précise.</p>
     </div>
   </div>
 
   <form action="/communications/send" method="POST" enctype="multipart/form-data" class="form-card">
-    <label class="form-label">Destinataire</label>
-    <div class="mb-3 d-flex flex-wrap gap-2">
-      <label class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2">
-        <input type="radio" name="receiver_type" value="all" autocomplete="off" checked class="d-none" />
-        Tous
+    <div class="mb-3 form-group-animated">
+      <label class="form-label">
+        <i data-feather="users" class="me-1" style="width: 14px; height: 14px;"></i>
+        Destinataire
       </label>
-      <label class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2">
-        <input type="radio" name="receiver_type" value="role" autocomplete="off" class="d-none" />
-        Par rôle
-      </label>
-      <label class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2">
-        <input type="radio" name="receiver_type" value="user" autocomplete="off" class="d-none" />
-        Une personne
-      </label>
+      <div class="d-flex flex-wrap gap-2">
+        <label class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2">
+          <input type="radio" name="receiver_type" value="all" autocomplete="off" checked class="d-none" />
+          <i data-feather="globe" class="me-1" style="width: 14px; height: 14px;"></i>
+          Tous
+        </label>
+        <label class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2">
+          <input type="radio" name="receiver_type" value="role" autocomplete="off" class="d-none" />
+          <i data-feather="briefcase" class="me-1" style="width: 14px; height: 14px;"></i>
+          Par rôle
+        </label>
+        <label class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2">
+          <input type="radio" name="receiver_type" value="user" autocomplete="off" class="d-none" />
+          <i data-feather="user" class="me-1" style="width: 14px; height: 14px;"></i>
+          Une personne
+        </label>
+      </div>
     </div>
 
-    <div class="mb-3 receiver-role-field d-none">
-      <label for="receiver_role" class="form-label">Rôle</label>
+    <div class="mb-3 receiver-role-field d-none form-group-animated">
+      <label for="receiver_role" class="form-label">
+        <i data-feather="briefcase" class="me-1" style="width: 14px; height: 14px;"></i>
+        Rôle
+      </label>
       <select id="receiver_role" name="receiver_role" class="form-select form-select-lg">
         <option value="administrateur">Administrateur</option>
         <option value="responsable vie scolaire">Responsable vie scolaire</option>
@@ -36,8 +370,11 @@
       </select>
     </div>
 
-    <div class="mb-3 receiver-user-field d-none">
-      <label for="receiver_user_id" class="form-label">Personne spécifique</label>
+    <div class="mb-3 receiver-user-field d-none form-group-animated">
+      <label for="receiver_user_id" class="form-label">
+        <i data-feather="user" class="me-1" style="width: 14px; height: 14px;"></i>
+        Personne spécifique
+      </label>
       <select id="receiver_user_id" name="receiver_user_id" class="form-select form-select-lg">
         <option value="">Choisir un utilisateur</option>
         <% const recipientUsers = typeof users !== 'undefined' ? users : []; %>
@@ -49,28 +386,45 @@
       </select>
     </div>
 
-    <div class="mb-3">
-      <label for="subject" class="form-label">Objet</label>
-      <input id="subject" type="text" name="subject" class="form-control form-control-lg" required />
+    <div class="mb-3 form-group-animated">
+      <label for="subject" class="form-label">
+        <i data-feather="edit-2" class="me-1" style="width: 14px; height: 14px;"></i>
+        Objet
+      </label>
+      <input id="subject" type="text" name="subject" class="form-control form-control-lg" required placeholder="Saisissez l'objet de votre message..." />
     </div>
 
-    <div class="mb-3">
-      <label for="body" class="form-label">Message</label>
-      <textarea id="body" name="body" rows="6" class="form-control form-control-lg" required></textarea>
+    <div class="mb-3 form-group-animated">
+      <label for="body" class="form-label">
+        <i data-feather="message-square" class="me-1" style="width: 14px; height: 14px;"></i>
+        Message
+      </label>
+      <textarea id="body" name="body" rows="6" class="form-control form-control-lg" required placeholder="Écrivez votre message ici..."></textarea>
     </div>
 
-    <div class="mb-4">
-      <label for="attachment" class="form-label">Fichier à joindre</label>
+    <div class="mb-4 form-group-animated">
+      <label for="attachment" class="form-label">
+        <i data-feather="paperclip" class="me-1" style="width: 14px; height: 14px;"></i>
+        Fichier à joindre
+      </label>
       <input id="attachment" type="file" name="attachment" class="form-control form-control-lg" />
-      <small class="text-muted">PDF, image ou document. Taille maximale recommandée 10 Mo.</small>
+      <small class="text-muted"><i data-feather="info" class="me-1" style="width: 12px; height: 12px;"></i>PDF, image ou document. Taille maximale recommandée 10 Mo.</small>
     </div>
 
-    <button type="submit" class="btn btn-primary btn-lg w-100">Envoyer</button>
+    <button type="submit" class="btn btn-primary btn-lg w-100">
+      <i data-feather="send" class="me-2" style="width: 18px; height: 18px;"></i>
+      Envoyer
+    </button>
   </form>
 </div>
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
+    // Remplacer les icônes Feather
+    if (typeof feather !== 'undefined') {
+      feather.replace();
+    }
+
     const radios = document.querySelectorAll('input[name="receiver_type"]');
     const roleField = document.querySelector('.receiver-role-field');
     const userField = document.querySelector('.receiver-user-field');

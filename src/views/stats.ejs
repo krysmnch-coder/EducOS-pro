@@ -3,16 +3,175 @@
 <head>
   <%- include('partials/head') %>
   <style>
-    .chart-card {
-      background-color: var(--bs-card-bg);
-      border: 1px solid var(--bs-border-color);
-      border-radius: 1rem;
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
+    /* ==========================================================================
+       Page Statistiques Globales - Style Glassmorphism
+       ========================================================================== */
+    
+    .page-shell {
+      padding-top: 1rem;
+      padding-bottom: 2rem;
     }
+    
+    /* Titre de page */
+    .page-title {
+      color: var(--text-color, #212529);
+      font-weight: 700;
+      animation: title-slide 0.6s ease forwards !important;
+      opacity: 0;
+      transform: translateX(-10px);
+    }
+    
+    @keyframes title-slide {
+      from {
+        opacity: 0;
+        transform: translateX(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    
+    [data-theme="dark"] .page-title {
+      color: #ffffff;
+    }
+    
+    /* Bouton retour Glassmorphism */
+    .glass-btn-back {
+      background: rgba(255, 255, 255, 0.05) !important;
+      backdrop-filter: blur(8px) !important;
+      -webkit-backdrop-filter: blur(8px) !important;
+      border: 1px solid rgba(255, 255, 255, 0.12) !important;
+      border-radius: 0.75rem !important;
+      transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+      color: var(--text-color, #212529) !important;
+      padding: 0.5rem 1.25rem !important;
+      display: inline-flex;
+      align-items: center;
+      text-decoration: none;
+    }
+    
+    .glass-btn-back:hover {
+      transform: translateY(-2px) scale(1.02) !important;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+      background: rgba(255, 255, 255, 0.1) !important;
+      color: var(--text-color, #212529) !important;
+    }
+    
+    [data-theme="dark"] .glass-btn-back {
+      color: #ffffff !important;
+      border-color: rgba(255, 255, 255, 0.08) !important;
+    }
+    
+    [data-theme="dark"] .glass-btn-back:hover {
+      background: rgba(255, 255, 255, 0.08) !important;
+      color: #ffffff !important;
+    }
+    
+    /* Chart Cards Glassmorphism */
+    .chart-card {
+      background: rgba(255, 255, 255, 0.06) !important;
+      backdrop-filter: blur(12px) !important;
+      -webkit-backdrop-filter: blur(12px) !important;
+      border: 1px solid rgba(255, 255, 255, 0.12) !important;
+      border-radius: 1.25rem !important;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06) !important;
+      padding: 1.5rem !important;
+      margin-bottom: 1.5rem;
+      animation: card-fade-in 0.6s ease forwards !important;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s ease;
+    }
+    
+    .chart-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 48px rgba(0, 0, 0, 0.08) !important;
+    }
+    
+    @keyframes card-fade-in {
+      from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+    
+    [data-theme="dark"] .chart-card {
+      background: rgba(255, 255, 255, 0.02) !important;
+      border: 1px solid rgba(255, 255, 255, 0.06) !important;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+    }
+    
+    [data-theme="dark"] .chart-card:hover {
+      box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5) !important;
+    }
+    
     .chart-card h4 {
       font-weight: 600;
       margin-bottom: 1.5rem;
+      color: var(--text-color, #212529);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    [data-theme="dark"] .chart-card h4 {
+      color: #ffffff;
+    }
+    
+    /* Délais d'animation pour les cartes */
+    .chart-card:nth-child(1) { animation-delay: 0.1s; }
+    .chart-card:nth-child(2) { animation-delay: 0.2s; }
+    .chart-card:nth-child(3) { animation-delay: 0.3s; }
+    
+    /* Container des graphiques */
+    canvas {
+      max-height: 300px;
+      max-width: 100%;
+    }
+    
+    /* Adaptation mobile */
+    @media (max-width: 768px) {
+      .page-title {
+        font-size: 1.4rem;
+      }
+      
+      .chart-card {
+        padding: 1rem !important;
+        border-radius: 1rem !important;
+      }
+      
+      .chart-card h4 {
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+      }
+      
+      canvas {
+        max-height: 250px;
+      }
+      
+      .glass-btn-back {
+        font-size: 0.85rem;
+        padding: 0.4rem 1rem !important;
+      }
+    }
+    
+    @media (max-width: 576px) {
+      .chart-card {
+        padding: 0.75rem !important;
+      }
+      
+      canvas {
+        max-height: 200px;
+      }
+      
+      .chart-card h4 {
+        font-size: 1rem;
+      }
     }
   </style>
 </head>
@@ -21,10 +180,13 @@
     <%- include('partials/header') %>
 
     <main class="page-main">
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h2 fw-bold">Statistiques Globales</h1>
-        <a href="/dashboard" class="btn btn-outline-secondary">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <h1 class="h2 fw-bold page-title">
+          <i data-feather="bar-chart-2" class="me-2" style="width: 28px; height: 28px;"></i>
+          Statistiques Globales
+        </h1>
+        <a href="/dashboard" class="glass-btn-back">
+          <i data-feather="arrow-left" class="me-1" style="width: 16px; height: 16px;"></i>
           Retour au tableau de bord
         </a>
       </div>
@@ -33,7 +195,10 @@
         <!-- Students per Class Chart -->
         <div class="col-lg-8">
           <div class="chart-card">
-            <h4>Élèves par classe</h4>
+            <h4>
+              <i data-feather="users" class="me-1" style="width: 20px; height: 20px;"></i>
+              Élèves par classe
+            </h4>
             <canvas id="studentsByClassChart"></canvas>
           </div>
         </div>
@@ -41,7 +206,10 @@
         <!-- Payments Chart -->
         <div class="col-lg-4">
           <div class="chart-card">
-            <h4>Statut des Paiements</h4>
+            <h4>
+              <i data-feather="credit-card" class="me-1" style="width: 20px; height: 20px;"></i>
+              Statut des Paiements
+            </h4>
             <canvas id="paymentsChart"></canvas>
           </div>
         </div>
@@ -51,7 +219,10 @@
         <!-- Online Registrations Chart -->
         <div class="col-12">
           <div class="chart-card">
-            <h4>Inscriptions en ligne (par mois)</h4>
+            <h4>
+              <i data-feather="trending-up" class="me-1" style="width: 20px; height: 20px;"></i>
+              Inscriptions en ligne (par mois)
+            </h4>
             <canvas id="registrationsChart"></canvas>
           </div>
         </div>
@@ -65,8 +236,14 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      const isDarkMode = document.documentElement.getAttribute('data-bs-theme') === 'dark';
-      const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+      // Remplacer les icônes Feather
+      if (typeof feather !== 'undefined') {
+        feather.replace();
+      }
+
+      const isDarkMode = document.documentElement.getAttribute('data-bs-theme') === 'dark' || 
+                         document.documentElement.getAttribute('data-theme') === 'dark';
+      const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)';
       const textColor = isDarkMode ? '#e0e0e0' : '#495057';
 
       // 1. Students by Class Chart (Bar)
@@ -79,14 +256,15 @@
           datasets: [{
             label: 'Nombre d\'élèves',
             data: studentData.data,
-            backgroundColor: 'rgba(54, 162, 235, 0.6)',
-            borderColor: 'rgba(54, 162, 235, 1)',
+            backgroundColor: isDarkMode ? 'rgba(96, 165, 250, 0.6)' : 'rgba(54, 162, 235, 0.6)',
+            borderColor: isDarkMode ? 'rgba(96, 165, 250, 1)' : 'rgba(54, 162, 235, 1)',
             borderWidth: 1,
             borderRadius: 5,
           }]
         },
         options: {
           responsive: true,
+          maintainAspectRatio: true,
           plugins: {
             legend: {
               display: false
@@ -131,11 +309,15 @@
         },
         options: {
           responsive: true,
+          maintainAspectRatio: true,
           plugins: {
             legend: {
               position: 'bottom',
               labels: {
-                color: textColor
+                color: textColor,
+                padding: 15,
+                usePointStyle: true,
+                pointStyle: 'circle'
               }
             }
           }
@@ -153,13 +335,19 @@
             label: 'Nouvelles inscriptions',
             data: registrationData.data,
             fill: true,
-            backgroundColor: 'rgba(25, 135, 84, 0.2)',
-            borderColor: 'rgba(25, 135, 84, 1)',
-            tension: 0.3
+            backgroundColor: isDarkMode ? 'rgba(96, 165, 250, 0.15)' : 'rgba(25, 135, 84, 0.2)',
+            borderColor: isDarkMode ? 'rgba(96, 165, 250, 1)' : 'rgba(25, 135, 84, 1)',
+            tension: 0.3,
+            pointBackgroundColor: isDarkMode ? 'rgba(96, 165, 250, 1)' : 'rgba(25, 135, 84, 1)',
+            pointBorderColor: isDarkMode ? '#1a1a2e' : '#ffffff',
+            pointBorderWidth: 2,
+            pointRadius: 4,
+            pointHoverRadius: 6
           }]
         },
         options: {
           responsive: true,
+          maintainAspectRatio: true,
           plugins: {
             legend: {
               display: false
@@ -177,6 +365,15 @@
             }
           }
         }
+      });
+
+      // Observer les changements de thème
+      const observer = new MutationObserver(() => {
+        location.reload();
+      });
+      observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['data-theme', 'data-bs-theme']
       });
     });
   </script>

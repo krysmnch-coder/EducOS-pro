@@ -4,6 +4,10 @@
     <%- include('partials/head', { title: 'Accueil | EducOS-pro', excludeMainCss: true }) %>
     
     <style>
+      /* ==========================================================================
+         Page Accueil - Style Glassmorphism
+         ========================================================================== */
+      
       /* Reset et styles de base */
       * {
         margin: 0;
@@ -22,12 +26,12 @@
       }
 
       /* Mode clair */
-      html[data-theme="light"] body { /* Applique un voile semi-transparent sur l'image de fond */
+      html[data-theme="light"] body {
         background-color: rgba(240, 242, 245, 0.8);
         color: #1a1a2e;
       }
       html[data-theme="light"] .bg-body-tertiary {
-        background: rgba(255,255,255,0.2) !important; /* Rendre la navbar du home plus transparente */
+        background: rgba(255,255,255,0.2) !important;
         border: 1px solid rgba(0,0,0,0.05);
         box-shadow: 0 4px 20px rgba(0,0,0,0.05);
       }
@@ -89,12 +93,12 @@
       }
 
       /* Mode sombre */
-      html[data-theme="dark"] body { /* Applique un voile semi-transparent sur l'image de fond */
+      html[data-theme="dark"] body {
         background-color: rgba(10, 10, 26, 0.8);
         color: #ffffff;
       }
       html[data-theme="dark"] .bg-body-tertiary {
-        background: rgba(17, 24, 39, 0.2) !important; /* Rendre la navbar du home plus transparente */
+        background: rgba(17, 24, 39, 0.2) !important;
         border: 1px solid rgba(255,255,255,0.05);
       }
       html[data-theme="dark"] .text-white-75 {
@@ -135,7 +139,7 @@
         stroke: #e0e0e0 !important;
       }
 
-      /* Navbar fixe */
+      /* Navbar Glassmorphism */
       .navbar {
         position: fixed;
         top: 1rem;
@@ -145,16 +149,27 @@
         max-width: 1400px;
         z-index: 1030;
         transition: transform 0.4s ease-in-out, opacity 0.4s ease-in-out;
+        background: rgba(255, 255, 255, 0.08) !important;
+        backdrop-filter: blur(16px) !important;
+        -webkit-backdrop-filter: blur(16px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        border-radius: 1.25rem !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06) !important;
       }
 
-      /* Classe pour masquer la navbar au défilement */
+      [data-theme="dark"] .navbar {
+        background: rgba(17, 24, 39, 0.6) !important;
+        border: 1px solid rgba(255, 255, 255, 0.06) !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+      }
+
       .navbar.hidden {
         transform: translate(-50%, -150%);
         opacity: 0;
         pointer-events: none;
       }
 
-      /* Navbar */
+      /* Navbar items */
       .nav-item-spaced {
         margin: 0 12px !important;
       }
@@ -162,13 +177,16 @@
         width: 44px;
         height: 44px;
         border-radius: 12px;
-        transition: all 0.2s ease;
+        transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
         background: transparent;
         border: none;
+      }
+      .nav-icon-btn:hover {
+        transform: translateY(-2px) scale(1.05);
       }
       .nav-divider {
         font-size: 20px;
@@ -199,34 +217,64 @@
       .page-shell {
         max-width: 1400px;
         margin: 0 auto;
-        padding: 0 20px 24px 20px; /* Le padding-top n'est plus nécessaire ici */
+        padding: 0 20px 24px 20px;
       }
 
-      /* Boutons */
+      /* Boutons Glassmorphism */
       .btn-success {
-        border: none;
-        padding: 12px 32px;
-        font-weight: 600;
-        transition: all 0.3s ease;
+        background: linear-gradient(135deg, rgba(25, 135, 84, 0.2), rgba(25, 135, 84, 0.1)) !important;
+        backdrop-filter: blur(8px) !important;
+        -webkit-backdrop-filter: blur(8px) !important;
+        border: 1px solid rgba(25, 135, 84, 0.3) !important;
+        border-radius: 0.75rem !important;
+        padding: 12px 32px !important;
+        font-weight: 600 !important;
+        color: #198754 !important;
+        transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
       }
       .btn-success:hover {
-        transform: scale(1.02);
+        transform: translateY(-3px) scale(1.02) !important;
+        box-shadow: 0 8px 30px rgba(25, 135, 84, 0.2) !important;
+        background: linear-gradient(135deg, rgba(25, 135, 84, 0.3), rgba(25, 135, 84, 0.15)) !important;
       }
-      .btn-outline-light {
-        padding: 12px 32px;
-        font-weight: 600;
-        transition: all 0.3s ease;
+      [data-theme="dark"] .btn-success {
+        color: #51cf66 !important;
+        border-color: rgba(25, 135, 84, 0.2) !important;
       }
-      .btn-outline-light:hover {
-        transform: scale(1.02);
+      [data-theme="dark"] .btn-success:hover {
+        box-shadow: 0 8px 30px rgba(25, 135, 84, 0.15) !important;
       }
 
-      /* Nouveaux styles pour la refonte */
+      .btn-outline-light {
+        background: rgba(255, 255, 255, 0.05) !important;
+        backdrop-filter: blur(8px) !important;
+        -webkit-backdrop-filter: blur(8px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        border-radius: 0.75rem !important;
+        padding: 12px 32px !important;
+        font-weight: 600 !important;
+        color: #ffffff !important;
+        transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+      }
+      .btn-outline-light:hover {
+        transform: translateY(-3px) scale(1.02) !important;
+        background: rgba(255, 255, 255, 0.1) !important;
+        box-shadow: 0 8px 30px rgba(255, 255, 255, 0.08) !important;
+      }
+      [data-theme="light"] .btn-outline-light {
+        color: #1a1a2e !important;
+        border-color: rgba(0,0,0,0.15) !important;
+      }
+      [data-theme="light"] .btn-outline-light:hover {
+        background: rgba(0,0,0,0.05) !important;
+      }
+
+      /* Hero Section */
       .hero-section {
         position: relative;
-        overflow: hidden; /* S'assure que le carrousel ne dépasse pas */
-        min-height: 100vh; /* Prend toute la hauteur de la fenêtre */
-        padding-top: 100px; /* Ajoute un padding pour que le contenu ne soit pas sous la navbar */
+        overflow: hidden;
+        min-height: 100vh;
+        padding-top: 100px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -249,7 +297,6 @@
         height: 100%;
         width: 100%;
       }
-      /* Voile pour la lisibilité du texte */
       .hero-carousel::after {
         content: '';
         position: absolute;
@@ -257,10 +304,10 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background-color: rgba(10, 10, 26, 0.7); /* Voile sombre par défaut */
+        background-color: rgba(10, 10, 26, 0.7);
       }
       html[data-theme="light"] .hero-carousel::after {
-        background-color: rgba(255, 255, 255, 0.5); /* Voile clair pour le thème light */
+        background-color: rgba(255, 255, 255, 0.5);
       }
       .hero-section > .container {
         position: relative;
@@ -269,10 +316,16 @@
       .hero-section .display-3 {
         font-weight: 800;
         letter-spacing: -1.5px;
+        animation: fadeInUp 0.8s ease-out forwards;
+        opacity: 0;
+        animation-delay: 0.2s;
       }
       .hero-section .lead {
         max-width: 700px;
         margin: 1.5rem auto 2.5rem auto;
+        animation: fadeInUp 0.8s ease-out forwards;
+        opacity: 0;
+        animation-delay: 0.4s;
       }
       html[data-theme="light"] .hero-section .lead {
         color: #4a5568 !important;
@@ -283,31 +336,46 @@
       html[data-theme="dark"] .hero-section .display-3 {
         color: #ffffff !important;
       }
+      .hero-section .badge {
+        animation: fadeInUp 0.8s ease-out forwards;
+        opacity: 0;
+        animation-delay: 0.1s;
+      }
+      .hero-section .d-flex {
+        animation: fadeInUp 0.8s ease-out forwards;
+        opacity: 0;
+        animation-delay: 0.6s;
+      }
 
       .scroll-down-container {
-        margin-top: 5rem; /* Espace sous les boutons, positionnement relatif */
+        margin-top: 5rem;
         z-index: 2;
       }
       .scroll-down-link {
         color: white;
         text-decoration: none;
-        animation: subtle-bounce 2.5s infinite; /* Animation plus moderne */
+        animation: subtle-bounce 2.5s infinite;
       }
       html[data-theme="light"] .scroll-down-link {
         color: #1a1a2e;
       }
 
       @keyframes subtle-bounce {
-        0%, 100% {
-          transform: translateY(0);
-        }
-        50% {
-          transform: translateY(8px);
-        }
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(8px); }
       }
 
+      /* Stats Section */
       .stats-section {
         padding: 2rem;
+        background: rgba(255, 255, 255, 0.04) !important;
+        backdrop-filter: blur(8px) !important;
+        -webkit-backdrop-filter: blur(8px) !important;
+        border-radius: 1.25rem !important;
+        border: 1px solid rgba(255, 255, 255, 0.06) !important;
+      }
+      [data-theme="dark"] .stats-section {
+        background: rgba(255, 255, 255, 0.02) !important;
       }
       .stats-section .stat-card:hover {
         transform: translateY(-5px);
@@ -316,29 +384,49 @@
       .stats-section .stat-number {
         font-size: 2.5rem;
         font-weight: 700;
+        color: var(--bs-primary, #0d6efd);
+      }
+      [data-theme="dark"] .stats-section .stat-number {
+        color: #ffffff;
       }
       .stats-section .stat-label {
         font-size: 0.9rem;
         text-transform: uppercase;
         letter-spacing: 0.5px;
+        color: var(--text-muted, #6c757d);
+      }
+      [data-theme="dark"] .stats-section .stat-label {
+        color: rgba(255, 255, 255, 0.5);
       }
 
+      /* Feature Showcase */
       .feature-showcase {
         padding: 4rem 0;
       }
       .feature-item {
         margin-bottom: 6rem;
+        opacity: 0;
+        transform: translateY(30px);
+        transition: opacity 0.8s ease-out, transform 0.8s ease-out;
       }
       .feature-item:last-child {
         margin-bottom: 0;
+      }
+      .feature-item.is-visible {
+        opacity: 1;
+        transform: translateY(0);
       }
       .feature-image {
         border-radius: 16px;
         overflow: hidden;
         box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        transition: transform 0.3s ease;
+      }
+      .feature-image:hover {
+        transform: scale(1.02);
       }
       html[data-theme="dark"] .feature-image {
-         box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.3);
       }
       .feature-text .feature-tag {
         display: inline-block;
@@ -365,57 +453,89 @@
         color: rgba(255,255,255,0.7) !important;
       }
 
+      .tag-communication { background-color: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+      .tag-pedagogy { background-color: rgba(16, 185, 129, 0.15); color: #34d399; }
+      .tag-organization { background-color: rgba(251, 191, 36, 0.15); color: #fbbf24; }
+      html[data-theme="light"] .tag-communication { background-color: rgba(13, 110, 253, 0.1); color: #0d6efd; }
+      html[data-theme="light"] .tag-pedagogy { background-color: rgba(25, 135, 84, 0.1); color: #198754; }
+      html[data-theme="light"] .tag-organization { background-color: rgba(255, 193, 7, 0.15); color: #d4a800; }
+
+      /* CTA Section */
       .cta-section {
         border-radius: 20px;
         padding: 4rem 2rem;
+        background: rgba(255, 255, 255, 0.04) !important;
+        backdrop-filter: blur(8px) !important;
+        -webkit-backdrop-filter: blur(8px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.06) !important;
+        opacity: 0;
+        transform: translateY(30px);
+        transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+      }
+      .cta-section.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      [data-theme="dark"] .cta-section {
+        background: rgba(255, 255, 255, 0.02) !important;
       }
       .cta-section h2 {
         font-weight: 700;
       }
 
-      /* Sections avec fond blanc */
+      /* About Section */
+      .animated-section-on-scroll {
+        opacity: 0;
+        transform: translateY(30px);
+        transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+      }
+      .animated-section-on-scroll.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      /* White BG Section */
       .white-bg-section {
-        background-color: #ffffff;
+        background: rgba(255, 255, 255, 0.04) !important;
         border-radius: 20px;
+        padding: 2rem;
+      }
+      [data-theme="dark"] .white-bg-section {
+        background: rgba(255, 255, 255, 0.02) !important;
       }
       .white-bg-section .stat-card {
         background: transparent !important;
         border: none !important;
         box-shadow: none !important;
-        padding: 0; /* Le padding est maintenant sur la section parente */
+        padding: 0;
       }
       .white-bg-section .stat-card:hover {
-        transform: none; /* On désactive l'effet sur la carte individuelle */
+        transform: none;
       }
       .white-bg-section, .white-bg-section h2, .white-bg-section .stat-number {
-        color: #1a1a2e !important;
+        color: var(--text-color, #1a1a2e) !important;
+      }
+      [data-theme="dark"] .white-bg-section, 
+      [data-theme="dark"] .white-bg-section h2, 
+      [data-theme="dark"] .white-bg-section .stat-number {
+        color: #ffffff !important;
       }
       .white-bg-section .lead, .white-bg-section .stat-label, .white-bg-section p {
-        color: #4a5568 !important;
+        color: var(--text-muted, #4a5568) !important;
       }
-
-      .animated-section {
-        animation: fadeInUp 0.8s ease-out forwards;
-        opacity: 0;
+      [data-theme="dark"] .white-bg-section .lead, 
+      [data-theme="dark"] .white-bg-section .stat-label, 
+      [data-theme="dark"] .white-bg-section p {
+        color: rgba(255, 255, 255, 0.6) !important;
       }
-      /* Couleurs des tags */
-      .tag-communication { background-color: rgba(59, 130, 246, 0.15); color: #60a5fa; }
-      .tag-pedagogy { background-color: rgba(16, 185, 129, 0.15); color: #34d399; }
-      .tag-organization { background-color: rgba(251, 191, 36, 0.15); color: #fbbf24; }
-
-      html[data-theme="light"] .tag-communication { background-color: rgba(13, 110, 253, 0.1); color: #0d6efd; }
-      html[data-theme="light"] .tag-pedagogy { background-color: rgba(25, 135, 84, 0.1); color: #198754; }
-      html[data-theme="light"] .tag-organization { background-color: rgba(255, 193, 7, 0.15); color: #d4a800; }
 
       /* Theme toggle button icons */
-      /* Par défaut (thème clair), on affiche l'icône de la lune pour passer au thème sombre */
       #themeToggle .moon-icon { display: block; }
       #themeToggle .sun-icon { display: none; }
-      /* En thème sombre, on affiche l'icône du soleil pour passer au thème clair */
       html[data-theme="dark"] #themeToggle .moon-icon { display: none; }
       html[data-theme="dark"] #themeToggle .sun-icon { display: block; }
 
-      /* Bouton Retour en Haut */
+      /* Back to Top Button */
       .back-to-top-btn {
         position: fixed;
         bottom: 30px;
@@ -423,11 +543,13 @@
         width: 50px;
         height: 50px;
         border-radius: 16px;
+        background: rgba(255, 255, 255, 0.08) !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
         cursor: pointer;
-        transition: opacity 0.3s ease, transform 0.3s ease, background-color 0.3s ease;
+        transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         z-index: 1000;
         display: flex;
         align-items: center;
@@ -436,6 +558,7 @@
         transform: translateY(20px);
         pointer-events: none;
         text-decoration: none;
+        color: var(--text-color, #1a1a2e);
       }
       .back-to-top-btn.visible {
         opacity: 1;
@@ -443,17 +566,17 @@
         pointer-events: auto;
       }
       .back-to-top-btn:hover {
-        transform: scale(1.1);
+        transform: scale(1.1) translateY(-3px);
+        background: rgba(255, 255, 255, 0.15) !important;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
       }
-      html[data-theme="light"] .back-to-top-btn {
-        background: rgba(255, 255, 255, 0.75); color: #1a1a2e; border: 1px solid rgba(0,0,0,0.08);
+      [data-theme="dark"] .back-to-top-btn {
+        color: #e0e0e0;
+        border-color: rgba(255, 255, 255, 0.06);
       }
-      html[data-theme="light"] .back-to-top-btn:hover { background: rgba(255, 255, 255, 0.9); color: #0d6efd; }
-      html[data-theme="dark"] .back-to-top-btn {
-        background: rgba(22, 27, 34, 0.75); color: #e0e0e0; border: 1px solid rgba(255,255,255,0.1);
+      [data-theme="dark"] .back-to-top-btn:hover {
+        color: #ffffff;
       }
-      html[data-theme="dark"] .back-to-top-btn:hover { background: rgba(22, 27, 34, 0.9); color: #ffffff; }
-
 
       /* Animations */
       @keyframes fadeInUp {
@@ -467,46 +590,18 @@
         }
       }
 
-      .hero-section .badge,
-      .hero-section h1,
-      .hero-section .lead,
-      .hero-section .d-flex {
-        animation: fadeInUp 0.8s ease-out forwards;
-        opacity: 0; /* Démarrer caché */
-      }
-
-      /* Délais échelonnés pour les éléments du hero */
-      .hero-section h1 { animation-delay: 0.2s; }
-      .hero-section .lead { animation-delay: 0.4s; }
-      .hero-section .d-flex { animation-delay: 0.6s; }
-
-      /* Pour les animations au défilement */
-      .animated-section-on-scroll,
-      .feature-item,
-      .cta-section {
-        opacity: 0;
-        transition: opacity 0.8s ease-out, transform 0.8s ease-out;
-        transform: translateY(30px);
-      }
-
-      .animated-section-on-scroll.is-visible,
-      .feature-item.is-visible,
-      .cta-section.is-visible {
-        opacity: 1;
-        transform: translateY(0);
-      }
-
-      /* Délais échelonnés pour les cartes de statistiques */
-      .stats-section .row > div:nth-child(2) .animated-section-on-scroll { transition-delay: 0.1s; }
-      .stats-section .row > div:nth-child(3) .animated-section-on-scroll { transition-delay: 0.2s; }
-      .stats-section .row > div:nth-child(4) .animated-section-on-scroll { transition-delay: 0.3s; }
-
-      /* Styles pour l'avatar dans la barre de navigation */
+      /* Avatar dans la barre de navigation */
       .navbar-avatar {
         width: 36px;
         height: 36px;
         border-radius: 50%;
         object-fit: cover;
+        border: 2px solid rgba(255, 255, 255, 0.15);
+        transition: all 0.3s ease;
+      }
+      .navbar-avatar:hover {
+        transform: scale(1.08);
+        border-color: var(--bs-primary, #0d6efd);
       }
 
       .navbar-avatar-placeholder {
@@ -517,14 +612,123 @@
         align-items: center;
         justify-content: center;
         font-weight: 600;
-        background-color: var(--bs-primary);
+        background: linear-gradient(135deg, var(--bs-primary, #0d6efd), var(--bs-info, #0dcaf0));
         color: white;
         font-size: 1rem;
+        border: 2px solid rgba(255, 255, 255, 0.15);
+        transition: all 0.3s ease;
+      }
+      .navbar-avatar-placeholder:hover {
+        transform: scale(1.08);
+      }
+
+      /* Dropdown Glassmorphism */
+      .dropdown-menu {
+        background: rgba(255, 255, 255, 0.08) !important;
+        backdrop-filter: blur(16px) !important;
+        -webkit-backdrop-filter: blur(16px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.06) !important;
+        border-radius: 0.75rem !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+      }
+      [data-theme="dark"] .dropdown-menu {
+        background: rgba(17, 24, 39, 0.8) !important;
+        border: 1px solid rgba(255, 255, 255, 0.04) !important;
+      }
+      .dropdown-menu .dropdown-item {
+        color: var(--text-color, #1a1a2e) !important;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        transition: all 0.2s ease;
+      }
+      [data-theme="dark"] .dropdown-menu .dropdown-item {
+        color: #e0e0e0 !important;
+      }
+      .dropdown-menu .dropdown-item:hover {
+        background: rgba(13, 110, 253, 0.08) !important;
+        color: var(--bs-primary, #0d6efd) !important;
+      }
+      [data-theme="dark"] .dropdown-menu .dropdown-item:hover {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #ffffff !important;
+      }
+      .dropdown-menu .dropdown-item.text-danger:hover {
+        background: rgba(220, 53, 69, 0.1) !important;
+        color: #dc3545 !important;
+      }
+      .dropdown-menu .dropdown-divider {
+        border-color: rgba(255, 255, 255, 0.06);
+      }
+      [data-theme="dark"] .dropdown-menu .dropdown-divider {
+        border-color: rgba(255, 255, 255, 0.04);
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .hero-section .display-3 {
+          font-size: 2.5rem;
+        }
+        .hero-section {
+          padding-top: 80px;
+          min-height: 90vh;
+        }
+        .stats-section .stat-number {
+          font-size: 2rem;
+        }
+        .feature-item {
+          margin-bottom: 3rem;
+        }
+        .feature-text h2 {
+          font-size: 1.5rem;
+        }
+        .cta-section {
+          padding: 2rem 1rem;
+        }
+        .navbar {
+          top: 0.5rem;
+          width: calc(100% - 16px);
+          border-radius: 1rem !important;
+          padding: 0.5rem 1rem !important;
+        }
+        .back-to-top-btn {
+          bottom: 20px;
+          right: 20px;
+          width: 44px;
+          height: 44px;
+        }
+        .btn-success, .btn-outline-light {
+          padding: 10px 20px !important;
+          font-size: 0.9rem !important;
+        }
+      }
+
+      @media (max-width: 576px) {
+        .hero-section .display-3 {
+          font-size: 2rem;
+        }
+        .hero-section .lead {
+          font-size: 1rem;
+        }
+        .stats-section .stat-number {
+          font-size: 1.75rem;
+        }
+        .feature-text p {
+          font-size: 0.95rem;
+        }
+        .navbar-avatar {
+          width: 30px;
+          height: 30px;
+        }
+        .navbar-avatar-placeholder {
+          width: 30px;
+          height: 30px;
+          font-size: 0.8rem;
+        }
       }
     </style>
   </head>
   <body>
-    <header class="navbar navbar-expand-lg rounded-4 bg-body-tertiary px-4 py-2">
+    <header class="navbar navbar-expand-lg px-4 py-2">
       <div class="container-fluid px-0">
         <a href="/" class="navbar-brand d-flex align-items-center gap-2 fw-bold text-decoration-none">
             <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-primary text-white p-2">
@@ -546,7 +750,6 @@
             <span>EducOS-pro</span>
         </a>
           
-        <!-- Le menu de navigation est simplifié pour la page d'accueil, sans bouton "hamburger" -->
         <div class="ms-auto">
           <ul class="navbar-nav flex-row align-items-center">
             <li class="nav-item">
@@ -560,7 +763,6 @@
               </button>
             </li>
             <% if (user) { %>
-              <!-- Menu déroulant de l'utilisateur -->
               <li class="nav-item dropdown ms-2">
                 <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" id="navbarUserDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                   <% if (user.avatar_url) { %>
@@ -597,7 +799,6 @@
     <main>
       <!-- Hero Section -->
       <section class="hero-section">
-        <!-- Carrousel en arrière-plan -->
         <div id="heroCarousel" class="carousel slide hero-carousel" data-bs-ride="carousel" data-bs-interval="15000">
           <div class="carousel-inner">
             <div class="carousel-item active">
@@ -617,9 +818,8 @@
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M12 2L20 7V17L12 22L4 17V7L12 2Z" stroke-linejoin="round"/>
             </svg>
-            EducOS-pro  v 1.0.0
+            EducOS-pro v 1.0.0
           </span>
-          <!-- Footer pour la vue mobile, centré sous le badge -->
           <div class="d-block d-md-none text-muted small mt-2 mb-4">
             <span>© 2026 EducOS-pro ver 1.0.0. Tous droits réservés.</span>
           </div>
@@ -653,35 +853,31 @@
         </section>
 
         <!-- Stats Section -->
-        <section class="stats-section my-5 white-bg-section">
+        <section class="stats-section my-5">
           <div class="container">
             <div class="text-center mb-5 animated-section-on-scroll">
               <h2 class="fw-bold">Notre communauté en chiffres</h2>
               <p class="lead text-muted">Des statistiques en temps réel qui témoignent de l'activité et de l'engagement sur notre plateforme.</p>
             </div>
             <div class="row g-4 text-center">
-              <!-- Établissements -->
               <div class="col-md-6 col-lg-3">
                 <div class="stat-card animated-section-on-scroll">
                   <div id="dashboardEstablishments" class="stat-number">...</div>
                   <div class="stat-label text-muted">Établissements Créés</div>
                 </div>
               </div>
-              <!-- Utilisateurs -->
               <div class="col-md-6 col-lg-3">
                 <div class="stat-card animated-section-on-scroll">
                   <div id="dashboardUsers" class="stat-number">...</div>
                   <div class="stat-label text-muted">Utilisateurs Actifs</div>
                 </div>
               </div>
-              <!-- Demandes -->
               <div class="col-md-6 col-lg-3">
                 <div class="stat-card animated-section-on-scroll">
                   <div id="dashboardRequests" class="stat-number">...</div>
                   <div class="stat-label text-muted">Demandes en cours</div>
                 </div>
               </div>
-              <!-- Professeurs -->
               <div class="col-md-6 col-lg-3">
                 <div class="stat-card animated-section-on-scroll">
                   <div id="dashboardProfessors" class="stat-number">...</div>
@@ -739,7 +935,7 @@
 
         <!-- Final CTA Section -->
         <section class="my-5">
-          <div class="cta-section text-center white-bg-section">
+          <div class="cta-section text-center">
             <div class="container">
               <h2 class="mb-3">Prêt à transformer votre établissement ?</h2>
               <p class="lead mb-4">Rejoignez les écoles qui font confiance à EducOS-pro pour une gestion simplifiée.</p>
@@ -748,14 +944,12 @@
           </div>
         </section>
 
-        <!-- Footer pour la vue desktop -->
         <footer class="py-4 text-center text-muted small d-none d-md-block">
           <span>© 2026 EducOS-pro ver 1.0.0. Tous droits réservés.</span>
         </footer>
       </div>
     </main>
 
-    <!-- Bouton Retour en Haut -->
     <a href="#" id="backToTopBtn" class="back-to-top-btn" aria-label="Retour en haut">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <path d="M12 19V5M5 12l7-7 7 7"/>
@@ -813,12 +1007,11 @@
               }
             });
           }, {
-            rootMargin: '0px 0px -100px 0px' // Déclenche l'animation un peu avant que l'élément soit complètement visible
+            rootMargin: '0px 0px -100px 0px'
           });
 
           animatedElements.forEach(el => observer.observe(el));
         } else {
-          // Fallback pour les navigateurs plus anciens qui ne supportent pas IntersectionObserver
           animatedElements.forEach(el => {
             el.classList.add('is-visible');
           });
@@ -827,16 +1020,14 @@
         // Logique pour le bouton "Retour en Haut"
         const backToTopBtn = document.getElementById('backToTopBtn');
         if (backToTopBtn) {
-          // Afficher/masquer le bouton au défilement
           window.addEventListener('scroll', () => {
-            if (window.scrollY > 300) { // Afficher après 300px de défilement
+            if (window.scrollY > 300) {
               backToTopBtn.classList.add('visible');
             } else {
               backToTopBtn.classList.remove('visible');
             }
           });
 
-          // Remonter en haut au clic
           backToTopBtn.addEventListener('click', (e) => {
             e.preventDefault();
             window.scrollTo({ top: 0, behavior: 'smooth' });

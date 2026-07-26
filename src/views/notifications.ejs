@@ -2,25 +2,277 @@
 <html lang="fr">
 <head>
   <%- include('partials/head') %>
+  <style>
+    /* ==========================================================================
+       Page Notifications - Style Glassmorphism
+       ========================================================================== */
+    
+    .page-shell {
+      padding-top: 1rem;
+      padding-bottom: 2rem;
+    }
+    
+    /* Titre de page */
+    .page-title {
+      color: var(--text-color, #212529);
+      font-weight: 700;
+      animation: title-slide 0.6s ease forwards !important;
+      opacity: 0;
+      transform: translateX(-10px);
+    }
+    
+    @keyframes title-slide {
+      from {
+        opacity: 0;
+        transform: translateX(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    
+    [data-theme="dark"] .page-title {
+      color: #ffffff;
+    }
+    
+    /* Carte principale Glassmorphism */
+    .glass-notif-card {
+      background: rgba(255, 255, 255, 0.06) !important;
+      backdrop-filter: blur(12px) !important;
+      -webkit-backdrop-filter: blur(12px) !important;
+      border: 1px solid rgba(255, 255, 255, 0.12) !important;
+      border-radius: 1.25rem !important;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06) !important;
+      overflow: hidden;
+      animation: card-fade-in 0.6s ease forwards !important;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    
+    @keyframes card-fade-in {
+      from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+    
+    [data-theme="dark"] .glass-notif-card {
+      background: rgba(255, 255, 255, 0.02) !important;
+      border: 1px solid rgba(255, 255, 255, 0.06) !important;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+    }
+    
+    .glass-notif-card .card-body {
+      padding: 2rem !important;
+    }
+    
+    /* Texte d'information */
+    .text-muted {
+      color: var(--text-muted, #6c757d) !important;
+    }
+    
+    [data-theme="dark"] .text-muted {
+      color: rgba(255, 255, 255, 0.6) !important;
+    }
+    
+    /* État vide stylisé */
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      animation: empty-fade 0.8s ease forwards !important;
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    
+    @keyframes empty-fade {
+      from {
+        opacity: 0;
+        transform: scale(0.95) translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+    
+    .empty-state .empty-icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(13, 110, 253, 0.06);
+      border-radius: 50%;
+      border: 2px solid rgba(13, 110, 253, 0.08);
+      transition: all 0.3s ease;
+    }
+    
+    .empty-state .empty-icon svg {
+      opacity: 0.4;
+      transition: all 0.3s ease;
+    }
+    
+    .empty-state:hover .empty-icon {
+      transform: scale(1.05);
+      background: rgba(13, 110, 253, 0.08);
+    }
+    
+    .empty-state:hover .empty-icon svg {
+      opacity: 0.6;
+    }
+    
+    [data-theme="dark"] .empty-state .empty-icon {
+      background: rgba(255, 255, 255, 0.03);
+      border-color: rgba(255, 255, 255, 0.04);
+    }
+    
+    .empty-state h5 {
+      color: var(--text-color, #212529);
+      font-weight: 600;
+    }
+    
+    [data-theme="dark"] .empty-state h5 {
+      color: #ffffff;
+    }
+    
+    .empty-state p {
+      color: var(--text-muted, #6c757d);
+      max-width: 400px;
+      margin: 0 auto;
+    }
+    
+    [data-theme="dark"] .empty-state p {
+      color: rgba(255, 255, 255, 0.5);
+    }
+    
+    /* Badge de statut */
+    .badge {
+      padding: 0.35rem 0.75rem;
+      border-radius: 0.5rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+    
+    .badge:hover {
+      transform: scale(1.05);
+    }
+    
+    /* Adaptation mobile */
+    @media (max-width: 768px) {
+      .page-title {
+        font-size: 1.4rem;
+      }
+      
+      .glass-notif-card .card-body {
+        padding: 1.25rem !important;
+      }
+      
+      .glass-notif-card {
+        border-radius: 1rem !important;
+      }
+      
+      .empty-state {
+        padding: 2rem 0.5rem;
+      }
+      
+      .empty-state .empty-icon {
+        width: 60px;
+        height: 60px;
+      }
+      
+      .empty-state h5 {
+        font-size: 1.1rem;
+      }
+    }
+    
+    @media (max-width: 576px) {
+      .page-title {
+        font-size: 1.2rem;
+      }
+      
+      .glass-notif-card .card-body {
+        padding: 1rem !important;
+      }
+      
+      .empty-state .empty-icon {
+        width: 50px;
+        height: 50px;
+      }
+      
+      .empty-state .empty-icon svg {
+        width: 28px;
+        height: 28px;
+      }
+    }
+  </style>
 </head>
 <body data-theme="light">
   <div class="page-shell container-xl py-4">
     <%- include('partials/header') %>
 
     <main class="page-main">
-      <div class="card shadow-sm border-0">
+      <div class="glass-notif-card">
         <div class="card-body p-4">
           <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-              <h1 class="h4 mb-1"><%= title %></h1>
+              <h1 class="h4 mb-1 page-title">
+                <i data-feather="bell" class="me-2" style="width: 24px; height: 24px;"></i>
+                <%= title %>
+              </h1>
               <p class="text-muted mb-0">Consultez vos dernières notifications.</p>
             </div>
+            <span class="badge bg-primary">
+              <i data-feather="bell" class="me-1" style="width: 12px; height: 12px;"></i>
+              0
+            </span>
           </div>
-          <p class="text-center text-muted py-5">La logique pour afficher la liste des notifications est à implémenter.</p>
+
+          <!-- État vide stylisé -->
+          <div class="empty-state">
+            <div class="empty-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+              </svg>
+            </div>
+            <h5>Aucune notification</h5>
+            <p>Vous n'avez pas encore de notifications. Revenez plus tard pour voir les mises à jour.</p>
+          </div>
+
+          <!-- Zone pour la liste des notifications (à implémenter) -->
+          <!-- 
+          <div class="notification-list">
+            <div class="notification-item">
+              <div class="notification-icon">
+                <i data-feather="user-plus"></i>
+              </div>
+              <div class="notification-content">
+                <p class="notification-text">Un nouvel élève a été inscrit.</p>
+                <span class="notification-time">Il y a 5 minutes</span>
+              </div>
+              <span class="notification-dot"></span>
+            </div>
+          </div>
+          -->
         </div>
       </div>
     </main>
   </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Remplacer les icônes Feather
+      if (typeof feather !== 'undefined') {
+        feather.replace();
+      }
+    });
+  </script>
 
   <%- include('partials/footer') %>
 </body>

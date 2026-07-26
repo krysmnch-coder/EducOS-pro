@@ -2,6 +2,364 @@
 <html lang="fr">
 <head>
   <%- include('partials/head') %>
+  <style>
+    /* ==========================================================================
+       Page Profil - Style Glassmorphism
+       ========================================================================== */
+    
+    /* Carte principale Glassmorphism */
+    .glass-profile-card {
+      background: rgba(255, 255, 255, 0.08) !important;
+      backdrop-filter: blur(12px) !important;
+      -webkit-backdrop-filter: blur(12px) !important;
+      border: 1px solid rgba(255, 255, 255, 0.15) !important;
+      border-radius: 1.25rem !important;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06) !important;
+      overflow: hidden;
+      animation: card-fade-in 0.6s ease forwards !important;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    
+    @keyframes card-fade-in {
+      from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+    
+    [data-theme="dark"] .glass-profile-card {
+      background: rgba(255, 255, 255, 0.03) !important;
+      border: 1px solid rgba(255, 255, 255, 0.06) !important;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+    }
+    
+    .glass-profile-card .card-body {
+      padding: 2.5rem !important;
+    }
+    
+    /* Avatar */
+    .profile-avatar-wrapper {
+      position: relative;
+      display: inline-block;
+      border-radius: 50%;
+      padding: 4px;
+      background: linear-gradient(135deg, rgba(13, 110, 253, 0.3), rgba(13, 202, 240, 0.3));
+      animation: avatar-glow 3s ease-in-out infinite;
+    }
+    
+    @keyframes avatar-glow {
+      0%, 100% {
+        box-shadow: 0 0 20px rgba(13, 110, 253, 0.1);
+      }
+      50% {
+        box-shadow: 0 0 40px rgba(13, 110, 253, 0.2);
+      }
+    }
+    
+    .profile-avatar {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid rgba(255, 255, 255, 0.8);
+      transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    
+    [data-theme="dark"] .profile-avatar {
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .profile-avatar:hover {
+      transform: scale(1.03);
+      box-shadow: 0 0 40px rgba(13, 110, 253, 0.15);
+    }
+    
+    /* Upload label pour l'avatar */
+    .upload-label {
+      position: absolute;
+      bottom: 5px;
+      right: 5px;
+      background: rgba(13, 110, 253, 0.9);
+      color: white;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      border: 2px solid rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+    
+    [data-theme="dark"] .upload-label {
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .upload-label:hover {
+      transform: scale(1.15);
+      background: rgba(13, 110, 253, 1);
+      box-shadow: 0 4px 20px rgba(13, 110, 253, 0.3);
+    }
+    
+    .upload-label svg {
+      stroke: white;
+    }
+    
+    #avatarUpload {
+      display: none;
+    }
+    
+    /* Badge de rôle */
+    .role-badge {
+      background: rgba(13, 110, 253, 0.08) !important;
+      border: 1px solid rgba(13, 110, 253, 0.15) !important;
+      padding: 0.4rem 1.2rem !important;
+      border-radius: 2rem !important;
+      font-weight: 500 !important;
+      color: var(--bs-primary, #0d6efd) !important;
+      transition: all 0.3s ease !important;
+    }
+    
+    .role-badge:hover {
+      transform: scale(1.05);
+      background: rgba(13, 110, 253, 0.15) !important;
+    }
+    
+    [data-theme="dark"] .role-badge {
+      color: #ffffff !important;
+      background: rgba(255, 255, 255, 0.05) !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+    
+    [data-theme="dark"] .role-badge:hover {
+      background: rgba(255, 255, 255, 0.1) !important;
+    }
+    
+    /* Titres */
+    .profile-title {
+      color: var(--text-color, #212529);
+      font-weight: 700;
+      animation: title-slide 0.6s ease forwards !important;
+      opacity: 0;
+      transform: translateX(-10px);
+    }
+    
+    @keyframes title-slide {
+      from {
+        opacity: 0;
+        transform: translateX(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    
+    .profile-subtitle {
+      color: var(--text-muted, #6c757d);
+    }
+    
+    /* Formulaires */
+    .glass-form .form-label {
+      font-weight: 500;
+      color: var(--text-color, #212529);
+    }
+    
+    .glass-form .form-control {
+      background: rgba(255, 255, 255, 0.06) !important;
+      border: 1px solid rgba(255, 255, 255, 0.12) !important;
+      border-radius: 0.75rem !important;
+      color: var(--text-color, #212529) !important;
+      transition: all 0.3s ease !important;
+      padding: 0.6rem 1rem !important;
+    }
+    
+    .glass-form .form-control:focus {
+      background: rgba(255, 255, 255, 0.1) !important;
+      border-color: var(--bs-primary, #0d6efd) !important;
+      box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15) !important;
+    }
+    
+    .glass-form .form-control:disabled,
+    .glass-form .form-control[readonly] {
+      background: rgba(255, 255, 255, 0.03) !important;
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+    
+    [data-theme="dark"] .glass-form .form-control {
+      background: rgba(255, 255, 255, 0.04) !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+      color: #e4e4e4 !important;
+    }
+    
+    [data-theme="dark"] .glass-form .form-control:focus {
+      background: rgba(255, 255, 255, 0.08) !important;
+      border-color: #ffffff !important;
+      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1) !important;
+    }
+    
+    [data-theme="dark"] .glass-form .form-control:disabled,
+    [data-theme="dark"] .glass-form .form-control[readonly] {
+      background: rgba(255, 255, 255, 0.02) !important;
+    }
+    
+    .glass-form .form-text {
+      color: var(--text-muted, #6c757d) !important;
+      font-size: 0.8rem;
+    }
+    
+    /* Bouton d'enregistrement */
+    .glass-btn-save {
+      background: linear-gradient(135deg, rgba(13, 110, 253, 0.15), rgba(13, 202, 240, 0.15)) !important;
+      backdrop-filter: blur(8px) !important;
+      -webkit-backdrop-filter: blur(8px) !important;
+      border: 1px solid rgba(13, 110, 253, 0.2) !important;
+      border-radius: 0.75rem !important;
+      padding: 0.6rem 2rem !important;
+      font-weight: 600 !important;
+      transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+      color: var(--bs-primary, #0d6efd) !important;
+    }
+    
+    .glass-btn-save:hover {
+      transform: translateY(-2px) scale(1.02) !important;
+      box-shadow: 0 8px 30px rgba(13, 110, 253, 0.2) !important;
+      border-color: var(--bs-primary, #0d6efd) !important;
+      background: linear-gradient(135deg, rgba(13, 110, 253, 0.25), rgba(13, 202, 240, 0.25)) !important;
+    }
+    
+    [data-theme="dark"] .glass-btn-save {
+      color: #ffffff !important;
+      border: 1px solid rgba(255, 255, 255, 0.15) !important;
+      background: rgba(255, 255, 255, 0.05) !important;
+    }
+    
+    [data-theme="dark"] .glass-btn-save:hover {
+      background: rgba(255, 255, 255, 0.1) !important;
+      box-shadow: 0 8px 30px rgba(255, 255, 255, 0.1) !important;
+      border-color: #ffffff !important;
+    }
+    
+    /* Bouton supprimer avatar */
+    .btn-outline-danger {
+      background: rgba(220, 53, 69, 0.05) !important;
+      border: 1px solid rgba(220, 53, 69, 0.15) !important;
+      border-radius: 0.5rem !important;
+      transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+      color: #dc3545 !important;
+    }
+    
+    .btn-outline-danger:hover:not(:disabled) {
+      background: rgba(220, 53, 69, 0.15) !important;
+      transform: translateY(-2px) scale(1.02) !important;
+      box-shadow: 0 4px 15px rgba(220, 53, 69, 0.15) !important;
+    }
+    
+    .btn-outline-danger:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    
+    [data-theme="dark"] .btn-outline-danger {
+      color: #ff6b6b !important;
+      border-color: rgba(255, 107, 107, 0.15) !important;
+    }
+    
+    [data-theme="dark"] .btn-outline-danger:hover:not(:disabled) {
+      background: rgba(255, 107, 107, 0.15) !important;
+    }
+    
+    /* Titre de section */
+    .section-title {
+      color: var(--text-color, #212529);
+      font-weight: 600;
+      position: relative;
+      padding-bottom: 0.5rem;
+    }
+    
+    .section-title::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 50px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--bs-primary, #0d6efd), var(--bs-info, #0dcaf0));
+      border-radius: 10px;
+    }
+    
+    [data-theme="dark"] .section-title {
+      color: #e4e4e4;
+    }
+    
+    /* Animation des éléments du formulaire */
+    .form-group-animated {
+      animation: form-fade 0.5s ease forwards !important;
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    
+    @keyframes form-fade {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .form-group-animated:nth-child(1) { animation-delay: 0.1s; }
+    .form-group-animated:nth-child(2) { animation-delay: 0.2s; }
+    .form-group-animated:nth-child(3) { animation-delay: 0.3s; }
+    .form-group-animated:nth-child(4) { animation-delay: 0.4s; }
+    
+    /* Adaptation mobile */
+    @media (max-width: 768px) {
+      .glass-profile-card .card-body {
+        padding: 1.25rem !important;
+      }
+      
+      .profile-avatar {
+        width: 120px;
+        height: 120px;
+      }
+      
+      .upload-label {
+        width: 34px;
+        height: 34px;
+        bottom: 2px;
+        right: 2px;
+      }
+      
+      .upload-label svg {
+        width: 14px;
+        height: 14px;
+      }
+    }
+    
+    @media (max-width: 576px) {
+      .profile-avatar {
+        width: 100px;
+        height: 100px;
+      }
+      
+      .glass-btn-save {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="page-shell container-xl py-4">
@@ -9,12 +367,15 @@
 
     <main class="page-main">
       <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h2 fw-bold">Mon Profil</h1>
+        <h1 class="h2 fw-bold profile-title">
+          <i data-feather="user" class="me-2" style="width: 28px; height: 28px;"></i>
+          Mon Profil
+        </h1>
       </div>
       
       <%- include('partials/messages') %>
       
-      <div class="card shadow-sm border-0">
+      <div class="card glass-profile-card border-0">
         <div class="card-body p-4 p-md-5">
           <div class="row g-5">
             <!-- Colonne de l'avatar -->
@@ -30,7 +391,7 @@
               </form>
               
               <!-- Bouton pour supprimer la photo de profil -->
-              <form action="/profile/avatar/delete" method="POST" id="deleteAvatarForm" class="mt-2">
+              <form action="/profile/avatar/delete" method="POST" id="deleteAvatarForm" class="mt-3">
                 <button type="submit" class="btn btn-outline-danger btn-sm" 
                         onclick="return confirm('Êtes-vous sûr de vouloir supprimer votre photo de profil ?')"
                         <%= user.avatar_url ? '' : 'disabled' %>>
@@ -39,38 +400,47 @@
                 </button>
               </form>
               
-              <h2 class="h4 fw-bold mt-3"><%= user.name %></h2>
-              <p><span class="badge bg-primary bg-opacity-25 text-primary-emphasis rounded-pill fs-6"><%= user.role %></span></p>
-              <p class="text-muted small mt-3">Membre depuis le <%= new Date(user.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) %></p>
+              <h2 class="h4 fw-bold mt-4"><%= user.name %></h2>
+              <p><span class="badge role-badge fs-6"><%= user.role %></span></p>
+              <p class="text-muted small mt-3">
+                <i data-feather="calendar" class="me-1" style="width: 14px; height: 14px;"></i>
+                Membre depuis le <%= new Date(user.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) %>
+              </p>
             </div>
 
             <!-- Colonne des informations -->
             <div class="col-md-8">
-              <h3 class="h5 fw-bold mb-4">Informations du compte</h3>
-              <form action="/profile/update" method="POST">
-                <div class="mb-3">
+              <h3 class="h5 fw-bold section-title mb-4">
+                <i data-feather="info" class="me-2" style="width: 18px; height: 18px;"></i>
+                Informations du compte
+              </h3>
+              <form action="/profile/update" method="POST" class="glass-form">
+                <div class="mb-3 form-group-animated">
                   <label for="name" class="form-label">Nom complet</label>
                   <input type="text" class="form-control" id="name" name="name" value="<%= user.name %>" required>
                 </div>
-                <div class="mb-3">
+                <div class="mb-3 form-group-animated">
                   <label for="email" class="form-label">Adresse e-mail</label>
                   <input type="email" class="form-control" id="email" name="email" value="<%= user.email %>" readonly disabled>
                   <div class="form-text">L'adresse e-mail ne peut pas être modifiée.</div>
                 </div>
-                <div class="mb-4">
+                <div class="mb-4 form-group-animated">
                   <label for="phone_number" class="form-label">Numéro de téléphone</label>
                   <input type="tel" class="form-control" id="phone_number" name="phone_number" value="<%= user.phone_number || '' %>" placeholder="Ajouter un numéro de téléphone">
                 </div>
                 
                 <!-- Affichage des champs spécifiques au rôle (non modifiables ici) -->
                 <% if (user.role === 'professeur' && user.subject) { %>
-                  <div class="mb-3">
+                  <div class="mb-3 form-group-animated">
                     <label class="form-label">Matière enseignée</label>
                     <input type="text" class="form-control" value="<%= user.subject %>" readonly disabled>
                   </div>
                 <% } %>
 
-                <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+                <button type="submit" class="btn glass-btn-save">
+                  <i data-feather="save" class="me-2" style="width: 16px; height: 16px;"></i>
+                  Enregistrer les modifications
+                </button>
               </form>
             </div>
           </div>
@@ -81,10 +451,18 @@
 
   <script src="/js/theme.js"></script>
   <script>
-    document.getElementById('avatarUpload')?.addEventListener('change', () => {
-      if (document.getElementById('avatarUpload').files.length > 0) {
-        document.getElementById('avatarForm').submit();
+    document.addEventListener('DOMContentLoaded', function() {
+      // Remplacer les icônes Feather
+      if (typeof feather !== 'undefined') {
+        feather.replace();
       }
+
+      // Upload d'avatar
+      document.getElementById('avatarUpload')?.addEventListener('change', () => {
+        if (document.getElementById('avatarUpload').files.length > 0) {
+          document.getElementById('avatarForm').submit();
+        }
+      });
     });
   </script>
   <%- include('partials/footer') %>

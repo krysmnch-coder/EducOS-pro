@@ -13,6 +13,489 @@
 
     <!-- Styles personnalisés -->
     <link rel="stylesheet" href="/css/style.css">
+    
+    <style>
+        /* ==========================================================================
+           Page Formulaire Élève - Style Glassmorphism
+           ========================================================================== */
+        
+        /* Page shell */
+        .page-shell {
+            padding-top: 1rem;
+            padding-bottom: 2rem;
+        }
+        
+        /* Carte principale Glassmorphism */
+        .glass-form-card {
+            background: rgba(255, 255, 255, 0.08) !important;
+            backdrop-filter: blur(12px) !important;
+            -webkit-backdrop-filter: blur(12px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.15) !important;
+            border-radius: 1.25rem !important;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06) !important;
+            overflow: hidden;
+            animation: card-fade-in 0.6s ease forwards !important;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        
+        @keyframes card-fade-in {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        [data-theme="dark"] .glass-form-card {
+            background: rgba(255, 255, 255, 0.03) !important;
+            border: 1px solid rgba(255, 255, 255, 0.06) !important;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+        }
+        
+        .glass-form-card .card-body {
+            padding: 2rem !important;
+        }
+        
+        /* Titre de page */
+        .page-title {
+            color: var(--text-color, #212529);
+            font-weight: 700;
+            animation: title-slide 0.6s ease forwards !important;
+            opacity: 0;
+            transform: translateX(-10px);
+        }
+        
+        @keyframes title-slide {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        [data-theme="dark"] .page-title {
+            color: #ffffff;
+        }
+        
+        /* Bouton retour Glassmorphism */
+        .glass-btn-back {
+            background: rgba(255, 255, 255, 0.05) !important;
+            backdrop-filter: blur(8px) !important;
+            -webkit-backdrop-filter: blur(8px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.12) !important;
+            border-radius: 0.75rem !important;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+            color: var(--text-color, #212529) !important;
+        }
+        
+        .glass-btn-back:hover {
+            transform: translateY(-2px) scale(1.02) !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+            background: rgba(255, 255, 255, 0.1) !important;
+        }
+        
+        [data-theme="dark"] .glass-btn-back {
+            color: #ffffff !important;
+            border-color: rgba(255, 255, 255, 0.08) !important;
+        }
+        
+        [data-theme="dark"] .glass-btn-back:hover {
+            background: rgba(255, 255, 255, 0.08) !important;
+        }
+        
+        /* Labels */
+        .form-label {
+            font-weight: 500;
+            color: var(--text-color, #212529);
+        }
+        
+        [data-theme="dark"] .form-label {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        /* Champs de formulaire Glassmorphism */
+        .form-control, .form-select {
+            background: rgba(255, 255, 255, 0.06) !important;
+            border: 1px solid rgba(255, 255, 255, 0.15) !important;
+            border-radius: 0.75rem !important;
+            padding: 0.7rem 1rem !important;
+            transition: all 0.3s ease !important;
+            color: var(--text-color, #212529) !important;
+            box-shadow: none !important;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            background: rgba(255, 255, 255, 0.1) !important;
+            border-color: var(--bs-primary, #0d6efd) !important;
+            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.12) !important;
+        }
+        
+        .form-control:disabled, .form-control[readonly] {
+            background: rgba(255, 255, 255, 0.03) !important;
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        
+        [data-theme="dark"] .form-control,
+        [data-theme="dark"] .form-select {
+            background: rgba(255, 255, 255, 0.04) !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            color: #ffffff !important;
+        }
+        
+        [data-theme="dark"] .form-control:focus,
+        [data-theme="dark"] .form-select:focus {
+            background: rgba(255, 255, 255, 0.08) !important;
+            border-color: #ffffff !important;
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.08) !important;
+        }
+        
+        [data-theme="dark"] .form-control:disabled,
+        [data-theme="dark"] .form-control[readonly] {
+            background: rgba(255, 255, 255, 0.02) !important;
+        }
+        
+        [data-theme="dark"] .form-select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+        }
+        
+        [data-theme="dark"] .form-select option {
+            background-color: #16213e;
+            color: #ffffff;
+        }
+        
+        .form-text {
+            color: var(--text-muted, #6c757d) !important;
+            font-size: 0.8rem;
+        }
+        
+        [data-theme="dark"] .form-text {
+            color: rgba(255, 255, 255, 0.5) !important;
+        }
+        
+        /* Texarea */
+        textarea.form-control {
+            resize: vertical;
+            min-height: 60px;
+        }
+        
+        /* Séparateurs */
+        hr {
+            border-color: rgba(13, 110, 253, 0.08) !important;
+            opacity: 1 !important;
+        }
+        
+        [data-theme="dark"] hr {
+            border-color: rgba(255, 255, 255, 0.06) !important;
+        }
+        
+        /* Titres de section */
+        .section-title {
+            color: var(--text-color, #212529);
+            font-weight: 600;
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 40px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--bs-primary, #0d6efd), var(--bs-info, #0dcaf0));
+            border-radius: 10px;
+        }
+        
+        [data-theme="dark"] .section-title {
+            color: #e4e4e4;
+        }
+        
+        /* Bouton principal Glassmorphism */
+        .glass-btn-primary {
+            background: linear-gradient(135deg, rgba(13, 110, 253, 0.2), rgba(13, 202, 240, 0.2)) !important;
+            backdrop-filter: blur(8px) !important;
+            -webkit-backdrop-filter: blur(8px) !important;
+            border: 1px solid rgba(13, 110, 253, 0.25) !important;
+            border-radius: 0.75rem !important;
+            padding: 0.6rem 1.5rem !important;
+            font-weight: 600 !important;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+            color: var(--bs-primary, #0d6efd) !important;
+        }
+        
+        .glass-btn-primary:hover {
+            transform: translateY(-2px) scale(1.02) !important;
+            box-shadow: 0 8px 30px rgba(13, 110, 253, 0.2) !important;
+            background: linear-gradient(135deg, rgba(13, 110, 253, 0.3), rgba(13, 202, 240, 0.3)) !important;
+            border-color: var(--bs-primary, #0d6efd) !important;
+        }
+        
+        [data-theme="dark"] .glass-btn-primary {
+            color: #ffffff !important;
+            border: 1px solid rgba(255, 255, 255, 0.15) !important;
+            background: rgba(255, 255, 255, 0.05) !important;
+        }
+        
+        [data-theme="dark"] .glass-btn-primary:hover {
+            background: rgba(255, 255, 255, 0.1) !important;
+            box-shadow: 0 8px 30px rgba(255, 255, 255, 0.08) !important;
+            border-color: #ffffff !important;
+        }
+        
+        /* Bouton secondaire Glassmorphism */
+        .glass-btn-secondary {
+            background: rgba(255, 255, 255, 0.05) !important;
+            backdrop-filter: blur(8px) !important;
+            -webkit-backdrop-filter: blur(8px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.12) !important;
+            border-radius: 0.75rem !important;
+            padding: 0.6rem 1.5rem !important;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+            color: var(--text-color, #212529) !important;
+        }
+        
+        .glass-btn-secondary:hover {
+            transform: translateY(-2px) scale(1.02) !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+            background: rgba(255, 255, 255, 0.1) !important;
+        }
+        
+        [data-theme="dark"] .glass-btn-secondary {
+            color: #ffffff !important;
+            border-color: rgba(255, 255, 255, 0.08) !important;
+        }
+        
+        [data-theme="dark"] .glass-btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.08) !important;
+        }
+        
+        /* Bouton nouveau parent */
+        .btn-outline-primary {
+            background: rgba(13, 110, 253, 0.05) !important;
+            border: 1px solid rgba(13, 110, 253, 0.15) !important;
+            border-radius: 0.5rem !important;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+            color: var(--bs-primary, #0d6efd) !important;
+        }
+        
+        .btn-outline-primary:hover {
+            background: rgba(13, 110, 253, 0.15) !important;
+            transform: translateY(-2px) scale(1.02) !important;
+        }
+        
+        [data-theme="dark"] .btn-outline-primary {
+            color: #ffffff !important;
+            border-color: rgba(255, 255, 255, 0.1) !important;
+            background: rgba(255, 255, 255, 0.05) !important;
+        }
+        
+        [data-theme="dark"] .btn-outline-primary:hover {
+            background: rgba(255, 255, 255, 0.1) !important;
+        }
+        
+        /* Liste des parents liés */
+        .glass-list-group {
+            background: transparent !important;
+            border-radius: 0.75rem !important;
+            overflow: hidden !important;
+        }
+        
+        .glass-list-group .list-group-item {
+            background: rgba(255, 255, 255, 0.04) !important;
+            border: 1px solid rgba(255, 255, 255, 0.06) !important;
+            border-radius: 0.5rem !important;
+            margin-bottom: 0.25rem !important;
+            transition: all 0.3s ease !important;
+        }
+        
+        .glass-list-group .list-group-item:hover {
+            background: rgba(13, 110, 253, 0.04) !important;
+            transform: translateX(3px) !important;
+        }
+        
+        [data-theme="dark"] .glass-list-group .list-group-item {
+            background: rgba(255, 255, 255, 0.02) !important;
+            border-color: rgba(255, 255, 255, 0.04) !important;
+        }
+        
+        [data-theme="dark"] .glass-list-group .list-group-item:hover {
+            background: rgba(255, 255, 255, 0.04) !important;
+        }
+        
+        .glass-list-group .list-group-item h6 {
+            color: var(--text-color, #212529);
+        }
+        
+        [data-theme="dark"] .glass-list-group .list-group-item h6 {
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        /* Alertes */
+        .alert {
+            border-radius: 0.75rem !important;
+            border-left-width: 4px !important;
+            animation: alert-fade-in 0.4s ease-out !important;
+        }
+        
+        @keyframes alert-fade-in {
+            from {
+                opacity: 0;
+                transform: translateY(-10px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        .alert-info {
+            background: rgba(13, 202, 240, 0.08) !important;
+            border-color: rgba(13, 202, 240, 0.3) !important;
+            color: var(--text-color, #212529) !important;
+        }
+        
+        [data-theme="dark"] .alert-info {
+            background: rgba(13, 202, 240, 0.12) !important;
+            color: #e4e4e4 !important;
+        }
+        
+        /* Modal Glassmorphism */
+        .modal-glass .modal-content {
+            background: rgba(255, 255, 255, 0.92) !important;
+            backdrop-filter: blur(20px) !important;
+            -webkit-backdrop-filter: blur(20px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+            border-radius: 1.25rem !important;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.2) !important;
+        }
+        
+        [data-theme="dark"] .modal-glass .modal-content {
+            background: rgba(25, 25, 45, 0.95) !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.5) !important;
+        }
+        
+        .modal-glass .modal-header {
+            border-bottom: 1px solid rgba(13, 110, 253, 0.08) !important;
+        }
+        
+        [data-theme="dark"] .modal-glass .modal-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+        }
+        
+        .modal-glass .modal-footer {
+            border-top: 1px solid rgba(13, 110, 253, 0.08) !important;
+        }
+        
+        [data-theme="dark"] .modal-glass .modal-footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
+        }
+        
+        /* Tom Select personnalisé */
+        .ts-wrapper .ts-control {
+            border-radius: 0.75rem !important;
+            background: rgba(255, 255, 255, 0.06) !important;
+            border: 1px solid rgba(255, 255, 255, 0.15) !important;
+            color: var(--text-color, #212529) !important;
+            padding: 0.7rem 1rem !important;
+            box-shadow: none !important;
+        }
+        
+        .ts-wrapper .ts-control:focus {
+            border-color: var(--bs-primary, #0d6efd) !important;
+            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.12) !important;
+        }
+        
+        [data-theme="dark"] .ts-wrapper .ts-control {
+            background: rgba(255, 255, 255, 0.04) !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            color: #e4e4e4 !important;
+        }
+        
+        [data-theme="dark"] .ts-wrapper .ts-control:focus {
+            border-color: #ffffff !important;
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.08) !important;
+        }
+        
+        .ts-wrapper .ts-dropdown {
+            border-radius: 0.75rem !important;
+            background: var(--card-bg, #ffffff) !important;
+            border: 1px solid rgba(0, 0, 0, 0.08) !important;
+        }
+        
+        [data-theme="dark"] .ts-wrapper .ts-dropdown {
+            background: #1a1a2e !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        }
+        
+        .ts-wrapper .ts-dropdown .option:hover {
+            background: rgba(13, 110, 253, 0.08) !important;
+        }
+        
+        [data-theme="dark"] .ts-wrapper .ts-dropdown .option:hover {
+            background: rgba(255, 255, 255, 0.05) !important;
+        }
+        
+        /* Animation des champs */
+        .form-group-animated {
+            animation: form-fade 0.5s ease forwards !important;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        
+        @keyframes form-fade {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .form-group-animated:nth-child(1) { animation-delay: 0.05s; }
+        .form-group-animated:nth-child(2) { animation-delay: 0.10s; }
+        .form-group-animated:nth-child(3) { animation-delay: 0.15s; }
+        .form-group-animated:nth-child(4) { animation-delay: 0.20s; }
+        .form-group-animated:nth-child(5) { animation-delay: 0.25s; }
+        .form-group-animated:nth-child(6) { animation-delay: 0.30s; }
+        
+        /* Adaptation mobile */
+        @media (max-width: 768px) {
+            .glass-form-card .card-body {
+                padding: 1.25rem !important;
+            }
+            
+            .glass-btn-primary,
+            .glass-btn-secondary {
+                width: 100%;
+                justify-content: center;
+                margin-top: 0.5rem;
+            }
+            
+            .d-flex.justify-content-end {
+                flex-direction: column-reverse;
+            }
+            
+            .d-flex.justify-content-end .me-2 {
+                margin-right: 0 !important;
+            }
+            
+            .page-title {
+                font-size: 1.25rem;
+            }
+        }
+    </style>
 </head>
 <body>
     <%- include('partials/header') %>
@@ -21,9 +504,12 @@
         <div class="container mt-4 page-shell">
             <div class="themed-container">
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h2 class="mb-0"><%= title %></h2>
-                    <a href="/students" class="btn btn-outline-secondary">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                    <h2 class="mb-0 page-title">
+                        <i data-feather="user-plus" class="me-2" style="width: 24px; height: 24px;"></i>
+                        <%= title %>
+                    </h2>
+                    <a href="/students" class="btn glass-btn-back">
+                        <i data-feather="arrow-left" class="me-1" style="width: 16px; height: 16px;"></i>
                         Retour à la liste
                     </a>
                 </div>
@@ -36,161 +522,218 @@
                         : (isCompletion ? '/students/complete' : '/students/new');
                 %>
 
-                <form action="<%= actionUrl %>" method="POST">
-                    
-                    <!-- Champs cachés pour la complétion -->
-                    <% if (isCompletion) { %>
-                        <input type="hidden" name="parent_id" value="<%= student.parent_id %>">
-                    <% } %>
-
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="name" class="form-label">Nom complet de l'élève</label>
-                            <input type="text" class="form-control" id="name" name="name" value="<%= student ? student.name : '' %>" required>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="matricule" class="form-label">Matricule</label>
-                            <input type="text" class="form-control" id="matricule" name="matricule" value="<%= student ? student.matricule : '' %>" required <%= isCompletion ? 'readonly' : '' %>>
-                            <% if (isCompletion) { %>
-                                <div class="form-text">Le matricule ne peut pas être modifié lors de la complétion.</div>
-                            <% } %>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="student_class" class="form-label">Classe</label>
-                            <input type="text" class="form-control" id="student_class" name="student_class" value="<%= student ? student.student_class : '' %>" required>
-                        </div>
-                    </div>
-
-                    <hr class="my-4">
-                    <h5 class="mb-3">Informations personnelles</h5>
-
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="date_of_birth" class="form-label">Date de naissance</label>
-                            <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" value="<%= student && student.date_of_birth ? new Date(student.date_of_birth).toISOString().split('T')[0] : '' %>">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="place_of_birth" class="form-label">Lieu de naissance</label>
-                            <input type="text" class="form-control" id="place_of_birth" name="place_of_birth" value="<%= student ? student.place_of_birth : '' %>">
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="address" class="form-label">Adresse</label>
-                        <textarea class="form-control" id="address" name="address" rows="2"><%= student ? student.address : '' %></textarea>
-                    </div>
-
-                    <hr class="my-4">
-                    <h5 class="mb-3">Liaison Parent</h5>
-
-                    <% if (isCompletion) { %>
-                        <!-- Pour la complétion, on affiche le parent initiateur unique et ses infos -->
-                        <div class="mb-3">
-                            <label class="form-label">Dossier initié par le parent</label>
-                            <input type="text" class="form-control mb-2" value="<%= student.parent_name %>" disabled>
+                <div class="card glass-form-card border-0">
+                    <div class="card-body">
+                        <form action="<%= actionUrl %>" method="POST">
                             
-                            <div class="row">
-                                <div class="col-md-6 mb-2">
-                                    <label for="parent_phone_number" class="form-label small">Téléphone</label>
-                                    <input type="tel" class="form-control" id="parent_phone_number" name="parent_phone_number" value="<%= student.parent_phone_number || '' %>">
-                                </div>
-                            </div>
-                            <div class="form-text">Ce parent est déjà lié à l'élève.</div>
-                        </div>
-                    <% } else { %>
-                        <!-- Affichage des parents déjà liés pour le mode édition -->
-                        <% if (typeof linkedParents !== 'undefined' && linkedParents.length > 0) { %>
-                            <div class="mb-3">
-                                <label class="form-label">Parent(s) actuellement lié(s)</label>
-                                <div class="list-group">
-                                    <% linkedParents.forEach(parent => { %>
-                                        <div class="list-group-item">
-                                            <div class="d-flex w-100 justify-content-between">
-                                                <h6 class="mb-1"><%= parent.name %></h6>
-                                            </div>
-                                            <p class="mb-1">
-                                                <small><strong>Téléphone :</strong> <%= parent.phone_number || 'Non renseigné' %></small>
-                                            </p>
-                                        </div>
-                                    <% }) %>
-                                </div>
-                            </div>
-                        <% } else { %>
-                            <div class="alert alert-info">Aucun parent n'est actuellement lié à cet élève.</div>
-                        <% } %>
+                            <!-- Champs cachés pour la complétion -->
+                            <% if (isCompletion) { %>
+                                <input type="hidden" name="parent_id" value="<%= student.parent_id %>">
+                            <% } %>
 
-                        <!-- Pour la création/modification, on peut lier un ou plusieurs parents existants -->
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                <label for="parent_ids" class="form-label mb-0">Parent(s) lié(s)</label>
-                                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addParentModal">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                                    Nouveau Parent
+                            <div class="row">
+                                <div class="col-md-6 mb-3 form-group-animated">
+                                    <label for="name" class="form-label">
+                                        <i data-feather="user" class="me-1" style="width: 14px; height: 14px;"></i>
+                                        Nom complet de l'élève
+                                    </label>
+                                    <input type="text" class="form-control" id="name" name="name" value="<%= student ? student.name : '' %>" required>
+                                </div>
+                                <div class="col-md-6 mb-3 form-group-animated">
+                                    <label for="matricule" class="form-label">
+                                        <i data-feather="hash" class="me-1" style="width: 14px; height: 14px;"></i>
+                                        Matricule
+                                    </label>
+                                    <input type="text" class="form-control" id="matricule" name="matricule" value="<%= student ? student.matricule : '' %>" required <%= isCompletion ? 'readonly' : '' %>>
+                                    <% if (isCompletion) { %>
+                                        <div class="form-text"><i data-feather="info" class="me-1" style="width: 12px; height: 12px;"></i>Le matricule ne peut pas être modifié lors de la complétion.</div>
+                                    <% } %>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3 form-group-animated">
+                                    <label for="student_class" class="form-label">
+                                        <i data-feather="grid" class="me-1" style="width: 14px; height: 14px;"></i>
+                                        Classe
+                                    </label>
+                                    <input type="text" class="form-control" id="student_class" name="student_class" value="<%= student ? student.student_class : '' %>" required>
+                                </div>
+                            </div>
+
+                            <hr class="my-4">
+                            <h5 class="mb-3 section-title">
+                                <i data-feather="info" class="me-2" style="width: 18px; height: 18px;"></i>
+                                Informations personnelles
+                            </h5>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3 form-group-animated">
+                                    <label for="date_of_birth" class="form-label">
+                                        <i data-feather="calendar" class="me-1" style="width: 14px; height: 14px;"></i>
+                                        Date de naissance
+                                    </label>
+                                    <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" value="<%= student && student.date_of_birth ? new Date(student.date_of_birth).toISOString().split('T')[0] : '' %>">
+                                </div>
+                                <div class="col-md-6 mb-3 form-group-animated">
+                                    <label for="place_of_birth" class="form-label">
+                                        <i data-feather="map-pin" class="me-1" style="width: 14px; height: 14px;"></i>
+                                        Lieu de naissance
+                                    </label>
+                                    <input type="text" class="form-control" id="place_of_birth" name="place_of_birth" value="<%= student ? student.place_of_birth : '' %>">
+                                </div>
+                            </div>
+
+                            <div class="mb-3 form-group-animated">
+                                <label for="address" class="form-label">
+                                    <i data-feather="home" class="me-1" style="width: 14px; height: 14px;"></i>
+                                    Adresse
+                                </label>
+                                <textarea class="form-control" id="address" name="address" rows="2"><%= student ? student.address : '' %></textarea>
+                            </div>
+
+                            <hr class="my-4">
+                            <h5 class="mb-3 section-title">
+                                <i data-feather="users" class="me-2" style="width: 18px; height: 18px;"></i>
+                                Liaison Parent
+                            </h5>
+
+                            <% if (isCompletion) { %>
+                                <!-- Pour la complétion, on affiche le parent initiateur unique et ses infos -->
+                                <div class="mb-3 form-group-animated">
+                                    <label class="form-label">
+                                        <i data-feather="user" class="me-1" style="width: 14px; height: 14px;"></i>
+                                        Dossier initié par le parent
+                                    </label>
+                                    <input type="text" class="form-control mb-2" value="<%= student.parent_name %>" disabled>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6 mb-2">
+                                            <label for="parent_phone_number" class="form-label small">
+                                                <i data-feather="phone" class="me-1" style="width: 12px; height: 12px;"></i>
+                                                Téléphone
+                                            </label>
+                                            <input type="tel" class="form-control" id="parent_phone_number" name="parent_phone_number" value="<%= student.parent_phone_number || '' %>">
+                                        </div>
+                                    </div>
+                                    <div class="form-text"><i data-feather="info" class="me-1" style="width: 12px; height: 12px;"></i>Ce parent est déjà lié à l'élève.</div>
+                                </div>
+                            <% } else { %>
+                                <!-- Affichage des parents déjà liés pour le mode édition -->
+                                <% if (typeof linkedParents !== 'undefined' && linkedParents.length > 0) { %>
+                                    <div class="mb-3 form-group-animated">
+                                        <label class="form-label">
+                                            <i data-feather="users" class="me-1" style="width: 14px; height: 14px;"></i>
+                                            Parent(s) actuellement lié(s)
+                                        </label>
+                                        <div class="list-group glass-list-group">
+                                            <% linkedParents.forEach(parent => { %>
+                                                <div class="list-group-item">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1"><%= parent.name %></h6>
+                                                    </div>
+                                                    <p class="mb-1">
+                                                        <small><i data-feather="phone" class="me-1" style="width: 12px; height: 12px;"></i><strong>Téléphone :</strong> <%= parent.phone_number || 'Non renseigné' %></small>
+                                                    </p>
+                                                </div>
+                                            <% }) %>
+                                        </div>
+                                    </div>
+                                <% } else { %>
+                                    <div class="alert alert-info form-group-animated">
+                                        <i data-feather="info" class="me-2" style="width: 16px; height: 16px;"></i>
+                                        Aucun parent n'est actuellement lié à cet élève.
+                                    </div>
+                                <% } %>
+
+                                <!-- Pour la création/modification, on peut lier un ou plusieurs parents existants -->
+                                <div class="mb-3 form-group-animated">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label for="parent_ids" class="form-label mb-0">
+                                            <i data-feather="user-plus" class="me-1" style="width: 14px; height: 14px;"></i>
+                                            Parent(s) lié(s)
+                                        </label>
+                                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addParentModal">
+                                            <i data-feather="plus" class="me-1" style="width: 14px; height: 14px;"></i>
+                                            Nouveau Parent
+                                        </button>
+                                    </div>
+                                    <select name="parent_ids" id="parent_ids" class="form-select" multiple>
+                                        <% if (parents && parents.length > 0) { %>
+                                            <% parents.forEach(parent => { %>
+                                                <option value="<%= parent.id %>" <%= linkedParentIds.includes(parent.id) ? 'selected' : '' %>>
+                                                    <%= parent.name %>
+                                                </option>
+                                            <% }) %>
+                                        <% } else { %>
+                                            <option disabled>Aucun compte parent approuvé n'a été trouvé.</option>
+                                        <% } %>
+                                    </select>
+                                    <div class="form-text">
+                                        <i data-feather="info" class="me-1" style="width: 12px; height: 12px;"></i>
+                                        Maintenez la touche Ctrl (ou Cmd sur Mac) enfoncée pour sélectionner plusieurs parents.
+                                        Seuls les parents avec un compte approuvé apparaissent ici.
+                                    </div>
+                                </div>
+                            <% } %>
+
+                            <div class="d-flex justify-content-end mt-4">
+                                <a href="/students" class="btn glass-btn-secondary me-2">Annuler</a>
+                                <button type="submit" class="btn glass-btn-primary">
+                                    <i data-feather="save" class="me-2" style="width: 16px; height: 16px;"></i>
+                                    <% if (student && !isCompletion) { %>
+                                        Mettre à jour le dossier
+                                    <% } else if (isCompletion) { %>
+                                        Finaliser et créer le compte
+                                    <% } else { %>
+                                        Enregistrer l'élève
+                                    <% } %>
                                 </button>
                             </div>
-                            <select name="parent_ids" id="parent_ids" class="form-select" multiple>
-                                <% if (parents && parents.length > 0) { %>
-                                    <% parents.forEach(parent => { %>
-                                        <option value="<%= parent.id %>" <%= linkedParentIds.includes(parent.id) ? 'selected' : '' %>>
-                                            <%= parent.name %>
-                                        </option>
-                                    <% }) %>
-                                <% } else { %>
-                                    <option disabled>Aucun compte parent approuvé n'a été trouvé.</option>
-                                <% } %>
-                            </select>
-                            <div class="form-text">
-                                Maintenez la touche Ctrl (ou Cmd sur Mac) enfoncée pour sélectionner plusieurs parents.
-                                Seuls les parents avec un compte approuvé apparaissent ici.
-                            </div>
-                        </div>
-                    <% } %>
-
-                    <div class="d-flex justify-content-end mt-4">
-                        <a href="/students" class="btn btn-secondary me-2">Annuler</a>
-                        <button type="submit" class="btn btn-primary">
-                            <% if (student && !isCompletion) { %>
-                                Mettre à jour le dossier
-                            <% } else if (isCompletion) { %>
-                                Finaliser et créer le compte
-                            <% } else { %>
-                                Enregistrer l'élève
-                            <% } %>
-                        </button>
+                        </form>
                     </div>
-                </form>
+                </div>
             </div>
         </div>
     </main>
 
-    <!-- Modal pour ajouter un parent -->
-    <div class="modal fade" id="addParentModal" tabindex="-1" aria-labelledby="addParentModalLabel" aria-hidden="true">
+    <!-- Modal pour ajouter un parent - Version Glassmorphism -->
+    <div class="modal fade modal-glass" id="addParentModal" tabindex="-1" aria-labelledby="addParentModalLabel" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="addParentModalLabel">Créer un nouveau compte parent</h5>
+            <h5 class="modal-title" id="addParentModalLabel">
+                <i data-feather="user-plus" class="me-2" style="width: 18px; height: 18px;"></i>
+                Créer un nouveau compte parent
+            </h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
             <div id="add-parent-alert" class="alert alert-danger" style="display: none;"></div>
             <form id="add-parent-form">
                 <div class="mb-3">
-                    <label for="new-parent-name" class="form-label">Nom complet du parent</label>
+                    <label for="new-parent-name" class="form-label">
+                        <i data-feather="user" class="me-1" style="width: 14px; height: 14px;"></i>
+                        Nom complet du parent
+                    </label>
                     <input type="text" class="form-control" id="new-parent-name" required>
                 </div>
                 <div class="mb-3">
-                    <label for="new-parent-phone" class="form-label">Numéro de téléphone</label>
+                    <label for="new-parent-phone" class="form-label">
+                        <i data-feather="phone" class="me-1" style="width: 14px; height: 14px;"></i>
+                        Numéro de téléphone
+                    </label>
                     <input type="tel" class="form-control" id="new-parent-phone" required>
                 </div>
             </form>
             <div id="new-parent-credentials" class="alert alert-success" style="display: none;"></div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-            <button type="button" class="btn btn-primary" id="save-new-parent-btn">Enregistrer et lier</button>
+            <button type="button" class="btn glass-btn-secondary" data-bs-dismiss="modal">Annuler</button>
+            <button type="button" class="btn glass-btn-primary" id="save-new-parent-btn">
+                <i data-feather="save" class="me-1" style="width: 16px; height: 16px;"></i>
+                Enregistrer et lier
+            </button>
           </div>
         </div>
       </div>
@@ -205,18 +748,23 @@
     <!-- Socket.IO client -->
     <script src="/socket.io/socket.io.js"></script>
 
-    <!-- Scripts personnalisés (assurez-vous que ces fichiers existent dans votre dossier public/js) -->
+    <!-- Scripts personnalisés -->
     <script src="/js/theme.js"></script>
     <script src="/js/main.js"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Remplacer les icônes Feather
+            if (typeof feather !== 'undefined') {
+                feather.replace();
+            }
+
             let tomSelectInstance;
             const parentSelect = document.getElementById('parent_ids');
             if (parentSelect) {
                 tomSelectInstance = new TomSelect(parentSelect, {
                     plugins: ['remove_button'],
-                    create: false, // Empêche la création de nouvelles options
+                    create: false,
                     placeholder: 'Rechercher et sélectionner un ou plusieurs parents...'
                 });
             }
@@ -241,7 +789,7 @@
                     }
                     
                     saveParentBtn.disabled = true;
-                    saveParentBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Enregistrement...';
+                    saveParentBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Enregistrement...';
 
                     try {
                         const response = await fetch('/students/create-parent', {
@@ -261,20 +809,23 @@
                         }
                         
                         credentialsEl.innerHTML = `
+                            <i data-feather="check-circle" class="me-2" style="width: 18px; height: 18px;"></i>
                             <strong>Succès !</strong> Le compte a été créé.<br>
+                            <i data-feather="mail" class="me-1" style="width: 14px; height: 14px;"></i>
                             <strong>Identifiant (email) :</strong> ${newParent.email}<br>
+                            <i data-feather="lock" class="me-1" style="width: 14px; height: 14px;"></i>
                             <strong>Mot de passe :</strong> ${newParent.defaultPassword}<br>
-                            <small>Veuillez communiquer ces informations au parent. Un email factice a été créé pour la connexion.</small>
+                            <small><i data-feather="info" class="me-1" style="width: 12px; height: 12px;"></i>Veuillez communiquer ces informations au parent. Un email factice a été créé pour la connexion.</small>
                         `;
                         credentialsEl.style.display = 'block';
                         addParentForm.style.display = 'none';
-                        saveParentBtn.textContent = 'Fermer';
+                        saveParentBtn.innerHTML = '<i data-feather="x" class="me-1" style="width: 16px; height: 16px;"></i> Fermer';
                         saveParentBtn.onclick = () => addParentModal.hide();
 
                     } catch (error) {
                         showAlert(error.message);
                         saveParentBtn.disabled = false;
-                        saveParentBtn.innerHTML = 'Enregistrer et lier';
+                        saveParentBtn.innerHTML = '<i data-feather="save" class="me-1" style="width: 16px; height: 16px;"></i> Enregistrer et lier';
                     }
                 });
 
@@ -284,12 +835,17 @@
                     credentialsEl.style.display = 'none';
                     alertEl.style.display = 'none';
                     saveParentBtn.disabled = false;
-                    saveParentBtn.innerHTML = 'Enregistrer et lier';
+                    saveParentBtn.innerHTML = '<i data-feather="save" class="me-1" style="width: 16px; height: 16px;"></i> Enregistrer et lier';
                     saveParentBtn.onclick = null;
+                    
+                    // Recharger les icônes Feather
+                    if (typeof feather !== 'undefined') {
+                        feather.replace();
+                    }
                 });
 
                 function showAlert(message) {
-                    alertEl.textContent = message;
+                    alertEl.innerHTML = `<i data-feather="alert-circle" class="me-2" style="width: 16px; height: 16px;"></i> ${message}`;
                     alertEl.style.display = 'block';
                 }
             }
