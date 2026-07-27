@@ -70,6 +70,20 @@ body {
   box-shadow: 0 0 30px rgba(var(--bs-primary-rgb), 0.3);
 }
 
+.navbar-toggler {
+  border: none;
+  padding: 0.35rem;
+  color: #6c757d;
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+.navbar-toggler:hover {
+  color: #ffffff;
+  transform: scale(1.1);
+}
+.navbar-toggler:focus {
+  box-shadow: none;
+}
+
 .navbar-nav {
   display: flex;
   align-items: center;
