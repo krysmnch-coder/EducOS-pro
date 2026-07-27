@@ -412,25 +412,17 @@
       .chat-page-container {
         flex-direction: column;
         height: calc(100vh - 140px);
-        gap: 0; 
+        gap: 1rem;
       }
       
-      /* Par défaut sur mobile, la sidebar prend toute la place et le chat est caché */
       .chat-sidebar {
-        flex: 1;
-        display: flex;
+        flex: 0 0 auto;
+        max-height: 300px;
       }
       
       .chat-main {
-        display: none;
-      }
-
-      .chat-page-container.show-chat .chat-sidebar {
-        display: none;
-      }
-      .chat-page-container.show-chat .chat-main {
-        display: flex;
         flex: 1;
+        min-height: 300px;
       }
     }
     
@@ -462,10 +454,9 @@
   </style>
 </head>
 <body data-user-id="<%= user ? user.id : '' %>">
-  <!-- ✅ UNE SEULE NAVBAR - via l'include -->
-  <%- include('partials/header') %>
-
   <div class="page-shell container-xl py-4">
+    <%- include('partials/header') %>
+
     <main class="page-main">
         <div class="chat-page-container">
             <!-- Colonne de gauche : Liste des conversations -->
@@ -481,6 +472,7 @@
                     </button>
                 </div>
                 <div class="list-group list-group-flush" id="user-list">
+                    <!-- Indicateur de chargement -->
                     <div class="p-4 text-center">
                         <div class="spinner-border text-primary" role="status">
                             <span class="visually-hidden">Loading...</span>
@@ -491,14 +483,17 @@
 
             <!-- Colonne de droite : Fenêtre de chat -->
             <div class="chat-main card">
+                <!-- Fenêtre de chat active (initialement cachée) -->
                 <div class="d-flex flex-column h-100" id="chat-window" style="display: none;">
                     <div class="card-header d-flex align-items-center" id="chat-header">
-                        <button class="btn btn-link text-body text-decoration-none me-2 d-lg-none" id="back-to-list-btn" aria-label="Retour à la liste">
+                        <button class="btn btn-light me-3 d-lg-none" id="back-to-list-btn" aria-label="Retour à la liste">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/></svg>
                         </button>
                         <span id="chat-header-title" class="fw-bold"></span>
                     </div>
-                    <div class="card-body" id="message-container"></div>
+                    <div class="card-body" id="message-container">
+                        <!-- Les messages seront injectés ici par JavaScript -->
+                    </div>
                     <div class="card-footer">
                         <div id="typing-indicator" class="text-muted small mb-1" style="height: 20px;"></div>
                         <form id="message-form" class="d-flex align-items-center gap-2">
@@ -510,6 +505,7 @@
                     </div>
                 </div>
 
+                <!-- Placeholder quand aucune conversation n'est sélectionnée -->
                 <div class="d-flex flex-column align-items-center justify-content-center h-100" id="chat-placeholder">
                     <div class="d-flex flex-column align-items-center justify-content-center h-100 text-center">
                         <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather feather-message-square text-muted mb-3"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
@@ -524,7 +520,7 @@
 
   <%- include('partials/footer') %>
 
-  <!-- New Chat Modal -->
+  <!-- New Chat Modal - Version Glassmorphism -->
   <div class="modal fade modal-glass" id="new-chat-modal" tabindex="-1" aria-labelledby="newChatModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-scrollable">
       <div class="modal-content">
@@ -558,14 +554,17 @@
     </div>
   </div>
 
+  <!-- Scripts pour le chat -->
   <script src="/socket.io/socket.io.js"></script>
   <script src="/js/chat.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
+      // Remplacer les icônes Feather
       if (typeof feather !== 'undefined') {
         feather.replace();
       }
 
+      // Ajouter les délais d'animation aux éléments de la liste
       document.querySelectorAll('.new-chat-user').forEach(function(el, index) {
         var delay = index * 0.05;
         el.style.animationDelay = delay + 's';
