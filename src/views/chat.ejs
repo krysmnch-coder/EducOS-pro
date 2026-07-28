@@ -374,6 +374,8 @@
             div.className = 'conversation-item d-flex align-items-center';
             div.dataset.userId = convo.id;
             div.innerHTML = `
+              <img src="${escapeHtml(convo.avatar_url || '/img/user.png')}" 
+                   alt="" class="conversation-avatar me-3"
               <div class="avatar-container me-3 ${isOnline ? 'online' : ''}">
                 <img src="${escapeHtml(convo.avatar_url || '/img/user.png')}" 
                    alt="${escapeHtml(convo.name || 'Utilisateur')}" class="conversation-avatar"
@@ -419,6 +421,7 @@
         
         chatPlaceholder.style.display = 'none';
         chatWindow.style.display = 'flex';
+        chatHeaderName.textContent = userName || 'Utilisateur';
         chatHeaderName.textContent = userName || 'Utilisateur'; // Nom de l'utilisateur
         const isOnline = onlineUserIds.has(userId.toString()); // Vérifie le statut en ligne
         chatHeaderStatus.textContent = isOnline ? 'En ligne' : 'Hors ligne'; // Met à jour le statut
