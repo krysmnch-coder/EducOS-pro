@@ -321,6 +321,7 @@
       
       let activeUserId = null;
       const currentUserId = document.body.dataset.userId;
+      let onlineUserIds = new Set(); // Ajout de l'état des utilisateurs en ligne
       
       const userList = document.getElementById('user-list');
       const messageContainer = document.getElementById('message-container');
@@ -368,13 +369,16 @@
           if (emptyState) emptyState.style.display = 'none';
 
           conversations.forEach(convo => {
+            const isOnline = onlineUserIds.has(convo.id.toString()); // Vérifie le statut en ligne
             const div = document.createElement('div');
             div.className = 'conversation-item d-flex align-items-center';
             div.dataset.userId = convo.id;
             div.innerHTML = `
-              <img src="${escapeHtml(convo.avatar_url || '/img/user.png')}" 
-                   alt="" class="conversation-avatar me-3"
+              <div class="avatar-container me-3 ${isOnline ? 'online' : ''}">
+                <img src="${escapeHtml(convo.avatar_url || '/img/user.png')}" 
+                   alt="${escapeHtml(convo.name || 'Utilisateur')}" class="conversation-avatar"
                    onerror="this.src='/img/user.png'">
+              </div>
               <div class="flex-grow-1 min-width-0">
                 <div class="d-flex justify-content-between">
                   <span class="conversation-name">${escapeHtml(convo.name || 'Utilisateur')}</span>
@@ -415,7 +419,9 @@
         
         chatPlaceholder.style.display = 'none';
         chatWindow.style.display = 'flex';
-        chatHeaderName.textContent = userName || 'Utilisateur';
+        chatHeaderName.textContent = userName || 'Utilisateur'; // Nom de l'utilisateur
+        const isOnline = onlineUserIds.has(userId.toString()); // Vérifie le statut en ligne
+        chatHeaderStatus.textContent = isOnline ? 'En ligne' : 'Hors ligne'; // Met à jour le statut
         
         // Activer l'input
         messageInput.disabled = false;
@@ -562,6 +568,19 @@
       // ========================================================================
       socket.on('connect', () => {
         console.log('✅ Connecté au serveur de chat');
+      });
+
+      // Réception de la liste des utilisateurs en ligne
+      socket.on('onlineUsersUpdate', (users) => {
+        console.log('🔄 Utilisateurs en ligne mis à jour:', users);
+        onlineUserIds = new Set(users.map(String)); // Met à jour la liste des IDs en ligne
+        loadConversations(); // Recharge les conversations pour mettre à jour les statuts dans la liste
+
+        // Met à jour le statut dans l'en-tête du chat actif si une conversation est ouverte
+        if (activeUserId) {
+          const isOnline = onlineUserIds.has(activeUserId.toString());
+          chatHeaderStatus.textContent = isOnline ? 'En ligne' : 'Hors ligne';
+        }
       });
 
       socket.on('newMessage', (data) => {
