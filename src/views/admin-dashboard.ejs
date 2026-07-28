@@ -19,11 +19,10 @@
             </div>
         </div>
 
-        <%# --- Section des Raccourcis (Widgets) - Version corrigée --- %>
+        <%# --- Section des Raccourcis (Widgets) - Version améliorée --- %>
         <h2 class="mb-4">Raccourcis de gestion</h2>
         <div class="row">
             <%
-            // Utiliser var au lieu de const pour la compatibilité
             var hasWidgets = false;
             try {
                 hasWidgets = (typeof widgets !== 'undefined' && widgets && widgets.length > 0);
@@ -32,7 +31,6 @@
             }
             
             if (hasWidgets) {
-                // Afficher les widgets dynamiques
                 for (var i = 0; i < widgets.length; i++) {
                     var widget = widgets[i];
                     var widgetLink = widget.link || '#';
@@ -40,10 +38,11 @@
                     var widgetIcon = widget.icon || 'box';
                     var widgetTitle = widget.title || 'Widget';
                     var widgetDesc = widget.description || 'Description';
+                    var delay = (i + 1) * 100; // Délai en ms pour l'animation
             %>
             <div class="col-xl-3 col-md-6 mb-4">
                 <a href="<%= widgetLink %>" class="text-decoration-none shortcut-link" data-shortcut-key="<%= widgetKey %>">
-                    <div class="card dashboard-stat h-100 glass-card">
+                    <div class="card dashboard-stat h-100 glass-card" data-delay="<%= delay %>">
                         <div class="card-body text-center">
                             <div class="stat-icon mb-3">
                                 <i data-feather="<%= widgetIcon %>"></i>
@@ -51,17 +50,18 @@
                             <h5 class="card-title mb-2"><%= widgetTitle %></h5>
                             <p class="card-text text-muted small"><%= widgetDesc %></p>
                         </div>
+                        <div class="glass-shine"></div>
                     </div>
                 </a>
             </div>
             <%
                 }
             } else {
-                // Afficher les widgets par défaut
+                // Widgets par défaut avec data-delay
             %>
             <div class="col-xl-3 col-md-6 mb-4">
                 <a href="/students" class="text-decoration-none shortcut-link" data-shortcut-key="students">
-                    <div class="card dashboard-stat h-100 glass-card">
+                    <div class="card dashboard-stat h-100 glass-card" data-delay="100">
                         <div class="card-body text-center">
                             <div class="stat-icon mb-3">
                                 <i data-feather="users"></i>
@@ -69,12 +69,13 @@
                             <h5 class="card-title mb-2">Gestion des Élèves</h5>
                             <p class="card-text text-muted small">Gérer les élèves</p>
                         </div>
+                        <div class="glass-shine"></div>
                     </div>
                 </a>
             </div>
             <div class="col-xl-3 col-md-6 mb-4">
                 <a href="/teachers" class="text-decoration-none shortcut-link" data-shortcut-key="teachers">
-                    <div class="card dashboard-stat h-100 glass-card">
+                    <div class="card dashboard-stat h-100 glass-card" data-delay="200">
                         <div class="card-body text-center">
                             <div class="stat-icon mb-3">
                                 <i data-feather="user-check"></i>
@@ -82,12 +83,13 @@
                             <h5 class="card-title mb-2">Gestion des Professeurs</h5>
                             <p class="card-text text-muted small">Gérer les professeurs</p>
                         </div>
+                        <div class="glass-shine"></div>
                     </div>
                 </a>
             </div>
             <div class="col-xl-3 col-md-6 mb-4">
                 <a href="/classes" class="text-decoration-none shortcut-link" data-shortcut-key="classes">
-                    <div class="card dashboard-stat h-100 glass-card">
+                    <div class="card dashboard-stat h-100 glass-card" data-delay="300">
                         <div class="card-body text-center">
                             <div class="stat-icon mb-3">
                                 <i data-feather="grid"></i>
@@ -95,12 +97,13 @@
                             <h5 class="card-title mb-2">Gestion des Classes</h5>
                             <p class="card-text text-muted small">Gérer les classes</p>
                         </div>
+                        <div class="glass-shine"></div>
                     </div>
                 </a>
             </div>
             <div class="col-xl-3 col-md-6 mb-4">
                 <a href="/admin" class="text-decoration-none shortcut-link" data-shortcut-key="admin">
-                    <div class="card dashboard-stat h-100 glass-card">
+                    <div class="card dashboard-stat h-100 glass-card" data-delay="400">
                         <div class="card-body text-center">
                             <div class="stat-icon mb-3">
                                 <i data-feather="settings"></i>
@@ -108,6 +111,7 @@
                             <h5 class="card-title mb-2">Paramètres</h5>
                             <p class="card-text text-muted small">Paramètres du système</p>
                         </div>
+                        <div class="glass-shine"></div>
                     </div>
                 </a>
             </div>
@@ -116,7 +120,7 @@
             %>
         </div>
 
-        <%# --- Section des Statistiques avec Graphiques --- %>
+        <%# --- Section des Statistiques --- %>
         <% if (stats) { %>
             <h2 class="mb-4 mt-5">Statistiques</h2>
             <div class="row">
@@ -191,35 +195,352 @@
 </div>
 
 <style>
-/* Votre CSS reste inchangé */
-/* ... */
+/* ==========================================================================
+   Glassmorphism - Style complet avec effets avancés
+   ========================================================================== */
+
+/* Variables CSS pour le glassmorphism */
+:root {
+    --glass-bg: rgba(255, 255, 255, 0.1);
+    --glass-border: rgba(255, 255, 255, 0.18);
+    --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+    --glass-blur: blur(12px);
+    --glass-shine: rgba(255, 255, 255, 0.4);
+    --primary-color: #0d6efd;
+    --primary-glow: rgba(13, 110, 253, 0.3);
+}
+
+[data-theme="dark"] {
+    --glass-bg: rgba(255, 255, 255, 0.03);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    --glass-shine: rgba(255, 255, 255, 0.1);
+}
+
+/* Conteneur glass */
+.glass-card {
+    position: relative;
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    box-shadow: var(--glass-shadow);
+    transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    overflow: hidden;
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+}
+
+/* Animation d'entrée avec data-delay */
+.glass-card.animate-in {
+    animation: cardFadeInUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes cardFadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(40px) scale(0.9);
+    }
+    60% {
+        opacity: 1;
+        transform: translateY(-5px) scale(1.02);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Effet de brillance qui suit la souris */
+.glass-shine {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        var(--glass-shine) 0%,
+        transparent 60%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    z-index: 2;
+    border-radius: 20px;
+}
+
+.glass-card:hover .glass-shine {
+    opacity: 1;
+}
+
+/* Animation de survol - translation et ombre */
+.glass-card:hover {
+    transform: translateY(-12px) scale(1.03);
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.1),
+        0 0 40px var(--primary-glow);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+[data-theme="dark"] .glass-card:hover {
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.4),
+        0 0 60px var(--primary-glow);
+}
+
+/* Contenu de la carte */
+.glass-card .card-body {
+    position: relative;
+    z-index: 3;
+}
+
+/* Style de l'icône avec animation pulse */
+.glass-card .stat-icon {
+    display: inline-block;
+    transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.glass-card .stat-icon svg {
+    width: 52px;
+    height: 52px;
+    stroke-width: 1.5;
+    transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    color: var(--primary-color);
+    filter: drop-shadow(0 0 8px transparent);
+}
+
+/* Animation pulse de l'icône au survol */
+.glass-card:hover .stat-icon {
+    animation: iconPulse 1.5s ease-in-out infinite;
+}
+
+.glass-card:hover .stat-icon svg {
+    color: #0a58ca;
+    filter: drop-shadow(0 0 15px var(--primary-glow));
+    transform: rotate(-5deg) scale(1.15);
+}
+
+@keyframes iconPulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+}
+
+/* Style du titre */
+.glass-card .card-title {
+    font-weight: 600;
+    transition: all 0.4s ease;
+    position: relative;
+    display: inline-block;
+}
+
+/* Soulignement animé du titre */
+.glass-card .card-title::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--primary-color), #0dcaf0);
+    transition: width 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    border-radius: 2px;
+}
+
+.glass-card:hover .card-title {
+    color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+.glass-card:hover .card-title::after {
+    width: 100%;
+}
+
+/* Texte de description */
+.glass-card .card-text {
+    transition: all 0.4s ease;
+}
+
+.glass-card:hover .card-text {
+    color: #495057 !important;
+    transform: translateY(-1px);
+}
+
+/* Effet de bordure lumineuse */
+.glass-card::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, 
+        transparent 30%, 
+        var(--primary-color) 50%, 
+        transparent 70%
+    );
+    border-radius: 22px;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    animation: borderRotate 3s linear infinite;
+}
+
+.glass-card:hover::before {
+    opacity: 0.3;
+}
+
+@keyframes borderRotate {
+    0% {
+        background: linear-gradient(0deg, 
+            transparent 30%, 
+            var(--primary-color) 50%, 
+            transparent 70%
+        );
+    }
+    100% {
+        background: linear-gradient(360deg, 
+            transparent 30%, 
+            var(--primary-color) 50%, 
+            transparent 70%
+        );
+    }
+}
+
+/* Animation de pulsation pour le highlight */
+.glass-card.is-pulsing {
+    animation: cardPulse 1s ease !important;
+}
+
+@keyframes cardPulse {
+    0% {
+        transform: scale(1);
+        box-shadow: var(--glass-shadow);
+    }
+    30% {
+        transform: scale(1.06);
+        box-shadow: 0 0 50px var(--primary-glow);
+    }
+    60% {
+        transform: scale(0.97);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: var(--glass-shadow);
+    }
+}
+
+/* États désactivés */
+.shortcut-link.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.shortcut-link.disabled .glass-card {
+    filter: grayscale(0.5);
+}
+
+/* Adaptations mobiles */
+@media (max-width: 768px) {
+    .glass-card {
+        border-radius: 16px;
+    }
+    
+    .glass-card .stat-icon svg {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .glass-card:hover {
+        transform: translateY(-8px) scale(1.02);
+    }
+    
+    .glass-shine {
+        display: none; /* Désactiver l'effet de brillance sur mobile pour les performances */
+    }
+}
+
+@media (max-width: 576px) {
+    .glass-card {
+        border-radius: 12px;
+    }
+    
+    .glass-card .stat-icon svg {
+        width: 32px;
+        height: 32px;
+    }
+}
 </style>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Initialiser Feather Icons
         if (typeof feather !== 'undefined') {
             feather.replace();
         }
 
-        // Ajout des délais d'animation pour chaque carte
-        var cards = document.querySelectorAll('.glass-card');
-        for (var i = 0; i < cards.length; i++) {
-            var delay = i + 1;
-            if (delay <= 8) {
-                cards[i].classList.add('delay-' + delay);
-            }
-        }
+        // ==========================================================================
+        // 1. Animation d'entrée échelonnée avec data-delay
+        // ==========================================================================
+        var glassCards = document.querySelectorAll('.glass-card');
+        
+        glassCards.forEach(function(card) {
+            var delay = parseInt(card.getAttribute('data-delay')) || 0;
+            
+            setTimeout(function() {
+                card.classList.add('animate-in');
+            }, delay);
+        });
 
-        // Animation des raccourcis
+        // ==========================================================================
+        // 2. Effet de brillance qui suit la souris
+        // ==========================================================================
+        glassCards.forEach(function(card) {
+            card.addEventListener('mousemove', function(e) {
+                var rect = card.getBoundingClientRect();
+                var x = ((e.clientX - rect.left) / rect.width) * 100;
+                var y = ((e.clientY - rect.top) / rect.height) * 100;
+                
+                card.style.setProperty('--mouse-x', x + '%');
+                card.style.setProperty('--mouse-y', y + '%');
+            });
+            
+            // Réinitialiser la position quand la souris quitte la carte
+            card.addEventListener('mouseleave', function() {
+                card.style.setProperty('--mouse-x', '50%');
+                card.style.setProperty('--mouse-y', '50%');
+            });
+        });
+
+        // ==========================================================================
+        // 3. Animation de highlight via Socket.io
+        // ==========================================================================
         if (typeof io !== 'undefined') {
             var socket = io();
+            
             socket.on('shortcutHighlight', function(data) {
                 if (data.shortcutKey) {
                     var shortcut = document.querySelector('.shortcut-link[data-shortcut-key="' + data.shortcutKey + '"]');
                     if (shortcut) {
                         var card = shortcut.querySelector('.glass-card');
                         if (card) {
+                            // Retirer la classe si elle existe déjà
+                            card.classList.remove('is-pulsing');
+                            
+                            // Force un reflow pour réinitialiser l'animation
+                            void card.offsetWidth;
+                            
+                            // Ajouter la classe d'animation
                             card.classList.add('is-pulsing');
+                            
+                            // Nettoyer après l'animation
                             setTimeout(function() { 
                                 card.classList.remove('is-pulsing'); 
                             }, 1200);
@@ -228,6 +549,17 @@
                 }
             });
         }
+
+        // ==========================================================================
+        // 4. Gestion des liens désactivés
+        // ==========================================================================
+        var disabledLinks = document.querySelectorAll('.shortcut-link.disabled');
+        disabledLinks.forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                return false;
+            });
+        });
     });
 </script>
 
