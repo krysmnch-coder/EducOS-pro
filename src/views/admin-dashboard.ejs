@@ -8,205 +8,65 @@
 
         <%# --- Section de bienvenue --- %>
         <div class="d-flex align-items-center mb-5">
-            <div class="rounded-circle me-4 d-flex align-items-center justify-content-center bg-primary text-white" style="width: 80px; height: 80px; font-size: 2.5rem; font-weight: 500; background-image: url('<%= currentUser.avatar_url %>'); background-size: cover; background-position: center;">
-                <% if (!currentUser.avatar_url) { %>
-                    <%= currentUser.name.charAt(0).toUpperCase() %>
+            <div class="rounded-circle me-4 d-flex align-items-center justify-content-center bg-primary text-white" style="width: 80px; height: 80px; font-size: 2.5rem; font-weight: 500; background-image: url('<%= user.avatar_url %>'); background-size: cover; background-position: center;">
+                <% if (!user.avatar_url) { %>
+                    <%= user.name.charAt(0).toUpperCase() %>
                 <% } %>
             </div>
             <div>
-                <h1 class="h2 mb-0">Bonjour, <%= currentUser.name %> !</h1>
-                <p class="lead text-muted mb-0">Bienvenue sur votre tableau de bord d'administration.</p>
+                <h1 class="h2 mb-0">Bonjour, <%= user.name %> !</h1>
+                <% if (typeof parentData !== 'undefined' && parentData.selectedChild) { %>
+                    <p class="lead text-muted mb-0">Vous consultez le profil de : <strong><%= parentData.selectedChild.name %></strong>.</p>
+                <% } else { %>
+                    <p class="lead text-muted mb-0">Ravi de vous revoir. Voici vos raccourcis.</p>
+                <% } %>
             </div>
         </div>
 
+        <%# --- Section de sélection de l'enfant pour les parents --- %>
+        <% if (user.role === 'PARENT') { %>
+            <div class="child-selector-wrapper card mb-5">
+                <div class="card-body d-md-flex align-items-center justify-content-between">
+                    <% if (typeof parentData !== 'undefined' && parentData.children && parentData.children.length > 0) { %>
+                        <form action="/select-child" method="POST" class="d-flex align-items-center gap-3 flex-wrap">
+                            <label for="childSelector" class="form-label mb-0 fw-bold">Suivre un enfant :</label>
+                            <select name="childId" id="childSelector" class="form-select" style="min-width: 250px;" onchange="this.form.submit()">
+                                <% parentData.children.forEach(child => { %>
+                                    <option value="<%= child.id %>" <%= (parentData.selectedChild && parentData.selectedChild.id === child.id) ? 'selected' : '' %>>
+                                        <%= child.name %>
+                                    </option>
+                                <% }); %>
+                            </select>
+                        </form>
+                    <% } else { %>
+                        <p class="text-muted mb-0">Aucun enfant n'est actuellement lié à votre compte. Les enfants sont ajoutés lors de votre inscription.</p>
+                    <% } %>
+                </div>
+            </div>
+        <% } %>
+
         <%# --- Section des Raccourcis (Widgets) --- %>
-        <% 
-        // Définir des widgets par défaut pour l'administrateur
-        const adminWidgets = [
-            { key: 'students', icon: 'users', title: 'Gestion des Élèves', link: '/students', description: 'Gérer les élèves' },
-            { key: 'teachers', icon: 'user-check', title: 'Gestion des Professeurs', link: '/teachers', description: 'Gérer les professeurs' },
-            { key: 'classes', icon: 'grid', title: 'Gestion des Classes', link: '/classes', description: 'Gérer les classes' },
-            { key: 'communications', icon: 'send', title: 'Communication', link: '/communications', description: 'Envoyer des messages' },
-            { key: 'admin', icon: 'settings', title: 'Paramètres', link: '/admin', description: 'Paramètres du système' }
-        ];
-        
-        // Définir des widgets par défaut pour le super admin
-        const superAdminWidgets = [
-            { key: 'establishments', icon: 'home', title: 'Établissements', link: '/establishments', description: 'Gérer les établissements' },
-            { key: 'admins', icon: 'user-cog', title: 'Admins', link: '/admin', description: 'Gérer les administrateurs' },
-            { key: 'users', icon: 'users', title: 'Utilisateurs', link: '/admin/users', description: 'Gérer les utilisateurs' },
-            { key: 'stats', icon: 'bar-chart-2', title: 'Statistiques', link: '/statistics', description: 'Voir les statistiques globales' },
-            { key: 'settings', icon: 'settings', title: 'Paramètres', link: '/admin/settings', description: 'Paramètres du système' }
-        ];
-        
-        // Choisir les widgets selon le rôle
-        let defaultWidgets = adminWidgets;
-        if (currentUser.role === 'SUPER_ADMIN' || currentUser.role === 'superadmin') {
-            defaultWidgets = superAdminWidgets;
-        }
-        
-        // Utiliser les widgets fournis par le contrôleur ou les widgets par défaut
-        let displayWidgets = defaultWidgets;
-        if (typeof widgets !== 'undefined' && widgets && Array.isArray(widgets) && widgets.length > 0) {
-            displayWidgets = widgets;
-        }
-        %>
-        
-        <h2 class="mb-4">
-            <i data-feather="grid" class="me-2" style="width: 24px; height: 24px;"></i>
-            Raccourcis de gestion
-        </h2>
-        <div class="row g-4">
-            <% if (displayWidgets && displayWidgets.length > 0) { %>
-                <% displayWidgets.forEach((widget, index) => { %>
+        <% if (typeof widgets !== 'undefined' && widgets.length > 0) { %>
+            <div class="row g-4">
+                <% widgets.forEach(widget => { %>
                 <div class="col-xl-3 col-md-6 mb-4">
-                    <a href="<%= widget.link || '#' %>" class="text-decoration-none shortcut-link" data-shortcut-key="<%= widget.key || 'widget-' + index %>" data-delay="<%= index * 0.1 %>">
-                        <div class="card dashboard-stat h-100 glass-card">
-                            <div class="card-body text-center">
-                                <div class="stat-icon mb-3">
-                                    <i data-feather="<%= widget.icon || 'box' %>"></i>
-                                </div>
-                                <h5 class="card-title mb-2"><%= widget.title || 'Widget' %></h5>
-                                <p class="card-text text-muted small"><%= widget.description || 'Description' %></p>
-                            </div>
+                    <a href="<%= (user.role === 'PARENT' && (typeof parentData === 'undefined' || !parentData.selectedChild)) ? '#' : widget.link %>" class="text-decoration-none shortcut-link <%= (user.role === 'PARENT' && (typeof parentData === 'undefined' || !parentData.selectedChild)) ? 'disabled' : '' %>" data-shortcut-key="<%= widget.key %>">
+                    <div class="card dashboard-stat h-100">
+                        <div class="card-body text-center">
+                        <div class="stat-icon mb-3">
+                            <i data-feather="<%= widget.icon %>"></i>
                         </div>
+                        <h5 class="card-title mb-2"><%= widget.title %></h5>
+                        <p class="card-text text-muted small"><%= widget.description %></p>
+                        </div>
+                    </div>
                     </a>
                 </div>
                 <% }); %>
-            <% } else { %>
-                <div class="col-12 text-center py-5">
-                    <p class="text-muted">Aucun raccourci n'est configuré pour votre rôle pour le moment.</p>
-                </div>
-            <% } %>
-        </div>
-
-        <%# --- Section des Statistiques avec Graphiques --- %>
-        <% if (stats) { %>
-            <h2 class="mb-4 mt-5">
-                <i data-feather="bar-chart-2" class="me-2" style="width: 24px; height: 24px;"></i>
-                Statistiques
-            </h2>
-            <div class="row">
-                <% if (currentUser.role === 'ADMINISTRATOR' || currentUser.role === 'administrateur') { %>
-                    <div class="col-md-6 col-lg-3 mb-4">
-                        <div class="card h-100 glass-stat-card">
-                            <div class="card-body text-center d-flex flex-column justify-content-center">
-                                <h5 class="card-title text-muted">
-                                    <i data-feather="users" class="me-1" style="width: 16px; height: 16px;"></i>
-                                    Élèves
-                                </h5>
-                                <p class="display-4 fw-bold my-2 stat-number" id="adminStudentCount"><%= stats.studentCount || 0 %></p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6 col-lg-3 mb-4">
-                        <div class="card h-100 glass-stat-card">
-                            <div class="card-body text-center d-flex flex-column justify-content-center">
-                                <h5 class="card-title text-muted">
-                                    <i data-feather="user-check" class="me-1" style="width: 16px; height: 16px;"></i>
-                                    Professeurs
-                                </h5>
-                                <p class="display-4 fw-bold my-2 stat-number" id="adminProfessorCount"><%= stats.professorCount || 0 %></p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6 col-lg-3 mb-4">
-                        <div class="card h-100 glass-stat-card">
-                            <div class="card-body text-center d-flex flex-column justify-content-center">
-                                <h5 class="card-title text-muted">
-                                    <i data-feather="users" class="me-1" style="width: 16px; height: 16px;"></i>
-                                    Parents
-                                </h5>
-                                <p class="display-4 fw-bold my-2 stat-number" id="adminParentCount"><%= stats.parentCount || 0 %></p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6 col-lg-3 mb-4">
-                        <div class="card h-100 text-center glass-stat-card bg-warning bg-opacity-10 border-warning">
-                            <div class="card-body d-flex flex-column justify-content-center">
-                                <h5 class="card-title">
-                                    <i data-feather="clock" class="me-1" style="width: 16px; height: 16px;"></i>
-                                    Comptes en attente
-                                </h5>
-                                <p class="display-4 fw-bold my-3 stat-number" id="adminPendingCount"><%= stats.pendingCount || 0 %></p>
-                                <a href="/admin" class="btn btn-sm btn-warning">Gérer</a>
-                            </div>
-                        </div>
-                    </div>
-                <% } else if (currentUser.role === 'SUPER_ADMIN' || currentUser.role === 'superadmin') { %>
-                    <div class="col-md-6 col-lg-3 mb-4">
-                        <div class="card h-100 glass-stat-card">
-                            <div class="card-body text-center d-flex flex-column justify-content-center">
-                                <h5 class="card-title text-muted">
-                                    <i data-feather="users" class="me-1" style="width: 16px; height: 16px;"></i>
-                                    Utilisateurs (Total)
-                                </h5>
-                                <p class="display-4 fw-bold my-2 stat-number" id="superAdminTotalUsers"><%= stats.totalUserCount || 0 %></p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6 col-lg-3 mb-4">
-                        <div class="card h-100 glass-stat-card">
-                            <div class="card-body text-center d-flex flex-column justify-content-center">
-                                <h5 class="card-title text-muted">
-                                    <i data-feather="user-cog" class="me-1" style="width: 16px; height: 16px;"></i>
-                                    Admins Scolaires
-                                </h5>
-                                <p class="display-4 fw-bold my-2 stat-number" id="superAdminAdminCount"><%= stats.adminCount || 0 %></p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6 col-lg-3 mb-4">
-                        <div class="card h-100 glass-stat-card">
-                            <div class="card-body text-center d-flex flex-column justify-content-center">
-                                <h5 class="card-title text-muted">
-                                    <i data-feather="home" class="me-1" style="width: 16px; height: 16px;"></i>
-                                    Établissements
-                                </h5>
-                                <p class="display-4 fw-bold my-2 stat-number" id="superAdminEstablishmentCount"><%= stats.establishmentCount || 0 %></p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6 col-lg-3 mb-4">
-                        <div class="card h-100 text-center glass-stat-card bg-warning bg-opacity-10 border-warning">
-                            <div class="card-body d-flex flex-column justify-content-center">
-                                <h5 class="card-title">
-                                    <i data-feather="clock" class="me-1" style="width: 16px; height: 16px;"></i>
-                                    Comptes en attente
-                                </h5>
-                                <p class="display-4 fw-bold my-3 stat-number" id="superAdminPendingCount"><%= stats.pendingCount || 0 %></p>
-                                <a href="/admin" class="btn btn-sm btn-warning">Gérer</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <% if (stats.establishmentsWithCounts && stats.establishmentsWithCounts.length > 0) { %>
-                        <div class="col-12">
-                            <h3 class="mb-4 mt-5">
-                                <i data-feather="briefcase" class="me-2" style="width: 20px; height: 20px;"></i>
-                                Utilisateurs par Établissement
-                            </h3>
-                            <div class="table-responsive glass-table-container">
-                                <table class="table table-hover glass-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Établissement</th>
-                                            <th class="text-end">Utilisateurs Approuvés</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <% stats.establishmentsWithCounts.forEach(est => { %>
-                                            <tr class="glass-row">
-                                                <td><%= est.name %></td>
-                                                <td class="text-end fw-bold stat-number" id="establishment-count-<%= est.id %>"><%= est.userCount || 0 %></td>
-                                            </tr>
-                                        <% }); %>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    <% } %>
-                <% } %>
+            </div>
+        <% } else { %>
+            <div class="text-center py-5">
+                <p class="text-muted">Aucun raccourci n'est configuré pour votre rôle pour le moment.</p>
             </div>
         <% } %>
     </div>
