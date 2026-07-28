@@ -61,79 +61,47 @@ const getMessages = async (req, res) => {
         const otherUserId = req.params.userId;
         const currentUserId = req.user.id;
 
-        console.log('═══════════════════════════════════════');
-        console.log('📥 GET /api/messages/' + otherUserId);
-        console.log('👤 Current User ID:', currentUserId, '(type:', typeof currentUserId, ')');
-        console.log('👤 Other User ID:', otherUserId, '(type:', typeof otherUserId, ')');
-
         if (!otherUserId) {
-            console.log('❌ otherUserId manquant');
             return res.status(400).json({ error: 'User ID manquant.' });
         }
 
-        // Vérification de l'autre utilisateur
+        // --- VÉRIFICATION DE SÉCURITÉ ---
+        // On s'assure que l'utilisateur ne peut voir que les messages des conversations autorisées.
         const otherUser = await userModel.getUserById(otherUserId);
-        console.log('🔍 Other User trouvé:', otherUser ? 'OUI' : 'NON');
-        
         if (!otherUser) {
-            console.log('❌ Utilisateur introuvable');
             return res.status(404).json({ error: 'Utilisateur introuvable.' });
         }
 
-        console.log('👤 Other User Name:', otherUser.name);
-        console.log('🏫 Current User Establishment:', req.user.establishment_id);
-        console.log('🏫 Other User Establishment:', otherUser.establishment_id);
-
-        // Vérification de sécurité
         const canInteract = 
             req.user.role === ROLES.SUPER_ADMIN ||
             (req.user.establishment_id && req.user.establishment_id === otherUser.establishment_id);
 
-        console.log('🔒 Can Interact:', canInteract);
-
         if (!canInteract) {
-            console.log('❌ Accès non autorisé');
             return res.status(403).json({ error: 'Vous n\'êtes pas autorisé à voir cette conversation.' });
         }
+        // --- FIN DE LA VÉRIFICATION ---
 
-        // Récupérer ou créer la conversation
-        console.log('💬 Recherche/Création de la conversation...');
+        // La logique est optimisée pour la clarté et la performance :
+        // 1. On trouve ou crée la conversation pour obtenir son ID.
         const conversationId = await chatModel.getOrCreateConversation(currentUserId, otherUserId);
-        console.log('💬 Conversation ID:', conversationId);
-
-        // Marquer comme lu
-        console.log('✓ Marquage des messages comme lus...');
+        
+        // 2. On marque les messages de cette conversation comme lus.
         await chatModel.markMessagesAsRead(conversationId, currentUserId);
 
-        // Récupérer les messages
-        console.log('📨 Récupération des messages...');
+        // 3. On récupère l'historique des messages en utilisant la nouvelle fonction optimisée.
         const messages = await chatModel.getMessages(currentUserId, otherUserId);
-        console.log('📨 Nombre de messages trouvés:', messages ? messages.length : 0);
-        
-        if (messages && messages.length > 0) {
-            console.log('📨 Premier message:', JSON.stringify(messages[0]).substring(0, 200));
-        }
 
-        // Mise à jour du badge
+        // Mettre à jour le badge de l'utilisateur via socket pour refléter la lecture
         const authIo = req.app.get('authIo');
         if (authIo) {
             const unreadCount = await chatModel.getUnreadCount(currentUserId);
             authIo.to(`user_${currentUserId}`).emit('unreadChatUpdate', { count: unreadCount });
         }
 
-        console.log('✅ Envoi de la réponse avec', messages ? messages.length : 0, 'messages');
-        console.log('═══════════════════════════════════════');
-        
-        res.json(messages || []);
-
+        res.json(messages);
     } catch (error) {
-        console.error('❌ ERREUR dans getMessages:', error);
-        console.error('❌ Stack:', error.stack);
-        console.log('═══════════════════════════════════════');
-        res.status(500).json({ 
-            error: 'Impossible de récupérer les messages.',
-            details: error.message 
-        });
+        console.error('Erreur API getMessages:', error);
+        res.status(500).json({ error: 'Impossible de récupérer les messages.' });
     }
 };
 
