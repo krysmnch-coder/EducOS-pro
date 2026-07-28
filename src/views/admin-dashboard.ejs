@@ -7,21 +7,32 @@
         <%- include('partials/messages') %>
 
         <%# --- Section de bienvenue --- %>
-        <div class="d-flex align-items-center mb-5">
-            <div class="rounded-circle me-4 d-flex align-items-center justify-content-center bg-primary text-white" style="width: 80px; height: 80px; font-size: 2.5rem; font-weight: 500; background-image: url('<%= currentUser.avatar_url %>'); background-size: cover; background-position: center;">
-                <% if (!currentUser.avatar_url) { %>
-                    <%= currentUser.name.charAt(0).toUpperCase() %>
+        <div class="d-flex align-items-center mb-5 welcome-section">
+            <div class="avatar-circle me-4">
+                <% if (currentUser.avatar_url) { %>
+                    <img src="<%= currentUser.avatar_url %>" alt="Avatar" class="avatar-img">
+                <% } else { %>
+                    <span class="avatar-text"><%= currentUser.name.charAt(0).toUpperCase() %></span>
                 <% } %>
+                <div class="avatar-status online"></div>
             </div>
             <div>
-                <h1 class="h2 mb-0">Bonjour, <%= currentUser.name %> !</h1>
+                <h1 class="h2 mb-1">Bonjour, <%= currentUser.name %> ! 👋</h1>
                 <p class="lead text-muted mb-0">Bienvenue sur votre tableau de bord d'administration.</p>
+                <small class="text-muted">
+                    <i data-feather="calendar" class="me-1" style="width: 14px; height: 14px;"></i>
+                    <%= new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %>
+                </small>
             </div>
         </div>
 
-        <%# --- Section des Raccourcis (Widgets) - Version améliorée --- %>
-        <h2 class="mb-4">Raccourcis de gestion</h2>
-        <div class="row">
+        <%# --- Section des Raccourcis (Widgets) --- %>
+        <div class="section-header mb-4">
+            <h2 class="mb-0">Raccourcis de gestion</h2>
+            <div class="section-line"></div>
+        </div>
+        
+        <div class="row g-4">
             <%
             var hasWidgets = false;
             try {
@@ -38,80 +49,94 @@
                     var widgetIcon = widget.icon || 'box';
                     var widgetTitle = widget.title || 'Widget';
                     var widgetDesc = widget.description || 'Description';
-                    var delay = (i + 1) * 100; // Délai en ms pour l'animation
+                    var delay = (i + 1) * 100;
             %>
-            <div class="col-xl-3 col-md-6 mb-4">
-                <a href="<%= widgetLink %>" class="text-decoration-none shortcut-link" data-shortcut-key="<%= widgetKey %>">
-                    <div class="card dashboard-stat h-100 glass-card" data-delay="<%= delay %>">
-                        <div class="card-body text-center">
-                            <div class="stat-icon mb-3">
+            <div class="col-xl-3 col-md-6">
+                <a href="<%= widgetLink %>" class="shortcut-link" data-shortcut-key="<%= widgetKey %>">
+                    <div class="widget-card glass-card" data-delay="<%= delay %>">
+                        <div class="glass-shine"></div>
+                        <div class="card-content">
+                            <div class="widget-icon-wrapper">
                                 <i data-feather="<%= widgetIcon %>"></i>
                             </div>
-                            <h5 class="card-title mb-2"><%= widgetTitle %></h5>
-                            <p class="card-text text-muted small"><%= widgetDesc %></p>
+                            <h5 class="widget-title"><%= widgetTitle %></h5>
+                            <p class="widget-description"><%= widgetDesc %></p>
+                            <div class="widget-arrow">
+                                <i data-feather="arrow-right"></i>
+                            </div>
                         </div>
-                        <div class="glass-shine"></div>
                     </div>
                 </a>
             </div>
             <%
                 }
             } else {
-                // Widgets par défaut avec data-delay
             %>
-            <div class="col-xl-3 col-md-6 mb-4">
-                <a href="/students" class="text-decoration-none shortcut-link" data-shortcut-key="students">
-                    <div class="card dashboard-stat h-100 glass-card" data-delay="100">
-                        <div class="card-body text-center">
-                            <div class="stat-icon mb-3">
+            <div class="col-xl-3 col-md-6">
+                <a href="/students" class="shortcut-link" data-shortcut-key="students">
+                    <div class="widget-card glass-card" data-delay="100">
+                        <div class="glass-shine"></div>
+                        <div class="card-content">
+                            <div class="widget-icon-wrapper">
                                 <i data-feather="users"></i>
                             </div>
-                            <h5 class="card-title mb-2">Gestion des Élèves</h5>
-                            <p class="card-text text-muted small">Gérer les élèves</p>
+                            <h5 class="widget-title">Gestion des Élèves</h5>
+                            <p class="widget-description">Gérer les élèves</p>
+                            <div class="widget-arrow">
+                                <i data-feather="arrow-right"></i>
+                            </div>
                         </div>
-                        <div class="glass-shine"></div>
                     </div>
                 </a>
             </div>
-            <div class="col-xl-3 col-md-6 mb-4">
-                <a href="/teachers" class="text-decoration-none shortcut-link" data-shortcut-key="teachers">
-                    <div class="card dashboard-stat h-100 glass-card" data-delay="200">
-                        <div class="card-body text-center">
-                            <div class="stat-icon mb-3">
+            <div class="col-xl-3 col-md-6">
+                <a href="/teachers" class="shortcut-link" data-shortcut-key="teachers">
+                    <div class="widget-card glass-card" data-delay="200">
+                        <div class="glass-shine"></div>
+                        <div class="card-content">
+                            <div class="widget-icon-wrapper">
                                 <i data-feather="user-check"></i>
                             </div>
-                            <h5 class="card-title mb-2">Gestion des Professeurs</h5>
-                            <p class="card-text text-muted small">Gérer les professeurs</p>
+                            <h5 class="widget-title">Gestion des Professeurs</h5>
+                            <p class="widget-description">Gérer les professeurs</p>
+                            <div class="widget-arrow">
+                                <i data-feather="arrow-right"></i>
+                            </div>
                         </div>
-                        <div class="glass-shine"></div>
                     </div>
                 </a>
             </div>
-            <div class="col-xl-3 col-md-6 mb-4">
-                <a href="/classes" class="text-decoration-none shortcut-link" data-shortcut-key="classes">
-                    <div class="card dashboard-stat h-100 glass-card" data-delay="300">
-                        <div class="card-body text-center">
-                            <div class="stat-icon mb-3">
+            <div class="col-xl-3 col-md-6">
+                <a href="/classes" class="shortcut-link" data-shortcut-key="classes">
+                    <div class="widget-card glass-card" data-delay="300">
+                        <div class="glass-shine"></div>
+                        <div class="card-content">
+                            <div class="widget-icon-wrapper">
                                 <i data-feather="grid"></i>
                             </div>
-                            <h5 class="card-title mb-2">Gestion des Classes</h5>
-                            <p class="card-text text-muted small">Gérer les classes</p>
+                            <h5 class="widget-title">Gestion des Classes</h5>
+                            <p class="widget-description">Gérer les classes</p>
+                            <div class="widget-arrow">
+                                <i data-feather="arrow-right"></i>
+                            </div>
                         </div>
-                        <div class="glass-shine"></div>
                     </div>
                 </a>
             </div>
-            <div class="col-xl-3 col-md-6 mb-4">
-                <a href="/admin" class="text-decoration-none shortcut-link" data-shortcut-key="admin">
-                    <div class="card dashboard-stat h-100 glass-card" data-delay="400">
-                        <div class="card-body text-center">
-                            <div class="stat-icon mb-3">
+            <div class="col-xl-3 col-md-6">
+                <a href="/admin" class="shortcut-key" data-shortcut-key="admin">
+                    <div class="widget-card glass-card" data-delay="400">
+                        <div class="glass-shine"></div>
+                        <div class="card-content">
+                            <div class="widget-icon-wrapper">
                                 <i data-feather="settings"></i>
                             </div>
-                            <h5 class="card-title mb-2">Paramètres</h5>
-                            <p class="card-text text-muted small">Paramètres du système</p>
+                            <h5 class="widget-title">Paramètres</h5>
+                            <p class="widget-description">Paramètres du système</p>
+                            <div class="widget-arrow">
+                                <i data-feather="arrow-right"></i>
+                            </div>
                         </div>
-                        <div class="glass-shine"></div>
                     </div>
                 </a>
             </div>
@@ -122,102 +147,332 @@
 
         <%# --- Section des Statistiques --- %>
         <% if (stats) { %>
-            <h2 class="mb-4 mt-5">Statistiques</h2>
-            <div class="row">
+            <div class="section-header mb-4 mt-5">
+                <h2 class="mb-0">Statistiques</h2>
+                <div class="section-line"></div>
+            </div>
+            
+            <div class="row g-4">
                 <% if (currentUser.role === 'ADMINISTRATOR' || currentUser.role === 'administrateur') { %>
-                    <div class="col-md-6 col-lg-3 mb-4">
-                        <div class="card h-100"><div class="card-body text-center d-flex flex-column justify-content-center"><h5 class="card-title text-muted">Élèves</h5><p class="display-4 fw-bold my-2" id="adminStudentCount"><%= stats.studentCount || 0 %></p></div></div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="stat-card glass-card" data-delay="500">
+                            <div class="glass-shine"></div>
+                            <div class="stat-content">
+                                <div class="stat-icon-circle stat-icon-primary">
+                                    <i data-feather="users"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h5 class="stat-label">Élèves</h5>
+                                    <div class="stat-value-wrapper">
+                                        <span class="stat-value" id="adminStudentCount" data-target="<%= stats.studentCount || 0 %>">0</span>
+                                    </div>
+                                    <span class="stat-badge">Total inscrits</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-md-6 col-lg-3 mb-4">
-                        <div class="card h-100"><div class="card-body text-center d-flex flex-column justify-content-center"><h5 class="card-title text-muted">Professeurs</h5><p class="display-4 fw-bold my-2" id="adminProfessorCount"><%= stats.professorCount || 0 %></p></div></div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="stat-card glass-card" data-delay="600">
+                            <div class="glass-shine"></div>
+                            <div class="stat-content">
+                                <div class="stat-icon-circle stat-icon-success">
+                                    <i data-feather="user-check"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h5 class="stat-label">Professeurs</h5>
+                                    <div class="stat-value-wrapper">
+                                        <span class="stat-value" id="adminProfessorCount" data-target="<%= stats.professorCount || 0 %>">0</span>
+                                    </div>
+                                    <span class="stat-badge">Total actifs</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-md-6 col-lg-3 mb-4">
-                        <div class="card h-100"><div class="card-body text-center d-flex flex-column justify-content-center"><h5 class="card-title text-muted">Parents</h5><p class="display-4 fw-bold my-2" id="adminParentCount"><%= stats.parentCount || 0 %></p></div></div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="stat-card glass-card" data-delay="700">
+                            <div class="glass-shine"></div>
+                            <div class="stat-content">
+                                <div class="stat-icon-circle stat-icon-info">
+                                    <i data-feather="heart"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h5 class="stat-label">Parents</h5>
+                                    <div class="stat-value-wrapper">
+                                        <span class="stat-value" id="adminParentCount" data-target="<%= stats.parentCount || 0 %>">0</span>
+                                    </div>
+                                    <span class="stat-badge">Total inscrits</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-md-6 col-lg-3 mb-4">
-                        <div class="card h-100 text-center bg-warning bg-opacity-10 border-warning">
-                            <div class="card-body d-flex flex-column justify-content-center">
-                                <h5 class="card-title">Comptes en attente</h5>
-                                <p class="display-4 fw-bold my-3" id="adminPendingCount"><%= stats.pendingCount || 0 %></p>
-                                <a href="/admin" class="btn btn-sm btn-warning">Gérer</a>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="stat-card glass-card stat-card-warning" data-delay="800">
+                            <div class="glass-shine"></div>
+                            <div class="stat-content">
+                                <div class="stat-icon-circle stat-icon-warning">
+                                    <i data-feather="clock"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h5 class="stat-label">En attente</h5>
+                                    <div class="stat-value-wrapper">
+                                        <span class="stat-value" id="adminPendingCount" data-target="<%= stats.pendingCount || 0 %>">0</span>
+                                    </div>
+                                    <span class="stat-badge">Comptes à valider</span>
+                                    <a href="/admin" class="btn btn-sm btn-warning mt-2">Gérer</a>
+                                </div>
                             </div>
                         </div>
                     </div>
                 <% } else if (currentUser.role === 'SUPER_ADMIN' || currentUser.role === 'superadmin') { %>
-                    <div class="col-md-6 col-lg-3 mb-4">
-                        <div class="card h-100"><div class="card-body text-center d-flex flex-column justify-content-center"><h5 class="card-title text-muted">Utilisateurs (Total)</h5><p class="display-4 fw-bold my-2" id="superAdminTotalUsers"><%= stats.totalUserCount || 0 %></p></div></div>
-                    </div>
-                    <div class="col-md-6 col-lg-3 mb-4">
-                        <div class="card h-100"><div class="card-body text-center d-flex flex-column justify-content-center"><h5 class="card-title text-muted">Admins Scolaires</h5><p class="display-4 fw-bold my-2" id="superAdminAdminCount"><%= stats.adminCount || 0 %></p></div></div>
-                    </div>
-                    <div class="col-md-6 col-lg-3 mb-4">
-                        <div class="card h-100"><div class="card-body text-center d-flex flex-column justify-content-center"><h5 class="card-title text-muted">Établissements</h5><p class="display-4 fw-bold my-2" id="superAdminEstablishmentCount"><%= stats.establishmentCount || 0 %></p></div></div>
-                    </div>
-                    <div class="col-md-6 col-lg-3 mb-4">
-                        <div class="card h-100 text-center bg-warning bg-opacity-10 border-warning">
-                            <div class="card-body d-flex flex-column justify-content-center">
-                                <h5 class="card-title">Comptes en attente</h5>
-                                <p class="display-4 fw-bold my-3" id="superAdminPendingCount"><%= stats.pendingCount || 0 %></p>
-                                <a href="/admin" class="btn btn-sm btn-warning">Gérer</a>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="stat-card glass-card" data-delay="500">
+                            <div class="glass-shine"></div>
+                            <div class="stat-content">
+                                <div class="stat-icon-circle stat-icon-primary">
+                                    <i data-feather="users"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h5 class="stat-label">Utilisateurs</h5>
+                                    <div class="stat-value-wrapper">
+                                        <span class="stat-value" id="superAdminTotalUsers" data-target="<%= stats.totalUserCount || 0 %>">0</span>
+                                    </div>
+                                    <span class="stat-badge">Total plateforme</span>
+                                </div>
                             </div>
                         </div>
                     </div>
-
-                    <% if (stats.establishmentsWithCounts && stats.establishmentsWithCounts.length > 0) { %>
-                        <div class="col-12">
-                            <h3 class="mb-4 mt-5">Utilisateurs par Établissement</h3>
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Établissement</th>
-                                            <th class="text-end">Utilisateurs Approuvés</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <% for (var j = 0; j < stats.establishmentsWithCounts.length; j++) { 
-                                            var est = stats.establishmentsWithCounts[j];
-                                        %>
-                                            <tr>
-                                                <td><%= est.name %></td>
-                                                <td class="text-end fw-bold" id="establishment-count-<%= est.id %>"><%= est.userCount || 0 %></td>
-                                            </tr>
-                                        <% } %>
-                                    </tbody>
-                                </table>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="stat-card glass-card" data-delay="600">
+                            <div class="glass-shine"></div>
+                            <div class="stat-content">
+                                <div class="stat-icon-circle stat-icon-success">
+                                    <i data-feather="shield"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h5 class="stat-label">Administrateurs</h5>
+                                    <div class="stat-value-wrapper">
+                                        <span class="stat-value" id="superAdminAdminCount" data-target="<%= stats.adminCount || 0 %>">0</span>
+                                    </div>
+                                    <span class="stat-badge">Admins scolaires</span>
+                                </div>
                             </div>
                         </div>
-                    <% } %>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="stat-card glass-card" data-delay="700">
+                            <div class="glass-shine"></div>
+                            <div class="stat-content">
+                                <div class="stat-icon-circle stat-icon-info">
+                                    <i data-feather="home"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h5 class="stat-label">Établissements</h5>
+                                    <div class="stat-value-wrapper">
+                                        <span class="stat-value" id="superAdminEstablishmentCount" data-target="<%= stats.establishmentCount || 0 %>">0</span>
+                                    </div>
+                                    <span class="stat-badge">Écoles actives</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="stat-card glass-card stat-card-warning" data-delay="800">
+                            <div class="glass-shine"></div>
+                            <div class="stat-content">
+                                <div class="stat-icon-circle stat-icon-warning">
+                                    <i data-feather="clock"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h5 class="stat-label">En attente</h5>
+                                    <div class="stat-value-wrapper">
+                                        <span class="stat-value" id="superAdminPendingCount" data-target="<%= stats.pendingCount || 0 %>">0</span>
+                                    </div>
+                                    <span class="stat-badge">Comptes à valider</span>
+                                    <a href="/admin" class="btn btn-sm btn-warning mt-2">Gérer</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 <% } %>
             </div>
+
+            <%# --- Tableau des établissements --- %>
+            <% if (stats.establishmentsWithCounts && stats.establishmentsWithCounts.length > 0) { %>
+                <div class="section-header mb-4 mt-5">
+                    <h3 class="mb-0">Utilisateurs par Établissement</h3>
+                    <div class="section-line"></div>
+                </div>
+                
+                <div class="glass-card table-card" data-delay="900">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Établissement</th>
+                                    <th class="text-end">Utilisateurs Approuvés</th>
+                                    <th class="text-end">Progression</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% 
+                                var maxUsers = 0;
+                                for (var j = 0; j < stats.establishmentsWithCounts.length; j++) {
+                                    if (stats.establishmentsWithCounts[j].userCount > maxUsers) {
+                                        maxUsers = stats.establishmentsWithCounts[j].userCount;
+                                    }
+                                }
+                                
+                                for (var j = 0; j < stats.establishmentsWithCounts.length; j++) { 
+                                    var est = stats.establishmentsWithCounts[j];
+                                    var percentage = maxUsers > 0 ? Math.round((est.userCount / maxUsers) * 100) : 0;
+                                %>
+                                    <tr class="table-row" data-delay="<%= 1000 + (j * 100) %>">
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="establishment-icon me-2">
+                                                    <i data-feather="bookmark"></i>
+                                                </div>
+                                                <%= est.name %>
+                                            </div>
+                                        </td>
+                                        <td class="text-end fw-bold" id="establishment-count-<%= est.id %>">
+                                            <%= est.userCount || 0 %>
+                                        </td>
+                                        <td class="text-end">
+                                            <div class="progress-wrapper">
+                                                <div class="progress" style="height: 8px;">
+                                                    <div class="progress-bar bg-primary progress-animated" 
+                                                         role="progressbar" 
+                                                         style="width: 0%;" 
+                                                         data-width="<%= percentage %>%"
+                                                         aria-valuenow="<%= percentage %>" 
+                                                         aria-valuemin="0" 
+                                                         aria-valuemax="100">
+                                                    </div>
+                                                </div>
+                                                <small class="progress-text"><%= percentage %>%</small>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            <% } %>
         <% } %>
     </div>
 </div>
 
 <style>
 /* ==========================================================================
-   Glassmorphism - Style complet avec effets avancés
+   CSS Complet - Design Premium Glassmorphism
    ========================================================================== */
 
-/* Variables CSS pour le glassmorphism */
 :root {
     --glass-bg: rgba(255, 255, 255, 0.1);
     --glass-border: rgba(255, 255, 255, 0.18);
-    --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+    --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
     --glass-blur: blur(12px);
     --glass-shine: rgba(255, 255, 255, 0.4);
     --primary-color: #0d6efd;
-    --primary-glow: rgba(13, 110, 253, 0.3);
+    --primary-glow: rgba(13, 110, 253, 0.2);
+    --success-color: #198754;
+    --success-glow: rgba(25, 135, 84, 0.2);
+    --info-color: #0dcaf0;
+    --info-glow: rgba(13, 202, 240, 0.2);
+    --warning-color: #ffc107;
+    --warning-glow: rgba(255, 193, 7, 0.2);
 }
 
 [data-theme="dark"] {
     --glass-bg: rgba(255, 255, 255, 0.03);
-    --glass-border: rgba(255, 255, 255, 0.08);
-    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-    --glass-shine: rgba(255, 255, 255, 0.1);
+    --glass-border: rgba(255, 255, 255, 0.06);
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    --glass-shine: rgba(255, 255, 255, 0.08);
 }
 
-/* Conteneur glass */
+/* ==========================================================================
+   Section Header
+   ========================================================================== */
+.section-header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.section-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, 
+        var(--primary-color), 
+        transparent
+    );
+    opacity: 0.3;
+}
+
+/* ==========================================================================
+   Welcome Section
+   ========================================================================== */
+.welcome-section {
+    animation: fadeInDown 0.8s ease;
+}
+
+.avatar-circle {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color), #0a58ca);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    box-shadow: 0 8px 25px var(--primary-glow);
+    transition: all 0.3s ease;
+}
+
+.avatar-circle:hover {
+    transform: scale(1.05);
+    box-shadow: 0 12px 35px var(--primary-glow);
+}
+
+.avatar-text {
+    color: white;
+    font-size: 2.5rem;
+    font-weight: 600;
+}
+
+.avatar-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.avatar-status {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid white;
+}
+
+.avatar-status.online {
+    background: #22c55e;
+    animation: statusPulse 2s infinite;
+}
+
+@keyframes statusPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
+    50% { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
+}
+
+/* ==========================================================================
+   Glass Card Base
+   ========================================================================== */
 .glass-card {
     position: relative;
     background: var(--glass-bg);
@@ -228,12 +483,10 @@
     box-shadow: var(--glass-shadow);
     transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     overflow: hidden;
-    cursor: pointer;
     opacity: 0;
     transform: translateY(30px) scale(0.95);
 }
 
-/* Animation d'entrée avec data-delay */
 .glass-card.animate-in {
     animation: cardFadeInUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
@@ -253,7 +506,6 @@
     }
 }
 
-/* Effet de brillance qui suit la souris */
 .glass-shine {
     position: absolute;
     top: 0;
@@ -276,110 +528,10 @@
     opacity: 1;
 }
 
-/* Animation de survol - translation et ombre */
-.glass-card:hover {
-    transform: translateY(-12px) scale(1.03);
-    box-shadow: 
-        0 20px 40px rgba(0, 0, 0, 0.1),
-        0 0 40px var(--primary-glow);
-    border-color: rgba(255, 255, 255, 0.4);
-}
-
-[data-theme="dark"] .glass-card:hover {
-    box-shadow: 
-        0 20px 40px rgba(0, 0, 0, 0.4),
-        0 0 60px var(--primary-glow);
-}
-
-/* Contenu de la carte */
-.glass-card .card-body {
-    position: relative;
-    z-index: 3;
-}
-
-/* Style de l'icône avec animation pulse */
-.glass-card .stat-icon {
-    display: inline-block;
-    transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-}
-
-.glass-card .stat-icon svg {
-    width: 52px;
-    height: 52px;
-    stroke-width: 1.5;
-    transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    color: var(--primary-color);
-    filter: drop-shadow(0 0 8px transparent);
-}
-
-/* Animation pulse de l'icône au survol */
-.glass-card:hover .stat-icon {
-    animation: iconPulse 1.5s ease-in-out infinite;
-}
-
-.glass-card:hover .stat-icon svg {
-    color: #0a58ca;
-    filter: drop-shadow(0 0 15px var(--primary-glow));
-    transform: rotate(-5deg) scale(1.15);
-}
-
-@keyframes iconPulse {
-    0%, 100% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.2);
-    }
-}
-
-/* Style du titre */
-.glass-card .card-title {
-    font-weight: 600;
-    transition: all 0.4s ease;
-    position: relative;
-    display: inline-block;
-}
-
-/* Soulignement animé du titre */
-.glass-card .card-title::after {
-    content: '';
-    position: absolute;
-    bottom: -4px;
-    left: 0;
-    width: 0;
-    height: 2px;
-    background: linear-gradient(90deg, var(--primary-color), #0dcaf0);
-    transition: width 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    border-radius: 2px;
-}
-
-.glass-card:hover .card-title {
-    color: var(--primary-color);
-    transform: translateY(-2px);
-}
-
-.glass-card:hover .card-title::after {
-    width: 100%;
-}
-
-/* Texte de description */
-.glass-card .card-text {
-    transition: all 0.4s ease;
-}
-
-.glass-card:hover .card-text {
-    color: #495057 !important;
-    transform: translateY(-1px);
-}
-
-/* Effet de bordure lumineuse */
 .glass-card::before {
     content: '';
     position: absolute;
-    top: -2px;
-    left: -2px;
-    right: -2px;
-    bottom: -2px;
+    inset: -2px;
     background: linear-gradient(45deg, 
         transparent 30%, 
         var(--primary-color) 50%, 
@@ -389,92 +541,546 @@
     z-index: -1;
     opacity: 0;
     transition: opacity 0.5s ease;
-    animation: borderRotate 3s linear infinite;
+    animation: borderGlow 3s linear infinite;
 }
 
 .glass-card:hover::before {
     opacity: 0.3;
 }
 
-@keyframes borderRotate {
-    0% {
-        background: linear-gradient(0deg, 
-            transparent 30%, 
-            var(--primary-color) 50%, 
-            transparent 70%
-        );
+@keyframes borderGlow {
+    0% { background: linear-gradient(0deg, transparent 30%, var(--primary-color) 50%, transparent 70%); }
+    100% { background: linear-gradient(360deg, transparent 30%, var(--primary-color) 50%, transparent 70%); }
+}
+
+/* ==========================================================================
+   Widget Cards
+   ========================================================================== */
+.widget-card {
+    min-height: 200px;
+    cursor: pointer;
+}
+
+.widget-card:hover {
+    transform: translateY(-12px) scale(1.03);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12), 0 0 40px var(--primary-glow);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.card-content {
+    position: relative;
+    z-index: 3;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.widget-icon-wrapper {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: rgba(13, 110, 253, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.2rem;
+    transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    position: relative;
+}
+
+.widget-icon-wrapper svg {
+    width: 36px;
+    height: 36px;
+    stroke-width: 1.5;
+    color: var(--primary-color);
+    transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.widget-card:hover .widget-icon-wrapper {
+    transform: scale(1.1) rotate(-5deg);
+    background: rgba(13, 110, 253, 0.15);
+    box-shadow: 0 0 30px var(--primary-glow);
+}
+
+.widget-card:hover .widget-icon-wrapper svg {
+    transform: scale(1.15);
+    filter: drop-shadow(0 0 12px var(--primary-glow));
+}
+
+.widget-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    position: relative;
+    transition: all 0.4s ease;
+}
+
+.widget-title::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--primary-color), #0dcaf0);
+    transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transform: translateX(-50%);
+    border-radius: 2px;
+}
+
+.widget-card:hover .widget-title {
+    color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+.widget-card:hover .widget-title::after {
+    width: 80%;
+}
+
+.widget-description {
+    color: #6c757d;
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+    transition: all 0.4s ease;
+}
+
+.widget-card:hover .widget-description {
+    color: #495057;
+    transform: translateY(-1px);
+}
+
+.widget-arrow {
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: all 0.4s ease;
+}
+
+.widget-card:hover .widget-arrow {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.widget-arrow svg {
+    width: 20px;
+    height: 20px;
+    color: var(--primary-color);
+}
+
+/* ==========================================================================
+   Stat Cards
+   ========================================================================== */
+.stat-card {
+    min-height: 220px;
+}
+
+.stat-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1), 0 0 30px var(--primary-glow);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.stat-content {
+    position: relative;
+    z-index: 3;
+    padding: 2rem 1.5rem;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.stat-icon-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.stat-icon-circle svg {
+    width: 28px;
+    height: 28px;
+    stroke-width: 2;
+    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.stat-card:hover .stat-icon-circle {
+    transform: scale(1.1) rotate(360deg);
+}
+
+.stat-icon-primary {
+    background: rgba(13, 110, 253, 0.1);
+}
+.stat-icon-primary svg { color: var(--primary-color); }
+
+.stat-icon-success {
+    background: rgba(25, 135, 84, 0.1);
+}
+.stat-icon-success svg { color: var(--success-color); }
+
+.stat-icon-info {
+    background: rgba(13, 202, 240, 0.1);
+}
+.stat-icon-info svg { color: var(--info-color); }
+
+.stat-icon-warning {
+    background: rgba(255, 193, 7, 0.1);
+}
+.stat-icon-warning svg { color: var(--warning-color); }
+
+.stat-card:hover .stat-icon-primary {
+    box-shadow: 0 0 25px var(--primary-glow);
+    background: rgba(13, 110, 253, 0.15);
+}
+
+.stat-card:hover .stat-icon-success {
+    box-shadow: 0 0 25px var(--success-glow);
+    background: rgba(25, 135, 84, 0.15);
+}
+
+.stat-card:hover .stat-icon-info {
+    box-shadow: 0 0 25px var(--info-glow);
+    background: rgba(13, 202, 240, 0.15);
+}
+
+.stat-card:hover .stat-icon-warning {
+    box-shadow: 0 0 25px var(--warning-glow);
+    background: rgba(255, 193, 7, 0.15);
+}
+
+.stat-info {
+    text-align: center;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 0.5rem;
+    transition: all 0.4s ease;
+}
+
+.stat-card:hover .stat-label {
+    transform: translateY(-2px);
+}
+
+.stat-card:hover .stat-icon-primary ~ .stat-info .stat-label { color: var(--primary-color); }
+.stat-card:hover .stat-icon-success ~ .stat-info .stat-label { color: var(--success-color); }
+.stat-card:hover .stat-icon-info ~ .stat-info .stat-label { color: var(--info-color); }
+.stat-card:hover .stat-icon-warning ~ .stat-info .stat-label { color: var(--warning-color); }
+
+.stat-value-wrapper {
+    margin: 0.5rem 0;
+}
+
+.stat-value {
+    font-size: 2.8rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--primary-color), #0a58ca);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    line-height: 1.1;
+}
+
+.stat-card:hover .stat-value {
+    transform: scale(1.08);
+    filter: drop-shadow(0 0 15px var(--primary-glow));
+}
+
+.stat-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background: rgba(13, 110, 253, 0.08);
+    border-radius: 20px;
+    font-size: 0.75rem;
+    color: #6c757d;
+    transition: all 0.4s ease;
+}
+
+.stat-card:hover .stat-badge {
+    background: rgba(13, 110, 253, 0.12);
+    color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+/* Warning Card */
+.stat-card-warning:hover {
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1), 0 0 30px var(--warning-glow);
+    border-color: rgba(255, 193, 7, 0.4);
+}
+
+.stat-card-warning .stat-value {
+    background: linear-gradient(135deg, #ffc107, #ff9800);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.stat-card-warning:hover .stat-value {
+    filter: drop-shadow(0 0 15px var(--warning-glow));
+}
+
+/* ==========================================================================
+   Table Card
+   ========================================================================== */
+.table-card {
+    padding: 1.5rem;
+}
+
+.glass-table {
+    width: 100%;
+}
+
+.glass-table thead {
+    background: rgba(13, 110, 253, 0.05);
+}
+
+.glass-table th {
+    border-bottom: 2px solid rgba(13, 110, 253, 0.15);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.8rem;
+    padding: 1rem 1.5rem;
+    color: #6c757d;
+}
+
+.glass-table td {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    vertical-align: middle;
+}
+
+.table-row {
+    opacity: 0;
+    animation: rowSlideIn 0.5s ease forwards;
+    transition: all 0.3s ease;
+}
+
+@keyframes rowSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
     }
-    100% {
-        background: linear-gradient(360deg, 
-            transparent 30%, 
-            var(--primary-color) 50%, 
-            transparent 70%
-        );
+    to {
+        opacity: 1;
+        transform: translateX(0);
     }
 }
 
-/* Animation de pulsation pour le highlight */
+.glass-table tbody tr:hover {
+    background: rgba(13, 110, 253, 0.03);
+    transform: scale(1.01);
+}
+
+.establishment-icon {
+    width: 35px;
+    height: 35px;
+    border-radius: 8px;
+    background: rgba(13, 110, 253, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.establishment-icon svg {
+    width: 18px;
+    height: 18px;
+    color: var(--primary-color);
+}
+
+.progress-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.progress {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    transition: width 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    border-radius: 10px;
+    background: linear-gradient(90deg, var(--primary-color), #0dcaf0);
+}
+
+.progress-text {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #6c757d;
+    min-width: 35px;
+}
+
+/* ==========================================================================
+   Animations
+   ========================================================================== */
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .glass-card.is-pulsing {
     animation: cardPulse 1s ease !important;
 }
 
 @keyframes cardPulse {
-    0% {
-        transform: scale(1);
-        box-shadow: var(--glass-shadow);
-    }
-    30% {
-        transform: scale(1.06);
-        box-shadow: 0 0 50px var(--primary-glow);
-    }
-    60% {
-        transform: scale(0.97);
-    }
-    100% {
-        transform: scale(1);
-        box-shadow: var(--glass-shadow);
-    }
+    0% { transform: scale(1); }
+    30% { transform: scale(1.06); box-shadow: 0 0 50px var(--primary-glow); }
+    60% { transform: scale(0.97); }
+    100% { transform: scale(1); }
 }
 
-/* États désactivés */
+/* ==========================================================================
+   Shortcut Links
+   ========================================================================== */
+.shortcut-link {
+    text-decoration: none !important;
+    display: block;
+    transition: all 0.3s ease;
+}
+
 .shortcut-link.disabled {
     opacity: 0.6;
     cursor: not-allowed;
     pointer-events: none;
 }
 
-.shortcut-link.disabled .glass-card {
+.shortcut-link.disabled .widget-card {
     filter: grayscale(0.5);
 }
 
-/* Adaptations mobiles */
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+@media (max-width: 992px) {
+    .widget-card {
+        min-height: 180px;
+    }
+    
+    .stat-card {
+        min-height: 200px;
+    }
+    
+    .stat-value {
+        font-size: 2.2rem;
+    }
+}
+
 @media (max-width: 768px) {
     .glass-card {
         border-radius: 16px;
     }
     
-    .glass-card .stat-icon svg {
-        width: 40px;
-        height: 40px;
+    .widget-card {
+        min-height: 160px;
     }
     
-    .glass-card:hover {
-        transform: translateY(-8px) scale(1.02);
+    .stat-card {
+        min-height: 180px;
+    }
+    
+    .widget-icon-wrapper {
+        width: 55px;
+        height: 55px;
+    }
+    
+    .widget-icon-wrapper svg {
+        width: 28px;
+        height: 28px;
+    }
+    
+    .stat-icon-circle {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .stat-icon-circle svg {
+        width: 24px;
+        height: 24px;
+    }
+    
+    .stat-value {
+        font-size: 2rem;
     }
     
     .glass-shine {
-        display: none; /* Désactiver l'effet de brillance sur mobile pour les performances */
+        display: none;
+    }
+    
+    .glass-card:hover {
+        transform: translateY(-6px) scale(1.01);
     }
 }
 
 @media (max-width: 576px) {
-    .glass-card {
-        border-radius: 12px;
+    .widget-card {
+        min-height: 140px;
     }
     
-    .glass-card .stat-icon svg {
-        width: 32px;
-        height: 32px;
+    .stat-card {
+        min-height: 160px;
+    }
+    
+    .card-content {
+        padding: 1.5rem 1rem;
+    }
+    
+    .stat-content {
+        padding: 1.5rem 1rem;
+    }
+    
+    .widget-icon-wrapper {
+        width: 48px;
+        height: 48px;
+    }
+    
+    .widget-icon-wrapper svg {
+        width: 24px;
+        height: 24px;
+    }
+    
+    .stat-icon-circle {
+        width: 42px;
+        height: 42px;
+    }
+    
+    .stat-icon-circle svg {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .stat-value {
+        font-size: 1.8rem;
+    }
+    
+    .widget-title {
+        font-size: 1rem;
+    }
+    
+    .stat-label {
+        font-size: 0.8rem;
     }
 }
 </style>
@@ -487,78 +1093,213 @@
         }
 
         // ==========================================================================
-        // 1. Animation d'entrée échelonnée avec data-delay
+        // Animation d'entrée échelonnée
         // ==========================================================================
-        var glassCards = document.querySelectorAll('.glass-card');
-        
-        glassCards.forEach(function(card) {
-            var delay = parseInt(card.getAttribute('data-delay')) || 0;
+        function initEntranceAnimations() {
+            var allCards = document.querySelectorAll('.glass-card');
             
-            setTimeout(function() {
-                card.classList.add('animate-in');
-            }, delay);
-        });
-
-        // ==========================================================================
-        // 2. Effet de brillance qui suit la souris
-        // ==========================================================================
-        glassCards.forEach(function(card) {
-            card.addEventListener('mousemove', function(e) {
-                var rect = card.getBoundingClientRect();
-                var x = ((e.clientX - rect.left) / rect.width) * 100;
-                var y = ((e.clientY - rect.top) / rect.height) * 100;
+            allCards.forEach(function(card) {
+                var delay = parseInt(card.getAttribute('data-delay')) || 0;
                 
-                card.style.setProperty('--mouse-x', x + '%');
-                card.style.setProperty('--mouse-y', y + '%');
+                setTimeout(function() {
+                    card.classList.add('animate-in');
+                }, delay);
             });
-            
-            // Réinitialiser la position quand la souris quitte la carte
-            card.addEventListener('mouseleave', function() {
-                card.style.setProperty('--mouse-x', '50%');
-                card.style.setProperty('--mouse-y', '50%');
-            });
-        });
 
-        // ==========================================================================
-        // 3. Animation de highlight via Socket.io
-        // ==========================================================================
-        if (typeof io !== 'undefined') {
-            var socket = io();
-            
-            socket.on('shortcutHighlight', function(data) {
-                if (data.shortcutKey) {
-                    var shortcut = document.querySelector('.shortcut-link[data-shortcut-key="' + data.shortcutKey + '"]');
-                    if (shortcut) {
-                        var card = shortcut.querySelector('.glass-card');
-                        if (card) {
-                            // Retirer la classe si elle existe déjà
-                            card.classList.remove('is-pulsing');
-                            
-                            // Force un reflow pour réinitialiser l'animation
-                            void card.offsetWidth;
-                            
-                            // Ajouter la classe d'animation
-                            card.classList.add('is-pulsing');
-                            
-                            // Nettoyer après l'animation
-                            setTimeout(function() { 
-                                card.classList.remove('is-pulsing'); 
-                            }, 1200);
-                        }
-                    }
-                }
+            // Animation des lignes du tableau
+            var tableRows = document.querySelectorAll('.table-row');
+            tableRows.forEach(function(row) {
+                var delay = parseInt(row.getAttribute('data-delay')) || 0;
+                row.style.animationDelay = delay + 'ms';
             });
         }
 
         // ==========================================================================
-        // 4. Gestion des liens désactivés
+        // Effet de brillance qui suit la souris
         // ==========================================================================
-        var disabledLinks = document.querySelectorAll('.shortcut-link.disabled');
-        disabledLinks.forEach(function(link) {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                return false;
+        function initShineEffect() {
+            if (window.innerWidth <= 768) return;
+            
+            var allCards = document.querySelectorAll('.glass-card');
+            
+            allCards.forEach(function(card) {
+                card.addEventListener('mousemove', function(e) {
+                    var rect = card.getBoundingClientRect();
+                    var x = ((e.clientX - rect.left) / rect.width) * 100;
+                    var y = ((e.clientY - rect.top) / rect.height) * 100;
+                    
+                    card.style.setProperty('--mouse-x', x + '%');
+                    card.style.setProperty('--mouse-y', y + '%');
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    card.style.setProperty('--mouse-x', '50%');
+                    card.style.setProperty('--mouse-y', '50%');
+                });
             });
+        }
+
+        // ==========================================================================
+        // Animation des compteurs
+        // ==========================================================================
+        function animateCounter(element) {
+            var target = parseInt(element.getAttribute('data-target')) || 0;
+            var duration = 1500;
+            var startTime = null;
+            
+            function update(timestamp) {
+                if (!startTime) startTime = timestamp;
+                var elapsed = timestamp - startTime;
+                var progress = Math.min(elapsed / duration, 1);
+                
+                // Fonction d'easing easeOutExpo
+                var eased = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+                
+                var current = Math.floor(eased * target);
+                element.textContent = current;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(update);
+                } else {
+                    element.textContent = target;
+                }
+            }
+            
+            requestAnimationFrame(update);
+        }
+
+        function initCounters() {
+            var counterElements = document.querySelectorAll('.stat-value[data-target]');
+            
+            if ('IntersectionObserver' in window) {
+                var observer = new IntersectionObserver(function(entries) {
+                    entries.forEach(function(entry) {
+                        if (entry.isIntersecting) {
+                            animateCounter(entry.target);
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, { 
+                    threshold: 0.3,
+                    rootMargin: '0px 0px -50px 0px'
+                });
+
+                counterElements.forEach(function(el) {
+                    observer.observe(el);
+                });
+            } else {
+                // Fallback pour les navigateurs sans IntersectionObserver
+                setTimeout(function() {
+                    counterElements.forEach(function(el) {
+                        animateCounter(el);
+                    });
+                }, 800);
+            }
+        }
+
+        // ==========================================================================
+        // Animation des barres de progression
+        // ==========================================================================
+        function initProgressBars() {
+            var progressBars = document.querySelectorAll('.progress-animated');
+            
+            if ('IntersectionObserver' in window) {
+                var observer = new IntersectionObserver(function(entries) {
+                    entries.forEach(function(entry) {
+                        if (entry.isIntersecting) {
+                            var bar = entry.target;
+                            var width = bar.getAttribute('data-width') || '0%';
+                            
+                            setTimeout(function() {
+                                bar.style.width = width;
+                            }, 300);
+                            
+                            observer.unobserve(bar);
+                        }
+                    });
+                }, { threshold: 0.5 });
+
+                progressBars.forEach(function(bar) {
+                    observer.observe(bar);
+                });
+            } else {
+                progressBars.forEach(function(bar) {
+                    var width = bar.getAttribute('data-width') || '0%';
+                    bar.style.width = width;
+                });
+            }
+        }
+
+        // ==========================================================================
+        // Socket.io pour les notifications
+        // ==========================================================================
+        function initSocketIO() {
+            if (typeof io === 'undefined') return;
+            
+            try {
+                var socket = io();
+                
+                socket.on('shortcutHighlight', function(data) {
+                    if (data.shortcutKey) {
+                        var selector = '.shortcut-link[data-shortcut-key="' + data.shortcutKey + '"]';
+                        var shortcut = document.querySelector(selector);
+                        
+                        if (shortcut) {
+                            var card = shortcut.querySelector('.glass-card');
+                            if (card) {
+                                card.classList.remove('is-pulsing');
+                                void card.offsetWidth;
+                                card.classList.add('is-pulsing');
+                                
+                                // Scroll vers la carte
+                                card.scrollIntoView({ 
+                                    behavior: 'smooth', 
+                                    block: 'center' 
+                                });
+                                
+                                setTimeout(function() { 
+                                    card.classList.remove('is-pulsing'); 
+                                }, 1200);
+                            }
+                        }
+                    }
+                });
+            } catch(e) {
+                console.log('Socket.io non disponible');
+            }
+        }
+
+        // ==========================================================================
+        // Gestion des liens désactivés
+        // ==========================================================================
+        function initDisabledLinks() {
+            var disabledLinks = document.querySelectorAll('.shortcut-link.disabled');
+            disabledLinks.forEach(function(link) {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                });
+            });
+        }
+
+        // ==========================================================================
+        // Initialisation
+        // ==========================================================================
+        initEntranceAnimations();
+        initShineEffect();
+        initCounters();
+        initProgressBars();
+        initSocketIO();
+        initDisabledLinks();
+        
+        // Réinitialiser l'effet de brillance au redimensionnement
+        var resizeTimeout;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(function() {
+                initShineEffect();
+            }, 250);
         });
     });
 </script>
