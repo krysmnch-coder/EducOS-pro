@@ -1,185 +1,242 @@
-const db = require('./db');
-
-// Créer ou récupérer une conversation
-async function getOrCreateConversation(user1Id, user2Id, trx = db) {
-  // Assure que les IDs sont toujours dans le même ordre pour éviter les doublons
-  const u1 = Math.min(Number(user1Id), Number(user2Id));
-  const u2 = Math.max(Number(user1Id), Number(user2Id));
-
-  const conversation = await trx('conversations')
-    .where({ user1_id: u1, user2_id: u2 })
-    .first('id');
-
-  if (conversation) {
-    return conversation.id;
-  }
-
-  const result = await trx('conversations').insert({
-    user1_id: u1,
-    user2_id: u2
-  }).returning('id');
-
-  if (!result || result.length === 0) {
-    throw new Error("La création de la conversation a échoué, aucun ID n'a été retourné.");
-  }
-  const [newIdObj] = result;
-
-  return newIdObj.id || newIdObj;
-}
-
-// Envoyer un message
-async function sendMessage(senderId, receiverId, message, trx = db) {
-  // La transaction est gérée par l'appelant (le gestionnaire de socket dans index.js)
-  const conversationId = await getOrCreateConversation(senderId, receiverId, trx);
-
-  const [messageIdObj] = await trx('chat_messages').insert({
-    conversation_id: conversationId,
-    sender_id: senderId,
-    message: message
-  }).returning('id');
-
-  const messageId = messageIdObj.id || messageIdObj;
-
-  return {
-    id: messageId,
-    conversation_id: conversationId,
-    sender_id: senderId,
-    message: message,
-    created_at: new Date().toISOString()
-  };
-}
-
-// Récupérer les messages d'une conversation
-async function getMessages(user1Id, user2Id, limit = 50) {
-  const u1 = Math.min(user1Id, user2Id);
-  const u2 = Math.max(user1Id, user2Id);
-
-  // Étape 1: Trouver l'ID de la conversation de manière beaucoup plus efficace.
-  const conversation = await db('conversations')
-    .where({ user1_id: u1, user2_id: u2 })
-    .first('id');
-
-  // S'il n'y a pas de conversation (donc pas de messages), on retourne un tableau vide.
-  if (!conversation) {
-    return [];
-  }
-
-  // Étape 2: Si la conversation existe, récupérer les messages associés.
-  return db('chat_messages as m')
-    .select('m.*', 'sender.name as sender_name', 'sender.avatar_url as sender_avatar')
-    .join('users as sender', 'm.sender_id', 'sender.id')
-    .where('m.conversation_id', conversation.id)
-    .orderBy('m.created_at', 'asc')
-    .limit(limit);
-}
-
-// Récupérer les conversations d'un utilisateur
-async function getUserConversations(userId) {
-  // Sous-requête pour obtenir le dernier message de chaque conversation en utilisant une fonction de fenêtre.
-  // C'est beaucoup plus performant que des sous-requêtes corrélées.
-  const latestMessageSubquery = db('chat_messages as m')
-    .select(
-      'm.conversation_id',
-      'm.message as last_message_text',
-      'm.created_at as last_activity',
-      db.raw('ROW_NUMBER() OVER(PARTITION BY m.conversation_id ORDER BY m.created_at DESC) as rn')
-    )
-    .as('latest_msg');
-
-  // Sous-requête pour compter les messages non lus par conversation.
-  const unreadCountsSubquery = db('chat_messages')
-    .select('conversation_id')
-    .count('* as unread_count')
-    .where('is_read', 0)
-    .andWhere('sender_id', '!=', userId)
-    .groupBy('conversation_id')
-    .as('unread');
-
-  // Requête principale qui assemble les informations.
-  return db('conversations as c')
-    .join('users as u1', 'c.user1_id', 'u1.id')
-    .join('users as u2', 'c.user2_id', 'u2.id')
-    // Jointure avec le dernier message (on ne garde que la ligne classée n°1).
-    .leftJoin(latestMessageSubquery, function() {
-      this.on('c.id', '=', 'latest_msg.conversation_id').andOn('latest_msg.rn', '=', 1);
-    })
-    // Jointure avec les comptes de messages non lus.
-    .leftJoin(unreadCountsSubquery, 'c.id', 'unread.conversation_id')
-    .select(
-      'c.id',
-      'c.user1_id',
-      'c.user2_id',
-      'u1.name as user1_name', 'u1.avatar_url as user1_avatar',
-      'u2.name as user2_name', 'u2.avatar_url as user2_avatar',
-      'latest_msg.last_message_text',
-      'latest_msg.last_activity',
-      // Utilise COALESCE pour s'assurer que le compte est 0 si `unread` est null.
-      db.raw('COALESCE(unread.unread_count, 0) as unread_count')
-    )
-    .where(function() { this.where('c.user1_id', userId).orWhere('c.user2_id', userId); })
-    // Le tri par 'last_activity' avec 'nulls last' est crucial. Il garantit que les
-    // conversations sans message (qui sont importantes) apparaissent à la fin de la liste,
-    // sans être cachées, tout en triant les autres par date.
-    .orderBy('last_activity', 'desc', 'last');
-}
-
-// Marquer les messages comme lus
-function markMessagesAsRead(conversationId, userId) {
-  return db('chat_messages')
-    .where('conversation_id', conversationId)
-    .andWhere('sender_id', '!=', userId)
-    .andWhere('is_read', 0)
-    .update({ is_read: 1 });
-}
-
-// Récupérer le nombre de messages non lus
-async function getUnreadCount(userId) {
-  // Cette version utilise une jointure, ce qui est souvent plus performant
-  // qu'une sous-requête avec WHERE IN, surtout avec les nouveaux index.
-  const result = await db('chat_messages as m')
-    .join('conversations as c', 'm.conversation_id', 'c.id')
-    .where(function() {
-      this.where('c.user1_id', userId).orWhere('c.user2_id', userId);
-    })
-    .andWhere('m.sender_id', '!=', userId)
-    .andWhere('m.is_read', 0)
-    .count('m.id as count')
-    .first();
-  return result ? Number(result.count) : 0;
-}
-
-// Récupérer les utilisateurs pour le chat (sauf soi-même)
-function getChatUsers(currentUserId) {
-  return db('users')
-    .select('id', 'name', 'email', 'role', 'avatar_url')
-    .whereNot('id', currentUserId)
-    .orderBy('name', 'asc');
-}
+const db = require('../config/database'); // Adaptez selon votre configuration de base de données
 
 /**
- * Récupère tous les utilisateurs d'un établissement avec qui l'utilisateur actuel peut discuter.
- * @param {number} currentUserId - L'ID de l'utilisateur qui fait la requête.
- * @param {number} establishmentId - L'ID de l'établissement.
- * @returns {Promise<Array>}
+ * Récupère les utilisateurs avec qui l'utilisateur courant peut chatter
+ * (Pour SUPER_ADMIN - tous les utilisateurs sauf lui-même)
  */
-async function getChatUsersByEstablishment(currentUserId, establishmentId) {
-  return db('users')
-    .select('id', 'name', 'role', 'avatar_url')
-    .where({
-      establishment_id: establishmentId,
-      approved: 1 // On ne peut discuter qu'avec les utilisateurs approuvés
-    })
-    .whereNot('id', currentUserId) // Exclut l'utilisateur actuel de la liste
-    .orderBy('name', 'asc');
-}
+const getChatUsers = async (currentUserId) => {
+    try {
+        const users = await db.query(
+            `SELECT id, name, avatar_url, establishment_id 
+             FROM users 
+             WHERE id != ? 
+             ORDER BY name ASC`,
+            [currentUserId]
+        );
+        return users || [];
+    } catch (error) {
+        console.error('❌ Erreur getChatUsers:', error);
+        return [];
+    }
+};
+
+/**
+ * Récupère les utilisateurs du même établissement
+ */
+const getChatUsersByEstablishment = async (currentUserId, establishmentId) => {
+    try {
+        const users = await db.query(
+            `SELECT id, name, avatar_url, establishment_id 
+             FROM users 
+             WHERE id != ? AND establishment_id = ? 
+             ORDER BY name ASC`,
+            [currentUserId, establishmentId]
+        );
+        return users || [];
+    } catch (error) {
+        console.error('❌ Erreur getChatUsersByEstablishment:', error);
+        return [];
+    }
+};
+
+/**
+ * Récupère la liste des conversations d'un utilisateur
+ */
+const getUserConversations = async (userId) => {
+    try {
+        console.log('🔍 getUserConversations pour userId:', userId);
+        
+        const conversations = await db.query(
+            `SELECT 
+                c.id as conversation_id,
+                c.user1_id,
+                c.user2_id,
+                u1.name as user1_name,
+                u1.avatar_url as user1_avatar,
+                u2.name as user2_name,
+                u2.avatar_url as user2_avatar,
+                (SELECT content FROM messages WHERE conversation_id = c.id ORDER BY created_at DESC LIMIT 1) as last_message_text,
+                (SELECT created_at FROM messages WHERE conversation_id = c.id ORDER BY created_at DESC LIMIT 1) as last_message_time,
+                (SELECT COUNT(*) FROM messages WHERE conversation_id = c.id AND sender_id != ? AND is_read = 0) as unread_count
+             FROM conversations c
+             LEFT JOIN users u1 ON c.user1_id = u1.id
+             LEFT JOIN users u2 ON c.user2_id = u2.id
+             WHERE c.user1_id = ? OR c.user2_id = ?
+             ORDER BY last_message_time DESC`,
+            [userId, userId, userId]
+        );
+
+        console.log('✅ Conversations trouvées:', conversations?.length || 0);
+        return conversations || [];
+
+    } catch (error) {
+        console.error('❌ Erreur getUserConversations:', error);
+        return [];
+    }
+};
+
+/**
+ * Crée une nouvelle conversation ou retourne l'ID de la conversation existante
+ */
+const getOrCreateConversation = async (userId1, userId2) => {
+    try {
+        console.log('🔍 getOrCreateConversation:', userId1, userId2);
+        
+        // Vérifier si la conversation existe déjà
+        let conversation = await db.query(
+            `SELECT id FROM conversations 
+             WHERE (user1_id = ? AND user2_id = ?) 
+                OR (user1_id = ? AND user2_id = ?)`,
+            [userId1, userId2, userId2, userId1]
+        );
+
+        if (conversation && conversation.length > 0) {
+            console.log('✅ Conversation existante, ID:', conversation[0].id);
+            return conversation[0].id;
+        }
+
+        // Créer une nouvelle conversation
+        console.log('🆕 Création nouvelle conversation...');
+        const result = await db.query(
+            `INSERT INTO conversations (user1_id, user2_id, created_at) 
+             VALUES (?, ?, NOW())`,
+            [Math.min(userId1, userId2), Math.max(userId1, userId2)]
+        );
+
+        console.log('✅ Nouvelle conversation créée, ID:', result.insertId);
+        return result.insertId;
+
+    } catch (error) {
+        console.error('❌ Erreur getOrCreateConversation:', error);
+        throw error;
+    }
+};
+
+/**
+ * Récupère les messages entre deux utilisateurs
+ */
+const getMessages = async (userId1, userId2) => {
+    try {
+        console.log('🔍 getMessages entre', userId1, 'et', userId2);
+        
+        // Trouver la conversation
+        const conversation = await db.query(
+            `SELECT id FROM conversations 
+             WHERE (user1_id = ? AND user2_id = ?) 
+                OR (user1_id = ? AND user2_id = ?)`,
+            [userId1, userId2, userId2, userId1]
+        );
+
+        if (!conversation || conversation.length === 0) {
+            console.log('⚠️ Aucune conversation trouvée');
+            return [];
+        }
+
+        const conversationId = conversation[0].id;
+        console.log('💬 Conversation ID:', conversationId);
+
+        // Récupérer les messages
+        const messages = await db.query(
+            `SELECT 
+                m.id,
+                m.sender_id,
+                m.content,
+                m.message,
+                m.created_at,
+                m.conversation_id,
+                m.is_read,
+                u.name as sender_name,
+                u.avatar_url as sender_avatar
+             FROM messages m
+             LEFT JOIN users u ON m.sender_id = u.id
+             WHERE m.conversation_id = ?
+             ORDER BY m.created_at ASC`,
+            [conversationId]
+        );
+
+        console.log('✅ Messages trouvés:', messages?.length || 0);
+        return messages || [];
+
+    } catch (error) {
+        console.error('❌ Erreur getMessages:', error);
+        return [];
+    }
+};
+
+/**
+ * Marque les messages d'une conversation comme lus
+ */
+const markMessagesAsRead = async (conversationId, userId) => {
+    try {
+        console.log('📖 Marquage messages lus - Conv:', conversationId, 'User:', userId);
+        
+        await db.query(
+            `UPDATE messages 
+             SET is_read = 1 
+             WHERE conversation_id = ? 
+             AND sender_id != ? 
+             AND is_read = 0`,
+            [conversationId, userId]
+        );
+
+        console.log('✅ Messages marqués comme lus');
+    } catch (error) {
+        console.error('❌ Erreur markMessagesAsRead:', error);
+    }
+};
+
+/**
+ * Récupère le nombre total de messages non lus pour un utilisateur
+ */
+const getUnreadCount = async (userId) => {
+    try {
+        const result = await db.query(
+            `SELECT COUNT(*) as count 
+             FROM messages m
+             JOIN conversations c ON m.conversation_id = c.id
+             WHERE (c.user1_id = ? OR c.user2_id = ?)
+             AND m.sender_id != ?
+             AND m.is_read = 0`,
+            [userId, userId, userId]
+        );
+
+        const count = result[0]?.count || 0;
+        console.log('📊 Unread count pour', userId, ':', count);
+        return count;
+
+    } catch (error) {
+        console.error('❌ Erreur getUnreadCount:', error);
+        return 0;
+    }
+};
+
+/**
+ * Sauvegarde un nouveau message
+ */
+const saveMessage = async (conversationId, senderId, content) => {
+    try {
+        const result = await db.query(
+            `INSERT INTO messages (conversation_id, sender_id, content, message, created_at, is_read) 
+             VALUES (?, ?, ?, ?, NOW(), 0)`,
+            [conversationId, senderId, content, content]
+        );
+
+        console.log('✅ Message sauvegardé, ID:', result.insertId);
+        return result.insertId;
+
+    } catch (error) {
+        console.error('❌ Erreur saveMessage:', error);
+        throw error;
+    }
+};
 
 module.exports = {
-  getOrCreateConversation,
-  sendMessage,
-  getMessages,
-  getUserConversations,
-  markMessagesAsRead,
-  getUnreadCount,
-  getChatUsers,
-  getChatUsersByEstablishment
+    getChatUsers,
+    getChatUsersByEstablishment,
+    getUserConversations,
+    getOrCreateConversation,
+    getMessages,
+    markMessagesAsRead,
+    getUnreadCount,
+    saveMessage
 };
