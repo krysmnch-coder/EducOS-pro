@@ -1,9 +1,14 @@
 <%- include('partials/head') %>
 <%- include('partials/header') %>
 
- <%# --- Section de bienvenue --- %>
-        <div class="d-flex align-items-center mb-5">
-            <div class="rounded-circle me-4 d-flex align-items-center justify-content-center bg-primary text-white" style="width: 80px; height: 80px; font-size: 2.5rem; font-weight: 500; background-image: url('<%= user.avatar_url %>'); background-size: cover; background-position: center;">
+<div class="container page-shell py-4">
+    <div class="themed-container">
+
+        <%- include('partials/messages') %>
+
+        <%# --- Section de bienvenue --- %>
+        <div class="d-flex align-items-center mb-5 welcome-section">
+            <div class="rounded-circle me-4 d-flex align-items-center justify-content-center bg-primary text-white avatar-wrapper" style="width: 80px; height: 80px; font-size: 2.5rem; font-weight: 500; background-image: url('<%= user.avatar_url %>'); background-size: cover; background-position: center;">
                 <% if (!user.avatar_url) { %>
                     <%= user.name.charAt(0).toUpperCase() %>
                 <% } %>
@@ -20,7 +25,7 @@
 
         <%# --- Section de sélection de l'enfant pour les parents --- %>
         <% if (user.role === 'PARENT') { %>
-            <div class="child-selector-wrapper card mb-5">
+            <div class="child-selector-wrapper card mb-5 glass-card-selector">
                 <div class="card-body d-md-flex align-items-center justify-content-between">
                     <% if (typeof parentData !== 'undefined' && parentData.children && parentData.children.length > 0) { %>
                         <form action="/select-child" method="POST" class="d-flex align-items-center gap-3 flex-wrap">
@@ -42,34 +47,37 @@
 
         <%# --- Section des Raccourcis (Widgets) --- %>
         <% if (typeof widgets !== 'undefined' && widgets.length > 0) { %>
+            <h2 class="mb-4 section-title">
+                <i data-feather="grid" class="me-2" style="width: 24px; height: 24px;"></i>
+                Raccourcis de gestion
+            </h2>
             <div class="row g-4">
-                <% widgets.forEach(widget => { %>
+                <% widgets.forEach((widget, index) => { %>
                 <div class="col-xl-3 col-md-6 mb-4">
-                    <a href="<%= (user.role === 'PARENT' && (typeof parentData === 'undefined' || !parentData.selectedChild)) ? '#' : widget.link %>" class="text-decoration-none shortcut-link <%= (user.role === 'PARENT' && (typeof parentData === 'undefined' || !parentData.selectedChild)) ? 'disabled' : '' %>" data-shortcut-key="<%= widget.key %>">
-                    <div class="card dashboard-stat h-100">
-                        <div class="card-body text-center">
-                        <div class="stat-icon mb-3">
-                            <i data-feather="<%= widget.icon %>"></i>
+                    <a href="<%= (user.role === 'PARENT' && (typeof parentData === 'undefined' || !parentData.selectedChild)) ? '#' : widget.link %>" class="text-decoration-none shortcut-link <%= (user.role === 'PARENT' && (typeof parentData === 'undefined' || !parentData.selectedChild)) ? 'disabled' : '' %>" data-shortcut-key="<%= widget.key %>" data-delay="<%= index * 0.1 %>">
+                        <div class="card dashboard-stat h-100 glass-card">
+                            <div class="card-body text-center">
+                                <div class="stat-icon mb-3">
+                                    <i data-feather="<%= widget.icon %>"></i>
+                                </div>
+                                <h5 class="card-title mb-2"><%= widget.title %></h5>
+                                <p class="card-text text-muted small"><%= widget.description %></p>
+                            </div>
                         </div>
-                        <h5 class="card-title mb-2"><%= widget.title %></h5>
-                        <p class="card-text text-muted small"><%= widget.description %></p>
-                        </div>
-                    </div>
                     </a>
                 </div>
                 <% }); %>
             </div>
         <% } else { %>
-            <div class="text-center py-5">
-                <p class="text-muted">Aucun raccourci n'est configuré pour votre rôle pour le moment.</p>
+            <div class="text-center py-5 empty-state">
+                <i data-feather="grid" style="width: 48px; height: 48px; stroke-width: 1; opacity: 0.4;"></i>
+                <p class="text-muted mt-3">Aucun raccourci n'est configuré pour votre rôle pour le moment.</p>
             </div>
         <% } %>
-    </div>
-</div> 
 
         <%# --- Section des Statistiques avec Graphiques --- %>
         <% if (stats) { %>
-            <h2 class="mb-4 mt-5">
+            <h2 class="mb-4 mt-5 section-title">
                 <i data-feather="bar-chart-2" class="me-2" style="width: 24px; height: 24px;"></i>
                 Statistiques
             </h2>
@@ -116,7 +124,7 @@
                                     Comptes en attente
                                 </h5>
                                 <p class="display-4 fw-bold my-3 stat-number" id="adminPendingCount"><%= stats.pendingCount || 0 %></p>
-                                <a href="/admin" class="btn btn-sm btn-warning">Gérer</a>
+                                <a href="/admin" class="btn btn-sm btn-warning glass-btn-small">Gérer</a>
                             </div>
                         </div>
                     </div>
@@ -162,14 +170,14 @@
                                     Comptes en attente
                                 </h5>
                                 <p class="display-4 fw-bold my-3 stat-number" id="superAdminPendingCount"><%= stats.pendingCount || 0 %></p>
-                                <a href="/admin" class="btn btn-sm btn-warning">Gérer</a>
+                                <a href="/admin" class="btn btn-sm btn-warning glass-btn-small">Gérer</a>
                             </div>
                         </div>
                     </div>
 
                     <% if (stats.establishmentsWithCounts && stats.establishmentsWithCounts.length > 0) { %>
                         <div class="col-12">
-                            <h3 class="mb-4 mt-5">
+                            <h3 class="mb-4 mt-5 section-title">
                                 <i data-feather="briefcase" class="me-2" style="width: 20px; height: 20px;"></i>
                                 Utilisateurs par Établissement
                             </h3>
@@ -201,234 +209,9 @@
 
 <style>
 /* ==========================================================================
-   Admin Dashboard - Style Glassmorphism
+   Admin Dashboard - Style Glassmorphism avec Animations
    ========================================================================== */
 
-/* Glass Card pour les widgets */
-.glass-card {
-    background: rgba(255, 255, 255, 0.15) !important;
-    backdrop-filter: blur(12px) !important;
-    -webkit-backdrop-filter: blur(12px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    border-radius: 1rem !important;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08) !important;
-    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
-    position: relative !important;
-    overflow: hidden !important;
-    cursor: pointer !important;
-}
-
-[data-theme="dark"] .glass-card {
-    background: rgba(255, 255, 255, 0.05) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
-}
-
-.glass-card:hover {
-    transform: translateY(-10px) scale(1.02) !important;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15) !important;
-    border-color: rgba(255, 255, 255, 0.4) !important;
-}
-
-[data-theme="dark"] .glass-card:hover {
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5) !important;
-}
-
-.glass-card .stat-icon svg {
-    width: 48px !important;
-    height: 48px !important;
-    stroke-width: 1.5 !important;
-    color: var(--bs-primary, #0d6efd) !important;
-    transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
-}
-
-.glass-card:hover .stat-icon svg {
-    transform: scale(1.2) rotate(-5deg) !important;
-    filter: drop-shadow(0 0 20px rgba(13, 110, 253, 0.3)) !important;
-}
-
-.glass-card .card-title {
-    transition: all 0.4s ease !important;
-}
-
-.glass-card:hover .card-title {
-    color: var(--bs-primary, #0d6efd) !important;
-}
-
-/* Animation d'entrée des cartes */
-.glass-card {
-    animation: card-fade-in 0.6s ease forwards !important;
-    opacity: 0 !important;
-    transform: translateY(20px) !important;
-}
-
-@keyframes card-fade-in {
-    from {
-        opacity: 0;
-        transform: translateY(30px) scale(0.95);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-/* Glass Card pour les statistiques */
-.glass-stat-card {
-    background: rgba(255, 255, 255, 0.10) !important;
-    backdrop-filter: blur(8px) !important;
-    -webkit-backdrop-filter: blur(8px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.15) !important;
-    border-radius: 1rem !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06) !important;
-    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
-}
-
-[data-theme="dark"] .glass-stat-card {
-    background: rgba(255, 255, 255, 0.03) !important;
-    border: 1px solid rgba(255, 255, 255, 0.06) !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
-}
-
-.glass-stat-card:hover {
-    transform: translateY(-5px) !important;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.10) !important;
-}
-
-[data-theme="dark"] .glass-stat-card:hover {
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4) !important;
-}
-
-.stat-number {
-    color: var(--bs-primary, #0d6efd);
-}
-
-[data-theme="dark"] .stat-number {
-    color: #ffffff;
-}
-
-/* Tableau Glassmorphism */
-.glass-table-container {
-    background: rgba(255, 255, 255, 0.06) !important;
-    backdrop-filter: blur(8px) !important;
-    -webkit-backdrop-filter: blur(8px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.10) !important;
-    border-radius: 1rem !important;
-    padding: 0.5rem !important;
-    overflow: hidden !important;
-}
-
-[data-theme="dark"] .glass-table-container {
-    background: rgba(255, 255, 255, 0.02) !important;
-    border: 1px solid rgba(255, 255, 255, 0.04) !important;
-}
-
-.glass-table thead th {
-    background: rgba(13, 110, 253, 0.06) !important;
-    color: var(--text-color, #212529) !important;
-    font-weight: 600 !important;
-    border-bottom: 2px solid rgba(13, 110, 253, 0.08) !important;
-}
-
-[data-theme="dark"] .glass-table thead th {
-    background: rgba(255, 255, 255, 0.03) !important;
-    color: rgba(255, 255, 255, 0.8) !important;
-    border-bottom: 2px solid rgba(255, 255, 255, 0.04) !important;
-}
-
-.glass-row {
-    background: transparent !important;
-    transition: all 0.3s ease !important;
-}
-
-.glass-row:hover {
-    background: rgba(13, 110, 253, 0.03) !important;
-}
-
-[data-theme="dark"] .glass-row:hover {
-    background: rgba(255, 255, 255, 0.02) !important;
-}
-
-.glass-row td {
-    padding: 0.75rem !important;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.04) !important;
-}
-
-[data-theme="dark"] .glass-row td {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.03) !important;
-}
-
-/* Lien */
-.shortcut-link {
-    display: block !important;
-    text-decoration: none !important;
-}
-
-/* Adaptation mobile */
-@media (max-width: 768px) {
-    .glass-card .stat-icon svg {
-        width: 36px !important;
-        height: 36px !important;
-    }
-    
-    .glass-card {
-        border-radius: 0.75rem !important;
-    }
-    
-    .stat-number {
-        font-size: 2.5rem !important;
-    }
-}
-</style>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        if (typeof feather !== 'undefined') {
-            feather.replace();
-        }
-
-        // Ajout des délais d'animation pour chaque carte via data-delay
-        document.querySelectorAll('.glass-card').forEach(function(card) {
-            var parentLink = card.closest('.shortcut-link');
-            if (parentLink) {
-                var delay = parentLink.getAttribute('data-delay');
-                if (delay) {
-                    card.style.animationDelay = delay + 's';
-                }
-            }
-        });
-
-        // Effet de brillance au survol des cartes
-        document.querySelectorAll('.glass-card').forEach(function(card) {
-            card.addEventListener('mousemove', function(e) {
-                var rect = this.getBoundingClientRect();
-                var x = ((e.clientX - rect.left) / rect.width) * 100;
-                var y = ((e.clientY - rect.top) / rect.height) * 100;
-                this.style.setProperty('--mouse-x', x + '%');
-                this.style.setProperty('--mouse-y', y + '%');
-            });
-        });
-
-        // Animation des raccourcis
-        if (typeof io !== 'undefined') {
-            var socket = io();
-            socket.on('shortcutHighlight', function(data) {
-                if (data.shortcutKey) {
-                    var shortcut = document.querySelector('.shortcut-link[data-shortcut-key="' + data.shortcutKey + '"]');
-                    if (shortcut) {
-                        var card = shortcut.querySelector('.glass-card');
-                        if (card) {
-                            card.classList.add('is-pulsing');
-                            setTimeout(function() { 
-                                card.classList.remove('is-pulsing'); 
-                            }, 1200);
-                        }
-                    }
-                }
-            });
-        }
-    });
-</script>
 /* Animation de la section de bienvenue */
 .welcome-section {
     animation: welcome-fade 0.8s ease forwards !important;
@@ -461,6 +244,31 @@
     50% {
         box-shadow: 0 0 40px rgba(13, 110, 253, 0.25);
     }
+}
+
+/* Titre de section */
+.section-title {
+    color: var(--text-color, #212529);
+    font-weight: 700;
+    animation: title-slide 0.6s ease forwards !important;
+    opacity: 0;
+    transform: translateX(-10px);
+    animation-delay: 0.1s !important;
+}
+
+@keyframes title-slide {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+[data-theme="dark"] .section-title {
+    color: #ffffff;
 }
 
 /* Glass Card pour le sélecteur d'enfant */
@@ -656,10 +464,185 @@
     100% { transform: scale(1); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08); }
 }
 
-/* Effet de survol du lien */
+/* Glass Card pour les statistiques */
+.glass-stat-card {
+    background: rgba(255, 255, 255, 0.10) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 1rem !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06) !important;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+    animation: stat-fade-in 0.6s ease forwards !important;
+    opacity: 0 !important;
+    transform: translateY(20px) !important;
+}
+
+.glass-stat-card:nth-child(1) { animation-delay: 0.1s !important; }
+.glass-stat-card:nth-child(2) { animation-delay: 0.2s !important; }
+.glass-stat-card:nth-child(3) { animation-delay: 0.3s !important; }
+.glass-stat-card:nth-child(4) { animation-delay: 0.4s !important; }
+
+@keyframes stat-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+[data-theme="dark"] .glass-stat-card {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+.glass-stat-card:hover {
+    transform: translateY(-5px) !important;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.10) !important;
+}
+
+[data-theme="dark"] .glass-stat-card:hover {
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4) !important;
+}
+
+.stat-number {
+    color: var(--bs-primary, #0d6efd);
+}
+
+[data-theme="dark"] .stat-number {
+    color: #ffffff;
+}
+
+/* Petit bouton Glassmorphism */
+.glass-btn-small {
+    background: rgba(255, 193, 7, 0.15) !important;
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+    border: 1px solid rgba(255, 193, 7, 0.2) !important;
+    border-radius: 0.5rem !important;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+    color: #d4a800 !important;
+}
+
+.glass-btn-small:hover {
+    transform: translateY(-2px) scale(1.05) !important;
+    background: rgba(255, 193, 7, 0.25) !important;
+    box-shadow: 0 4px 15px rgba(255, 193, 7, 0.15) !important;
+}
+
+[data-theme="dark"] .glass-btn-small {
+    color: #ffd43b !important;
+    border-color: rgba(255, 193, 7, 0.15) !important;
+}
+
+[data-theme="dark"] .glass-btn-small:hover {
+    background: rgba(255, 193, 7, 0.2) !important;
+}
+
+/* Tableau Glassmorphism */
+.glass-table-container {
+    background: rgba(255, 255, 255, 0.06) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.10) !important;
+    border-radius: 1rem !important;
+    padding: 0.5rem !important;
+    overflow: hidden !important;
+    animation: table-fade-in 0.8s ease forwards !important;
+    opacity: 0 !important;
+    transform: translateY(20px) !important;
+    animation-delay: 0.5s !important;
+}
+
+@keyframes table-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+[data-theme="dark"] .glass-table-container {
+    background: rgba(255, 255, 255, 0.02) !important;
+    border: 1px solid rgba(255, 255, 255, 0.04) !important;
+}
+
+.glass-table thead th {
+    background: rgba(13, 110, 253, 0.06) !important;
+    color: var(--text-color, #212529) !important;
+    font-weight: 600 !important;
+    border-bottom: 2px solid rgba(13, 110, 253, 0.08) !important;
+    padding: 0.85rem 1rem !important;
+    text-transform: uppercase !important;
+    font-size: 0.75rem !important;
+    letter-spacing: 0.05em !important;
+}
+
+[data-theme="dark"] .glass-table thead th {
+    background: rgba(255, 255, 255, 0.03) !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.04) !important;
+}
+
+.glass-row {
+    background: transparent !important;
+    transition: all 0.3s ease !important;
+    animation: row-fade-in 0.4s ease forwards !important;
+    opacity: 0 !important;
+    transform: translateX(-10px) !important;
+}
+
+.glass-row:nth-child(1) { animation-delay: 0.55s !important; }
+.glass-row:nth-child(2) { animation-delay: 0.60s !important; }
+.glass-row:nth-child(3) { animation-delay: 0.65s !important; }
+.glass-row:nth-child(4) { animation-delay: 0.70s !important; }
+.glass-row:nth-child(5) { animation-delay: 0.75s !important; }
+.glass-row:nth-child(6) { animation-delay: 0.80s !important; }
+.glass-row:nth-child(7) { animation-delay: 0.85s !important; }
+.glass-row:nth-child(8) { animation-delay: 0.90s !important; }
+.glass-row:nth-child(9) { animation-delay: 0.95s !important; }
+.glass-row:nth-child(10) { animation-delay: 1.00s !important; }
+
+@keyframes row-fade-in {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.glass-row:hover {
+    background: rgba(13, 110, 253, 0.03) !important;
+    transform: scale(1.002) !important;
+}
+
+[data-theme="dark"] .glass-row:hover {
+    background: rgba(255, 255, 255, 0.02) !important;
+}
+
+.glass-row td {
+    padding: 0.75rem 1rem !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.04) !important;
+    vertical-align: middle !important;
+}
+
+[data-theme="dark"] .glass-row td {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03) !important;
+}
+
+/* Lien */
 .shortcut-link {
     display: block !important;
-    transition: all 0.3s ease !important;
     text-decoration: none !important;
 }
 
@@ -673,15 +656,33 @@
     filter: grayscale(0.5) !important;
 }
 
+/* État vide */
+.empty-state {
+    animation: empty-fade 0.8s ease forwards !important;
+    opacity: 0;
+    transform: scale(0.95);
+}
+
+@keyframes empty-fade {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
 /* Adaptation mobile */
 @media (max-width: 768px) {
-    .glass-card {
-        border-radius: 0.75rem !important;
-    }
-    
     .glass-card .stat-icon svg {
         width: 36px !important;
         height: 36px !important;
+    }
+    
+    .glass-card {
+        border-radius: 0.75rem !important;
     }
     
     .glass-card:hover {
@@ -689,6 +690,18 @@
     }
     
     .glass-card-selector {
+        border-radius: 0.75rem !important;
+    }
+    
+    .section-title {
+        font-size: 1.25rem;
+    }
+    
+    .stat-number {
+        font-size: 2.5rem !important;
+    }
+    
+    .glass-stat-card {
         border-radius: 0.75rem !important;
     }
 }
@@ -742,5 +755,6 @@
         }
     });
 </script>
+
 <%- include('partials/page-end-scripts') %>
 <%- include('partials/footer') %>
