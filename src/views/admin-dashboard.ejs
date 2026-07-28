@@ -8,131 +8,65 @@
 
         <%# --- Section de bienvenue --- %>
         <div class="d-flex align-items-center mb-5">
-            <div class="rounded-circle me-4 d-flex align-items-center justify-content-center bg-primary text-white" style="width: 80px; height: 80px; font-size: 2.5rem; font-weight: 500; background-image: url('<%= currentUser.avatar_url %>'); background-size: cover; background-position: center;">
-                <% if (!currentUser.avatar_url) { %>
-                    <%= currentUser.name.charAt(0).toUpperCase() %>
+            <div class="rounded-circle me-4 d-flex align-items-center justify-content-center bg-primary text-white" style="width: 80px; height: 80px; font-size: 2.5rem; font-weight: 500; background-image: url('<%= user.avatar_url %>'); background-size: cover; background-position: center;">
+                <% if (!user.avatar_url) { %>
+                    <%= user.name.charAt(0).toUpperCase() %>
                 <% } %>
             </div>
             <div>
-                <h1 class="h2 mb-0">Bonjour, <%= currentUser.name %> !</h1>
-                <p class="lead text-muted mb-0">Bienvenue sur votre tableau de bord d'administration.</p>
+                <h1 class="h2 mb-0">Bonjour, <%= user.name %> !</h1>
+                <% if (typeof parentData !== 'undefined' && parentData.selectedChild) { %>
+                    <p class="lead text-muted mb-0">Vous consultez le profil de : <strong><%= parentData.selectedChild.name %></strong>.</p>
+                <% } else { %>
+                    <p class="lead text-muted mb-0">Ravi de vous revoir. Voici vos raccourcis.</p>
+                <% } %>
             </div>
         </div>
+
+        <%# --- Section de sélection de l'enfant pour les parents --- %>
+        <% if (user.role === 'PARENT') { %>
+            <div class="child-selector-wrapper card mb-5">
+                <div class="card-body d-md-flex align-items-center justify-content-between">
+                    <% if (typeof parentData !== 'undefined' && parentData.children && parentData.children.length > 0) { %>
+                        <form action="/select-child" method="POST" class="d-flex align-items-center gap-3 flex-wrap">
+                            <label for="childSelector" class="form-label mb-0 fw-bold">Suivre un enfant :</label>
+                            <select name="childId" id="childSelector" class="form-select" style="min-width: 250px;" onchange="this.form.submit()">
+                                <% parentData.children.forEach(child => { %>
+                                    <option value="<%= child.id %>" <%= (parentData.selectedChild && parentData.selectedChild.id === child.id) ? 'selected' : '' %>>
+                                        <%= child.name %>
+                                    </option>
+                                <% }); %>
+                            </select>
+                        </form>
+                    <% } else { %>
+                        <p class="text-muted mb-0">Aucun enfant n'est actuellement lié à votre compte. Les enfants sont ajoutés lors de votre inscription.</p>
+                    <% } %>
+                </div>
+            </div>
+        <% } %>
 
         <%# --- Section des Raccourcis (Widgets) --- %>
-        <% 
-        // Définir des widgets par défaut pour l'administrateur
-        const adminWidgets = [
-            { key: 'students', icon: 'users', title: 'Gestion des Élèves', link: '/students', description: 'Gérer les élèves' },
-            { key: 'teachers', icon: 'user-check', title: 'Gestion des Professeurs', link: '/teachers', description: 'Gérer les professeurs' },
-            { key: 'classes', icon: 'grid', title: 'Gestion des Classes', link: '/classes', description: 'Gérer les classes' },
-            { key: 'admin', icon: 'settings', title: 'Paramètres', link: '/admin', description: 'Paramètres du système' }
-        ];
-        
-        // Définir des widgets par défaut pour le super admin
-        const superAdminWidgets = [
-            { key: 'establishments', icon: 'home', title: 'Établissements', link: '/establishments', description: 'Gérer les établissements' },
-            { key: 'admins', icon: 'user-cog', title: 'Admins', link: '/admin', description: 'Gérer les administrateurs' },
-            { key: 'users', icon: 'users', title: 'Utilisateurs', link: '/admin/users', description: 'Gérer les utilisateurs' },
-            { key: 'settings', icon: 'settings', title: 'Paramètres', link: '/admin/settings', description: 'Paramètres du système' }
-        ];
-        
-        // Choisir les widgets selon le rôle
-        let defaultWidgets = adminWidgets;
-        if (currentUser.role === 'SUPER_ADMIN' || currentUser.role === 'superadmin') {
-            defaultWidgets = superAdminWidgets;
-        }
-        
-        // Utiliser les widgets fournis ou les widgets par défaut
-        const displayWidgets = (typeof widgets !== 'undefined' && widgets && widgets.length > 0) ? widgets : defaultWidgets;
-        %>
-        
-        <h2 class="mb-4">Raccourcis de gestion</h2>
-        <div class="row">
-            <% displayWidgets.forEach((widget, index) => { %>
-            <div class="col-xl-3 col-md-6 mb-4">
-                <a href="<%= widget.link || '#' %>" class="text-decoration-none shortcut-link" data-shortcut-key="<%= widget.key || 'widget-' + index %>">
+        <% if (typeof widgets !== 'undefined' && widgets.length > 0) { %>
+            <div class="row g-4">
+                <% widgets.forEach(widget => { %>
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <a href="<%= (user.role === 'PARENT' && (typeof parentData === 'undefined' || !parentData.selectedChild)) ? '#' : widget.link %>" class="text-decoration-none shortcut-link <%= (user.role === 'PARENT' && (typeof parentData === 'undefined' || !parentData.selectedChild)) ? 'disabled' : '' %>" data-shortcut-key="<%= widget.key %>">
                     <div class="card dashboard-stat h-100 glass-card">
                         <div class="card-body text-center">
-                            <div class="stat-icon mb-3">
-                                <i data-feather="<%= widget.icon || 'box' %>"></i>
-                            </div>
-                            <h5 class="card-title mb-2"><%= widget.title || 'Widget' %></h5>
-                            <p class="card-text text-muted small"><%= widget.description || 'Description' %></p>
+                        <div class="stat-icon mb-3">
+                            <i data-feather="<%= widget.icon %>"></i>
+                        </div>
+                        <h5 class="card-title mb-2"><%= widget.title %></h5>
+                        <p class="card-text text-muted small"><%= widget.description %></p>
                         </div>
                     </div>
-                </a>
+                    </a>
+                </div>
+                <% }); %>
             </div>
-            <% }); %>
-        </div>
-
-        <%# --- Section des Statistiques avec Graphiques --- %>
-        <% if (stats) { %>
-            <h2 class="mb-4 mt-5">Statistiques</h2>
-            <div class="row">
-                <% if (currentUser.role === 'ADMINISTRATOR' || currentUser.role === 'administrateur') { %>
-                    <div class="col-md-6 col-lg-3 mb-4">
-                        <div class="card h-100"><div class="card-body text-center d-flex flex-column justify-content-center"><h5 class="card-title text-muted">Élèves</h5><p class="display-4 fw-bold my-2" id="adminStudentCount"><%= stats.studentCount || 0 %></p></div></div>
-                    </div>
-                    <div class="col-md-6 col-lg-3 mb-4">
-                        <div class="card h-100"><div class="card-body text-center d-flex flex-column justify-content-center"><h5 class="card-title text-muted">Professeurs</h5><p class="display-4 fw-bold my-2" id="adminProfessorCount"><%= stats.professorCount || 0 %></p></div></div>
-                    </div>
-                    <div class="col-md-6 col-lg-3 mb-4">
-                        <div class="card h-100"><div class="card-body text-center d-flex flex-column justify-content-center"><h5 class="card-title text-muted">Parents</h5><p class="display-4 fw-bold my-2" id="adminParentCount"><%= stats.parentCount || 0 %></p></div></div>
-                    </div>
-                    <div class="col-md-6 col-lg-3 mb-4">
-                        <div class="card h-100 text-center bg-warning bg-opacity-10 border-warning">
-                            <div class="card-body d-flex flex-column justify-content-center">
-                                <h5 class="card-title">Comptes en attente</h5>
-                                <p class="display-4 fw-bold my-3" id="adminPendingCount"><%= stats.pendingCount || 0 %></p>
-                                <a href="/admin" class="btn btn-sm btn-warning">Gérer</a>
-                            </div>
-                        </div>
-                    </div>
-                <% } else if (currentUser.role === 'SUPER_ADMIN' || currentUser.role === 'superadmin') { %>
-                    <div class="col-md-6 col-lg-3 mb-4">
-                        <div class="card h-100"><div class="card-body text-center d-flex flex-column justify-content-center"><h5 class="card-title text-muted">Utilisateurs (Total)</h5><p class="display-4 fw-bold my-2" id="superAdminTotalUsers"><%= stats.totalUserCount || 0 %></p></div></div>
-                    </div>
-                    <div class="col-md-6 col-lg-3 mb-4">
-                        <div class="card h-100"><div class="card-body text-center d-flex flex-column justify-content-center"><h5 class="card-title text-muted">Admins Scolaires</h5><p class="display-4 fw-bold my-2" id="superAdminAdminCount"><%= stats.adminCount || 0 %></p></div></div>
-                    </div>
-                    <div class="col-md-6 col-lg-3 mb-4">
-                        <div class="card h-100"><div class="card-body text-center d-flex flex-column justify-content-center"><h5 class="card-title text-muted">Établissements</h5><p class="display-4 fw-bold my-2" id="superAdminEstablishmentCount"><%= stats.establishmentCount || 0 %></p></div></div>
-                    </div>
-                    <div class="col-md-6 col-lg-3 mb-4">
-                        <div class="card h-100 text-center bg-warning bg-opacity-10 border-warning">
-                            <div class="card-body d-flex flex-column justify-content-center">
-                                <h5 class="card-title">Comptes en attente</h5>
-                                <p class="display-4 fw-bold my-3" id="superAdminPendingCount"><%= stats.pendingCount || 0 %></p>
-                                <a href="/admin" class="btn btn-sm btn-warning">Gérer</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <% if (stats.establishmentsWithCounts && stats.establishmentsWithCounts.length > 0) { %>
-                        <div class="col-12">
-                            <h3 class="mb-4 mt-5">Utilisateurs par Établissement</h3>
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Établissement</th>
-                                            <th class="text-end">Utilisateurs Approuvés</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <% stats.establishmentsWithCounts.forEach(est => { %>
-                                            <tr>
-                                                <td><%= est.name %></td>
-                                                <td class="text-end fw-bold" id="establishment-count-<%= est.id %>"><%= est.userCount || 0 %></td>
-                                            </tr>
-                                        <% }); %>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    <% } %>
-                <% } %>
+        <% } else { %>
+            <div class="text-center py-5">
+                <p class="text-muted">Aucun raccourci n'est configuré pour votre rôle pour le moment.</p>
             </div>
         <% } %>
     </div>
@@ -168,12 +102,31 @@
     opacity: 0 !important;
     transition: opacity 0.6s ease !important;
     pointer-events: none !important;
-    z-index: 0 !important;
 }
 
-.glass-card .card-body {
-    position: relative !important;
-    z-index: 1 !important;
+.glass-card::after {
+    content: '' !important;
+    position: absolute !important;
+    top: -2px !important;
+    left: -2px !important;
+    right: -2px !important;
+    bottom: -2px !important;
+    background: linear-gradient(135deg, rgba(13, 110, 253, 0.3), rgba(13, 202, 240, 0.3), rgba(13, 110, 253, 0.3)) !important;
+    background-size: 300% 300% !important;
+    border-radius: 1.05rem !important;
+    z-index: -1 !important;
+    opacity: 0 !important;
+    transition: opacity 0.6s ease !important;
+    animation: gradient-shift 4s ease-in-out infinite !important;
+}
+
+/* Effet de brillance au survol */
+.glass-card:hover::before {
+    opacity: 1 !important;
+}
+
+.glass-card:hover::after {
+    opacity: 1 !important;
 }
 
 /* Mode sombre - adaptation */
@@ -181,6 +134,10 @@
     background: rgba(255, 255, 255, 0.05) !important;
     border: 1px solid rgba(255, 255, 255, 0.08) !important;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+}
+
+[data-theme="dark"] .glass-card::after {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(100, 100, 255, 0.2), rgba(255, 255, 255, 0.2)) !important;
 }
 
 /* Animation de survol */
@@ -192,10 +149,6 @@
 
 [data-theme="dark"] .glass-card:hover {
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5) !important;
-}
-
-.glass-card:hover::before {
-    opacity: 1 !important;
 }
 
 /* Icône avec animation */
@@ -259,6 +212,60 @@
     width: 100% !important;
 }
 
+/* Texte avec effet */
+.glass-card .card-text {
+    transition: all 0.4s ease !important;
+}
+
+.glass-card:hover .card-text {
+    color: var(--text-color, #212529) !important;
+    opacity: 0.9 !important;
+}
+
+/* Animation de pulsation au clic (highlight) */
+.glass-card.is-pulsing {
+    animation: card-pulse 0.8s ease !important;
+}
+
+@keyframes card-pulse {
+    0% { transform: scale(1); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08); }
+    30% { transform: scale(1.05); box-shadow: 0 0 50px rgba(13, 110, 253, 0.3); }
+    60% { transform: scale(0.98); }
+    100% { transform: scale(1); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08); }
+}
+
+/* Animation de la bordure dégradée */
+@keyframes gradient-shift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Effet de brillance flottante */
+.glass-card .card-body {
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+/* Effet de particules lumineuses au survol */
+.glass-card::after {
+    content: '' !important;
+    position: absolute !important;
+    top: -50% !important;
+    left: -50% !important;
+    width: 200% !important;
+    height: 200% !important;
+    background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.1) 0%, transparent 50%) !important;
+    opacity: 0 !important;
+    transition: opacity 0.3s ease !important;
+    pointer-events: none !important;
+    z-index: 0 !important;
+}
+
+.glass-card:hover::after {
+    opacity: 1 !important;
+}
+
 /* Animation d'entrée des cartes */
 .glass-card {
     animation: card-fade-in 0.6s ease forwards !important;
@@ -277,7 +284,7 @@
     }
 }
 
-/* Classes de délai - Appliquées via JavaScript */
+/* Délai d'animation pour chaque carte - Appliqué via JavaScript */
 .glass-card.delay-1 { animation-delay: 0.1s !important; }
 .glass-card.delay-2 { animation-delay: 0.2s !important; }
 .glass-card.delay-3 { animation-delay: 0.3s !important; }
@@ -291,7 +298,6 @@
 .shortcut-link {
     display: block !important;
     transition: all 0.3s ease !important;
-    text-decoration: none !important;
 }
 
 .shortcut-link.disabled {
@@ -302,18 +308,6 @@
 
 .shortcut-link.disabled .glass-card {
     filter: grayscale(0.5) !important;
-}
-
-/* Animation de pulsation au clic (highlight) */
-.glass-card.is-pulsing {
-    animation: card-pulse 0.8s ease !important;
-}
-
-@keyframes card-pulse {
-    0% { transform: scale(1); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08); }
-    30% { transform: scale(1.05); box-shadow: 0 0 50px rgba(13, 110, 253, 0.3); }
-    60% { transform: scale(0.98); }
-    100% { transform: scale(1); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08); }
 }
 
 /* Adaptation mobile */
@@ -359,21 +353,20 @@
         });
 
         // Animation des raccourcis
-        if (typeof io !== 'undefined') {
-            const socket = io();
-            socket.on('shortcutHighlight', function(data) {
-                if (data.shortcutKey) {
-                    const shortcut = document.querySelector(`.shortcut-link[data-shortcut-key="${data.shortcutKey}"]`);
-                    if (shortcut) {
-                        const card = shortcut.querySelector('.glass-card');
-                        if (card) {
-                            card.classList.add('is-pulsing');
-                            setTimeout(() => { card.classList.remove('is-pulsing'); }, 1200);
-                        }
+        const socket = io(); // Connexion au namespace par défaut
+        socket.on('shortcutHighlight', function(data) {
+            if (data.shortcutKey) {
+                const shortcut = document.querySelector(`.shortcut-link[data-shortcut-key="${data.shortcutKey}"]`);
+                if (shortcut) {
+                    const card = shortcut.querySelector('.glass-card');
+                    if (card) {
+                        card.classList.add('is-pulsing');
+                        // Retirer la classe après l'animation pour qu'elle puisse rejouer
+                        setTimeout(() => { card.classList.remove('is-pulsing'); }, 1200);
                     }
                 }
-            });
-        }
+            }
+        });
     });
 </script>
 
