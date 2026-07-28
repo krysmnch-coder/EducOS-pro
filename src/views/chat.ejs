@@ -422,15 +422,15 @@
       }
       
       .chat-main {
-        display: none; /* La fenêtre de chat est cachée par défaut */
+        display: none !important; /* FORCÉ : La fenêtre de chat est cachée par défaut */
       }
 
       /* Lorsque .show-chat est ajouté, on inverse la visibilité */
       .chat-page-container.show-chat .chat-sidebar {
-        display: none; /* On cache la liste */
+        display: none !important; /* FORCÉ : On cache la liste */
       }
       .chat-page-container.show-chat .chat-main {
-        display: flex; /* On affiche la fenêtre de chat */
+        display: flex !important; /* FORCÉ : On affiche la fenêtre de chat */
         flex: 1;
       }
     }
