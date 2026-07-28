@@ -1,14 +1,11 @@
-<%- include('partials/head') %>
-<%- include('partials/header') %>
-
 <div class="container page-shell py-4">
     <div class="themed-container">
 
         <%- include('partials/messages') %>
 
         <%# --- Section de bienvenue --- %>
-        <div class="d-flex align-items-center mb-5">
-            <div class="rounded-circle me-4 d-flex align-items-center justify-content-center bg-primary text-white" style="width: 80px; height: 80px; font-size: 2.5rem; font-weight: 500; background-image: url('<%= user.avatar_url %>'); background-size: cover; background-position: center;">
+        <div class="d-flex align-items-center mb-5 welcome-section">
+            <div class="rounded-circle me-4 d-flex align-items-center justify-content-center bg-primary text-white avatar-wrapper" style="width: 80px; height: 80px; font-size: 2.5rem; font-weight: 500; background-image: url('<%= user.avatar_url %>'); background-size: cover; background-position: center;">
                 <% if (!user.avatar_url) { %>
                     <%= user.name.charAt(0).toUpperCase() %>
                 <% } %>
@@ -25,7 +22,7 @@
 
         <%# --- Section de sélection de l'enfant pour les parents --- %>
         <% if (user.role === 'PARENT') { %>
-            <div class="child-selector-wrapper card mb-5">
+            <div class="child-selector-wrapper card mb-5 glass-card-selector">
                 <div class="card-body d-md-flex align-items-center justify-content-between">
                     <% if (typeof parentData !== 'undefined' && parentData.children && parentData.children.length > 0) { %>
                         <form action="/select-child" method="POST" class="d-flex align-items-center gap-3 flex-wrap">
@@ -47,26 +44,31 @@
 
         <%# --- Section des Raccourcis (Widgets) --- %>
         <% if (typeof widgets !== 'undefined' && widgets.length > 0) { %>
+            <h2 class="mb-4 section-title">
+                <i data-feather="grid" class="me-2" style="width: 24px; height: 24px;"></i>
+                Raccourcis de gestion
+            </h2>
             <div class="row g-4">
-                <% widgets.forEach(widget => { %>
+                <% widgets.forEach((widget, index) => { %>
                 <div class="col-xl-3 col-md-6 mb-4">
-                    <a href="<%= (user.role === 'PARENT' && (typeof parentData === 'undefined' || !parentData.selectedChild)) ? '#' : widget.link %>" class="text-decoration-none shortcut-link <%= (user.role === 'PARENT' && (typeof parentData === 'undefined' || !parentData.selectedChild)) ? 'disabled' : '' %>" data-shortcut-key="<%= widget.key %>">
-                    <div class="card dashboard-stat h-100">
-                        <div class="card-body text-center">
-                        <div class="stat-icon mb-3">
-                            <i data-feather="<%= widget.icon %>"></i>
+                    <a href="<%= (user.role === 'PARENT' && (typeof parentData === 'undefined' || !parentData.selectedChild)) ? '#' : widget.link %>" class="text-decoration-none shortcut-link <%= (user.role === 'PARENT' && (typeof parentData === 'undefined' || !parentData.selectedChild)) ? 'disabled' : '' %>" data-shortcut-key="<%= widget.key %>" data-delay="<%= index * 0.1 %>">
+                        <div class="card dashboard-stat h-100 glass-card">
+                            <div class="card-body text-center">
+                                <div class="stat-icon mb-3">
+                                    <i data-feather="<%= widget.icon %>"></i>
+                                </div>
+                                <h5 class="card-title mb-2"><%= widget.title %></h5>
+                                <p class="card-text text-muted small"><%= widget.description %></p>
+                            </div>
                         </div>
-                        <h5 class="card-title mb-2"><%= widget.title %></h5>
-                        <p class="card-text text-muted small"><%= widget.description %></p>
-                        </div>
-                    </div>
                     </a>
                 </div>
                 <% }); %>
             </div>
         <% } else { %>
-            <div class="text-center py-5">
-                <p class="text-muted">Aucun raccourci n'est configuré pour votre rôle pour le moment.</p>
+            <div class="text-center py-5 empty-state">
+                <i data-feather="grid" style="width: 48px; height: 48px; stroke-width: 1; opacity: 0.4;"></i>
+                <p class="text-muted mt-3">Aucun raccourci n'est configuré pour votre rôle pour le moment.</p>
             </div>
         <% } %>
     </div>
@@ -74,8 +76,87 @@
 
 <style>
 /* ==========================================================================
-   Admin Dashboard - Style Glassmorphism
+   Dashboard - Style Glassmorphism avec Animations
    ========================================================================== */
+
+/* Animation de la section de bienvenue */
+.welcome-section {
+    animation: welcome-fade 0.8s ease forwards !important;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+@keyframes welcome-fade {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Avatar avec effet de lueur */
+.avatar-wrapper {
+    position: relative;
+    animation: avatar-glow 3s ease-in-out infinite;
+    box-shadow: 0 0 20px rgba(13, 110, 253, 0.1);
+}
+
+@keyframes avatar-glow {
+    0%, 100% {
+        box-shadow: 0 0 20px rgba(13, 110, 253, 0.1);
+    }
+    50% {
+        box-shadow: 0 0 40px rgba(13, 110, 253, 0.25);
+    }
+}
+
+/* Titre de section */
+.section-title {
+    color: var(--text-color, #212529);
+    font-weight: 700;
+    animation: title-slide 0.6s ease forwards !important;
+    opacity: 0;
+    transform: translateX(-10px);
+    animation-delay: 0.1s !important;
+}
+
+@keyframes title-slide {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+[data-theme="dark"] .section-title {
+    color: #ffffff;
+}
+
+/* Glass Card pour le sélecteur d'enfant */
+.glass-card-selector {
+    background: rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 1rem !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06) !important;
+    animation: card-fade-in 0.6s ease forwards !important;
+    opacity: 0 !important;
+    transform: translateY(20px) !important;
+    animation-delay: 0.2s !important;
+}
+
+[data-theme="dark"] .glass-card-selector {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+}
 
 /* Glass Card pour les widgets */
 .glass-card {
@@ -89,51 +170,12 @@
     position: relative !important;
     overflow: hidden !important;
     cursor: pointer !important;
-}
-
-[data-theme="dark"] .glass-card {
-    background: rgba(255, 255, 255, 0.05) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
-}
-
-.glass-card:hover {
-    transform: translateY(-10px) scale(1.02) !important;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15) !important;
-    border-color: rgba(255, 255, 255, 0.4) !important;
-}
-
-[data-theme="dark"] .glass-card:hover {
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5) !important;
-}
-
-.glass-card .stat-icon svg {
-    width: 48px !important;
-    height: 48px !important;
-    stroke-width: 1.5 !important;
-    color: var(--bs-primary, #0d6efd) !important;
-    transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
-}
-
-.glass-card:hover .stat-icon svg {
-    transform: scale(1.2) rotate(-5deg) !important;
-    filter: drop-shadow(0 0 20px rgba(13, 110, 253, 0.3)) !important;
-}
-
-.glass-card .card-title {
-    transition: all 0.4s ease !important;
-}
-
-.glass-card:hover .card-title {
-    color: var(--bs-primary, #0d6efd) !important;
-}
-
-/* Animation d'entrée des cartes */
-.glass-card {
     animation: card-fade-in 0.6s ease forwards !important;
     opacity: 0 !important;
     transform: translateY(20px) !important;
 }
+
+/* Délais d'animation appliqués via JavaScript */
 
 @keyframes card-fade-in {
     from {
@@ -146,110 +188,205 @@
     }
 }
 
-/* Glass Card pour les statistiques */
-.glass-stat-card {
-    background: rgba(255, 255, 255, 0.10) !important;
-    backdrop-filter: blur(8px) !important;
-    -webkit-backdrop-filter: blur(8px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.15) !important;
-    border-radius: 1rem !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06) !important;
-    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+[data-theme="dark"] .glass-card {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
 }
 
-[data-theme="dark"] .glass-stat-card {
-    background: rgba(255, 255, 255, 0.03) !important;
-    border: 1px solid rgba(255, 255, 255, 0.06) !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+/* Effet de brillance animé derrière la carte */
+.glass-card::before {
+    content: '' !important;
+    position: absolute !important;
+    top: -50% !important;
+    left: -50% !important;
+    width: 200% !important;
+    height: 200% !important;
+    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.1), transparent 70%) !important;
+    opacity: 0 !important;
+    transition: opacity 0.6s ease !important;
+    pointer-events: none !important;
+    z-index: 0 !important;
 }
 
-.glass-stat-card:hover {
-    transform: translateY(-5px) !important;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.10) !important;
+.glass-card .card-body {
+    position: relative !important;
+    z-index: 1 !important;
 }
 
-[data-theme="dark"] .glass-stat-card:hover {
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4) !important;
+/* Animation de survol */
+.glass-card:hover {
+    transform: translateY(-10px) scale(1.02) !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15) !important;
+    border-color: rgba(255, 255, 255, 0.4) !important;
 }
 
-.stat-number {
-    color: var(--bs-primary, #0d6efd);
+[data-theme="dark"] .glass-card:hover {
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5) !important;
 }
 
-[data-theme="dark"] .stat-number {
-    color: #ffffff;
+.glass-card:hover::before {
+    opacity: 1 !important;
 }
 
-/* Tableau Glassmorphism */
-.glass-table-container {
-    background: rgba(255, 255, 255, 0.06) !important;
-    backdrop-filter: blur(8px) !important;
-    -webkit-backdrop-filter: blur(8px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.10) !important;
-    border-radius: 1rem !important;
-    padding: 0.5rem !important;
-    overflow: hidden !important;
+/* Icône avec animation */
+.glass-card .stat-icon {
+    transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+    display: inline-block !important;
 }
 
-[data-theme="dark"] .glass-table-container {
-    background: rgba(255, 255, 255, 0.02) !important;
-    border: 1px solid rgba(255, 255, 255, 0.04) !important;
+.glass-card .stat-icon svg {
+    width: 48px !important;
+    height: 48px !important;
+    stroke-width: 1.5 !important;
+    transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+    color: var(--bs-primary, #0d6efd) !important;
 }
 
-.glass-table thead th {
-    background: rgba(13, 110, 253, 0.06) !important;
+.glass-card:hover .stat-icon {
+    transform: scale(1.2) rotate(-5deg) !important;
+}
+
+.glass-card:hover .stat-icon svg {
+    color: var(--bs-primary, #0d6efd) !important;
+    filter: drop-shadow(0 0 20px rgba(13, 110, 253, 0.3)) !important;
+}
+
+/* Animation de l'icône au survol (pulsation) */
+@keyframes icon-pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+}
+
+.glass-card:hover .stat-icon {
+    animation: icon-pulse 1.2s ease-in-out infinite !important;
+}
+
+/* Titre avec effet */
+.glass-card .card-title {
+    transition: all 0.4s ease !important;
+    position: relative !important;
+    display: inline-block !important;
+}
+
+.glass-card:hover .card-title {
+    color: var(--bs-primary, #0d6efd) !important;
+    transform: scale(1.05) !important;
+}
+
+.glass-card .card-title::after {
+    content: '' !important;
+    position: absolute !important;
+    bottom: -2px !important;
+    left: 0 !important;
+    width: 0 !important;
+    height: 2px !important;
+    background: linear-gradient(90deg, var(--bs-primary, #0d6efd), var(--bs-info, #0dcaf0)) !important;
+    transition: width 0.4s ease !important;
+}
+
+.glass-card:hover .card-title::after {
+    width: 100% !important;
+}
+
+/* Texte avec effet */
+.glass-card .card-text {
+    transition: all 0.4s ease !important;
+}
+
+.glass-card:hover .card-text {
     color: var(--text-color, #212529) !important;
-    font-weight: 600 !important;
-    border-bottom: 2px solid rgba(13, 110, 253, 0.08) !important;
+    opacity: 0.9 !important;
 }
 
-[data-theme="dark"] .glass-table thead th {
-    background: rgba(255, 255, 255, 0.03) !important;
-    color: rgba(255, 255, 255, 0.8) !important;
-    border-bottom: 2px solid rgba(255, 255, 255, 0.04) !important;
+/* Effet de brillance flottante au survol */
+.glass-card::after {
+    content: '' !important;
+    position: absolute !important;
+    top: -50% !important;
+    left: -50% !important;
+    width: 200% !important;
+    height: 200% !important;
+    background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.1) 0%, transparent 50%) !important;
+    opacity: 0 !important;
+    transition: opacity 0.3s ease !important;
+    pointer-events: none !important;
+    z-index: 0 !important;
 }
 
-.glass-row {
-    background: transparent !important;
-    transition: all 0.3s ease !important;
+.glass-card:hover::after {
+    opacity: 1 !important;
 }
 
-.glass-row:hover {
-    background: rgba(13, 110, 253, 0.03) !important;
+/* Animation de pulsation au clic (highlight) */
+.glass-card.is-pulsing {
+    animation: card-pulse 0.8s ease !important;
 }
 
-[data-theme="dark"] .glass-row:hover {
-    background: rgba(255, 255, 255, 0.02) !important;
+@keyframes card-pulse {
+    0% { transform: scale(1); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08); }
+    30% { transform: scale(1.05); box-shadow: 0 0 50px rgba(13, 110, 253, 0.3); }
+    60% { transform: scale(0.98); }
+    100% { transform: scale(1); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08); }
 }
 
-.glass-row td {
-    padding: 0.75rem !important;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.04) !important;
-}
-
-[data-theme="dark"] .glass-row td {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.03) !important;
-}
-
-/* Lien */
+/* Effet de survol du lien */
 .shortcut-link {
     display: block !important;
+    transition: all 0.3s ease !important;
     text-decoration: none !important;
+}
+
+.shortcut-link.disabled {
+    opacity: 0.6 !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+}
+
+.shortcut-link.disabled .glass-card {
+    filter: grayscale(0.5) !important;
+}
+
+/* État vide */
+.empty-state {
+    animation: empty-fade 0.8s ease forwards !important;
+    opacity: 0;
+    transform: scale(0.95);
+}
+
+@keyframes empty-fade {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
 }
 
 /* Adaptation mobile */
 @media (max-width: 768px) {
+    .glass-card {
+        border-radius: 0.75rem !important;
+    }
+    
     .glass-card .stat-icon svg {
         width: 36px !important;
         height: 36px !important;
     }
     
-    .glass-card {
+    .glass-card:hover {
+        transform: translateY(-5px) scale(1.01) !important;
+    }
+    
+    .glass-card-selector {
         border-radius: 0.75rem !important;
     }
     
-    .stat-number {
-        font-size: 2.5rem !important;
+    .section-title {
+        font-size: 1.25rem;
     }
 }
 </style>
@@ -271,7 +408,7 @@
             }
         });
 
-        // Effet de brillance au survol des cartes
+        // Effet de brillance au survol des cartes (suivi de la souris)
         document.querySelectorAll('.glass-card').forEach(function(card) {
             card.addEventListener('mousemove', function(e) {
                 var rect = this.getBoundingClientRect();
@@ -282,7 +419,7 @@
             });
         });
 
-        // Animation des raccourcis
+        // Animation des raccourcis via Socket.io
         if (typeof io !== 'undefined') {
             var socket = io();
             socket.on('shortcutHighlight', function(data) {
@@ -302,6 +439,3 @@
         }
     });
 </script>
-
-<%- include('partials/page-end-scripts') %>
-<%- include('partials/footer') %>
