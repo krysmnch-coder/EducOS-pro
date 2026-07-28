@@ -1,5 +1,5 @@
 <%- include('partials/head') %>
-<%- include('partials/header') %>
+<%- include('partials/navbar') %>
 
 <div class="container page-shell py-4">
     <div class="themed-container">
@@ -8,49 +8,24 @@
 
         <%# --- Section de bienvenue --- %>
         <div class="d-flex align-items-center mb-5">
-            <div class="rounded-circle me-4 d-flex align-items-center justify-content-center bg-primary text-white" style="width: 80px; height: 80px; font-size: 2.5rem; font-weight: 500; background-image: url('<%= user.avatar_url %>'); background-size: cover; background-position: center;">
-                <% if (!user.avatar_url) { %>
-                    <%= user.name.charAt(0).toUpperCase() %>
+            <div class="rounded-circle me-4 d-flex align-items-center justify-content-center bg-primary text-white" style="width: 80px; height: 80px; font-size: 2.5rem; font-weight: 500; background-image: url('<%= currentUser.avatar_url %>'); background-size: cover; background-position: center;">
+                <% if (!currentUser.avatar_url) { %>
+                    <%= currentUser.name.charAt(0).toUpperCase() %>
                 <% } %>
             </div>
             <div>
-                <h1 class="h2 mb-0">Bonjour, <%= user.name %> !</h1>
-                <% if (typeof parentData !== 'undefined' && parentData.selectedChild) { %>
-                    <p class="lead text-muted mb-0">Vous consultez le profil de : <strong><%= parentData.selectedChild.name %></strong>.</p>
-                <% } else { %>
-                    <p class="lead text-muted mb-0">Ravi de vous revoir. Voici vos raccourcis.</p>
-                <% } %>
+                <h1 class="h2 mb-0">Bonjour, <%= currentUser.name %> !</h1>
+                <p class="lead text-muted mb-0">Bienvenue sur votre tableau de bord d'administration.</p>
             </div>
         </div>
 
-        <%# --- Section de sélection de l'enfant pour les parents --- %>
-        <% if (user.role === 'PARENT') { %>
-            <div class="child-selector-wrapper card mb-5">
-                <div class="card-body d-md-flex align-items-center justify-content-between">
-                    <% if (typeof parentData !== 'undefined' && parentData.children && parentData.children.length > 0) { %>
-                        <form action="/select-child" method="POST" class="d-flex align-items-center gap-3 flex-wrap">
-                            <label for="childSelector" class="form-label mb-0 fw-bold">Suivre un enfant :</label>
-                            <select name="childId" id="childSelector" class="form-select" style="min-width: 250px;" onchange="this.form.submit()">
-                                <% parentData.children.forEach(child => { %>
-                                    <option value="<%= child.id %>" <%= (parentData.selectedChild && parentData.selectedChild.id === child.id) ? 'selected' : '' %>>
-                                        <%= child.name %>
-                                    </option>
-                                <% }); %>
-                            </select>
-                        </form>
-                    <% } else { %>
-                        <p class="text-muted mb-0">Aucun enfant n'est actuellement lié à votre compte. Les enfants sont ajoutés lors de votre inscription.</p>
-                    <% } %>
-                </div>
-            </div>
-        <% } %>
-
         <%# --- Section des Raccourcis (Widgets) --- %>
-        <% if (typeof widgets !== 'undefined' && widgets.length > 0) { %>
-            <div class="row g-4">
+        <% if (widgets && widgets.length > 0) { %>
+            <h2 class="mb-4">Raccourcis de gestion</h2>
+            <div class="row">
                 <% widgets.forEach(widget => { %>
                 <div class="col-xl-3 col-md-6 mb-4">
-                    <a href="<%= (user.role === 'PARENT' && (typeof parentData === 'undefined' || !parentData.selectedChild)) ? '#' : widget.link %>" class="text-decoration-none shortcut-link <%= (user.role === 'PARENT' && (typeof parentData === 'undefined' || !parentData.selectedChild)) ? 'disabled' : '' %>" data-shortcut-key="<%= widget.key %>">
+                    <a href="<%= widget.link %>" class="text-decoration-none shortcut-link" data-shortcut-key="<%= widget.key %>">
                     <div class="card dashboard-stat h-100 glass-card">
                         <div class="card-body text-center">
                         <div class="stat-icon mb-3">
@@ -64,9 +39,76 @@
                 </div>
                 <% }); %>
             </div>
-        <% } else { %>
-            <div class="text-center py-5">
-                <p class="text-muted">Aucun raccourci n'est configuré pour votre rôle pour le moment.</p>
+        <% } %>
+
+        <%# --- Section des Statistiques avec Graphiques --- %>
+        <% if (stats) { %>
+            <h2 class="mb-4 mt-5">Statistiques</h2>
+            <div class="row">
+                <% if (currentUser.role === 'ADMINISTRATOR') { %>
+                    <div class="col-md-6 col-lg-3 mb-4">
+                        <div class="card h-100"><div class="card-body text-center d-flex flex-column justify-content-center"><h5 class="card-title text-muted">Élèves</h5><p class="display-4 fw-bold my-2" id="adminStudentCount"><%= stats.studentCount %></p></div></div>
+                    </div>
+                    <div class="col-md-6 col-lg-3 mb-4">
+                        <div class="card h-100"><div class="card-body text-center d-flex flex-column justify-content-center"><h5 class="card-title text-muted">Professeurs</h5><p class="display-4 fw-bold my-2" id="adminProfessorCount"><%= stats.professorCount %></p></div></div>
+                    </div>
+                    <div class="col-md-6 col-lg-3 mb-4">
+                        <div class="card h-100"><div class="card-body text-center d-flex flex-column justify-content-center"><h5 class="card-title text-muted">Parents</h5><p class="display-4 fw-bold my-2" id="adminParentCount"><%= stats.parentCount %></p></div></div>
+                    </div>
+                    <div class="col-md-6 col-lg-3 mb-4">
+                        <div class="card h-100 text-center bg-warning bg-opacity-10 border-warning">
+                            <div class="card-body d-flex flex-column justify-content-center">
+                                <h5 class="card-title">Comptes en attente</h5>
+                                <p class="display-4 fw-bold my-3" id="adminPendingCount"><%= stats.pendingCount %></p>
+                                <a href="/admin" class="btn btn-sm btn-warning">Gérer</a>
+                            </div>
+                        </div>
+                    </div>
+                <% } %>
+                <% if (currentUser.role === 'SUPER_ADMIN') { %>
+                    <div class="col-md-6 col-lg-3 mb-4">
+                        <div class="card h-100"><div class="card-body text-center d-flex flex-column justify-content-center"><h5 class="card-title text-muted">Utilisateurs (Total)</h5><p class="display-4 fw-bold my-2" id="superAdminTotalUsers"><%= stats.totalUserCount %></p></div></div>
+                    </div>
+                    <div class="col-md-6 col-lg-3 mb-4">
+                        <div class="card h-100"><div class="card-body text-center d-flex flex-column justify-content-center"><h5 class="card-title text-muted">Admins Scolaires</h5><p class="display-4 fw-bold my-2" id="superAdminAdminCount"><%= stats.adminCount %></p></div></div>
+                    </div>
+                    <div class="col-md-6 col-lg-3 mb-4">
+                        <div class="card h-100"><div class="card-body text-center d-flex flex-column justify-content-center"><h5 class="card-title text-muted">Établissements</h5><p class="display-4 fw-bold my-2" id="superAdminEstablishmentCount"><%= stats.establishmentCount %></p></div></div>
+                    </div>
+                    <div class="col-md-6 col-lg-3 mb-4">
+                        <div class="card h-100 text-center bg-warning bg-opacity-10 border-warning">
+                            <div class="card-body d-flex flex-column justify-content-center">
+                                <h5 class="card-title">Comptes en attente</h5>
+                                <p class="display-4 fw-bold my-3" id="superAdminPendingCount"><%= stats.pendingCount %></p>
+                                <a href="/admin" class="btn btn-sm btn-warning">Gérer</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <% if (stats.establishmentsWithCounts && stats.establishmentsWithCounts.length > 0) { %>
+                        <div class="col-12">
+                            <h3 class="mb-4 mt-5">Utilisateurs par Établissement</h3>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Établissement</th>
+                                            <th class="text-end">Utilisateurs Approuvés</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% stats.establishmentsWithCounts.forEach(est => { %>
+                                            <tr>
+                                                <td><%= est.name %></td>
+                                                <td class="text-end fw-bold" id="establishment-count-<%= est.id %>"><%= est.userCount %></td>
+                                            </tr>
+                                        <% }); %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    <% } %>
+                <% } %>
             </div>
         <% } %>
     </div>
@@ -102,6 +144,7 @@
     opacity: 0 !important;
     transition: opacity 0.6s ease !important;
     pointer-events: none !important;
+    z-index: 0 !important;
 }
 
 .glass-card::after {
@@ -247,25 +290,6 @@
     z-index: 1 !important;
 }
 
-/* Effet de particules lumineuses au survol */
-.glass-card::after {
-    content: '' !important;
-    position: absolute !important;
-    top: -50% !important;
-    left: -50% !important;
-    width: 200% !important;
-    height: 200% !important;
-    background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.1) 0%, transparent 50%) !important;
-    opacity: 0 !important;
-    transition: opacity 0.3s ease !important;
-    pointer-events: none !important;
-    z-index: 0 !important;
-}
-
-.glass-card:hover::after {
-    opacity: 1 !important;
-}
-
 /* Animation d'entrée des cartes */
 .glass-card {
     animation: card-fade-in 0.6s ease forwards !important;
@@ -284,7 +308,7 @@
     }
 }
 
-/* Délai d'animation pour chaque carte - Appliqué via JavaScript */
+/* Classes de délai - Appliquées via JavaScript */
 .glass-card.delay-1 { animation-delay: 0.1s !important; }
 .glass-card.delay-2 { animation-delay: 0.2s !important; }
 .glass-card.delay-3 { animation-delay: 0.3s !important; }
