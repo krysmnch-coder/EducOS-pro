@@ -1,4 +1,4 @@
-const db = require('../config/database'); // Adaptez selon votre configuration de base de données
+const db = require('./db'); // Adaptez selon votre configuration de base de données
 
 /**
  * Récupère les utilisateurs avec qui l'utilisateur courant peut chatter
