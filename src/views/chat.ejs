@@ -7,7 +7,6 @@
        Page Chat - Design Premium Glassmorphism
        ========================================================================== */
     
-    /* Variables */
     :root {
       --chat-primary: #0d6efd;
       --chat-primary-light: rgba(13, 110, 253, 0.1);
@@ -24,9 +23,6 @@
       --chat-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     }
     
-    /* ==========================================================================
-       Container Principal
-       ========================================================================== */
     .chat-page-wrapper {
       padding: 0;
     }
@@ -63,7 +59,6 @@
       box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4) !important;
     }
     
-    /* En-tête du sidebar */
     .chat-sidebar .sidebar-header {
       background: rgba(13, 110, 253, 0.04) !important;
       border-bottom: 1px solid rgba(13, 110, 253, 0.08) !important;
@@ -91,7 +86,6 @@
       color: var(--chat-primary);
     }
     
-    /* Barre de recherche */
     .search-wrapper {
       padding: 0.75rem 1.25rem;
       border-bottom: 1px solid rgba(13, 110, 253, 0.06) !important;
@@ -128,7 +122,6 @@
       pointer-events: none;
     }
     
-    /* Bouton nouveau chat */
     .btn-new-chat {
       background: linear-gradient(135deg, var(--chat-primary), #0a58ca) !important;
       border: none !important;
@@ -149,7 +142,6 @@
       transform: translateY(0) !important;
     }
     
-    /* Liste des conversations */
     .conversation-list {
       flex: 1;
       overflow-y: auto;
@@ -166,28 +158,25 @@
       cursor: pointer;
       position: relative;
       overflow: hidden;
+      animation: conversationFadeIn 0.4s ease forwards;
+      opacity: 0;
+      transform: translateX(-10px);
     }
     
-    .conversation-item::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 0;
-      height: 70%;
-      background: var(--chat-primary);
-      border-radius: 0 4px 4px 0;
-      transition: width 0.3s var(--chat-transition);
+    @keyframes conversationFadeIn {
+      from {
+        opacity: 0;
+        transform: translateX(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
     }
     
     .conversation-item:hover {
       background: rgba(13, 110, 253, 0.05) !important;
       transform: translateX(3px) !important;
-    }
-    
-    .conversation-item:hover::before {
-      width: 3px;
     }
     
     [data-theme="dark"] .conversation-item:hover {
@@ -199,16 +188,11 @@
       border-left: 3px solid var(--chat-primary) !important;
     }
     
-    .conversation-item.active::before {
-      width: 0;
-    }
-    
     [data-theme="dark"] .conversation-item.active {
       background: rgba(255, 255, 255, 0.06) !important;
       border-left: 3px solid #ffffff !important;
     }
     
-    /* Avatar dans la liste */
     .conversation-avatar {
       width: 48px;
       height: 48px;
@@ -217,6 +201,7 @@
       border: 2px solid rgba(13, 110, 253, 0.15);
       transition: all 0.4s var(--chat-transition);
       flex-shrink: 0;
+      background: rgba(13, 110, 253, 0.1);
     }
     
     .conversation-item:hover .conversation-avatar {
@@ -229,7 +214,6 @@
       border-color: rgba(255, 255, 255, 0.15);
     }
     
-    /* Badge de statut en ligne */
     .status-indicator {
       position: absolute;
       bottom: 2px;
@@ -251,7 +235,6 @@
       50% { box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
     }
     
-    /* Info de la conversation */
     .conversation-info {
       flex: 1;
       min-width: 0;
@@ -285,13 +268,14 @@
       background: var(--chat-primary);
       color: white;
       border-radius: 50%;
-      width: 20px;
+      min-width: 20px;
       height: 20px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 0.7rem;
       font-weight: 700;
+      padding: 0 4px;
       animation: badgePop 0.3s ease;
     }
     
@@ -322,7 +306,6 @@
       box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1) !important;
     }
     
-    /* En-tête du chat */
     .chat-header {
       background: rgba(13, 110, 253, 0.04) !important;
       border-bottom: 1px solid rgba(13, 110, 253, 0.08) !important;
@@ -349,6 +332,7 @@
       border-radius: 50%;
       object-fit: cover;
       border: 2px solid rgba(13, 110, 253, 0.2);
+      background: rgba(13, 110, 253, 0.1);
     }
     
     .chat-header-name {
@@ -365,13 +349,13 @@
       color: var(--chat-success);
     }
     
-    /* Bouton retour */
     .btn-back {
       background: rgba(255, 255, 255, 0.06) !important;
       border: 1px solid rgba(255, 255, 255, 0.12) !important;
       border-radius: 0.75rem !important;
       padding: 0.4rem 0.75rem !important;
       transition: all 0.3s ease !important;
+      color: var(--text-color, #212529) !important;
     }
     
     .btn-back:hover {
@@ -379,7 +363,6 @@
       transform: translateX(-2px) !important;
     }
     
-    /* Zone des messages */
     .messages-container {
       flex: 1;
       overflow-y: auto;
@@ -387,14 +370,13 @@
       background: transparent !important;
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      gap: 0.25rem;
     }
     
-    /* Message */
     .message-wrapper {
       display: flex;
       margin-bottom: 0.25rem;
-      animation: messageSlideIn 0.4s var(--chat-transition) forwards;
+      animation: messageSlideIn 0.3s var(--chat-transition) forwards;
       opacity: 0;
     }
     
@@ -464,7 +446,6 @@
       color: rgba(255, 255, 255, 0.8);
     }
     
-    /* Indicateur de saisie */
     .typing-indicator {
       padding: 0.5rem;
       font-size: 0.85rem;
@@ -501,7 +482,6 @@
       30% { transform: translateY(-5px); }
     }
     
-    /* Footer - Zone de saisie */
     .chat-footer {
       background: rgba(255, 255, 255, 0.04) !important;
       border-top: 1px solid rgba(13, 110, 253, 0.06) !important;
@@ -549,6 +529,11 @@
     
     .message-input::placeholder {
       color: #adb5bd;
+    }
+    
+    .message-input:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
     
     .btn-send {
@@ -637,6 +622,8 @@
     
     .modal-glass .modal-body {
       padding: 0 !important;
+      max-height: 60vh;
+      overflow-y: auto;
     }
     
     .modal-user-item {
@@ -674,6 +661,7 @@
       border-radius: 50%;
       object-fit: cover;
       border: 2px solid rgba(13, 110, 253, 0.15);
+      background: rgba(13, 110, 253, 0.1);
     }
     
     .modal-user-name {
@@ -703,24 +691,6 @@
     [data-theme="dark"] .conversation-list::-webkit-scrollbar-thumb,
     [data-theme="dark"] .messages-container::-webkit-scrollbar-thumb {
       background: rgba(255, 255, 255, 0.15);
-    }
-    
-    /* ==========================================================================
-       Animations d'entrée
-       ========================================================================== */
-    .fade-in-up {
-      animation: fadeInUp 0.5s var(--chat-transition) forwards;
-    }
-    
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
     }
     
     /* ==========================================================================
@@ -774,6 +744,15 @@
       
       .btn-new-chat span {
         display: none;
+      }
+      
+      .modal-user-item {
+        padding: 0.6rem 1rem !important;
+      }
+      
+      .modal-user-avatar {
+        width: 38px;
+        height: 38px;
       }
     }
   </style>
@@ -892,7 +871,7 @@
             <% if (typeof otherUsers !== 'undefined' && otherUsers.length > 0) { %>
               <% otherUsers.forEach(function(otherUser) { %>
                 <div class="modal-user-item new-chat-user" data-user-id="<%= otherUser.id %>" data-user-name="<%= otherUser.name %>">
-                  <img src="<%= otherUser.avatar_url || '/img/user.png' %>" alt="<%= otherUser.name %>" class="modal-user-avatar">
+                  <img src="<%= otherUser.avatar_url || '/img/user.png' %>" alt="<%= otherUser.name %>" class="modal-user-avatar" onerror="this.src='/img/user.png'">
                   <span class="modal-user-name"><%= otherUser.name %></span>
                 </div>
               <% }); %>
@@ -910,7 +889,6 @@
 
   <!-- Scripts -->
   <script src="/socket.io/socket.io.js"></script>
-  <script src="/js/chat.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       // Initialiser Feather Icons
@@ -920,8 +898,6 @@
 
       // Variables globales
       var chatContainer = document.getElementById('chatContainer');
-      var chatSidebar = document.getElementById('chatSidebar');
-      var chatMain = document.getElementById('chatMain');
       var chatWindow = document.getElementById('chat-window');
       var chatPlaceholder = document.getElementById('chat-placeholder');
       var messageContainer = document.getElementById('message-container');
@@ -934,10 +910,14 @@
       var searchInput = document.getElementById('searchConversation');
       
       var currentUserId = document.body.getAttribute('data-user-id');
+      currentUserId = currentUserId ? parseInt(currentUserId) : null;
+      
       var activeConversationId = null;
       var socket = null;
       var conversations = [];
       var messages = {};
+
+      console.log('🚀 Chat initialisé - User ID:', currentUserId);
 
       // ==========================================================================
       // Initialisation Socket.io
@@ -948,7 +928,9 @@
           
           socket.on('connect', function() {
             console.log('✅ Connecté au serveur de chat');
-            socket.emit('userOnline', currentUserId);
+            if (currentUserId) {
+              socket.emit('userOnline', currentUserId);
+            }
           });
           
           socket.on('disconnect', function() {
@@ -956,8 +938,7 @@
           });
           
           socket.on('connect_error', function(error) {
-            console.error('Erreur de connexion:', error);
-            showNotification('Erreur de connexion au chat', 'danger');
+            console.error('❌ Erreur de connexion Socket.io:', error);
           });
           
           // Réception d'un nouveau message
@@ -966,24 +947,10 @@
             handleNewMessage(data);
           });
           
-          // Mise à jour des conversations
-          socket.on('updateConversations', function(data) {
-            console.log('🔄 Mise à jour des conversations:', data);
+          // Écouter les mises à jour de messages non lus
+          socket.on('unreadChatUpdate', function(data) {
+            console.log('📊 Mise à jour des messages non lus:', data);
             loadConversations();
-          });
-          
-          // Indicateur de saisie
-          socket.on('userTyping', function(data) {
-            showTypingIndicator(data.userId, data.userName, true);
-          });
-          
-          socket.on('userStoppedTyping', function(data) {
-            showTypingIndicator(data.userId, null, false);
-          });
-          
-          // Statut en ligne
-          socket.on('userStatus', function(data) {
-            updateUserStatus(data.userId, data.online);
           });
           
         } catch(e) {
@@ -995,32 +962,78 @@
       // Chargement des conversations
       // ==========================================================================
       function loadConversations() {
-        console.log('Chargement des conversations...');
+        console.log('🔄 Chargement des conversations...');
         
-        fetch('/api/conversations')
-          .then(function(response) {
-            if (!response.ok) throw new Error('Erreur réseau');
-            return response.json();
-          })
-          .then(function(data) {
-            console.log('Conversations chargées:', data);
-            conversations = data.conversations || [];
-            renderConversations();
-            
-            if (loadingIndicator) {
-              loadingIndicator.style.display = 'none';
-            }
-            
-            if (conversations.length === 0 && emptyState) {
-              emptyState.style.display = 'block';
-            }
-          })
-          .catch(function(error) {
-            console.error('Erreur lors du chargement des conversations:', error);
-            if (loadingIndicator) {
-              loadingIndicator.innerHTML = '<div class="text-danger"><i data-feather="alert-triangle"></i><p class="mt-2">Erreur de chargement</p><button class="btn btn-sm btn-outline-primary mt-2" onclick="location.reload()">Réessayer</button></div>';
-            }
-          });
+        if (loadingIndicator) {
+          loadingIndicator.style.display = 'block';
+        }
+        if (emptyState) {
+          emptyState.style.display = 'none';
+        }
+        
+        if (!currentUserId) {
+          console.error('❌ Aucun ID utilisateur');
+          showLoadError('Vous devez être connecté');
+          return;
+        }
+        
+        fetch('/api/conversations', {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          credentials: 'same-origin'
+        })
+        .then(function(response) {
+          console.log('📡 Status conversations:', response.status);
+          
+          if (response.status === 401) {
+            throw new Error('Non authentifié');
+          }
+          
+          if (!response.ok) {
+            throw new Error('Erreur HTTP ' + response.status);
+          }
+          
+          return response.json();
+        })
+        .then(function(data) {
+          console.log('✅ Conversations reçues:', data);
+          
+          if (Array.isArray(data)) {
+            conversations = data;
+          } else if (data && data.conversations) {
+            conversations = data.conversations;
+          } else {
+            conversations = [];
+          }
+          
+          console.log('📋 Nombre de conversations:', conversations.length);
+          
+          if (loadingIndicator) {
+            loadingIndicator.style.display = 'none';
+          }
+          
+          renderConversations();
+          
+          if (conversations.length === 0 && emptyState) {
+            emptyState.style.display = 'block';
+          }
+        })
+        .catch(function(error) {
+          console.error('❌ Erreur chargement conversations:', error);
+          
+          if (loadingIndicator) {
+            loadingIndicator.style.display = 'none';
+          }
+          
+          if (error.message === 'Non authentifié') {
+            showLoadError('Session expirée. Veuillez vous reconnecter.');
+          } else {
+            showLoadError('Impossible de charger les conversations');
+          }
+        });
       }
 
       // ==========================================================================
@@ -1029,7 +1042,6 @@
       function renderConversations(filterText) {
         if (!userList) return;
         
-        // Supprimer les éléments existants (sauf loading et empty)
         var existingItems = userList.querySelectorAll('.conversation-item');
         existingItems.forEach(function(item) {
           item.remove();
@@ -1046,7 +1058,7 @@
         if (filterText) {
           filterText = filterText.toLowerCase();
           filteredConversations = conversations.filter(function(conv) {
-            return conv.name.toLowerCase().includes(filterText);
+            return (conv.name && conv.name.toLowerCase().includes(filterText));
           });
         }
         
@@ -1055,7 +1067,6 @@
           userList.appendChild(item);
         });
         
-        // Réinitialiser Feather Icons pour les nouveaux éléments
         if (typeof feather !== 'undefined') {
           feather.replace();
         }
@@ -1064,26 +1075,24 @@
       function createConversationItem(conversation, index) {
         var div = document.createElement('div');
         div.className = 'conversation-item d-flex align-items-center';
-        div.setAttribute('data-conversation-id', conversation.id);
+        div.setAttribute('data-user-id', conversation.id);
         div.style.animationDelay = (index * 0.05) + 's';
         
-        if (activeConversationId === conversation.id) {
+        if (parseInt(activeConversationId) === parseInt(conversation.id)) {
           div.classList.add('active');
         }
         
-        var timeStr = conversation.lastMessageTime ? formatTime(conversation.lastMessageTime) : '';
-        var lastMsg = conversation.lastMessage || 'Aucun message';
-        var unreadCount = conversation.unreadCount || 0;
+        var lastMsg = conversation.last_message || 'Aucun message';
+        var unreadCount = conversation.unread_count || 0;
         
         div.innerHTML = 
           '<div class="position-relative me-3 flex-shrink-0">' +
-            '<img src="' + (conversation.avatar || '/img/user.png') + '" alt="' + conversation.name + '" class="conversation-avatar">' +
-            (conversation.online ? '<span class="status-indicator online"></span>' : '<span class="status-indicator"></span>') +
+            '<img src="' + (conversation.avatar_url || '/img/user.png') + '" alt="' + (conversation.name || '') + '" class="conversation-avatar" onerror="this.src=\'/img/user.png\'">' +
+            (conversation.online ? '<span class="status-indicator online"></span>' : '') +
           '</div>' +
           '<div class="conversation-info flex-grow-1 min-width-0">' +
             '<div class="d-flex justify-content-between align-items-start">' +
-              '<span class="conversation-name">' + escapeHtml(conversation.name) + '</span>' +
-              (timeStr ? '<small class="conversation-time ms-2">' + timeStr + '</small>' : '') +
+              '<span class="conversation-name">' + escapeHtml(conversation.name || 'Utilisateur') + '</span>' +
             '</div>' +
             '<div class="d-flex justify-content-between align-items-center">' +
               '<span class="conversation-last-message">' + escapeHtml(lastMsg) + '</span>' +
@@ -1092,7 +1101,7 @@
           '</div>';
         
         div.addEventListener('click', function() {
-          openConversation(conversation.id, conversation.name, conversation.avatar);
+          openConversation(conversation.id, conversation.name, conversation.avatar_url);
         });
         
         return div;
@@ -1101,69 +1110,88 @@
       // ==========================================================================
       // Ouverture d'une conversation
       // ==========================================================================
-      function openConversation(conversationId, userName, userAvatar) {
-        console.log('Ouverture de la conversation:', conversationId, userName);
+      function openConversation(userId, userName, userAvatar) {
+        console.log('💬 Ouverture conversation - UserID:', userId, 'Nom:', userName);
         
-        activeConversationId = conversationId;
+        activeConversationId = parseInt(userId);
         
-        // Mise à jour UI
         if (chatPlaceholder) chatPlaceholder.style.display = 'none';
         if (chatWindow) chatWindow.style.display = 'flex';
         
-        // Header
         document.getElementById('chat-header-name').textContent = userName || 'Utilisateur';
         document.getElementById('chat-header-avatar').src = userAvatar || '/img/user.png';
         
-        // Activer l'input
         if (messageInput) {
           messageInput.disabled = false;
           messageInput.focus();
         }
         
-        // Mettre à jour la liste
-        renderConversations();
+        updateActiveConversation();
+        loadMessages(userId);
         
-        // Charger les messages
-        loadMessages(conversationId);
-        
-        // Sur mobile, afficher le chat
-        if (window.innerWidth <= 992) {
+        if (window.innerWidth <= 992 && chatContainer) {
           chatContainer.classList.add('show-chat');
         }
-        
-        // Marquer comme lu
-        if (socket) {
-          socket.emit('markAsRead', { conversationId: conversationId });
-        }
+      }
+
+      function updateActiveConversation() {
+        var items = userList.querySelectorAll('.conversation-item');
+        items.forEach(function(item) {
+          item.classList.remove('active');
+          if (parseInt(item.getAttribute('data-user-id')) === parseInt(activeConversationId)) {
+            item.classList.add('active');
+          }
+        });
       }
 
       // ==========================================================================
       // Chargement des messages
       // ==========================================================================
-      function loadMessages(conversationId) {
-        console.log('Chargement des messages pour:', conversationId);
+      function loadMessages(userId) {
+        console.log('📥 Chargement messages pour userId:', userId);
         
         if (!messageContainer) return;
         
-        messageContainer.innerHTML = '<div class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary" role="status"></div></div>';
+        messageContainer.innerHTML = '<div class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary" role="status"></div><p class="text-muted small mt-2">Chargement des messages...</p></div>';
         
-        fetch('/api/messages/' + conversationId)
-          .then(function(response) {
-            if (!response.ok) throw new Error('Erreur réseau');
-            return response.json();
-          })
-          .then(function(data) {
-            console.log('Messages chargés:', data);
-            var msgList = data.messages || [];
-            messages[conversationId] = msgList;
-            renderMessages(msgList);
-          })
-          .catch(function(error) {
-            console.error('Erreur lors du chargement des messages:', error);
-            if (messageContainer) {
-              messageContainer.innerHTML = '<div class="text-center text-danger py-3"><i data-feather="alert-triangle"></i><p class="mt-2">Erreur de chargement</p></div>';
-            }
-          });
+        fetch('/api/messages/' + userId, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          credentials: 'same-origin'
+        })
+        .then(function(response) {
+          console.log('📡 Status messages:', response.status);
+          
+          if (!response.ok) {
+            throw new Error('Erreur HTTP ' + response.status);
+          }
+          
+          return response.json();
+        })
+        .then(function(data) {
+          console.log('✅ Messages reçus:', data);
+          
+          var msgList = Array.isArray(data) ? data : (data.messages || []);
+          
+          messages[userId] = msgList;
+          renderMessages(msgList);
+        })
+        .catch(function(error) {
+          console.error('❌ Erreur chargement messages:', error);
+          
+          if (messageContainer) {
+            messageContainer.innerHTML = 
+              '<div class="text-center text-danger py-4">' +
+                '<i data-feather="alert-triangle" style="width: 32px; height: 32px;"></i>' +
+                '<p class="mt-2">Erreur de chargement des messages</p>' +
+                '<button class="btn btn-sm btn-outline-danger mt-2" onclick="loadMessages(' + userId + ')">Réessayer</button>' +
+              '</div>';
+            if (typeof feather !== 'undefined') feather.replace();
+          }
+        });
       }
 
       // ==========================================================================
@@ -1177,9 +1205,11 @@
         if (!msgList || msgList.length === 0) {
           messageContainer.innerHTML = 
             '<div class="text-center text-muted py-5">' +
-              '<i data-feather="message-circle" style="width: 40px; height: 40px;"></i>' +
-              '<p class="mt-2">Aucun message. Commencez la conversation !</p>' +
+              '<i data-feather="message-circle" style="width: 48px; height: 48px;"></i>' +
+              '<p class="mt-3">Aucun message</p>' +
+              '<p class="small">Commencez la conversation !</p>' +
             '</div>';
+          if (typeof feather !== 'undefined') feather.replace();
           return;
         }
         
@@ -1188,27 +1218,24 @@
           messageContainer.appendChild(msgElement);
         });
         
-        // Scroll vers le bas
         scrollToBottom();
         
-        // Réinitialiser Feather Icons
-        if (typeof feather !== 'undefined') {
-          feather.replace();
-        }
+        if (typeof feather !== 'undefined') feather.replace();
       }
 
       function createMessageElement(msg, index) {
         var wrapper = document.createElement('div');
-        var isSent = msg.senderId === currentUserId;
+        var isSent = parseInt(msg.sender_id) === parseInt(currentUserId);
         
         wrapper.className = 'message-wrapper ' + (isSent ? 'message-sent' : 'message-received');
-        wrapper.style.animationDelay = (index * 0.03) + 's';
+        wrapper.style.animationDelay = (index * 0.02) + 's';
         
-        var time = msg.timestamp ? formatMessageTime(msg.timestamp) : '';
+        var time = msg.created_at ? formatMessageTime(msg.created_at) : '';
+        var content = msg.content || msg.message || '';
         
         wrapper.innerHTML = 
           '<div class="message-bubble">' +
-            '<div class="message-content">' + escapeHtml(msg.content) + '</div>' +
+            '<div class="message-content">' + escapeHtml(content) + '</div>' +
             '<div class="message-time">' + time + '</div>' +
           '</div>';
         
@@ -1216,48 +1243,46 @@
       }
 
       // ==========================================================================
-      // Gestion des nouveaux messages
+      // Gestion des nouveaux messages (Socket.io)
       // ==========================================================================
       function handleNewMessage(data) {
-        var conversationId = data.conversationId;
-        var message = data.message;
+        console.log('📨 Traitement nouveau message:', data);
         
-        // Ajouter le message à la conversation
-        if (!messages[conversationId]) {
-          messages[conversationId] = [];
-        }
-        messages[conversationId].push(message);
+        var otherUserId = data.sender_id || data.senderId;
+        var messageContent = data.content || data.message;
         
-        // Mettre à jour la conversation dans la liste
-        var conv = conversations.find(function(c) { return c.id === conversationId; });
-        if (conv) {
-          conv.lastMessage = message.content;
-          conv.lastMessageTime = message.timestamp;
-          if (activeConversationId !== conversationId) {
-            conv.unreadCount = (conv.unreadCount || 0) + 1;
-          }
+        if (!otherUserId || !messageContent) {
+          console.warn('⚠️ Données de message incomplètes');
+          return;
         }
         
-        renderConversations();
+        otherUserId = parseInt(otherUserId);
         
-        // Si la conversation est active, afficher le message
-        if (activeConversationId === conversationId) {
-          var msgElement = createMessageElement(message, messages[conversationId].length - 1);
+        if (!messages[otherUserId]) {
+          messages[otherUserId] = [];
+        }
+        messages[otherUserId].push({
+          sender_id: otherUserId,
+          content: messageContent,
+          created_at: data.timestamp || new Date().toISOString()
+        });
+        
+        if (parseInt(activeConversationId) === otherUserId) {
+          var msgElement = createMessageElement({
+            sender_id: otherUserId,
+            content: messageContent,
+            created_at: new Date().toISOString()
+          }, messages[otherUserId].length - 1);
+          
           messageContainer.appendChild(msgElement);
           scrollToBottom();
-          
-          // Marquer comme lu
-          if (socket) {
-            socket.emit('markAsRead', { conversationId: conversationId });
-          }
         }
         
-        // Notification sonore (optionnel)
-        // playNotificationSound();
+        loadConversations();
       }
 
       // ==========================================================================
-      // Envoi de message
+      // Envoi de message via Socket.io
       // ==========================================================================
       if (messageForm) {
         messageForm.addEventListener('submit', function(e) {
@@ -1272,74 +1297,33 @@
         var content = messageInput.value.trim();
         if (!content) return;
         
-        console.log('Envoi du message:', content);
+        console.log('📤 Envoi message à', activeConversationId, ':', content);
         
-        var messageData = {
-          conversationId: activeConversationId,
+        socket.emit('sendMessage', {
+          receiverId: parseInt(activeConversationId),
+          senderId: parseInt(currentUserId),
           content: content,
-          senderId: currentUserId,
           timestamp: new Date().toISOString()
+        });
+        
+        if (!messages[activeConversationId]) {
+          messages[activeConversationId] = [];
+        }
+        
+        var sentMessage = {
+          sender_id: currentUserId,
+          content: content,
+          created_at: new Date().toISOString()
         };
         
-        socket.emit('sendMessage', messageData, function(response) {
-          if (response && response.success) {
-            messageInput.value = '';
-            messageInput.focus();
-          } else {
-            console.error('Erreur lors de l\'envoi du message:', response);
-            showNotification('Erreur lors de l\'envoi du message', 'danger');
-          }
-        });
+        messages[activeConversationId].push(sentMessage);
         
-        // Optimistic update
-        handleNewMessage({
-          conversationId: activeConversationId,
-          message: messageData
-        });
-      }
-
-      // ==========================================================================
-      // Indicateur de saisie
-      // ==========================================================================
-      var typingTimer = null;
-      
-      if (messageInput) {
-        messageInput.addEventListener('input', function() {
-          if (!socket || !activeConversationId) return;
-          
-          socket.emit('typing', { conversationId: activeConversationId });
-          
-          clearTimeout(typingTimer);
-          typingTimer = setTimeout(function() {
-            socket.emit('stopTyping', { conversationId: activeConversationId });
-          }, 1500);
-        });
-      }
-
-      function showTypingIndicator(userId, userName, isTyping) {
-        var indicator = document.getElementById('typing-indicator');
-        var typingText = document.getElementById('typing-text');
+        var msgElement = createMessageElement(sentMessage, messages[activeConversationId].length - 1);
+        messageContainer.appendChild(msgElement);
+        scrollToBottom();
         
-        if (!indicator || !typingText) return;
-        
-        if (isTyping && userName && activeConversationId) {
-          indicator.style.display = 'flex';
-          typingText.textContent = userName + ' écrit...';
-        } else {
-          indicator.style.display = 'none';
-        }
-      }
-
-      // ==========================================================================
-      // Mise à jour du statut en ligne
-      // ==========================================================================
-      function updateUserStatus(userId, online) {
-        conversations.forEach(function(conv) {
-          if (conv.userId === userId) {
-            conv.online = online;
-          }
-        });
-        renderConversations();
+        messageInput.value = '';
+        messageInput.focus();
       }
 
       // ==========================================================================
@@ -1356,66 +1340,29 @@
       // ==========================================================================
       if (backToListBtn) {
         backToListBtn.addEventListener('click', function() {
-          chatContainer.classList.remove('show-chat');
+          if (chatContainer) {
+            chatContainer.classList.remove('show-chat');
+          }
         });
       }
 
       // ==========================================================================
-      // Modal nouvelle conversation
-      // ==========================================================================
-      document.addEventListener('click', function(e) {
-        if (e.target.closest('.new-chat-user')) {
-          var userElement = e.target.closest('.new-chat-user');
-          var userId = userElement.getAttribute('data-user-id');
-          var userName = userElement.getAttribute('data-user-name');
-          
-          console.log('Création d\'une nouvelle conversation avec:', userName);
-          
-          if (socket) {
-            socket.emit('createConversation', { userId: userId }, function(response) {
-              if (response && response.success) {
-                // Fermer le modal
-                var modal = bootstrap.Modal.getInstance(document.getElementById('new-chat-modal'));
-                if (modal) modal.hide();
-                
-                // Ouvrir la nouvelle conversation
-                openConversation(response.conversationId, userName, null);
-                
-                // Recharger la liste
-                loadConversations();
-              }
-            });
-          }
-        }
-      });
-
-      // ==========================================================================
-      // Utilitaires
+      // Fonctions utilitaires
       // ==========================================================================
       function scrollToBottom() {
         if (messageContainer) {
           setTimeout(function() {
             messageContainer.scrollTop = messageContainer.scrollHeight;
-          }, 100);
+          }, 50);
         }
-      }
-
-      function formatTime(timestamp) {
-        if (!timestamp) return '';
-        var date = new Date(timestamp);
-        var now = new Date();
-        var diff = now - date;
-        
-        if (diff < 60000) return 'À l\'instant';
-        if (diff < 3600000) return Math.floor(diff / 60000) + ' min';
-        if (diff < 86400000) return date.getHours() + ':' + String(date.getMinutes()).padStart(2, '0');
-        return date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear();
       }
 
       function formatMessageTime(timestamp) {
         if (!timestamp) return '';
         var date = new Date(timestamp);
-        return date.getHours() + ':' + String(date.getMinutes()).padStart(2, '0');
+        var hours = String(date.getHours()).padStart(2, '0');
+        var minutes = String(date.getMinutes()).padStart(2, '0');
+        return hours + ':' + minutes;
       }
 
       function escapeHtml(text) {
@@ -1425,14 +1372,45 @@
         return div.innerHTML;
       }
 
-      function showNotification(message, type) {
-        // Implémentation simple - à adapter selon votre système de notifications
-        console.log('[' + type + '] ' + message);
+      function showLoadError(message) {
+        if (loadingIndicator) {
+          loadingIndicator.innerHTML = 
+            '<div class="text-center py-4">' +
+              '<i data-feather="alert-triangle" style="width: 32px; height: 32px; color: #dc3545;"></i>' +
+              '<p class="text-danger mt-2 mb-3">' + message + '</p>' +
+              '<button class="btn btn-sm btn-outline-danger" onclick="location.reload()">' +
+                '<i data-feather="refresh-cw" style="width: 14px; height: 14px;"></i> Réessayer' +
+              '</button>' +
+            '</div>';
+          if (typeof feather !== 'undefined') feather.replace();
+        }
       }
+
+      // ==========================================================================
+      // Gestion du modal nouvelle conversation
+      // ==========================================================================
+      document.addEventListener('click', function(e) {
+        if (e.target.closest('.new-chat-user')) {
+          var userElement = e.target.closest('.new-chat-user');
+          var userId = userElement.getAttribute('data-user-id');
+          var userName = userElement.getAttribute('data-user-name');
+          
+          console.log('✨ Nouvelle conversation avec:', userName, '(ID:', userId, ')');
+          
+          var modalElement = document.getElementById('new-chat-modal');
+          if (modalElement) {
+            var modal = bootstrap.Modal.getInstance(modalElement);
+            if (modal) modal.hide();
+          }
+          
+          openConversation(parseInt(userId), userName, null);
+        }
+      });
 
       // ==========================================================================
       // Initialisation
       // ==========================================================================
+      console.log('🚀 Démarrage du chat...');
       initSocket();
       loadConversations();
     });
