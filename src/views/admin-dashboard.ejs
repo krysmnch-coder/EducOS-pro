@@ -20,48 +20,27 @@
         </div>
 
         <%# --- Section des Raccourcis (Widgets) --- %>
-        <% 
-        // Définir des widgets par défaut pour l'administrateur
-        const adminWidgets = [
-            { key: 'students', icon: 'users', title: 'Gestion des Élèves', link: '/students', description: 'Gérer les élèves' },
-            { key: 'teachers', icon: 'user-check', title: 'Gestion des Professeurs', link: '/teachers', description: 'Gérer les professeurs' },
-            { key: 'classes', icon: 'grid', title: 'Gestion des Classes', link: '/classes', description: 'Gérer les classes' },
-            { key: 'admin', icon: 'settings', title: 'Paramètres', link: '/admin', description: 'Paramètres du système' }
-        ];
-        
-        // Définir des widgets par défaut pour le super admin
-        const superAdminWidgets = [
-            { key: 'establishments', icon: 'home', title: 'Établissements', link: '/establishments', description: 'Gérer les établissements' },
-            { key: 'admins', icon: 'user-cog', title: 'Admins', link: '/admin', description: 'Gérer les administrateurs' },
-            { key: 'users', icon: 'users', title: 'Utilisateurs', link: '/admin/users', description: 'Gérer les utilisateurs' },
-            { key: 'settings', icon: 'settings', title: 'Paramètres', link: '/admin/settings', description: 'Paramètres du système' }
-        ];
-        
-        // Choisir les widgets selon le rôle
-        let defaultWidgets = adminWidgets;
-        if (currentUser.role === 'SUPER_ADMIN' || currentUser.role === 'superadmin') {
-            defaultWidgets = superAdminWidgets;
-        }
-        
-        // Utiliser les widgets fournis ou les widgets par défaut
-        const displayWidgets = (typeof widgets !== 'undefined' && widgets && widgets.length > 0) ? widgets : defaultWidgets;
-        %>
-        
-        <h2 class="mb-4">Raccourcis de gestion</h2>
-        <div class="row">
-            <% displayWidgets.forEach((widget, index) => { %>
-            <div class="col-xl-3 col-md-6 mb-4">
-                <a href="<%= widget.link || '#' %>" class="text-decoration-none shortcut-link" data-shortcut-key="<%= widget.key || 'widget-' + index %>">
-                    <div class="card dashboard-stat h-100 glass-card">
+        <% if (typeof widgets !== 'undefined' && widgets.length > 0) { %>
+            <div class="row g-4">
+                <% widgets.forEach(widget => { %>
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <a href="<%= (user.role === 'PARENT' && (typeof parentData === 'undefined' || !parentData.selectedChild)) ? '#' : widget.link %>" class="text-decoration-none shortcut-link <%= (user.role === 'PARENT' && (typeof parentData === 'undefined' || !parentData.selectedChild)) ? 'disabled' : '' %>" data-shortcut-key="<%= widget.key %>">
+                    <div class="card dashboard-stat h-100">
                         <div class="card-body text-center">
-                            <div class="stat-icon mb-3">
-                                <i data-feather="<%= widget.icon || 'box' %>"></i>
-                            </div>
-                            <h5 class="card-title mb-2"><%= widget.title || 'Widget' %></h5>
-                            <p class="card-text text-muted small"><%= widget.description || 'Description' %></p>
+                        <div class="stat-icon mb-3">
+                            <i data-feather="<%= widget.icon %>"></i>
+                        </div>
+                        <h5 class="card-title mb-2"><%= widget.title %></h5>
+                        <p class="card-text text-muted small"><%= widget.description %></p>
                         </div>
                     </div>
-                </a>
+                    </a>
+                </div>
+                <% }); %>
+            </div>
+        <% } else { %>
+            <div class="text-center py-5">
+                <p class="text-muted">Aucun raccourci n'est configuré pour votre rôle pour le moment.</p>
             </div>
             <% }); %>
         </div>
