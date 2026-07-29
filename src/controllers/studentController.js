@@ -78,48 +78,6 @@ function generateSecurePassword(length = 8) {
 }
 
 /**
- * Crée un nouveau compte parent depuis le formulaire élève (via une modale).
- */
-const createParentFromStudentForm = async (req, res) => {
-    const { name, phone_number } = req.body;
-    const establishmentId = req.user.establishment_id;
-
-    if (!name || !phone_number) {
-        return res.status(400).json({ success: false, message: 'Le nom et le numéro de téléphone sont requis.' });
-    }
-
-    try {
-        const email = `${phone_number.replace(/\s+/g, '')}@educos.parent.local`;
-
-        const existingUser = await userModel.getUserByEmail(email);
-        if (existingUser) {
-            return res.status(409).json({ success: false, message: 'Un utilisateur avec un identifiant similaire existe déjà.' });
-        }
-
-        const defaultPassword = generateSecurePassword(8);
-        const hashedPassword = await bcrypt.hash(defaultPassword, 10);
-
-        const [newUserIdObj] = await userModel.createUser({
-            name, email, password: hashedPassword,
-            role: ROLES.PARENT, approved: 1,
-            establishment_id: establishmentId,
-            phone_number: phone_number,
-            avatar_url: '/img/user.png'
-        });
-        
-        const newParentId = newUserIdObj.id || newUserIdObj;
-
-        res.status(201).json({ success: true, parent: {
-            id: newParentId, name, email, defaultPassword
-        }});
-
-    } catch (error) {
-        console.error("Erreur lors de la création du parent depuis le formulaire élève:", error);
-        res.status(500).json({ success: false, message: 'Une erreur est survenue sur le serveur.' });
-    }
-};
-
-/**
  * Affiche le formulaire pour ajouter un nouvel élève.
  */
 const renderNewStudentForm = async (req, res) => {
@@ -476,7 +434,6 @@ module.exports = {
   completeStudentRegistration,
   renderEditStudentForm,
   updateStudent,
-  createParentFromStudentForm,
   renderAddChildForm,
   postAddChild,
 };

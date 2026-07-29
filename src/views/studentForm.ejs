@@ -550,7 +550,7 @@
         }
     </script>
 
-       <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="/js/theme.js"></script>
@@ -560,15 +560,13 @@
         // ==========================================================================
         // INITIALISATION PRINCIPALE
         // ==========================================================================
-        (function() {
-            // Variables globales dans la closure
-            var linkedParents = [];
-            var newParentCounter = 10000;
-            var tomSelectInstance = null;
-            var SERVER_DATA = { linkedParents: [], manualParents: [], studentId: null, isEdit: false };
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof feather !== 'undefined') feather.replace();
 
-            // Récupérer les données serveur
+            // Récupérer les données serveur depuis le script JSON
             var serverDataEl = document.getElementById('server-data');
+            var SERVER_DATA = { linkedParents: [], manualParents: [], studentId: null, isEdit: false };
+            
             if (serverDataEl) {
                 try {
                     SERVER_DATA = JSON.parse(serverDataEl.textContent);
@@ -577,68 +575,47 @@
                 }
             }
 
-            // ========================================================================
-            // INITIALISATION
-            // ========================================================================
-            function init() {
-                if (typeof feather !== 'undefined') feather.replace();
-                
-                // Charger les parents
-                loadInitialParents();
-                
-                // Initialiser TomSelect
-                initTomSelect();
-                
-                // Rendre la liste
-                renderLinkedParents();
-                
-                // Initialiser le modal
-                initModal();
-                
-                // Initialiser le formulaire
-                initForm();
-                
-                console.log('✅ Initialisation terminée');
-            }
+            console.log('📦 Données serveur:', SERVER_DATA);
 
             // ========================================================================
-            // CHARGEMENT DES PARENTS
+            // DONNÉES INITIALES DES PARENTS
             // ========================================================================
-            function loadInitialParents() {
-                linkedParents = [];
-                
-                if (SERVER_DATA.linkedParents && SERVER_DATA.linkedParents.length > 0) {
-                    SERVER_DATA.linkedParents.forEach(function(parent) {
-                        linkedParents.push({
-                            id: parent.id,
-                            name: parent.name || 'N/A',
-                            phone: parent.phone_number || parent.phone || '',
-                            isNew: false,
-                            type: 'linked'
-                        });
-                    });
-                }
+            var linkedParents = [];
 
-                if (SERVER_DATA.manualParents && SERVER_DATA.manualParents.length > 0) {
-                    SERVER_DATA.manualParents.forEach(function(parent) {
-                        linkedParents.push({
-                            id: parent.id || ('manual_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)),
-                            name: parent.name || 'N/A',
-                            phone: parent.phone || '',
-                            isNew: true,
-                            type: 'manual'
-                        });
+            if (SERVER_DATA.linkedParents && SERVER_DATA.linkedParents.length > 0) {
+                SERVER_DATA.linkedParents.forEach(function(parent) {
+                    linkedParents.push({
+                        id: parent.id,
+                        name: parent.name || 'N/A',
+                        phone: parent.phone_number || parent.phone || '',
+                        isNew: false,
+                        type: 'linked'
                     });
-                }
+                });
             }
+
+            if (SERVER_DATA.manualParents && SERVER_DATA.manualParents.length > 0) {
+                SERVER_DATA.manualParents.forEach(function(parent) {
+                    linkedParents.push({
+                        id: parent.id || ('manual_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)),
+                        name: parent.name || 'N/A',
+                        phone: parent.phone || '',
+                        isNew: true,
+                        type: 'manual'
+                    });
+                });
+            }
+
+            console.log('👥 Tous les parents chargés:', linkedParents);
+
+            var newParentCounter = 10000;
+            var tomSelectInstance;
 
             // ========================================================================
             // TOM SELECT
             // ========================================================================
-            function initTomSelect() {
-                var parentSelect = document.getElementById('parent_ids');
-                if (!parentSelect || typeof TomSelect === 'undefined') return;
-                
+            var parentSelect = document.getElementById('parent_ids');
+            if (parentSelect && typeof TomSelect !== 'undefined') {
                 tomSelectInstance = new TomSelect(parentSelect, {
                     plugins: ['remove_button'],
                     create: false,
@@ -682,17 +659,16 @@
                 if (linkedParents.length === 0) {
                     container.innerHTML = '<div class="list-group-item text-center py-3" style="color: rgba(255,255,255,0.5);"><i data-feather="users" style="width: 20px; height: 20px;"></i><p class="mb-0 mt-1">Aucun parent lié</p></div>';
                 } else {
-                    var html = '';
-                    linkedParents.forEach(function(parent, index) {
+                    container.innerHTML = linkedParents.map(function(parent, index) {
                         var phoneDisplay = parent.phone 
                             ? '<span style="color: #22c55e; font-weight: 500;">' + escapeHtml(parent.phone) + '</span>'
-                            : '<span class="phone-editable" data-action="edit" data-index="' + index + '" title="Cliquez pour ajouter un numéro" style="color: #ef4444; cursor: pointer; border-bottom: 1px dashed #ef4444;">Non renseigné - Cliquez pour ajouter</span>';
+                            : '<span class="phone-editable" onclick="window.editPhone(' + index + ')" title="Cliquez pour ajouter un numéro" style="color: #ef4444; cursor: pointer; border-bottom: 1px dashed #ef4444;">Non renseigné - Cliquez pour ajouter</span>';
                         
                         var typeBadge = parent.type === 'manual' 
                             ? '<span class="badge bg-info ms-2" style="font-size: 0.65rem;">Ajouté manuellement</span>'
                             : '<span class="badge bg-success ms-2" style="font-size: 0.65rem;">Compte existant</span>';
                         
-                        html += '<div class="list-group-item linked-parent-item" style="animation-delay: ' + (index * 0.05) + 's;">' +
+                        return '<div class="list-group-item linked-parent-item" style="animation-delay: ' + (index * 0.05) + 's;">' +
                             '<div class="d-flex w-100 justify-content-between align-items-start">' +
                                 '<div>' +
                                     '<h6 class="mb-1"><i data-feather="user" style="width: 14px; height: 14px;"></i> ' + escapeHtml(parent.name) + typeBadge + '</h6>' +
@@ -700,236 +676,121 @@
                                         '<span id="phone-display-' + index + '">' + phoneDisplay + '</span>' +
                                         '<span id="phone-edit-' + index + '" style="display: none;">' +
                                             '<input type="tel" class="phone-edit-input" id="phone-input-' + index + '" value="' + escapeHtml(parent.phone) + '" placeholder="Numéro" style="width: 150px; padding: 2px 8px; border-radius: 4px; border: 1px solid #0d6efd; background: rgba(255,255,255,0.1); color: #fff;">' +
-                                            '<button class="btn btn-sm btn-success" data-action="save-phone" data-index="' + index + '" style="padding: 2px 8px; font-size: 0.75rem;">✓</button>' +
-                                            '<button class="btn btn-sm btn-outline-secondary" data-action="cancel-phone" data-index="' + index + '" style="padding: 2px 8px; font-size: 0.75rem;">✗</button>' +
+                                            '<button class="btn btn-sm btn-success" onclick="window.savePhone(' + index + ')" style="padding: 2px 8px; font-size: 0.75rem;">✓</button>' +
+                                            '<button class="btn btn-sm btn-outline-secondary" onclick="window.cancelEditPhone(' + index + ')" style="padding: 2px 8px; font-size: 0.75rem;">✗</button>' +
                                         '</span>' +
                                     '</small></p>' +
                                 '</div>' +
-                                '<button type="button" class="btn btn-sm btn-outline-danger" data-action="remove" data-index="' + index + '" title="Retirer ce parent"><i data-feather="trash-2" style="width: 14px; height: 14px;"></i></button>' +
+                                '<button type="button" class="btn btn-sm btn-outline-danger" onclick="window.removeLinkedParent(' + index + ')" title="Retirer ce parent"><i data-feather="trash-2" style="width: 14px; height: 14px;"></i></button>' +
                             '</div>' +
                         '</div>';
-                    });
-                    container.innerHTML = html;
+                    }).join('');
                 }
                 
                 if (typeof feather !== 'undefined') feather.replace();
-                
-                // Attacher les événements APRÈS le rendu
-                attachListEvents();
             }
 
-            // ========================================================================
-            // ÉVÉNEMENTS DE LA LISTE (délégation d'événements)
-            // ========================================================================
-            function attachListEvents() {
-                var container = document.getElementById('linked-parents-list');
-                if (!container) return;
-                
-                // Supprimer l'ancien listener
-                var newContainer = container.cloneNode(true);
-                container.parentNode.replaceChild(newContainer, container);
-                container = newContainer;
-                
-                container.addEventListener('click', function(e) {
-                    var target = e.target.closest('[data-action]');
-                    if (!target) return;
-                    
-                    var action = target.getAttribute('data-action');
-                    var index = parseInt(target.getAttribute('data-index'));
-                    
-                    if (isNaN(index)) return;
-                    
-                    switch(action) {
-                        case 'edit':
-                            editPhoneHandler(index);
-                            break;
-                        case 'save-phone':
-                            savePhoneHandler(index);
-                            break;
-                        case 'cancel-phone':
-                            cancelEditPhoneHandler(index);
-                            break;
-                        case 'remove':
-                            removeParentHandler(index);
-                            break;
-                    }
-                });
-            }
+            // Fonctions globales
+            window.editPhone = function(index) {
+                document.getElementById('phone-display-' + index).style.display = 'none';
+                document.getElementById('phone-edit-' + index).style.display = 'inline';
+                document.getElementById('phone-input-' + index).focus();
+            };
 
-            // ========================================================================
-            // HANDLERS
-            // ========================================================================
-            function editPhoneHandler(index) {
-                var display = document.getElementById('phone-display-' + index);
-                var edit = document.getElementById('phone-edit-' + index);
-                var input = document.getElementById('phone-input-' + index);
-                if (display) display.style.display = 'none';
-                if (edit) edit.style.display = 'inline';
-                if (input) setTimeout(function() { input.focus(); }, 50);
-            }
-
-            function savePhoneHandler(index) {
-                var input = document.getElementById('phone-input-' + index);
-                if (input && linkedParents[index]) {
-                    linkedParents[index].phone = input.value.trim();
-                }
+            window.savePhone = function(index) {
+                var phone = document.getElementById('phone-input-' + index).value.trim();
+                if (linkedParents[index]) linkedParents[index].phone = phone;
                 renderLinkedParents();
                 updateManualParentsData();
-            }
+            };
 
-            function cancelEditPhoneHandler(index) {
+            window.cancelEditPhone = function(index) {
                 renderLinkedParents();
-            }
+            };
 
-            function removeParentHandler(index) {
-                if (index < 0 || index >= linkedParents.length) return;
+            window.removeLinkedParent = function(index) {
                 var parent = linkedParents[index];
-                
-                // Utiliser une méthode plus fiable que confirm()
-                var shouldRemove = window.confirm('Retirer "' + parent.name + '" de la liste ?');
-                
-                if (shouldRemove) {
+                if (confirm('Retirer "' + parent.name + '" de la liste ?')) {
                     if (parent.type === 'linked' && tomSelectInstance) {
-                        try {
-                            tomSelectInstance.removeItem(parent.id);
-                        } catch(e) {}
+                        tomSelectInstance.removeItem(parent.id);
                     }
                     linkedParents.splice(index, 1);
                     renderLinkedParents();
                     updateManualParentsData();
                 }
-            }
+            };
 
             function updateManualParentsData() {
-                var manualParentsData = document.getElementById('manual-parents-data');
-                if (!manualParentsData) return;
                 var manualParents = linkedParents
                     .filter(function(p) { return p.type === 'manual'; })
                     .map(function(p) { return { name: p.name, phone: p.phone }; });
-                manualParentsData.value = JSON.stringify(manualParents);
+                document.getElementById('manual-parents-data').value = JSON.stringify(manualParents);
             }
 
-            // ========================================================================
-            // MODAL AJOUTER PARENT
-            // ========================================================================
-            function initModal() {
-                var modalEl = document.getElementById('addParentModal');
-                if (!modalEl) return;
-                
-                var modal = new bootstrap.Modal(modalEl, {
-                    backdrop: true,
-                    keyboard: true
-                });
-                
+            // Modal
+            var addParentModalEl = document.getElementById('addParentModal');
+            if (addParentModalEl) {
+                var modal = new bootstrap.Modal(addParentModalEl);
                 var saveBtn = document.getElementById('save-new-parent-btn');
                 var alertEl = document.getElementById('add-parent-alert');
                 var nameInput = document.getElementById('new-parent-name');
                 var phoneInput = document.getElementById('new-parent-phone');
                 var form = document.getElementById('add-parent-form');
 
-                // Fonction pour ajouter un parent
-                function addParent() {
-                    var name = nameInput ? nameInput.value.trim() : '';
-                    var phone = phoneInput ? phoneInput.value.trim() : '';
+                saveBtn.addEventListener('click', function() {
+                    var name = nameInput.value.trim();
+                    var phone = phoneInput.value.trim();
                     
-                    if (!name) { 
-                        if (alertEl) {
-                            alertEl.textContent = 'Veuillez entrer le nom du parent.';
-                            alertEl.style.display = 'block';
-                        }
-                        return; 
-                    }
-                    if (!phone) { 
-                        if (alertEl) {
-                            alertEl.textContent = 'Veuillez entrer le numéro de téléphone.';
-                            alertEl.style.display = 'block';
-                        }
-                        return; 
-                    }
+                    if (!name) { alertEl.innerHTML = 'Veuillez entrer le nom du parent.'; alertEl.style.display = 'block'; return; }
+                    if (!phone) { alertEl.innerHTML = 'Veuillez entrer le numéro de téléphone.'; alertEl.style.display = 'block'; return; }
                     
-                    // Ajouter le parent
-                    linkedParents.push({ 
-                        id: newParentCounter++, 
-                        name: name, 
-                        phone: phone, 
-                        isNew: true, 
-                        type: 'manual' 
-                    });
-                    
+                    linkedParents.push({ id: newParentCounter++, name: name, phone: phone, isNew: true, type: 'manual' });
                     renderLinkedParents();
                     updateManualParentsData();
-                    
-                    // Réinitialiser et fermer
-                    if (form) form.reset();
-                    if (alertEl) alertEl.style.display = 'none';
                     modal.hide();
-                    
-                    // Feedback visuel simple
-                    var toast = document.createElement('div');
-                    toast.textContent = '✅ Parent "' + name + '" ajouté !';
-                    toast.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:9999;background:rgba(25,135,84,0.9);color:white;padding:12px 20px;border-radius:8px;font-size:14px;box-shadow:0 4px 15px rgba(0,0,0,0.3);';
-                    document.body.appendChild(toast);
-                    setTimeout(function() { 
-                        toast.style.opacity = '0'; 
-                        toast.style.transition = 'opacity 0.3s';
-                        setTimeout(function() { if (toast.parentNode) toast.remove(); }, 300);
-                    }, 2000);
-                }
-
-                // Nettoyer et réattacher l'événement
-                if (saveBtn) {
-                    var newBtn = saveBtn.cloneNode(true);
-                    saveBtn.parentNode.replaceChild(newBtn, saveBtn);
-                    newBtn.addEventListener('click', addParent);
-                }
-
-                // Réinitialiser quand le modal est fermé
-                modalEl.addEventListener('hidden.bs.modal', function() {
-                    if (form) form.reset();
-                    if (alertEl) alertEl.style.display = 'none';
-                    if (typeof feather !== 'undefined') feather.replace();
+                    form.reset();
+                    alertEl.style.display = 'none';
+                    showToast('Parent "' + name + '" ajouté avec succès !');
                 });
 
-                // Permettre la soumission avec Entrée
-                if (form) {
-                    form.addEventListener('submit', function(e) {
-                        e.preventDefault();
-                        addParent();
-                    });
-                }
+                addParentModalEl.addEventListener('hidden.bs.modal', function() {
+                    form.reset();
+                    alertEl.style.display = 'none';
+                    if (typeof feather !== 'undefined') feather.replace();
+                });
             }
 
-            // ========================================================================
-            // SOUMISSION DU FORMULAIRE PRINCIPAL
-            // ========================================================================
-            function initForm() {
-                var studentForm = document.getElementById('student-form');
-                if (!studentForm) return;
-                
+            function showToast(message) {
+                var toast = document.createElement('div');
+                toast.className = 'toast-notification';
+                toast.innerHTML = '✅ ' + message;
+                document.body.appendChild(toast);
+                setTimeout(function() {
+                    toast.style.animation = 'toastSlideOut 0.3s ease forwards';
+                    setTimeout(function() { toast.remove(); }, 300);
+                }, 3000);
+            }
+
+            // Soumission
+            var studentForm = document.getElementById('student-form');
+            if (studentForm) {
                 studentForm.addEventListener('submit', function(e) {
                     updateManualParentsData();
-                    
-                    // Supprimer les anciens inputs cachés
-                    var oldInputs = studentForm.querySelectorAll('input[name="parent_ids[]"]');
-                    oldInputs.forEach(function(inp) { inp.remove(); });
-                    
-                    // Ajouter les parents liés
                     linkedParents.filter(function(p) { return p.type === 'linked'; }).forEach(function(parent) {
-                        var input = document.createElement('input');
-                        input.type = 'hidden';
-                        input.name = 'parent_ids[]';
-                        input.value = parent.id;
-                        studentForm.appendChild(input);
+                        var existingInput = studentForm.querySelector('input[type="hidden"][name="parent_ids[]"][value="' + parent.id + '"]');
+                        if (!existingInput) {
+                            var input = document.createElement('input');
+                            input.type = 'hidden';
+                            input.name = 'parent_ids[]';
+                            input.value = parent.id;
+                            studentForm.appendChild(input);
+                        }
                     });
-                    
-                    console.log('📤 Formulaire soumis - Parents:', linkedParents.length);
+                    console.log('📤 Formulaire soumis avec ' + linkedParents.length + ' parents');
                     return true;
                 });
             }
 
-            // ========================================================================
-            // UTILITAIRE
-            // ========================================================================
             function escapeHtml(text) {
                 if (!text) return '';
                 var div = document.createElement('div');
@@ -937,13 +798,10 @@
                 return div.innerHTML;
             }
 
-            // ========================================================================
-            // DÉMARRAGE
-            // ========================================================================
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', init);
-            } else {
-                init();
-            }
-        })();
+            // Init
+            renderLinkedParents();
+            updateManualParentsData();
+        });
     </script>
+</body>
+</html>
