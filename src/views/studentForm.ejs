@@ -1,458 +1,57 @@
 <!DOCTYPE html>
-<html lang="fr" data-theme="light">
+<html lang="fr" data-theme="dark" data-bs-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title %></title>
+    <title>Modifier le dossier de Tiana RABENJA</title>
     
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- TomSelect pour les listes déroulantes améliorées -->
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.css" rel="stylesheet">
-
-    <!-- Styles personnalisés -->
     <link rel="stylesheet" href="/css/style.css">
     
     <style>
-        /* ==========================================================================
-           Page Formulaire Élève - Style Glassmorphism
-           ========================================================================== */
+        /* VOTRE CSS EXISTANT - NE PAS MODIFIER */
+        /* ... tout votre CSS ... */
         
-        /* Page shell */
-        .page-shell {
-            padding-top: 1rem;
-            padding-bottom: 2rem;
+        /* Styles additionnels pour l'édition inline du téléphone */
+        .phone-editable {
+            cursor: pointer;
+            border-bottom: 1px dashed #6c757d;
+            transition: all 0.3s ease;
         }
         
-        /* Carte principale Glassmorphism */
-        .glass-form-card {
-            background: rgba(255, 255, 255, 0.08) !important;
-            backdrop-filter: blur(12px) !important;
-            -webkit-backdrop-filter: blur(12px) !important;
-            border: 1px solid rgba(255, 255, 255, 0.15) !important;
-            border-radius: 1.25rem !important;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06) !important;
-            overflow: hidden;
-            animation: card-fade-in 0.6s ease forwards !important;
-            opacity: 0;
-            transform: translateY(20px);
+        .phone-editable:hover {
+            color: var(--bs-primary, #0d6efd);
+            border-bottom-color: var(--bs-primary, #0d6efd);
         }
         
-        @keyframes card-fade-in {
-            from {
-                opacity: 0;
-                transform: translateY(20px) scale(0.98);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-        
-        [data-theme="dark"] .glass-form-card {
-            background: rgba(255, 255, 255, 0.03) !important;
-            border: 1px solid rgba(255, 255, 255, 0.06) !important;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
-        }
-        
-        .glass-form-card .card-body {
-            padding: 2rem !important;
-        }
-        
-        /* Titre de page */
-        .page-title {
+        .phone-edit-input {
+            width: 150px;
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--bs-primary, #0d6efd);
+            background: rgba(255, 255, 255, 0.1);
             color: var(--text-color, #212529);
-            font-weight: 700;
-            animation: title-slide 0.6s ease forwards !important;
-            opacity: 0;
-            transform: translateX(-10px);
+            font-size: 0.875rem;
         }
         
-        @keyframes title-slide {
-            from {
-                opacity: 0;
-                transform: translateX(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
+        .phone-edit-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.2);
         }
         
-        [data-theme="dark"] .page-title {
-            color: #ffffff;
+        .btn-save-phone {
+            padding: 2px 8px;
+            font-size: 0.75rem;
+            margin-left: 5px;
         }
         
-        /* Bouton retour Glassmorphism */
-        .glass-btn-back {
-            background: rgba(255, 255, 255, 0.05) !important;
-            backdrop-filter: blur(8px) !important;
-            -webkit-backdrop-filter: blur(8px) !important;
-            border: 1px solid rgba(255, 255, 255, 0.12) !important;
-            border-radius: 0.75rem !important;
-            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
-            color: var(--text-color, #212529) !important;
+        .linked-parent-item {
+            animation: fadeInUp 0.3s ease;
         }
         
-        .glass-btn-back:hover {
-            transform: translateY(-2px) scale(1.02) !important;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
-            background: rgba(255, 255, 255, 0.1) !important;
-        }
-        
-        [data-theme="dark"] .glass-btn-back {
-            color: #ffffff !important;
-            border-color: rgba(255, 255, 255, 0.08) !important;
-        }
-        
-        [data-theme="dark"] .glass-btn-back:hover {
-            background: rgba(255, 255, 255, 0.08) !important;
-        }
-        
-        /* Labels */
-        .form-label {
-            font-weight: 500;
-            color: var(--text-color, #212529);
-        }
-        
-        [data-theme="dark"] .form-label {
-            color: rgba(255, 255, 255, 0.8);
-        }
-        
-        /* Champs de formulaire Glassmorphism */
-        .form-control, .form-select {
-            background: rgba(255, 255, 255, 0.06) !important;
-            border: 1px solid rgba(255, 255, 255, 0.15) !important;
-            border-radius: 0.75rem !important;
-            padding: 0.7rem 1rem !important;
-            transition: all 0.3s ease !important;
-            color: var(--text-color, #212529) !important;
-            box-shadow: none !important;
-        }
-        
-        .form-control:focus, .form-select:focus {
-            background: rgba(255, 255, 255, 0.1) !important;
-            border-color: var(--bs-primary, #0d6efd) !important;
-            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.12) !important;
-        }
-        
-        .form-control:disabled, .form-control[readonly] {
-            background: rgba(255, 255, 255, 0.03) !important;
-            opacity: 0.7;
-            cursor: not-allowed;
-        }
-        
-        [data-theme="dark"] .form-control,
-        [data-theme="dark"] .form-select {
-            background: rgba(255, 255, 255, 0.04) !important;
-            border: 1px solid rgba(255, 255, 255, 0.08) !important;
-            color: #ffffff !important;
-        }
-        
-        [data-theme="dark"] .form-control:focus,
-        [data-theme="dark"] .form-select:focus {
-            background: rgba(255, 255, 255, 0.08) !important;
-            border-color: #ffffff !important;
-            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.08) !important;
-        }
-        
-        [data-theme="dark"] .form-control:disabled,
-        [data-theme="dark"] .form-control[readonly] {
-            background: rgba(255, 255, 255, 0.02) !important;
-        }
-        
-        [data-theme="dark"] .form-select {
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
-        }
-        
-        [data-theme="dark"] .form-select option {
-            background-color: #16213e;
-            color: #ffffff;
-        }
-        
-        .form-text {
-            color: var(--text-muted, #6c757d) !important;
-            font-size: 0.8rem;
-        }
-        
-        [data-theme="dark"] .form-text {
-            color: rgba(255, 255, 255, 0.5) !important;
-        }
-        
-        /* Texarea */
-        textarea.form-control {
-            resize: vertical;
-            min-height: 60px;
-        }
-        
-        /* Séparateurs */
-        hr {
-            border-color: rgba(13, 110, 253, 0.08) !important;
-            opacity: 1 !important;
-        }
-        
-        [data-theme="dark"] hr {
-            border-color: rgba(255, 255, 255, 0.06) !important;
-        }
-        
-        /* Titres de section */
-        .section-title {
-            color: var(--text-color, #212529);
-            font-weight: 600;
-            position: relative;
-            padding-bottom: 0.5rem;
-        }
-        
-        .section-title::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 40px;
-            height: 3px;
-            background: linear-gradient(90deg, var(--bs-primary, #0d6efd), var(--bs-info, #0dcaf0));
-            border-radius: 10px;
-        }
-        
-        [data-theme="dark"] .section-title {
-            color: #e4e4e4;
-        }
-        
-        /* Bouton principal Glassmorphism */
-        .glass-btn-primary {
-            background: linear-gradient(135deg, rgba(13, 110, 253, 0.2), rgba(13, 202, 240, 0.2)) !important;
-            backdrop-filter: blur(8px) !important;
-            -webkit-backdrop-filter: blur(8px) !important;
-            border: 1px solid rgba(13, 110, 253, 0.25) !important;
-            border-radius: 0.75rem !important;
-            padding: 0.6rem 1.5rem !important;
-            font-weight: 600 !important;
-            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
-            color: var(--bs-primary, #0d6efd) !important;
-        }
-        
-        .glass-btn-primary:hover {
-            transform: translateY(-2px) scale(1.02) !important;
-            box-shadow: 0 8px 30px rgba(13, 110, 253, 0.2) !important;
-            background: linear-gradient(135deg, rgba(13, 110, 253, 0.3), rgba(13, 202, 240, 0.3)) !important;
-            border-color: var(--bs-primary, #0d6efd) !important;
-        }
-        
-        [data-theme="dark"] .glass-btn-primary {
-            color: #ffffff !important;
-            border: 1px solid rgba(255, 255, 255, 0.15) !important;
-            background: rgba(255, 255, 255, 0.05) !important;
-        }
-        
-        [data-theme="dark"] .glass-btn-primary:hover {
-            background: rgba(255, 255, 255, 0.1) !important;
-            box-shadow: 0 8px 30px rgba(255, 255, 255, 0.08) !important;
-            border-color: #ffffff !important;
-        }
-        
-        /* Bouton secondaire Glassmorphism */
-        .glass-btn-secondary {
-            background: rgba(255, 255, 255, 0.05) !important;
-            backdrop-filter: blur(8px) !important;
-            -webkit-backdrop-filter: blur(8px) !important;
-            border: 1px solid rgba(255, 255, 255, 0.12) !important;
-            border-radius: 0.75rem !important;
-            padding: 0.6rem 1.5rem !important;
-            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
-            color: var(--text-color, #212529) !important;
-        }
-        
-        .glass-btn-secondary:hover {
-            transform: translateY(-2px) scale(1.02) !important;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
-            background: rgba(255, 255, 255, 0.1) !important;
-        }
-        
-        [data-theme="dark"] .glass-btn-secondary {
-            color: #ffffff !important;
-            border-color: rgba(255, 255, 255, 0.08) !important;
-        }
-        
-        [data-theme="dark"] .glass-btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.08) !important;
-        }
-        
-        /* Bouton nouveau parent */
-        .btn-outline-primary {
-            background: rgba(13, 110, 253, 0.05) !important;
-            border: 1px solid rgba(13, 110, 253, 0.15) !important;
-            border-radius: 0.5rem !important;
-            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
-            color: var(--bs-primary, #0d6efd) !important;
-        }
-        
-        .btn-outline-primary:hover {
-            background: rgba(13, 110, 253, 0.15) !important;
-            transform: translateY(-2px) scale(1.02) !important;
-        }
-        
-        [data-theme="dark"] .btn-outline-primary {
-            color: #ffffff !important;
-            border-color: rgba(255, 255, 255, 0.1) !important;
-            background: rgba(255, 255, 255, 0.05) !important;
-        }
-        
-        [data-theme="dark"] .btn-outline-primary:hover {
-            background: rgba(255, 255, 255, 0.1) !important;
-        }
-        
-        /* Liste des parents liés */
-        .glass-list-group {
-            background: transparent !important;
-            border-radius: 0.75rem !important;
-            overflow: hidden !important;
-        }
-        
-        .glass-list-group .list-group-item {
-            background: rgba(255, 255, 255, 0.04) !important;
-            border: 1px solid rgba(255, 255, 255, 0.06) !important;
-            border-radius: 0.5rem !important;
-            margin-bottom: 0.25rem !important;
-            transition: all 0.3s ease !important;
-        }
-        
-        .glass-list-group .list-group-item:hover {
-            background: rgba(13, 110, 253, 0.04) !important;
-            transform: translateX(3px) !important;
-        }
-        
-        [data-theme="dark"] .glass-list-group .list-group-item {
-            background: rgba(255, 255, 255, 0.02) !important;
-            border-color: rgba(255, 255, 255, 0.04) !important;
-        }
-        
-        [data-theme="dark"] .glass-list-group .list-group-item:hover {
-            background: rgba(255, 255, 255, 0.04) !important;
-        }
-        
-        .glass-list-group .list-group-item h6 {
-            color: var(--text-color, #212529);
-        }
-        
-        [data-theme="dark"] .glass-list-group .list-group-item h6 {
-            color: rgba(255, 255, 255, 0.9);
-        }
-        
-        /* Alertes */
-        .alert {
-            border-radius: 0.75rem !important;
-            border-left-width: 4px !important;
-            animation: alert-fade-in 0.4s ease-out !important;
-        }
-        
-        @keyframes alert-fade-in {
-            from {
-                opacity: 0;
-                transform: translateY(-10px) scale(0.98);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-        
-        .alert-info {
-            background: rgba(13, 202, 240, 0.08) !important;
-            border-color: rgba(13, 202, 240, 0.3) !important;
-            color: var(--text-color, #212529) !important;
-        }
-        
-        [data-theme="dark"] .alert-info {
-            background: rgba(13, 202, 240, 0.12) !important;
-            color: #e4e4e4 !important;
-        }
-        
-        /* Modal Glassmorphism */
-        .modal-glass .modal-content {
-            background: rgba(255, 255, 255, 0.92) !important;
-            backdrop-filter: blur(20px) !important;
-            -webkit-backdrop-filter: blur(20px) !important;
-            border: 1px solid rgba(255, 255, 255, 0.2) !important;
-            border-radius: 1.25rem !important;
-            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.2) !important;
-        }
-        
-        [data-theme="dark"] .modal-glass .modal-content {
-            background: rgba(25, 25, 45, 0.95) !important;
-            border: 1px solid rgba(255, 255, 255, 0.08) !important;
-            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.5) !important;
-        }
-        
-        .modal-glass .modal-header {
-            border-bottom: 1px solid rgba(13, 110, 253, 0.08) !important;
-        }
-        
-        [data-theme="dark"] .modal-glass .modal-header {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
-        }
-        
-        .modal-glass .modal-footer {
-            border-top: 1px solid rgba(13, 110, 253, 0.08) !important;
-        }
-        
-        [data-theme="dark"] .modal-glass .modal-footer {
-            border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
-        }
-        
-        /* Tom Select personnalisé */
-        .ts-wrapper .ts-control {
-            border-radius: 0.75rem !important;
-            background: rgba(255, 255, 255, 0.06) !important;
-            border: 1px solid rgba(255, 255, 255, 0.15) !important;
-            color: var(--text-color, #212529) !important;
-            padding: 0.7rem 1rem !important;
-            box-shadow: none !important;
-        }
-        
-        .ts-wrapper .ts-control:focus {
-            border-color: var(--bs-primary, #0d6efd) !important;
-            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.12) !important;
-        }
-        
-        [data-theme="dark"] .ts-wrapper .ts-control {
-            background: rgba(255, 255, 255, 0.04) !important;
-            border: 1px solid rgba(255, 255, 255, 0.08) !important;
-            color: #e4e4e4 !important;
-        }
-        
-        [data-theme="dark"] .ts-wrapper .ts-control:focus {
-            border-color: #ffffff !important;
-            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.08) !important;
-        }
-        
-        .ts-wrapper .ts-dropdown {
-            border-radius: 0.75rem !important;
-            background: var(--card-bg, #ffffff) !important;
-            border: 1px solid rgba(0, 0, 0, 0.08) !important;
-        }
-        
-        [data-theme="dark"] .ts-wrapper .ts-dropdown {
-            background: #1a1a2e !important;
-            border: 1px solid rgba(255, 255, 255, 0.08) !important;
-        }
-        
-        .ts-wrapper .ts-dropdown .option:hover {
-            background: rgba(13, 110, 253, 0.08) !important;
-        }
-        
-        [data-theme="dark"] .ts-wrapper .ts-dropdown .option:hover {
-            background: rgba(255, 255, 255, 0.05) !important;
-        }
-        
-        /* Animation des champs */
-        .form-group-animated {
-            animation: form-fade 0.5s ease forwards !important;
-            opacity: 0;
-            transform: translateY(10px);
-        }
-        
-        @keyframes form-fade {
+        @keyframes fadeInUp {
             from {
                 opacity: 0;
                 transform: translateY(10px);
@@ -462,43 +61,11 @@
                 transform: translateY(0);
             }
         }
-        
-        .form-group-animated:nth-child(1) { animation-delay: 0.05s; }
-        .form-group-animated:nth-child(2) { animation-delay: 0.10s; }
-        .form-group-animated:nth-child(3) { animation-delay: 0.15s; }
-        .form-group-animated:nth-child(4) { animation-delay: 0.20s; }
-        .form-group-animated:nth-child(5) { animation-delay: 0.25s; }
-        .form-group-animated:nth-child(6) { animation-delay: 0.30s; }
-        
-        /* Adaptation mobile */
-        @media (max-width: 768px) {
-            .glass-form-card .card-body {
-                padding: 1.25rem !important;
-            }
-            
-            .glass-btn-primary,
-            .glass-btn-secondary {
-                width: 100%;
-                justify-content: center;
-                margin-top: 0.5rem;
-            }
-            
-            .d-flex.justify-content-end {
-                flex-direction: column-reverse;
-            }
-            
-            .d-flex.justify-content-end .me-2 {
-                margin-right: 0 !important;
-            }
-            
-            .page-title {
-                font-size: 1.25rem;
-            }
-        }
     </style>
 </head>
 <body>
-    <%- include('partials/header') %>
+    <!-- HEADER EXISTANT - NE PAS MODIFIER -->
+    <!-- ... votre header ... -->
 
     <main class="main-content">
         <div class="container mt-4 page-shell">
@@ -506,7 +73,7 @@
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h2 class="mb-0 page-title">
                         <i data-feather="user-plus" class="me-2" style="width: 24px; height: 24px;"></i>
-                        <%= title %>
+                        Modifier le dossier de Tiana RABENJA
                     </h2>
                     <a href="/students" class="btn glass-btn-back">
                         <i data-feather="arrow-left" class="me-1" style="width: 16px; height: 16px;"></i>
@@ -514,40 +81,24 @@
                     </a>
                 </div>
 
-                <%- include('partials/messages') %>
-
-                <% 
-                    const actionUrl = student && !isCompletion 
-                        ? `/students/${student.id}/edit` 
-                        : (isCompletion ? '/students/complete' : '/students/new');
-                %>
-
                 <div class="card glass-form-card border-0">
                     <div class="card-body">
-                        <form action="<%= actionUrl %>" method="POST">
+                        <form action="/students/5/edit" method="POST" id="student-form">
                             
-                            <!-- Champs cachés pour la complétion -->
-                            <% if (isCompletion) { %>
-                                <input type="hidden" name="parent_id" value="<%= student.parent_id %>">
-                            <% } %>
-
                             <div class="row">
                                 <div class="col-md-6 mb-3 form-group-animated">
                                     <label for="name" class="form-label">
                                         <i data-feather="user" class="me-1" style="width: 14px; height: 14px;"></i>
                                         Nom complet de l'élève
                                     </label>
-                                    <input type="text" class="form-control" id="name" name="name" value="<%= student ? student.name : '' %>" required>
+                                    <input type="text" class="form-control" id="name" name="name" value="Tiana RABENJA" required>
                                 </div>
                                 <div class="col-md-6 mb-3 form-group-animated">
                                     <label for="matricule" class="form-label">
                                         <i data-feather="hash" class="me-1" style="width: 14px; height: 14px;"></i>
                                         Matricule
                                     </label>
-                                    <input type="text" class="form-control" id="matricule" name="matricule" value="<%= student ? student.matricule : '' %>" required <%= isCompletion ? 'readonly' : '' %>>
-                                    <% if (isCompletion) { %>
-                                        <div class="form-text"><i data-feather="info" class="me-1" style="width: 12px; height: 12px;"></i>Le matricule ne peut pas être modifié lors de la complétion.</div>
-                                    <% } %>
+                                    <input type="text" class="form-control" id="matricule" name="matricule" value="0002" required>
                                 </div>
                             </div>
 
@@ -557,7 +108,7 @@
                                         <i data-feather="grid" class="me-1" style="width: 14px; height: 14px;"></i>
                                         Classe
                                     </label>
-                                    <input type="text" class="form-control" id="student_class" name="student_class" value="<%= student ? student.student_class : '' %>" required>
+                                    <input type="text" class="form-control" id="student_class" name="student_class" value="4ème" required>
                                 </div>
                             </div>
 
@@ -573,14 +124,14 @@
                                         <i data-feather="calendar" class="me-1" style="width: 14px; height: 14px;"></i>
                                         Date de naissance
                                     </label>
-                                    <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" value="<%= student && student.date_of_birth ? new Date(student.date_of_birth).toISOString().split('T')[0] : '' %>">
+                                    <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" value="2013-07-23">
                                 </div>
                                 <div class="col-md-6 mb-3 form-group-animated">
                                     <label for="place_of_birth" class="form-label">
                                         <i data-feather="map-pin" class="me-1" style="width: 14px; height: 14px;"></i>
                                         Lieu de naissance
                                     </label>
-                                    <input type="text" class="form-control" id="place_of_birth" name="place_of_birth" value="<%= student ? student.place_of_birth : '' %>">
+                                    <input type="text" class="form-control" id="place_of_birth" name="place_of_birth" value="Befelatanana">
                                 </div>
                             </div>
 
@@ -589,7 +140,7 @@
                                     <i data-feather="home" class="me-1" style="width: 14px; height: 14px;"></i>
                                     Adresse
                                 </label>
-                                <textarea class="form-control" id="address" name="address" rows="2"><%= student ? student.address : '' %></textarea>
+                                <textarea class="form-control" id="address" name="address" rows="2">IbI 8 Isoraka</textarea>
                             </div>
 
                             <hr class="my-4">
@@ -598,96 +149,46 @@
                                 Liaison Parent
                             </h5>
 
-                            <% if (isCompletion) { %>
-                                <!-- Pour la complétion, on affiche le parent initiateur unique et ses infos -->
-                                <div class="mb-3 form-group-animated">
-                                    <label class="form-label">
-                                        <i data-feather="user" class="me-1" style="width: 14px; height: 14px;"></i>
-                                        Dossier initié par le parent
-                                    </label>
-                                    <input type="text" class="form-control mb-2" value="<%= student.parent_name %>" disabled>
-                                    
-                                    <div class="row">
-                                        <div class="col-md-6 mb-2">
-                                            <label for="parent_phone_number" class="form-label small">
-                                                <i data-feather="phone" class="me-1" style="width: 12px; height: 12px;"></i>
-                                                Téléphone
-                                            </label>
-                                            <input type="tel" class="form-control" id="parent_phone_number" name="parent_phone_number" value="<%= student.parent_phone_number || '' %>">
-                                        </div>
-                                    </div>
-                                    <div class="form-text"><i data-feather="info" class="me-1" style="width: 12px; height: 12px;"></i>Ce parent est déjà lié à l'élève.</div>
+                            <!-- Parents actuellement liés - AVEC ÉDITION DU TÉLÉPHONE -->
+                            <div class="mb-3 form-group-animated">
+                                <label class="form-label">
+                                    <i data-feather="users" class="me-1" style="width: 14px; height: 14px;"></i>
+                                    Parent(s) actuellement lié(s)
+                                </label>
+                                <div class="list-group glass-list-group" id="linked-parents-list">
+                                    <!-- Les parents liés seront affichés ici dynamiquement -->
                                 </div>
-                            <% } else { %>
-                                <!-- Affichage des parents déjà liés pour le mode édition -->
-                                <% if (typeof linkedParents !== 'undefined' && linkedParents.length > 0) { %>
-                                    <div class="mb-3 form-group-animated">
-                                        <label class="form-label">
-                                            <i data-feather="users" class="me-1" style="width: 14px; height: 14px;"></i>
-                                            Parent(s) actuellement lié(s)
-                                        </label>
-                                        <div class="list-group glass-list-group">
-                                            <% linkedParents.forEach(parent => { %>
-                                                <div class="list-group-item">
-                                                    <div class="d-flex w-100 justify-content-between">
-                                                        <h6 class="mb-1"><%= parent.name %></h6>
-                                                    </div>
-                                                    <p class="mb-1">
-                                                        <small><i data-feather="phone" class="me-1" style="width: 12px; height: 12px;"></i><strong>Téléphone :</strong> <%= parent.phone_number || 'Non renseigné' %></small>
-                                                    </p>
-                                                </div>
-                                            <% }) %>
-                                        </div>
-                                    </div>
-                                <% } else { %>
-                                    <div class="alert alert-info form-group-animated">
-                                        <i data-feather="info" class="me-2" style="width: 16px; height: 16px;"></i>
-                                        Aucun parent n'est actuellement lié à cet élève.
-                                    </div>
-                                <% } %>
+                            </div>
 
-                                <!-- Pour la création/modification, on peut lier un ou plusieurs parents existants -->
-                                <div class="mb-3 form-group-animated">
-                                    <div class="d-flex justify-content-between align-items-center mb-1">
-                                        <label for="parent_ids" class="form-label mb-0">
-                                            <i data-feather="user-plus" class="me-1" style="width: 14px; height: 14px;"></i>
-                                            Parent(s) lié(s)
-                                        </label>
-                                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addParentModal">
-                                            <i data-feather="plus" class="me-1" style="width: 14px; height: 14px;"></i>
-                                            Nouveau Parent
-                                        </button>
-                                    </div>
-                                    <select name="parent_ids" id="parent_ids" class="form-select" multiple>
-                                        <% if (parents && parents.length > 0) { %>
-                                            <% parents.forEach(parent => { %>
-                                                <option value="<%= parent.id %>" <%= linkedParentIds.includes(parent.id) ? 'selected' : '' %>>
-                                                    <%= parent.name %>
-                                                </option>
-                                            <% }) %>
-                                        <% } else { %>
-                                            <option disabled>Aucun compte parent approuvé n'a été trouvé.</option>
-                                        <% } %>
-                                    </select>
-                                    <div class="form-text">
-                                        <i data-feather="info" class="me-1" style="width: 12px; height: 12px;"></i>
-                                        Maintenez la touche Ctrl (ou Cmd sur Mac) enfoncée pour sélectionner plusieurs parents.
-                                        Seuls les parents avec un compte approuvé apparaissent ici.
-                                    </div>
+                            <!-- Select pour lier des parents existants -->
+                            <div class="mb-3 form-group-animated">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <label for="parent_ids-ts-control" class="form-label mb-0" id="parent_ids-ts-label">
+                                        <i data-feather="user-plus" class="me-1" style="width: 14px; height: 14px;"></i>
+                                        Ajouter un parent existant
+                                    </label>
+                                    <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addParentModal">
+                                        <i data-feather="plus" class="me-1" style="width: 14px; height: 14px;"></i>
+                                        Nouveau Parent
+                                    </button>
                                 </div>
-                            <% } %>
+                                <select name="parent_ids" id="parent_ids" class="form-select" multiple>
+                                    <!-- Options chargées dynamiquement -->
+                                </select>
+                                <div class="form-text">
+                                    <i data-feather="info" class="me-1" style="width: 12px; height: 12px;"></i>
+                                    Sélectionnez des parents existants à lier. Utilisez "Nouveau Parent" pour ajouter un parent sans compte.
+                                </div>
+                            </div>
+
+                            <!-- Champ caché pour stocker les parents ajoutés manuellement -->
+                            <input type="hidden" name="manual_parents" id="manual-parents-data" value="[]">
 
                             <div class="d-flex justify-content-end mt-4">
                                 <a href="/students" class="btn glass-btn-secondary me-2">Annuler</a>
                                 <button type="submit" class="btn glass-btn-primary">
                                     <i data-feather="save" class="me-2" style="width: 16px; height: 16px;"></i>
-                                    <% if (student && !isCompletion) { %>
-                                        Mettre à jour le dossier
-                                    <% } else if (isCompletion) { %>
-                                        Finaliser et créer le compte
-                                    <% } else { %>
-                                        Enregistrer l'élève
-                                    <% } %>
+                                    Mettre à jour le dossier
                                 </button>
                             </div>
                         </form>
@@ -697,158 +198,393 @@
         </div>
     </main>
 
-    <!-- Modal pour ajouter un parent - Version Glassmorphism -->
+    <!-- Modal pour ajouter un parent SANS CRÉER DE COMPTE -->
     <div class="modal fade modal-glass" id="addParentModal" tabindex="-1" aria-labelledby="addParentModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="addParentModalLabel">
-                <i data-feather="user-plus" class="me-2" style="width: 18px; height: 18px;"></i>
-                Créer un nouveau compte parent
-            </h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <div id="add-parent-alert" class="alert alert-danger" style="display: none;"></div>
-            <form id="add-parent-form">
-                <div class="mb-3">
-                    <label for="new-parent-name" class="form-label">
-                        <i data-feather="user" class="me-1" style="width: 14px; height: 14px;"></i>
-                        Nom complet du parent
-                    </label>
-                    <input type="text" class="form-control" id="new-parent-name" required>
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addParentModalLabel">
+                        <i data-feather="user-plus" class="me-2" style="width: 18px; height: 18px;"></i>
+                        Ajouter un parent
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="mb-3">
-                    <label for="new-parent-phone" class="form-label">
-                        <i data-feather="phone" class="me-1" style="width: 14px; height: 14px;"></i>
-                        Numéro de téléphone
-                    </label>
-                    <input type="tel" class="form-control" id="new-parent-phone" required>
+                <div class="modal-body">
+                    <div id="add-parent-alert" class="alert alert-danger" style="display: none;"></div>
+                    <form id="add-parent-form">
+                        <div class="mb-3">
+                            <label for="new-parent-name" class="form-label">
+                                <i data-feather="user" class="me-1" style="width: 14px; height: 14px;"></i>
+                                Nom complet du parent
+                            </label>
+                            <input type="text" class="form-control" id="new-parent-name" required placeholder="Ex: RAKOTO Jean">
+                        </div>
+                        <div class="mb-3">
+                            <label for="new-parent-phone" class="form-label">
+                                <i data-feather="phone" class="me-1" style="width: 14px; height: 14px;"></i>
+                                Numéro de téléphone
+                            </label>
+                            <input type="tel" class="form-control" id="new-parent-phone" required placeholder="Ex: 0341234567">
+                        </div>
+                        <div class="alert alert-info">
+                            <i data-feather="info" class="me-1" style="width: 14px; height: 14px;"></i>
+                            <small>Ce parent sera ajouté directement au dossier de l'élève sans créer de compte utilisateur.</small>
+                        </div>
+                    </form>
                 </div>
-            </form>
-            <div id="new-parent-credentials" class="alert alert-success" style="display: none;"></div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn glass-btn-secondary" data-bs-dismiss="modal">Annuler</button>
-            <button type="button" class="btn glass-btn-primary" id="save-new-parent-btn">
-                <i data-feather="save" class="me-1" style="width: 16px; height: 16px;"></i>
-                Enregistrer et lier
-            </button>
-          </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn glass-btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn glass-btn-primary" id="save-new-parent-btn">
+                        <i data-feather="save" class="me-1" style="width: 16px; height: 16px;"></i>
+                        Ajouter le parent
+                    </button>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
 
-    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- TomSelect JS -->
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
-
-    <!-- Socket.IO client -->
     <script src="/socket.io/socket.io.js"></script>
-
-    <!-- Scripts personnalisés -->
     <script src="/js/theme.js"></script>
     <script src="/js/main.js"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Remplacer les icônes Feather
             if (typeof feather !== 'undefined') {
                 feather.replace();
             }
 
+            // ========================================================================
+            // DONNÉES INITIALES
+            // ========================================================================
+            
+            // Parents déjà liés avec leurs infos
+            let linkedParents = [
+                { id: 3, name: 'RABENJA Albert', phone: '', isNew: false }
+            ];
+            
+            // Parents disponibles dans le select (ceux qui ont un compte)
+            const availableParents = [
+                { id: 36, name: 'Anthony RAKOTOBE' },
+                { id: 24, name: 'Krystofer Manach' },
+                { id: 32, name: 'Lia keishalk' },
+                { id: 21, name: 'Maps andri' },
+                { id: 13, name: 'RABE Nasolo' },
+                { id: 16, name: 'RABENJA Lova' },
+                { id: 18, name: 'RABENJA Niaina' },
+                { id: 19, name: 'Rajoutons nivo' },
+                { id: 20, name: 'Rakoto nivo' },
+                { id: 25, name: 'RAKOTO Olivier' },
+                { id: 17, name: 'RAKOTOSON Fitia' },
+                { id: 15, name: 'RANAIVO marc' },
+                { id: 23, name: 'RANDRIA Thierry' },
+                { id: 30, name: 'RANORO Sendra' }
+            ];
+            
+            // Compteur pour générer des IDs uniques pour les nouveaux parents
+            let newParentCounter = 1000;
+
+            // ========================================================================
+            // TOM SELECT
+            // ========================================================================
             let tomSelectInstance;
             const parentSelect = document.getElementById('parent_ids');
+            
             if (parentSelect) {
+                // Filtrer les parents déjà liés
+                const linkedIds = linkedParents.filter(p => !p.isNew).map(p => p.id);
+                const availableOptions = availableParents.filter(p => !linkedIds.includes(p.id));
+                
+                // Remplir le select
+                availableOptions.forEach(parent => {
+                    const option = document.createElement('option');
+                    option.value = parent.id;
+                    option.textContent = parent.name;
+                    parentSelect.appendChild(option);
+                });
+                
                 tomSelectInstance = new TomSelect(parentSelect, {
                     plugins: ['remove_button'],
                     create: false,
-                    placeholder: 'Rechercher et sélectionner un ou plusieurs parents...'
+                    placeholder: 'Rechercher et sélectionner un parent existant...',
+                    onChange: function(values) {
+                        // Ajouter les parents sélectionnés à la liste des liés
+                        values.forEach(value => {
+                            const parentId = parseInt(value);
+                            if (!linkedParents.find(p => p.id === parentId)) {
+                                const parent = availableParents.find(p => p.id === parentId);
+                                if (parent) {
+                                    linkedParents.push({
+                                        id: parent.id,
+                                        name: parent.name,
+                                        phone: '',
+                                        isNew: false
+                                    });
+                                }
+                            }
+                        });
+                        renderLinkedParents();
+                        updateManualParentsData();
+                    },
+                    onItemRemove: function(value) {
+                        // Retirer de la liste des liés
+                        const parentId = parseInt(value);
+                        linkedParents = linkedParents.filter(p => p.id !== parentId);
+                        renderLinkedParents();
+                        updateManualParentsData();
+                    }
                 });
             }
 
-            // Logique de la modale d'ajout de parent
+            // ========================================================================
+            // RENDU DE LA LISTE DES PARENTS LIÉS
+            // ========================================================================
+            function renderLinkedParents() {
+                const listContainer = document.getElementById('linked-parents-list');
+                if (!listContainer) return;
+                
+                if (linkedParents.length === 0) {
+                    listContainer.innerHTML = `
+                        <div class="list-group-item text-muted text-center py-3">
+                            <i data-feather="users" style="width: 20px; height: 20px;"></i>
+                            <p class="mb-0 mt-1">Aucun parent lié</p>
+                        </div>
+                    `;
+                } else {
+                    listContainer.innerHTML = linkedParents.map((parent, index) => `
+                        <div class="list-group-item linked-parent-item" data-parent-index="${index}">
+                            <div class="d-flex w-100 justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-1">
+                                        ${escapeHtml(parent.name)}
+                                        ${parent.isNew ? '<span class="badge bg-info ms-2" style="font-size: 0.65rem;">Nouveau</span>' : ''}
+                                    </h6>
+                                    <p class="mb-1">
+                                        <small>
+                                            <i data-feather="phone" class="me-1" style="width: 12px; height: 12px;"></i>
+                                            <strong>Téléphone :</strong>
+                                            <span class="phone-display" id="phone-display-${index}">
+                                                ${parent.phone ? escapeHtml(parent.phone) : '<span class="phone-editable" onclick="editPhone(' + index + ')" title="Cliquez pour ajouter un numéro">Non renseigné</span>'}
+                                            </span>
+                                            <span class="phone-edit-area" id="phone-edit-${index}" style="display: none;">
+                                                <input type="tel" class="phone-edit-input" id="phone-input-${index}" value="${escapeHtml(parent.phone)}" placeholder="Numéro de téléphone">
+                                                <button class="btn btn-sm btn-success btn-save-phone" onclick="savePhone(${index})">
+                                                    <i data-feather="check" style="width: 12px; height: 12px;"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-secondary btn-save-phone" onclick="cancelEditPhone(${index})">
+                                                    <i data-feather="x" style="width: 12px; height: 12px;"></i>
+                                                </button>
+                                            </span>
+                                        </small>
+                                    </p>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeLinkedParent(${index})" title="Retirer ce parent">
+                                    <i data-feather="trash-2" style="width: 14px; height: 14px;"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+                
+                if (typeof feather !== 'undefined') {
+                    feather.replace();
+                }
+            }
+
+            // ========================================================================
+            // FONCTIONS D'ÉDITION DU TÉLÉPHONE
+            // ========================================================================
+            window.editPhone = function(index) {
+                const displayEl = document.getElementById('phone-display-' + index);
+                const editEl = document.getElementById('phone-edit-' + index);
+                const inputEl = document.getElementById('phone-input-' + index);
+                
+                if (displayEl && editEl) {
+                    displayEl.style.display = 'none';
+                    editEl.style.display = 'inline';
+                    inputEl.focus();
+                }
+            };
+
+            window.savePhone = function(index) {
+                const inputEl = document.getElementById('phone-input-' + index);
+                const phone = inputEl.value.trim();
+                
+                if (linkedParents[index]) {
+                    linkedParents[index].phone = phone;
+                }
+                
+                renderLinkedParents();
+                updateManualParentsData();
+            };
+
+            window.cancelEditPhone = function(index) {
+                renderLinkedParents();
+            };
+
+            window.removeLinkedParent = function(index) {
+                const parent = linkedParents[index];
+                
+                if (confirm('Voulez-vous retirer "' + parent.name + '" de la liste des parents liés ?')) {
+                    linkedParents.splice(index, 1);
+                    
+                    // Retirer aussi du TomSelect si c'est un parent existant
+                    if (!parent.isNew && tomSelectInstance) {
+                        tomSelectInstance.removeItem(parent.id);
+                    }
+                    
+                    renderLinkedParents();
+                    updateManualParentsData();
+                }
+            };
+
+            // ========================================================================
+            // MISE À JOUR DES DONNÉES CACHÉES POUR LE FORMULAIRE
+            // ========================================================================
+            function updateManualParentsData() {
+                const manualParents = linkedParents
+                    .filter(p => p.isNew)
+                    .map(p => ({ name: p.name, phone: p.phone }));
+                
+                document.getElementById('manual-parents-data').value = JSON.stringify(manualParents);
+            }
+
+            // ========================================================================
+            // MODAL AJOUT DE PARENT (SANS CRÉER DE COMPTE)
+            // ========================================================================
             const addParentModalEl = document.getElementById('addParentModal');
             if (addParentModalEl) {
                 const addParentModal = new bootstrap.Modal(addParentModalEl);
                 const saveParentBtn = document.getElementById('save-new-parent-btn');
                 const addParentForm = document.getElementById('add-parent-form');
                 const alertEl = document.getElementById('add-parent-alert');
-                const credentialsEl = document.getElementById('new-parent-credentials');
                 const nameInput = document.getElementById('new-parent-name');
+                const phoneInput = document.getElementById('new-parent-phone');
 
-                saveParentBtn.addEventListener('click', async () => {
+                // Réinitialiser le bouton au cas où
+                saveParentBtn.onclick = null;
+
+                saveParentBtn.addEventListener('click', function() {
                     const name = nameInput.value.trim();
-                    const phone_number = document.getElementById('new-parent-phone').value.trim();
+                    const phone = phoneInput.value.trim();
 
-                    if (!name || !phone_number) {
-                        showAlert('Veuillez remplir le nom et le numéro de téléphone.');
+                    if (!name) {
+                        showAlert('Veuillez entrer le nom du parent.');
                         return;
                     }
-                    
-                    saveParentBtn.disabled = true;
-                    saveParentBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Enregistrement...';
 
-                    try {
-                        const response = await fetch('/students/create-parent', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                            body: JSON.stringify({ name, phone_number })
-                        });
-
-                        const result = await response.json();
-                        if (!response.ok) throw new Error(result.message || 'Une erreur est survenue.');
-
-                        const newParent = result.parent;
-                        
-                        if (tomSelectInstance) {
-                            tomSelectInstance.addOption({ value: newParent.id, text: newParent.name });
-                            tomSelectInstance.addItem(newParent.id);
-                        }
-                        
-                        credentialsEl.innerHTML = `
-                            <i data-feather="check-circle" class="me-2" style="width: 18px; height: 18px;"></i>
-                            <strong>Succès !</strong> Le compte a été créé.<br>
-                            <i data-feather="mail" class="me-1" style="width: 14px; height: 14px;"></i>
-                            <strong>Identifiant (email) :</strong> ${newParent.email}<br>
-                            <i data-feather="lock" class="me-1" style="width: 14px; height: 14px;"></i>
-                            <strong>Mot de passe :</strong> ${newParent.defaultPassword}<br>
-                            <small><i data-feather="info" class="me-1" style="width: 12px; height: 12px;"></i>Veuillez communiquer ces informations au parent. Un email factice a été créé pour la connexion.</small>
-                        `;
-                        credentialsEl.style.display = 'block';
-                        addParentForm.style.display = 'none';
-                        saveParentBtn.innerHTML = '<i data-feather="x" class="me-1" style="width: 16px; height: 16px;"></i> Fermer';
-                        saveParentBtn.onclick = () => addParentModal.hide();
-
-                    } catch (error) {
-                        showAlert(error.message);
-                        saveParentBtn.disabled = false;
-                        saveParentBtn.innerHTML = '<i data-feather="save" class="me-1" style="width: 16px; height: 16px;"></i> Enregistrer et lier';
+                    if (!phone) {
+                        showAlert('Veuillez entrer le numéro de téléphone.');
+                        return;
                     }
+
+                    // Créer un nouveau parent local (sans compte)
+                    const newParent = {
+                        id: newParentCounter++,
+                        name: name,
+                        phone: phone,
+                        isNew: true
+                    };
+
+                    // Ajouter à la liste des parents liés
+                    linkedParents.push(newParent);
+                    
+                    // Mettre à jour l'affichage
+                    renderLinkedParents();
+                    updateManualParentsData();
+                    
+                    // Fermer le modal et réinitialiser
+                    addParentModal.hide();
+                    addParentForm.reset();
+                    alertEl.style.display = 'none';
+
+                    // Notification de succès
+                    showToast('Parent "' + name + '" ajouté avec succès !');
                 });
 
-                addParentModalEl.addEventListener('hidden.bs.modal', () => {
+                addParentModalEl.addEventListener('hidden.bs.modal', function() {
                     addParentForm.reset();
-                    addParentForm.style.display = 'block';
-                    credentialsEl.style.display = 'none';
                     alertEl.style.display = 'none';
-                    saveParentBtn.disabled = false;
-                    saveParentBtn.innerHTML = '<i data-feather="save" class="me-1" style="width: 16px; height: 16px;"></i> Enregistrer et lier';
-                    saveParentBtn.onclick = null;
-                    
-                    // Recharger les icônes Feather
                     if (typeof feather !== 'undefined') {
                         feather.replace();
                     }
                 });
 
                 function showAlert(message) {
-                    alertEl.innerHTML = `<i data-feather="alert-circle" class="me-2" style="width: 16px; height: 16px;"></i> ${message}`;
+                    alertEl.innerHTML = '<i data-feather="alert-circle" class="me-2" style="width: 16px; height: 16px;"></i> ' + message;
                     alertEl.style.display = 'block';
+                    if (typeof feather !== 'undefined') {
+                        feather.replace();
+                    }
                 }
             }
+
+            // ========================================================================
+            // TOAST NOTIFICATION
+            // ========================================================================
+            function showToast(message) {
+                // Créer un toast simple
+                const toastEl = document.createElement('div');
+                toastEl.className = 'alert alert-success position-fixed bottom-0 end-0 m-3';
+                toastEl.style.zIndex = '9999';
+                toastEl.style.animation = 'fadeInUp 0.3s ease';
+                toastEl.innerHTML = `
+                    <i data-feather="check-circle" class="me-2" style="width: 16px; height: 16px;"></i>
+                    ${message}
+                `;
+                document.body.appendChild(toastEl);
+                
+                if (typeof feather !== 'undefined') {
+                    feather.replace();
+                }
+                
+                setTimeout(function() {
+                    toastEl.style.animation = 'fadeOutDown 0.3s ease';
+                    setTimeout(function() {
+                        toastEl.remove();
+                    }, 300);
+                }, 3000);
+            }
+
+            // ========================================================================
+            // SOUMISSION DU FORMULAIRE
+            // ========================================================================
+            document.getElementById('student-form').addEventListener('submit', function(e) {
+                // Mettre à jour les données avant soumission
+                updateManualParentsData();
+                
+                // Ajouter les IDs des parents existants comme champs cachés
+                linkedParents.filter(p => !p.isNew).forEach(parent => {
+                    let input = document.querySelector(`input[name="parent_ids[]"][value="${parent.id}"]`);
+                    if (!input) {
+                        input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'parent_ids[]';
+                        input.value = parent.id;
+                        this.appendChild(input);
+                    }
+                });
+                
+                console.log('Parents liés soumis:', linkedParents);
+                console.log('Parents manuels:', document.getElementById('manual-parents-data').value);
+            });
+
+            // ========================================================================
+            // UTILITAIRES
+            // ========================================================================
+            function escapeHtml(text) {
+                if (!text) return '';
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            // ========================================================================
+            // INITIALISATION
+            // ========================================================================
+            renderLinkedParents();
+            updateManualParentsData();
         });
     </script>
 </body>
