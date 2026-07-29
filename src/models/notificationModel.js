@@ -49,9 +49,9 @@ async function createBulkNotifications(notifications) {
   return db('notifications').insert(notifications);
 }
 
-function getNotificationsForUser(user) {
+function getNotificationsForUser(userId) {
   return db('notifications')
-    .where({ user_id: user.id })
+    .where({ user_id: userId })
     .orderBy('created_at', 'desc');
 }
 
@@ -60,24 +60,24 @@ async function getUnreadNotificationCountForUser(user) {
     .where({ is_read: 0, user_id: user.id })
     .count('id as count')
     .first();
-  return result ? result.count : 0;
+  return result ? Number(result.count) : 0;
 }
 
-function markNotificationsReadForUser(user) {
+function markAllAsReadForUser(userId) {
   return db('notifications')
-    .where({ is_read: 0, user_id: user.id })
+    .where({ is_read: 0, user_id: userId })
     .update({ is_read: 1 });
 }
 
-function deleteNotificationForUser(id, userId) {
+function deleteNotification(id, userId) {
   return db('notifications')
     .where({ id: id, user_id: userId })
     .del();
 }
 
-function markNotificationAsReadById(notificationId, userId) {
+function markAsRead(id, userId) {
   return db('notifications')
-    .where({ id: notificationId, user_id: userId, is_read: 0 })
+    .where({ id: id, user_id: userId, is_read: 0 })
     .update({ is_read: 1 });
 }
 
@@ -94,7 +94,7 @@ module.exports = {
   createSystemNotification,
   getNotificationsForUser,
   getUnreadNotificationCountForUser,
-  markNotificationsReadForUser,
-  deleteNotificationForUser,
-  markNotificationAsReadById
+  markAllAsReadForUser,
+  deleteNotification,
+  markAsRead
 };

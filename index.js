@@ -16,6 +16,7 @@ const studentRoutes = require('./src/routes/studentRoutes');
 const adminRoutes = require('./src/routes/adminRoutes');
 const apiRoutes = require('./src/routes/apiRoutes');
 const establishmentRoutes = require('./src/routes/establishmentRoutes'); // Ajout des routes pour les établissements
+const notificationRoutes = require('./src/routes/notificationRoutes');
 const chatModel = require('./src/models/chatModel');
 const http = require('http');
 const socketIo = require('socket.io');
@@ -275,6 +276,7 @@ app.use('/communications', communicationRoutes);
 app.use('/admin', adminRoutes);
 app.use('/students', studentRoutes);
 app.use('/establishments', establishmentRoutes); // Utilisation des nouvelles routes
+app.use('/notifications', notificationRoutes);
 
 // Partager la session Express avec Socket.IO (wrapper pour middleware Express)
 const wrap = (middleware) => (socket, next) => middleware(socket.request, {}, next);
