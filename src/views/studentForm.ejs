@@ -778,7 +778,7 @@
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h2 class="mb-0 page-title">
                         <i data-feather="user-plus" class="me-2" style="width: 24px; height: 24px;"></i>
-                        Modifier le dossier de Tiana RABENJA
+                        <%= title %>
                     </h2>
                     <a href="/students" class="btn glass-btn-back">
                         <i data-feather="arrow-left" class="me-1" style="width: 16px; height: 16px;"></i>
@@ -788,7 +788,11 @@
 
                 <div class="card glass-form-card border-0">
                     <div class="card-body">
-                        <form action="/students/5/edit" method="POST" id="student-form">
+                        <% if (student && student.id) { %>
+                        <form action="/students/<%= student.id %>/edit" method="POST" id="student-form">
+                        <% } else { %>
+                        <form action="/students" method="POST" id="student-form">
+                        <% } %>
                             
                             <div class="row">
                                 <div class="col-md-6 mb-3 form-group-animated">
@@ -796,14 +800,14 @@
                                         <i data-feather="user" style="width: 14px; height: 14px;"></i>
                                         Nom complet de l'élève
                                     </label>
-                                    <input type="text" class="form-control" id="name" name="name" value="Tiana RABENJA" required>
+                                    <input type="text" class="form-control" id="name" name="name" value="<%= student ? (student.name || '') : '' %>" required>
                                 </div>
                                 <div class="col-md-6 mb-3 form-group-animated">
                                     <label for="matricule" class="form-label">
                                         <i data-feather="hash" style="width: 14px; height: 14px;"></i>
                                         Matricule
                                     </label>
-                                    <input type="text" class="form-control" id="matricule" name="matricule" value="0002" required>
+                                    <input type="text" class="form-control" id="matricule" name="matricule" value="<%= student ? (student.matricule || '') : '' %>" required>
                                 </div>
                             </div>
 
@@ -813,7 +817,7 @@
                                         <i data-feather="grid" style="width: 14px; height: 14px;"></i>
                                         Classe
                                     </label>
-                                    <input type="text" class="form-control" id="student_class" name="student_class" value="4ème" required>
+                                    <input type="text" class="form-control" id="student_class" name="student_class" value="<%= student ? (student.student_class || '') : '' %>" required>
                                 </div>
                             </div>
 
@@ -829,14 +833,14 @@
                                         <i data-feather="calendar" style="width: 14px; height: 14px;"></i>
                                         Date de naissance
                                     </label>
-                                    <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" value="2013-07-23">
+                                    <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" value="<%= (student && student.date_of_birth) ? new Date(student.date_of_birth).toISOString().split('T')[0] : '' %>">
                                 </div>
                                 <div class="col-md-6 mb-3 form-group-animated">
                                     <label for="place_of_birth" class="form-label">
                                         <i data-feather="map-pin" style="width: 14px; height: 14px;"></i>
                                         Lieu de naissance
                                     </label>
-                                    <input type="text" class="form-control" id="place_of_birth" name="place_of_birth" value="Befelatanana">
+                                    <input type="text" class="form-control" id="place_of_birth" name="place_of_birth" value="<%= student ? (student.place_of_birth || '') : '' %>">
                                 </div>
                             </div>
 
@@ -845,7 +849,7 @@
                                     <i data-feather="home" style="width: 14px; height: 14px;"></i>
                                     Adresse
                                 </label>
-                                <textarea class="form-control" id="address" name="address" rows="2">IbI 8 Isoraka</textarea>
+                                <textarea class="form-control" id="address" name="address" rows="2"><%= student ? (student.address || '') : '' %></textarea>
                             </div>
 
                             <hr>
@@ -877,20 +881,32 @@
                                         Nouveau Parent
                                     </button>
                                 </div>
-                                <select name="parent_ids" id="parent_ids" class="form-select" multiple></select>
+                                <select name="parent_ids" id="parent_ids" class="form-select" multiple>
+                                    <% if (typeof parents !== 'undefined' && parents.length > 0) { %>
+                                        <% parents.forEach(function(parent) { %>
+                                            <option value="<%= parent.id %>" <%= (linkedParentIds && linkedParentIds.includes(parent.id)) ? 'selected' : '' %>>
+                                                <%= parent.name %>
+                                            </option>
+                                        <% }); %>
+                                    <% } %>
+                                </select>
                                 <div class="form-text" style="color: rgba(255,255,255,0.5);">
                                     <i data-feather="info" style="width: 12px; height: 12px;"></i>
                                     Sélectionnez des parents existants ou utilisez "Nouveau Parent".
                                 </div>
                             </div>
 
-                            <input type="hidden" name="manual_parents" id="manual-parents-data" value="[]">
+                            <input type="hidden" name="manual_parents" id="manual-parents-data" value='<%- JSON.stringify(manualParents || []) %>'>
 
                             <div class="d-flex justify-content-end mt-4">
                                 <a href="/students" class="btn glass-btn-secondary me-2">Annuler</a>
                                 <button type="submit" class="btn glass-btn-primary">
                                     <i data-feather="save" style="width: 16px; height: 16px;"></i>
-                                    Mettre à jour le dossier
+                                    <% if (student && student.id) { %>
+                                        Mettre à jour le dossier
+                                    <% } else { %>
+                                        Créer l'élève
+                                    <% } %>
                                 </button>
                             </div>
                         </form>
@@ -899,7 +915,6 @@
             </div>
         </div>
     </main>
-
     <!-- Modal Ajouter un Parent -->
     <div class="modal fade modal-glass" id="addParentModal" tabindex="-1" aria-labelledby="addParentModalLabel" aria-hidden="true">
         <div class="modal-dialog">
