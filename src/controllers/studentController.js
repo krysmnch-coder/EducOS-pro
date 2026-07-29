@@ -3,7 +3,7 @@ const { ROLES } = require('../../constants');
 const bcrypt = require('bcrypt');
 const communicationModel = require('../models/communicationModel');
 const crypto = require('crypto');
-const db = require('../models/db');
+const db = require('../models/db'); // Importer db pour la logique des parents
 
 
 /**
@@ -11,31 +11,8 @@ const db = require('../models/db');
  */
 const listStudents = async (req, res) => {
   try {
+    // La nouvelle fonction du modèle fait tout le travail lourd de manière optimisée.
     const allStudents = await userModel.getStudentsAndPlaceholders();
-
-    // ==========================================================================
-    // AJOUT DES PARENTS MANUELS POUR CHAQUE ÉLÈVE
-    // ==========================================================================
-    for (let student of allStudents) {
-      // Récupérer les parents manuels depuis la colonne manual_parents (JSON)
-      if (student.manual_parents) {
-        try {
-          student.manualParents = typeof student.manual_parents === 'string' 
-            ? JSON.parse(student.manual_parents) 
-            : student.manual_parents;
-        } catch (e) {
-          console.error(`Erreur parsing manual_parents pour l'élève ${student.id}:`, e);
-          student.manualParents = [];
-        }
-      } else {
-        student.manualParents = [];
-      }
-
-      // S'assurer que linkedParents existe aussi
-      if (!student.linkedParents) {
-        student.linkedParents = [];
-      }
-    }
 
     // Grouper les élèves par classe
     const studentsByClass = allStudents.reduce((acc, student) => {
@@ -50,6 +27,7 @@ const listStudents = async (req, res) => {
     // Logique pour la vue restreinte des parents
     let parentChildrenClasses = [];
     if (req.user.role === ROLES.PARENT) {
+        // Récupère les classes des enfants directement depuis la nouvelle table
         parentChildrenClasses = await db('parent_student_links')
             .where('parent_id', req.user.id)
             .distinct('student_class')
@@ -59,9 +37,9 @@ const listStudents = async (req, res) => {
     res.render('students', {
       title: 'Liste des Élèves',
       studentsByClass: studentsByClass,
-      user: req.user,
-      ROLES: ROLES,
-      parentChildrenClasses: parentChildrenClasses
+      user: req.user, // Pour la gestion des droits (RBAC)
+      ROLES: ROLES, // Pour vérifier les rôles dans la vue
+      parentChildrenClasses: parentChildrenClasses // Passe la liste des classes des enfants à la vue
     });
   } catch (error) {
     console.error('Erreur lors du chargement de la page des élèves:', error);
@@ -72,11 +50,57 @@ const listStudents = async (req, res) => {
 
 /**
  * Génère un mot de passe aléatoire et sécurisé.
+ * @param {number} length - La longueur souhaitée du mot de passe.
+ * @returns {string} Le mot de passe généré.
  */
 function generateSecurePassword(length = 8) {
+  // Génère des octets aléatoires et les convertit en une chaîne hexadécimale.
   return crypto.randomBytes(Math.ceil(length / 2)).toString('hex').slice(0, length);
 }
+/**
+ * Crée un nouveau compte parent depuis le formulaire élève (via une modale).
+ * Le compte est automatiquement approuvé.
+ */
+const createParentFromStudentForm = async (req, res) => {
+    const { name, phone_number } = req.body;
+    const establishmentId = req.user.establishment_id;
 
+    if (!name || !phone_number) {
+        return res.status(400).json({ success: false, message: 'Le nom et le numéro de téléphone sont requis.' });
+    }
+
+    try {
+        // Création d'un email factice et unique pour permettre la connexion,
+        // puisque le formulaire ne demande que le numéro de téléphone.
+        const email = `${phone_number.replace(/\s+/g, '')}@educos.parent.local`;
+
+        const existingUser = await userModel.getUserByEmail(email);
+        if (existingUser) {
+            return res.status(409).json({ success: false, message: 'Un utilisateur avec un identifiant similaire (basé sur le numéro de téléphone) existe déjà.' });
+        }
+
+        const defaultPassword = generateSecurePassword(8);
+        const hashedPassword = await bcrypt.hash(defaultPassword, 10);
+
+        const [newUserIdObj] = await userModel.createUser({
+            name, email, password: hashedPassword,
+            role: ROLES.PARENT, approved: 1, // Approuvé automatiquement
+            establishment_id: establishmentId,
+            phone_number: phone_number, // Enregistre le vrai numéro de téléphone
+            avatar_url: '/img/user.png'
+        });
+        
+        const newParentId = newUserIdObj.id || newUserIdObj;
+
+        res.status(201).json({ success: true, parent: {
+            id: newParentId, name, email, defaultPassword
+        }});
+
+    } catch (error) {
+        console.error("Erreur lors de la création du parent depuis le formulaire élève:", error);
+        res.status(500).json({ success: false, message: 'Une erreur est survenue sur le serveur.' });
+    }
+};
 /**
  * Affiche le formulaire pour ajouter un nouvel élève.
  */
@@ -88,9 +112,7 @@ const renderNewStudentForm = async (req, res) => {
             student: null,
             isCompletion: false,
             parents: parents,
-            linkedParentIds: [],
-            linkedParents: [],
-            manualParents: [] // Ajouté pour la vue
+            linkedParentIds: [] // Pas de parents liés pour un nouvel élève
         });
     } catch (error) {
         console.error("Erreur lors du chargement du formulaire d'ajout d'élève:", error);
@@ -101,6 +123,9 @@ const renderNewStudentForm = async (req, res) => {
 
 /**
  * Crée un tableau d'objets de liaison parent-élève pour l'insertion en base de données.
+ * @param {string|string[]} parent_ids - Un ou plusieurs IDs de parents.
+ * @param {object} studentData - Données de l'élève { name, matricule, student_class }.
+ * @returns {Array<object>}
  */
 function createParentLinkObjects(parent_ids, studentData) {
     const { name, matricule, student_class } = studentData;
@@ -118,10 +143,7 @@ function createParentLinkObjects(parent_ids, studentData) {
  * Gère la création d'un nouvel élève et la liaison avec ses parents.
  */
 const createStudent = async (req, res) => {
-    const { 
-        name, matricule, student_class, date_of_birth, place_of_birth, address, 
-        parent_ids, manual_parents 
-    } = req.body;
+    const { name, matricule, student_class, date_of_birth, place_of_birth, address, parent_ids } = req.body;
 
     try {
         const existingStudent = await userModel.getUserByMatricule(matricule);
@@ -134,31 +156,18 @@ const createStudent = async (req, res) => {
         const hashedPassword = await bcrypt.hash(defaultPassword, 10);
         const email = `${matricule.toLowerCase().replace(/\s+/g, '')}@educos.local`;
 
-        // Parser les parents manuels
-        let manualParentsData = [];
-        if (manual_parents) {
-            try {
-                manualParentsData = typeof manual_parents === 'string' 
-                    ? JSON.parse(manual_parents) 
-                    : manual_parents;
-            } catch (e) {
-                console.error('Erreur parsing manual_parents:', e);
-            }
-        }
-
         await db.transaction(async trx => {
-            // 1. Créer l'utilisateur élève avec les parents manuels
+            // 1. Créer l'utilisateur élève
             await userModel.createUser({
                 name, email, password: hashedPassword,
                 role: ROLES.STUDENT, approved: 1,
                 establishment_id: req.user.establishment_id, password_reset_required: true,
                 matricule, student_class, date_of_birth, place_of_birth, address,
                 created_by: req.user.id,
-                avatar_url: '/img/user.png',
-                manual_parents: JSON.stringify(manualParentsData) // Stocker les parents manuels
+                avatar_url: '/img/user.png'
             }, trx);
 
-            // 2. Créer les liens avec les parents (comptes existants)
+            // 2. Créer les liens avec les parents
             if (parent_ids && parent_ids.length > 0) {
                 const links = createParentLinkObjects(parent_ids, { name, matricule, student_class });
                 if (links.length > 0) await trx('parent_student_links').insert(links);
@@ -180,9 +189,12 @@ const createStudent = async (req, res) => {
  */
 const renderCompleteStudentForm = async (req, res) => {
     const { name, matricule, parent_id, parent_name, parent_phone_number } = req.query;
-    let { student_class } = req.query;
+    let { student_class } = req.query; // On le rend mutable pour pouvoir le corriger.
 
     try {
+        // Correctif demandé : si la classe n'est pas pré-remplie (ex: "Non classé"),
+        // on la récupère depuis les "détails" de l'élève (la table de liaison).
+        // Cela rend le formulaire plus robuste si le paramètre de l'URL est manquant.
         if (!student_class) {
             const linkDetails = await db('parent_student_links').where({ student_matricule: matricule }).first();
             if (linkDetails && linkDetails.student_class) {
@@ -190,20 +202,23 @@ const renderCompleteStudentForm = async (req, res) => {
             }
         }
 
+        // Créer un objet "student" partiel pour pré-remplir le formulaire
         const student = { name, matricule, student_class };
+
+        // Récupérer la liste de tous les parents pour le dropdown
         const allParents = await userModel.getApprovedParents();
 
+        // Le parent qui a initié est déjà lié. On le passe à la vue.
         const linkedParents = parent_id ? [{ id: parent_id, name: parent_name, phone_number: parent_phone_number }] : [];
         const linkedParentIds = parent_id ? [parent_id] : [];
 
         res.render('studentForm', {
             title: `Compléter le dossier de ${name}`,
             student: student,
-            isCompletion: true,
+            isCompletion: true, // Indique au formulaire qu'il s'agit d'une complétion
             parents: allParents,
             linkedParentIds: linkedParentIds,
-            linkedParents: linkedParents,
-            manualParents: [] // Ajouté pour la vue
+            linkedParents: linkedParents
         });
     } catch (error) {
         console.error("Erreur lors du chargement du formulaire de complétion:", error);
@@ -216,12 +231,8 @@ const renderCompleteStudentForm = async (req, res) => {
  * Finalise la création d'un compte élève et envoie une notification au parent.
  */
 const completeStudentRegistration = async (req, res) => {
-    const { 
-        name, matricule, parent_id, student_class, date_of_birth, place_of_birth, 
-        address, parent_phone_number, manual_parents 
-    } = req.body;
-    const creatorId = req.user.id;
-
+    const { name, matricule, parent_id, student_class, date_of_birth, place_of_birth, address, parent_phone_number } = req.body;
+    const creatorId = req.user.id; // L'expéditeur du message est l'utilisateur connecté (l'admin)
     try {
         const existingStudent = await userModel.getUserByMatricule(matricule);
         if (existingStudent) {
@@ -233,42 +244,33 @@ const completeStudentRegistration = async (req, res) => {
         const hashedPassword = await bcrypt.hash(defaultPassword, 10);
         const email = `${matricule.toLowerCase().replace(/\s+/g, '')}@educos.local`;
 
-        // Parser les parents manuels
-        let manualParentsData = [];
-        if (manual_parents) {
-            try {
-                manualParentsData = typeof manual_parents === 'string' 
-                    ? JSON.parse(manual_parents) 
-                    : manual_parents;
-            } catch (e) {
-                console.error('Erreur parsing manual_parents:', e);
-            }
-        }
-
+        // Utilisation d'une transaction pour garantir que la mise à jour du parent et la création de l'élève sont atomiques.
         await db.transaction(async trx => {
-            // 1. Mettre à jour le numéro de téléphone du parent si fourni
-            if (parent_id && parent_phone_number) {
-                await trx('users').where({ id: parent_id }).update({ phone_number: parent_phone_number });
+            // 1. Mettre à jour le numéro de téléphone du parent.
+            if (parent_id) {
+                const parentUpdateData = { phone_number: parent_phone_number };
+                await trx('users').where({ id: parent_id }).update(parentUpdateData);
             }
 
-            // 2. Créer l'utilisateur élève avec les parents manuels
+            // 2. On crée l'utilisateur élève.
             await userModel.createUser({
                 name, email, password: hashedPassword,
                 role: ROLES.STUDENT, approved: 1,
                 establishment_id: req.user.establishment_id, password_reset_required: true,
                 matricule, student_class, date_of_birth, place_of_birth, address,
                 created_by: creatorId,
-                avatar_url: '/img/user.png',
-                manual_parents: JSON.stringify(manualParentsData) // Stocker les parents manuels
+                avatar_url: '/img/user.png'
             }, trx);
         });
 
-        // Notification au parent
+        // --- Animation du raccourci ---
+        // On notifie le parent pour faire briller le raccourci "Documents"
         const authIo = req.app.get('authIo');
         if (authIo) {
             authIo.to(`user_${parent_id}`).emit('shortcutHighlight', { shortcutKey: 'documents' });
         }
 
+        // Envoyer un message interne au parent avec les identifiants
         const messageBody = `Bonjour,
 Le dossier de votre enfant ${name} a été finalisé par l'administration.
 Voici ses informations de connexion à la plateforme EducOS-pro :<br />
@@ -285,7 +287,7 @@ Vous pouvez les lui communiquer. Cordialement.`;
             message: messageBody
         });
 
-        const successMessage = `Le compte de l'élève ${name} a été créé. Identifiant : ${email}, Mot de passe : ${defaultPassword}.`;
+        const successMessage = `Le compte de l'élève ${name} a été créé. Identifiant : ${email}, Mot de passe : ${defaultPassword}. Ces informations ont aussi été envoyées au parent.`;
         req.flash('success_msg', successMessage);
         res.redirect('/students');
     } catch (error) {
@@ -300,33 +302,27 @@ Vous pouvez les lui communiquer. Cordialement.`;
  */
 const renderEditStudentForm = async (req, res) => {
     try {
+        // On applique la même méthode de récupération directe que pour les autres formulaires
+        // pour garantir que les données affichées sont toujours les plus à jour.
         const student = await db('users').where({ id: req.params.id, role: ROLES.STUDENT }).first();
 
         if (!student) {
             req.flash('error_msg', 'Élève non trouvé.');
             return res.redirect('/students');
         }
+        // Les informations personnelles (classe, date de naissance, etc.) sont déjà
+        // dans l'objet 'student' et sont utilisées par la vue pour remplir le formulaire.
+        const parents = await userModel.getApprovedParents(); // Tous les parents pour le dropdown
 
-        // Parser les parents manuels
-        let manualParents = [];
-        if (student.manual_parents) {
-            try {
-                manualParents = typeof student.manual_parents === 'string' 
-                    ? JSON.parse(student.manual_parents) 
-                    : student.manual_parents;
-            } catch (e) {
-                console.error('Erreur parsing manual_parents:', e);
-            }
-        }
-
-        const parents = await userModel.getApprovedParents();
-
+        // Récupérer les informations complètes des parents déjà liés pour les afficher.
         const selectColumns = ['u.id', 'u.name', 'u.phone_number'];
+
         const linkedParents = await db('parent_student_links as psl')
             .join('users as u', 'psl.parent_id', 'u.id')
             .where('psl.student_matricule', student.matricule)
             .select(selectColumns);
 
+        // Extraire les IDs pour pré-sélectionner les options dans le dropdown.
         const linkedParentIds = linkedParents.map(p => p.id);
 
         res.render('studentForm', {
@@ -335,8 +331,7 @@ const renderEditStudentForm = async (req, res) => {
             isCompletion: false,
             parents: parents,
             linkedParentIds: linkedParentIds,
-            linkedParents: linkedParents,
-            manualParents: manualParents // Passer les parents manuels à la vue
+            linkedParents: linkedParents // On passe aussi les objets parents complets à la vue.
         });
     } catch (error) {
         console.error("Erreur lors du chargement du formulaire de modification:", error);
@@ -345,14 +340,16 @@ const renderEditStudentForm = async (req, res) => {
     }
 };
 
-/**
- * Met à jour les informations d'un élève.
- */
 const updateStudent = async (req, res) => {
     const studentId = req.params.id;
     const {
-        name, matricule, student_class, date_of_birth, place_of_birth, 
-        address, parent_ids, manual_parents
+        name,
+        matricule,
+        student_class,
+        date_of_birth,
+        place_of_birth,
+        address,
+        parent_ids
     } = req.body;
 
     try {
@@ -370,32 +367,24 @@ const updateStudent = async (req, res) => {
             }
         }
 
-        // Parser les parents manuels
-        let manualParentsData = [];
-        if (manual_parents) {
-            try {
-                manualParentsData = typeof manual_parents === 'string' 
-                    ? JSON.parse(manual_parents) 
-                    : manual_parents;
-            } catch (e) {
-                console.error('Erreur parsing manual_parents:', e);
-            }
-        }
-
         await db.transaction(async trx => {
-            // 1. Mettre à jour les détails de l'élève AVEC les parents manuels
+            // 1. Mettre à jour les détails de l'élève
             await userModel.updateStudentDetails(studentId, {
-                name, matricule, student_class, date_of_birth, place_of_birth, address,
-                manual_parents: JSON.stringify(manualParentsData) // Mettre à jour les parents manuels
+                name, matricule, student_class, date_of_birth, place_of_birth, address
             }, trx);
 
-            // 2. Mettre à jour les liens parents si le champ est présent
+            // 2. Mettre à jour les liens parents, SEULEMENT si le champ parent_ids est présent dans la requête.
+            // S'il est absent (undefined), cela signifie que l'utilisateur n'a pas touché à la sélection des parents,
+            // et nous ne devons PAS supprimer les liens existants. C'était la source du bug.
             if (parent_ids !== undefined) {
+                // D'abord, supprimer les anciens liens pour cet élève (basé sur l'ancien matricule)
                 await trx('parent_student_links').where('student_matricule', student.matricule).del();
+                // Si le matricule a changé, on s'assure de nettoyer les liens potentiels sur le nouveau matricule aussi
                 if (matricule !== student.matricule) {
                     await trx('parent_student_links').where('student_matricule', matricule).del();
                 }
 
+                // Créer les nouveaux liens. `parent_ids` peut être un tableau vide pour tout délier.
                 const links = createParentLinkObjects(parent_ids, { name, matricule, student_class });
                 if (links.length > 0) await trx('parent_student_links').insert(links);
             }
@@ -413,6 +402,9 @@ const updateStudent = async (req, res) => {
 
 /**
  * Placeholder pour l'ancienne route d'ajout d'enfant (GET).
+ * Redirige vers le tableau de bord pour éviter un crash de l'application,
+ * car la route est probablement toujours définie dans studentRoutes.js.
+ * C'est une mesure de sécurité pour assurer la stabilité du démarrage.
  */
 const renderAddChildForm = (req, res) => {
     req.flash('info_msg', "L'ajout d'un enfant se fait désormais uniquement lors de l'inscription du parent.");
@@ -434,6 +426,7 @@ module.exports = {
   completeStudentRegistration,
   renderEditStudentForm,
   updateStudent,
+  createParentFromStudentForm,
   renderAddChildForm,
   postAddChild,
 };
