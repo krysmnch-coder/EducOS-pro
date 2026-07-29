@@ -377,16 +377,10 @@ authNamespace.on('connection', (socket) => { // Note: les gestionnaires à l'int
       // 4. Confirmer à l'expéditeur
       if (typeof callback === 'function') callback({ success: true, message: newMessage });
 
-      // 5. Mettre à jour le badge de chat non lu pour le destinataire
-      try {
-        const unreadCount = await chatModel.getUnreadCount(receiverId);
-        authNamespace.to(`user_${receiverId}`).emit('unreadChatUpdate', {
-          count: unreadCount
-        });
-      } catch (postSendError) {
-        console.error('Erreur post-envoi (notification/badge):', postSendError);
-      }
-
+      // 5. Mettre à jour les badges du destinataire (chat et notifications)
+      const unreadChatCount = await chatModel.getUnreadCount(receiverId);
+      authNamespace.to(`user_${receiverId}`).emit('unreadChatUpdate', { count: unreadChatCount });
+      emitNotificationUpdate(receiverId); // Utilise le nouvel helper
     } catch (error) {
       console.error('Erreur sendMessage:', error);
       if (typeof callback === 'function') callback({ success: false, error: 'Impossible d\'enregistrer le message.' });
@@ -443,6 +437,21 @@ app.set('authIo', authNamespace); // Rendre le namespace authentifié accessible
 app.set('publicIo', publicNamespace);
 app.set('broadcastDashboardStats', broadcastDashboardStats);
 app.set('broadcastAdminStats', broadcastAdminStats);
+
+/**
+ * Helper to emit a notification update to a specific user via Socket.IO.
+ * @param {number} userId - The ID of the user to notify.
+ */
+async function emitNotificationUpdate(userId) {
+  try {
+    const unreadCount = await notificationModel.getUnreadNotificationCountForUser({ id: userId });
+    authNamespace.to(`user_${userId}`).emit('newNotification', { unreadCount });
+  } catch (error) {
+    console.error(`Failed to emit notification update for user ${userId}:`, error);
+  }
+}
+
+app.set('emitNotificationUpdate', emitNotificationUpdate);
 
 /**
  * Fonction de démarrage asynchrone pour s'assurer que la base de données

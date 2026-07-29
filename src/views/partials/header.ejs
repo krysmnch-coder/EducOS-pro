@@ -106,14 +106,9 @@
           </li>
 
           <!-- Notifications -->
-          <li class="nav-item">
-            <a href="/notifications" class="nav-icon-btn border-0 bg-transparent <%= currentPath.startsWith('/notifications') ? 'active' : '' %>" title="Notifications">
-              <span class="icon-badge-wrapper">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg>
-                <span id="notification-badge" class="badge rounded-pill bg-danger" style="position: absolute; top: -5px; right: -8px; display: none; border: 2px solid var(--card-bg);">0</span>
-              </span>
-            </a>
-          </li>
+          <!-- Nouveau code -->
+<%- include('../partials/notification-dropdown') %>
+
 
           <!-- Mode -->
           <li class="nav-item">
