@@ -32,6 +32,7 @@ async function initializeDatabase() {
       table.string('matricule').unique();
       table.text('children');
       table.string('avatar_url');
+      table.text('manual_parents'); // Ajout de la colonne pour les parents manuels
       table.string('phone_number');
       table.date('date_of_birth');
       table.string('place_of_birth');
@@ -48,6 +49,14 @@ async function initializeDatabase() {
       console.log('Mise à jour de la table "users": ajout de la colonne "password_reset_required"...');
       await db.schema.alterTable('users', table => {
         table.boolean('password_reset_required').defaultTo(false);
+      });
+    }
+    // Vérifier et ajouter la colonne manual_parents si elle manque
+    const hasManualParentsCol = await db.schema.hasColumn('users', 'manual_parents');
+    if (!hasManualParentsCol) {
+      console.log('Mise à jour de la table "users": ajout de la colonne "manual_parents"...');
+      await db.schema.alterTable('users', table => {
+        table.text('manual_parents');
       });
     }
   }

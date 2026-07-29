@@ -10,62 +10,767 @@
     <link rel="stylesheet" href="/css/style.css">
     
     <style>
-        /* VOTRE CSS EXISTANT - NE PAS MODIFIER */
-        /* ... tout votre CSS ... */
+        /* ==========================================================================
+           CSS Complet - Glassmorphism Premium avec Animations
+           ========================================================================== */
         
-        /* Styles additionnels pour l'édition inline du téléphone */
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+            --glass-blur: blur(12px);
+            --glass-shine: rgba(255, 255, 255, 0.4);
+            --primary-color: #0d6efd;
+            --primary-glow: rgba(13, 110, 253, 0.2);
+            --success-color: #198754;
+            --warning-color: #ffc107;
+            --info-color: #0dcaf0;
+        }
+
+        [data-theme="dark"] {
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.06);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --glass-shine: rgba(255, 255, 255, 0.08);
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+
+        [data-theme="light"] body {
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+        }
+
+        .page-shell {
+            padding-top: 1rem;
+            padding-bottom: 2rem;
+        }
+
+        /* ==========================================================================
+           Carte Principale Glassmorphism
+           ========================================================================== */
+        .glass-form-card {
+            background: var(--glass-bg) !important;
+            backdrop-filter: var(--glass-blur) !important;
+            -webkit-backdrop-filter: var(--glass-blur) !important;
+            border: 1px solid var(--glass-border) !important;
+            border-radius: 1.5rem !important;
+            box-shadow: var(--glass-shadow) !important;
+            overflow: hidden;
+            animation: cardFadeInUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards !important;
+            opacity: 0;
+            transform: translateY(30px) scale(0.95);
+            position: relative;
+        }
+
+        .glass-form-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.05), transparent 70%);
+            opacity: 0;
+            transition: opacity 0.6s ease;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .glass-form-card:hover::before {
+            opacity: 1;
+        }
+
+        .glass-form-card .card-body {
+            position: relative;
+            z-index: 1;
+            padding: 2rem !important;
+        }
+
+        @keyframes cardFadeInUp {
+            0% { opacity: 0; transform: translateY(40px) scale(0.9); }
+            60% { opacity: 1; transform: translateY(-5px) scale(1.02); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        [data-theme="dark"] .glass-form-card {
+            background: rgba(255, 255, 255, 0.03) !important;
+            border: 1px solid rgba(255, 255, 255, 0.06) !important;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+        }
+
+        /* ==========================================================================
+           Titre de Page avec Animation
+           ========================================================================== */
+        .page-title {
+            color: #ffffff;
+            font-weight: 700;
+            animation: titleSlideIn 0.6s ease forwards !important;
+            opacity: 0;
+            transform: translateX(-20px);
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes titleSlideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        [data-theme="light"] .page-title {
+            color: #212529;
+            text-shadow: none;
+        }
+
+        /* ==========================================================================
+           Bouton Retour Glassmorphism
+           ========================================================================== */
+        .glass-btn-back {
+            background: rgba(255, 255, 255, 0.08) !important;
+            backdrop-filter: blur(10px) !important;
+            -webkit-backdrop-filter: blur(10px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.15) !important;
+            border-radius: 0.75rem !important;
+            padding: 0.5rem 1.2rem !important;
+            color: #ffffff !important;
+            font-weight: 500;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+            animation: fadeIn 0.6s ease forwards;
+            animation-delay: 0.2s;
+            opacity: 0;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .glass-btn-back:hover {
+            transform: translateY(-3px) scale(1.03) !important;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2) !important;
+            background: rgba(255, 255, 255, 0.15) !important;
+            border-color: rgba(255, 255, 255, 0.3) !important;
+        }
+
+        [data-theme="light"] .glass-btn-back {
+            color: #212529 !important;
+            background: rgba(255, 255, 255, 0.6) !important;
+            border-color: rgba(0, 0, 0, 0.1) !important;
+        }
+
+        /* ==========================================================================
+           Labels avec Icônes
+           ========================================================================== */
+        .form-label {
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.9) !important;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-label svg {
+            color: var(--primary-color);
+            transition: transform 0.3s ease;
+        }
+
+        .form-label:hover svg {
+            transform: scale(1.2) rotate(5deg);
+        }
+
+        [data-theme="light"] .form-label {
+            color: #495057 !important;
+        }
+
+        /* ==========================================================================
+           Champs de Formulaire Glassmorphism
+           ========================================================================== */
+        .form-control, .form-select {
+            background: rgba(255, 255, 255, 0.06) !important;
+            backdrop-filter: blur(5px) !important;
+            -webkit-backdrop-filter: blur(5px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.12) !important;
+            border-radius: 0.75rem !important;
+            padding: 0.7rem 1rem !important;
+            color: #ffffff !important;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+            box-shadow: none !important;
+        }
+
+        .form-control:focus, .form-select:focus {
+            background: rgba(255, 255, 255, 0.1) !important;
+            border-color: var(--primary-color) !important;
+            box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.2) !important;
+            transform: translateY(-2px);
+        }
+
+        .form-control:hover, .form-select:hover {
+            border-color: rgba(255, 255, 255, 0.25) !important;
+            background: rgba(255, 255, 255, 0.08) !important;
+        }
+
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        [data-theme="light"] .form-control,
+        [data-theme="light"] .form-select {
+            background: rgba(255, 255, 255, 0.7) !important;
+            border-color: rgba(0, 0, 0, 0.1) !important;
+            color: #212529 !important;
+        }
+
+        [data-theme="light"] .form-control::placeholder {
+            color: #adb5bd;
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        /* ==========================================================================
+           Séparateurs Animés
+           ========================================================================== */
+        hr {
+            border: none !important;
+            height: 1px !important;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent) !important;
+            margin: 1.5rem 0 !important;
+            opacity: 1 !important;
+            animation: separatorPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes separatorPulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        [data-theme="light"] hr {
+            background: linear-gradient(90deg, transparent, rgba(13, 110, 253, 0.3), transparent) !important;
+        }
+
+        /* ==========================================================================
+           Titres de Section
+           ========================================================================== */
+        .section-title {
+            color: #ffffff;
+            font-weight: 600;
+            position: relative;
+            padding-bottom: 0.6rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-color), var(--info-color));
+            border-radius: 10px;
+            animation: underlineWidth 2s ease-in-out infinite;
+        }
+
+        @keyframes underlineWidth {
+            0%, 100% { width: 50px; }
+            50% { width: 80px; }
+        }
+
+        [data-theme="light"] .section-title {
+            color: #212529;
+        }
+
+        /* ==========================================================================
+           Animation des Groupes de Formulaire
+           ========================================================================== */
+        .form-group-animated {
+            animation: formFadeIn 0.5s ease forwards !important;
+            opacity: 0;
+            transform: translateY(15px);
+        }
+
+        @keyframes formFadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-group-animated:nth-child(1) { animation-delay: 0.05s; }
+        .form-group-animated:nth-child(2) { animation-delay: 0.1s; }
+        .form-group-animated:nth-child(3) { animation-delay: 0.15s; }
+        .form-group-animated:nth-child(4) { animation-delay: 0.2s; }
+        .form-group-animated:nth-child(5) { animation-delay: 0.25s; }
+        .form-group-animated:nth-child(6) { animation-delay: 0.3s; }
+        .form-group-animated:nth-child(7) { animation-delay: 0.35s; }
+        .form-group-animated:nth-child(8) { animation-delay: 0.4s; }
+
+        /* ==========================================================================
+           Liste des Parents Liés - Glassmorphism
+           ========================================================================== */
+        .glass-list-group {
+            background: transparent !important;
+            border-radius: 1rem !important;
+            overflow: hidden !important;
+        }
+
+        .glass-list-group .list-group-item {
+            background: rgba(255, 255, 255, 0.04) !important;
+            backdrop-filter: blur(8px) !important;
+            -webkit-backdrop-filter: blur(8px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            border-radius: 0.75rem !important;
+            margin-bottom: 0.5rem !important;
+            padding: 1rem !important;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+            color: #ffffff !important;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-list-group .list-group-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(180deg, var(--primary-color), var(--info-color));
+            border-radius: 0 4px 4px 0;
+            transform: scaleY(0);
+            transition: transform 0.4s ease;
+        }
+
+        .glass-list-group .list-group-item:hover {
+            background: rgba(13, 110, 253, 0.08) !important;
+            transform: translateX(5px) !important;
+            border-color: rgba(13, 110, 253, 0.2) !important;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2) !important;
+        }
+
+        .glass-list-group .list-group-item:hover::before {
+            transform: scaleY(1);
+        }
+
+        .glass-list-group .list-group-item h6 {
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        [data-theme="light"] .glass-list-group .list-group-item {
+            background: rgba(255, 255, 255, 0.7) !important;
+            border-color: rgba(0, 0, 0, 0.06) !important;
+            color: #212529 !important;
+        }
+
+        [data-theme="light"] .glass-list-group .list-group-item h6 {
+            color: #212529;
+        }
+
+        /* ==========================================================================
+           Badge Nouveau Parent
+           ========================================================================== */
+        .badge-new {
+            background: linear-gradient(135deg, var(--info-color), #0a58ca) !important;
+            color: white !important;
+            font-size: 0.65rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 1rem;
+            animation: badgePulse 2s ease-in-out infinite;
+        }
+
+        @keyframes badgePulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(13, 202, 240, 0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(13, 202, 240, 0); }
+        }
+
+        /* ==========================================================================
+           Téléphone Éditable
+           ========================================================================== */
         .phone-editable {
             cursor: pointer;
-            border-bottom: 1px dashed #6c757d;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.4);
+            transition: all 0.3s ease;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .phone-editable:hover {
+            color: var(--primary-color) !important;
+            border-bottom-color: var(--primary-color) !important;
+            text-shadow: 0 0 10px var(--primary-glow);
+        }
+
+        [data-theme="light"] .phone-editable {
+            color: #6c757d;
+            border-bottom-color: rgba(0, 0, 0, 0.2);
+        }
+
+        .phone-edit-input {
+            width: 160px;
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 0.5rem;
+            border: 1px solid var(--primary-color);
+            background: rgba(255, 255, 255, 0.1) !important;
+            color: #ffffff;
+            font-size: 0.85rem;
             transition: all 0.3s ease;
         }
-        
-        .phone-editable:hover {
-            color: var(--bs-primary, #0d6efd);
-            border-bottom-color: var(--bs-primary, #0d6efd);
-        }
-        
-        .phone-edit-input {
-            width: 150px;
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 4px;
-            border: 1px solid var(--bs-primary, #0d6efd);
-            background: rgba(255, 255, 255, 0.1);
-            color: var(--text-color, #212529);
-            font-size: 0.875rem;
-        }
-        
+
         .phone-edit-input:focus {
             outline: none;
-            box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.2);
+            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.3);
+            background: rgba(255, 255, 255, 0.15) !important;
         }
-        
+
+        [data-theme="light"] .phone-edit-input {
+            color: #212529;
+            background: rgba(255, 255, 255, 0.9) !important;
+        }
+
+        /* ==========================================================================
+           Boutons d'Action
+           ========================================================================== */
         .btn-save-phone {
-            padding: 2px 8px;
+            padding: 3px 10px;
             font-size: 0.75rem;
-            margin-left: 5px;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
         }
-        
+
+        .btn-save-phone:hover {
+            transform: scale(1.1);
+        }
+
+        .btn-outline-danger {
+            background: rgba(220, 53, 69, 0.05) !important;
+            border: 1px solid rgba(220, 53, 69, 0.2) !important;
+            border-radius: 0.5rem !important;
+            color: #dc3545 !important;
+            transition: all 0.3s ease !important;
+        }
+
+        .btn-outline-danger:hover {
+            background: rgba(220, 53, 69, 0.15) !important;
+            transform: scale(1.05) !important;
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3) !important;
+        }
+
+        /* ==========================================================================
+           Boutons Principaux
+           ========================================================================== */
+        .glass-btn-primary {
+            background: linear-gradient(135deg, rgba(13, 110, 253, 0.3), rgba(13, 202, 240, 0.3)) !important;
+            backdrop-filter: blur(10px) !important;
+            -webkit-backdrop-filter: blur(10px) !important;
+            border: 1px solid rgba(13, 110, 253, 0.3) !important;
+            border-radius: 0.75rem !important;
+            padding: 0.6rem 1.8rem !important;
+            font-weight: 600 !important;
+            color: #ffffff !important;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .glass-btn-primary:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .glass-btn-primary:hover {
+            transform: translateY(-3px) scale(1.03) !important;
+            box-shadow: 0 12px 35px rgba(13, 110, 253, 0.4) !important;
+            border-color: var(--primary-color) !important;
+        }
+
+        .glass-btn-secondary {
+            background: rgba(255, 255, 255, 0.06) !important;
+            backdrop-filter: blur(10px) !important;
+            -webkit-backdrop-filter: blur(10px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.15) !important;
+            border-radius: 0.75rem !important;
+            padding: 0.6rem 1.8rem !important;
+            color: #ffffff !important;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+        }
+
+        .glass-btn-secondary:hover {
+            transform: translateY(-3px) scale(1.03) !important;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3) !important;
+            background: rgba(255, 255, 255, 0.12) !important;
+        }
+
+        [data-theme="light"] .glass-btn-secondary {
+            color: #212529 !important;
+            background: rgba(255, 255, 255, 0.7) !important;
+            border-color: rgba(0, 0, 0, 0.1) !important;
+        }
+
+        /* ==========================================================================
+           Bouton Outline Primary
+           ========================================================================== */
+        .btn-outline-primary {
+            background: rgba(13, 110, 253, 0.08) !important;
+            border: 1px solid rgba(13, 110, 253, 0.2) !important;
+            border-radius: 0.5rem !important;
+            color: #ffffff !important;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+        }
+
+        .btn-outline-primary:hover {
+            background: rgba(13, 110, 253, 0.2) !important;
+            transform: translateY(-2px) scale(1.03) !important;
+            box-shadow: 0 6px 20px rgba(13, 110, 253, 0.3) !important;
+        }
+
+        [data-theme="light"] .btn-outline-primary {
+            color: var(--primary-color) !important;
+            background: rgba(13, 110, 253, 0.05) !important;
+        }
+
+        /* ==========================================================================
+           Modal Glassmorphism
+           ========================================================================== */
+        .modal-glass .modal-content {
+            background: rgba(20, 20, 40, 0.95) !important;
+            backdrop-filter: blur(25px) !important;
+            -webkit-backdrop-filter: blur(25px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border-radius: 1.5rem !important;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5) !important;
+            animation: modalSlideIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+        }
+
+        @keyframes modalSlideIn {
+            from { opacity: 0; transform: translateY(-30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        [data-theme="light"] .modal-glass .modal-content {
+            background: rgba(255, 255, 255, 0.95) !important;
+            border-color: rgba(0, 0, 0, 0.08) !important;
+        }
+
+        .modal-glass .modal-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+            padding: 1.25rem 1.5rem !important;
+        }
+
+        .modal-glass .modal-title {
+            color: #ffffff !important;
+            font-weight: 600;
+        }
+
+        [data-theme="light"] .modal-glass .modal-title {
+            color: #212529 !important;
+        }
+
+        .modal-glass .modal-body {
+            padding: 1.5rem !important;
+            color: rgba(255, 255, 255, 0.9) !important;
+        }
+
+        [data-theme="light"] .modal-glass .modal-body {
+            color: #212529 !important;
+        }
+
+        .modal-glass .modal-footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+            padding: 1rem 1.5rem !important;
+        }
+
+        .modal-glass .btn-close {
+            filter: invert(1);
+        }
+
+        [data-theme="light"] .modal-glass .btn-close {
+            filter: none;
+        }
+
+        /* ==========================================================================
+           Alertes Animées
+           ========================================================================== */
+        .alert {
+            border-radius: 0.75rem !important;
+            border-left-width: 4px !important;
+            animation: alertSlideIn 0.4s ease-out !important;
+            backdrop-filter: blur(8px) !important;
+            -webkit-backdrop-filter: blur(8px) !important;
+        }
+
+        @keyframes alertSlideIn {
+            from { opacity: 0; transform: translateY(-10px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .alert-info {
+            background: rgba(13, 202, 240, 0.1) !important;
+            border-color: rgba(13, 202, 240, 0.3) !important;
+            color: rgba(255, 255, 255, 0.9) !important;
+        }
+
+        .alert-danger {
+            background: rgba(220, 53, 69, 0.1) !important;
+            border-color: rgba(220, 53, 69, 0.3) !important;
+            color: #ff6b6b !important;
+        }
+
+        [data-theme="light"] .alert-info {
+            color: #055160 !important;
+        }
+
+        /* ==========================================================================
+           TomSelect Personnalisé
+           ========================================================================== */
+        .ts-wrapper .ts-control {
+            border-radius: 0.75rem !important;
+            background: rgba(255, 255, 255, 0.06) !important;
+            backdrop-filter: blur(5px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.12) !important;
+            color: #ffffff !important;
+            padding: 0.6rem 1rem !important;
+            box-shadow: none !important;
+            transition: all 0.4s ease !important;
+        }
+
+        .ts-wrapper .ts-control:focus {
+            border-color: var(--primary-color) !important;
+            box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.2) !important;
+        }
+
+        [data-theme="light"] .ts-wrapper .ts-control {
+            background: rgba(255, 255, 255, 0.7) !important;
+            border-color: rgba(0, 0, 0, 0.1) !important;
+            color: #212529 !important;
+        }
+
+        .ts-wrapper .ts-dropdown {
+            border-radius: 0.75rem !important;
+            background: rgba(20, 20, 40, 0.95) !important;
+            backdrop-filter: blur(15px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        }
+
+        [data-theme="light"] .ts-wrapper .ts-dropdown {
+            background: rgba(255, 255, 255, 0.95) !important;
+            border-color: rgba(0, 0, 0, 0.08) !important;
+        }
+
+        .ts-wrapper .ts-dropdown .option {
+            color: rgba(255, 255, 255, 0.9) !important;
+            transition: all 0.3s ease !important;
+        }
+
+        .ts-wrapper .ts-dropdown .option:hover,
+        .ts-wrapper .ts-dropdown .option.active {
+            background: rgba(13, 110, 253, 0.15) !important;
+        }
+
+        [data-theme="light"] .ts-wrapper .ts-dropdown .option {
+            color: #212529 !important;
+        }
+
+        .ts-wrapper .item {
+            background: linear-gradient(135deg, rgba(13, 110, 253, 0.2), rgba(13, 202, 240, 0.2)) !important;
+            border: 1px solid rgba(13, 110, 253, 0.3) !important;
+            border-radius: 0.5rem !important;
+            color: #ffffff !important;
+        }
+
+        /* ==========================================================================
+           Toast Notification
+           ========================================================================== */
+        .toast-notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+            background: rgba(25, 135, 84, 0.2) !important;
+            backdrop-filter: blur(15px) !important;
+            -webkit-backdrop-filter: blur(15px) !important;
+            border: 1px solid rgba(25, 135, 84, 0.3) !important;
+            border-radius: 1rem !important;
+            padding: 1rem 1.5rem !important;
+            color: #ffffff !important;
+            animation: toastSlideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) !important;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3) !important;
+        }
+
+        @keyframes toastSlideIn {
+            from { opacity: 0; transform: translateX(100px) scale(0.8); }
+            to { opacity: 1; transform: translateX(0) scale(1); }
+        }
+
+        @keyframes toastSlideOut {
+            from { opacity: 1; transform: translateX(0) scale(1); }
+            to { opacity: 0; transform: translateX(100px) scale(0.8); }
+        }
+
+        /* ==========================================================================
+           Linked Parent Item Animation
+           ========================================================================== */
         .linked-parent-item {
-            animation: fadeInUp 0.3s ease;
+            animation: itemSlideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards !important;
+            opacity: 0;
+            transform: translateX(-20px);
         }
-        
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
+
+        @keyframes itemSlideIn {
+            from { opacity: 0; transform: translateX(-20px) scale(0.95); }
+            to { opacity: 1; transform: translateX(0) scale(1); }
+        }
+
+        /* ==========================================================================
+           Responsive
+           ========================================================================== */
+        @media (max-width: 768px) {
+            .glass-form-card .card-body {
+                padding: 1.25rem !important;
             }
-            to {
-                opacity: 1;
-                transform: translateY(0);
+
+            .glass-btn-primary,
+            .glass-btn-secondary {
+                width: 100%;
+                justify-content: center;
+                margin-top: 0.5rem;
+            }
+
+            .d-flex.justify-content-end {
+                flex-direction: column-reverse;
+            }
+
+            .d-flex.justify-content-end .me-2 {
+                margin-right: 0 !important;
+            }
+
+            .page-title {
+                font-size: 1.25rem;
             }
         }
     </style>
 </head>
 <body>
-    <!-- HEADER EXISTANT - NE PAS MODIFIER -->
-    <!-- ... votre header ... -->
+    <!-- HEADER - INCLUS VOTRE HEADER EXISTANT ICI -->
+    <!-- ... -->
 
     <main class="main-content">
         <div class="container mt-4 page-shell">
@@ -88,14 +793,14 @@
                             <div class="row">
                                 <div class="col-md-6 mb-3 form-group-animated">
                                     <label for="name" class="form-label">
-                                        <i data-feather="user" class="me-1" style="width: 14px; height: 14px;"></i>
+                                        <i data-feather="user" style="width: 14px; height: 14px;"></i>
                                         Nom complet de l'élève
                                     </label>
                                     <input type="text" class="form-control" id="name" name="name" value="Tiana RABENJA" required>
                                 </div>
                                 <div class="col-md-6 mb-3 form-group-animated">
                                     <label for="matricule" class="form-label">
-                                        <i data-feather="hash" class="me-1" style="width: 14px; height: 14px;"></i>
+                                        <i data-feather="hash" style="width: 14px; height: 14px;"></i>
                                         Matricule
                                     </label>
                                     <input type="text" class="form-control" id="matricule" name="matricule" value="0002" required>
@@ -105,30 +810,30 @@
                             <div class="row">
                                 <div class="col-md-6 mb-3 form-group-animated">
                                     <label for="student_class" class="form-label">
-                                        <i data-feather="grid" class="me-1" style="width: 14px; height: 14px;"></i>
+                                        <i data-feather="grid" style="width: 14px; height: 14px;"></i>
                                         Classe
                                     </label>
                                     <input type="text" class="form-control" id="student_class" name="student_class" value="4ème" required>
                                 </div>
                             </div>
 
-                            <hr class="my-4">
+                            <hr>
                             <h5 class="mb-3 section-title">
-                                <i data-feather="info" class="me-2" style="width: 18px; height: 18px;"></i>
+                                <i data-feather="info" style="width: 18px; height: 18px;"></i>
                                 Informations personnelles
                             </h5>
 
                             <div class="row">
                                 <div class="col-md-6 mb-3 form-group-animated">
                                     <label for="date_of_birth" class="form-label">
-                                        <i data-feather="calendar" class="me-1" style="width: 14px; height: 14px;"></i>
+                                        <i data-feather="calendar" style="width: 14px; height: 14px;"></i>
                                         Date de naissance
                                     </label>
                                     <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" value="2013-07-23">
                                 </div>
                                 <div class="col-md-6 mb-3 form-group-animated">
                                     <label for="place_of_birth" class="form-label">
-                                        <i data-feather="map-pin" class="me-1" style="width: 14px; height: 14px;"></i>
+                                        <i data-feather="map-pin" style="width: 14px; height: 14px;"></i>
                                         Lieu de naissance
                                     </label>
                                     <input type="text" class="form-control" id="place_of_birth" name="place_of_birth" value="Befelatanana">
@@ -137,57 +842,54 @@
 
                             <div class="mb-3 form-group-animated">
                                 <label for="address" class="form-label">
-                                    <i data-feather="home" class="me-1" style="width: 14px; height: 14px;"></i>
+                                    <i data-feather="home" style="width: 14px; height: 14px;"></i>
                                     Adresse
                                 </label>
                                 <textarea class="form-control" id="address" name="address" rows="2">IbI 8 Isoraka</textarea>
                             </div>
 
-                            <hr class="my-4">
+                            <hr>
                             <h5 class="mb-3 section-title">
-                                <i data-feather="users" class="me-2" style="width: 18px; height: 18px;"></i>
+                                <i data-feather="users" style="width: 18px; height: 18px;"></i>
                                 Liaison Parent
                             </h5>
 
-                            <!-- Parents actuellement liés - AVEC ÉDITION DU TÉLÉPHONE -->
+                            <!-- Parents actuellement liés -->
                             <div class="mb-3 form-group-animated">
                                 <label class="form-label">
-                                    <i data-feather="users" class="me-1" style="width: 14px; height: 14px;"></i>
+                                    <i data-feather="users" style="width: 14px; height: 14px;"></i>
                                     Parent(s) actuellement lié(s)
                                 </label>
                                 <div class="list-group glass-list-group" id="linked-parents-list">
-                                    <!-- Les parents liés seront affichés ici dynamiquement -->
+                                    <!-- Rendu dynamique -->
                                 </div>
                             </div>
 
-                            <!-- Select pour lier des parents existants -->
+                            <!-- Select pour ajouter des parents existants -->
                             <div class="mb-3 form-group-animated">
                                 <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <label for="parent_ids-ts-control" class="form-label mb-0" id="parent_ids-ts-label">
-                                        <i data-feather="user-plus" class="me-1" style="width: 14px; height: 14px;"></i>
+                                    <label for="parent_ids-ts-control" class="form-label mb-0">
+                                        <i data-feather="user-plus" style="width: 14px; height: 14px;"></i>
                                         Ajouter un parent existant
                                     </label>
                                     <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addParentModal">
-                                        <i data-feather="plus" class="me-1" style="width: 14px; height: 14px;"></i>
+                                        <i data-feather="plus" style="width: 14px; height: 14px;"></i>
                                         Nouveau Parent
                                     </button>
                                 </div>
-                                <select name="parent_ids" id="parent_ids" class="form-select" multiple>
-                                    <!-- Options chargées dynamiquement -->
-                                </select>
-                                <div class="form-text">
-                                    <i data-feather="info" class="me-1" style="width: 12px; height: 12px;"></i>
-                                    Sélectionnez des parents existants à lier. Utilisez "Nouveau Parent" pour ajouter un parent sans compte.
+                                <select name="parent_ids" id="parent_ids" class="form-select" multiple></select>
+                                <div class="form-text" style="color: rgba(255,255,255,0.5);">
+                                    <i data-feather="info" style="width: 12px; height: 12px;"></i>
+                                    Sélectionnez des parents existants ou utilisez "Nouveau Parent".
                                 </div>
                             </div>
 
-                            <!-- Champ caché pour stocker les parents ajoutés manuellement -->
                             <input type="hidden" name="manual_parents" id="manual-parents-data" value="[]">
 
                             <div class="d-flex justify-content-end mt-4">
                                 <a href="/students" class="btn glass-btn-secondary me-2">Annuler</a>
                                 <button type="submit" class="btn glass-btn-primary">
-                                    <i data-feather="save" class="me-2" style="width: 16px; height: 16px;"></i>
+                                    <i data-feather="save" style="width: 16px; height: 16px;"></i>
                                     Mettre à jour le dossier
                                 </button>
                             </div>
@@ -198,13 +900,13 @@
         </div>
     </main>
 
-    <!-- Modal pour ajouter un parent SANS CRÉER DE COMPTE -->
+    <!-- Modal Ajouter un Parent -->
     <div class="modal fade modal-glass" id="addParentModal" tabindex="-1" aria-labelledby="addParentModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="addParentModalLabel">
-                        <i data-feather="user-plus" class="me-2" style="width: 18px; height: 18px;"></i>
+                        <i data-feather="user-plus" style="width: 18px; height: 18px;"></i>
                         Ajouter un parent
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -214,28 +916,28 @@
                     <form id="add-parent-form">
                         <div class="mb-3">
                             <label for="new-parent-name" class="form-label">
-                                <i data-feather="user" class="me-1" style="width: 14px; height: 14px;"></i>
+                                <i data-feather="user" style="width: 14px; height: 14px;"></i>
                                 Nom complet du parent
                             </label>
                             <input type="text" class="form-control" id="new-parent-name" required placeholder="Ex: RAKOTO Jean">
                         </div>
                         <div class="mb-3">
                             <label for="new-parent-phone" class="form-label">
-                                <i data-feather="phone" class="me-1" style="width: 14px; height: 14px;"></i>
+                                <i data-feather="phone" style="width: 14px; height: 14px;"></i>
                                 Numéro de téléphone
                             </label>
                             <input type="tel" class="form-control" id="new-parent-phone" required placeholder="Ex: 0341234567">
                         </div>
                         <div class="alert alert-info">
-                            <i data-feather="info" class="me-1" style="width: 14px; height: 14px;"></i>
-                            <small>Ce parent sera ajouté directement au dossier de l'élève sans créer de compte utilisateur.</small>
+                            <i data-feather="info" style="width: 14px; height: 14px;"></i>
+                            <small>Ce parent sera ajouté au dossier sans créer de compte utilisateur.</small>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn glass-btn-secondary" data-bs-dismiss="modal">Annuler</button>
                     <button type="button" class="btn glass-btn-primary" id="save-new-parent-btn">
-                        <i data-feather="save" class="me-1" style="width: 16px; height: 16px;"></i>
+                        <i data-feather="save" style="width: 16px; height: 16px;"></i>
                         Ajouter le parent
                     </button>
                 </div>
@@ -245,26 +947,15 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="/js/theme.js"></script>
-    <script src="/js/main.js"></script>
-
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            if (typeof feather !== 'undefined') {
-                feather.replace();
-            }
+            if (typeof feather !== 'undefined') feather.replace();
 
-            // ========================================================================
-            // DONNÉES INITIALES
-            // ========================================================================
-            
-            // Parents déjà liés avec leurs infos
+            // Données
             let linkedParents = [
                 { id: 3, name: 'RABENJA Albert', phone: '', isNew: false }
             ];
             
-            // Parents disponibles dans le select (ceux qui ont un compte)
             const availableParents = [
                 { id: 36, name: 'Anthony RAKOTOBE' },
                 { id: 24, name: 'Krystofer Manach' },
@@ -282,22 +973,14 @@
                 { id: 30, name: 'RANORO Sendra' }
             ];
             
-            // Compteur pour générer des IDs uniques pour les nouveaux parents
             let newParentCounter = 1000;
-
-            // ========================================================================
-            // TOM SELECT
-            // ========================================================================
             let tomSelectInstance;
+
+            // Initialiser TomSelect
             const parentSelect = document.getElementById('parent_ids');
-            
             if (parentSelect) {
-                // Filtrer les parents déjà liés
                 const linkedIds = linkedParents.filter(p => !p.isNew).map(p => p.id);
-                const availableOptions = availableParents.filter(p => !linkedIds.includes(p.id));
-                
-                // Remplir le select
-                availableOptions.forEach(parent => {
+                availableParents.filter(p => !linkedIds.includes(p.id)).forEach(parent => {
                     const option = document.createElement('option');
                     option.value = parent.id;
                     option.textContent = parent.name;
@@ -307,114 +990,80 @@
                 tomSelectInstance = new TomSelect(parentSelect, {
                     plugins: ['remove_button'],
                     create: false,
-                    placeholder: 'Rechercher et sélectionner un parent existant...',
+                    placeholder: 'Rechercher un parent existant...',
                     onChange: function(values) {
-                        // Ajouter les parents sélectionnés à la liste des liés
                         values.forEach(value => {
                             const parentId = parseInt(value);
                             if (!linkedParents.find(p => p.id === parentId)) {
                                 const parent = availableParents.find(p => p.id === parentId);
-                                if (parent) {
-                                    linkedParents.push({
-                                        id: parent.id,
-                                        name: parent.name,
-                                        phone: '',
-                                        isNew: false
-                                    });
-                                }
+                                if (parent) linkedParents.push({ id: parent.id, name: parent.name, phone: '', isNew: false });
                             }
                         });
                         renderLinkedParents();
                         updateManualParentsData();
                     },
                     onItemRemove: function(value) {
-                        // Retirer de la liste des liés
-                        const parentId = parseInt(value);
-                        linkedParents = linkedParents.filter(p => p.id !== parentId);
+                        linkedParents = linkedParents.filter(p => p.id !== parseInt(value));
                         renderLinkedParents();
                         updateManualParentsData();
                     }
                 });
             }
 
-            // ========================================================================
-            // RENDU DE LA LISTE DES PARENTS LIÉS
-            // ========================================================================
+            // Rendu de la liste
             function renderLinkedParents() {
-                const listContainer = document.getElementById('linked-parents-list');
-                if (!listContainer) return;
+                const container = document.getElementById('linked-parents-list');
+                if (!container) return;
                 
                 if (linkedParents.length === 0) {
-                    listContainer.innerHTML = `
-                        <div class="list-group-item text-muted text-center py-3">
-                            <i data-feather="users" style="width: 20px; height: 20px;"></i>
-                            <p class="mb-0 mt-1">Aucun parent lié</p>
-                        </div>
-                    `;
+                    container.innerHTML = `<div class="list-group-item text-center py-3" style="color: rgba(255,255,255,0.5);">
+                        <i data-feather="users" style="width: 20px; height: 20px;"></i>
+                        <p class="mb-0 mt-1">Aucun parent lié</p>
+                    </div>`;
                 } else {
-                    listContainer.innerHTML = linkedParents.map((parent, index) => `
+                    container.innerHTML = linkedParents.map((parent, index) => `
                         <div class="list-group-item linked-parent-item" data-parent-index="${index}">
                             <div class="d-flex w-100 justify-content-between align-items-start">
                                 <div>
                                     <h6 class="mb-1">
                                         ${escapeHtml(parent.name)}
-                                        ${parent.isNew ? '<span class="badge bg-info ms-2" style="font-size: 0.65rem;">Nouveau</span>' : ''}
+                                        ${parent.isNew ? '<span class="badge badge-new ms-2">Nouveau</span>' : ''}
                                     </h6>
-                                    <p class="mb-1">
+                                    <p class="mb-0">
                                         <small>
-                                            <i data-feather="phone" class="me-1" style="width: 12px; height: 12px;"></i>
+                                            <i data-feather="phone" style="width: 12px; height: 12px;"></i>
                                             <strong>Téléphone :</strong>
-                                            <span class="phone-display" id="phone-display-${index}">
-                                                ${parent.phone ? escapeHtml(parent.phone) : '<span class="phone-editable" onclick="editPhone(' + index + ')" title="Cliquez pour ajouter un numéro">Non renseigné</span>'}
+                                            <span id="phone-display-${index}">
+                                                ${parent.phone ? escapeHtml(parent.phone) : '<span class="phone-editable" onclick="editPhone(' + index + ')" title="Cliquez pour ajouter">Non renseigné</span>'}
                                             </span>
-                                            <span class="phone-edit-area" id="phone-edit-${index}" style="display: none;">
-                                                <input type="tel" class="phone-edit-input" id="phone-input-${index}" value="${escapeHtml(parent.phone)}" placeholder="Numéro de téléphone">
-                                                <button class="btn btn-sm btn-success btn-save-phone" onclick="savePhone(${index})">
-                                                    <i data-feather="check" style="width: 12px; height: 12px;"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-outline-secondary btn-save-phone" onclick="cancelEditPhone(${index})">
-                                                    <i data-feather="x" style="width: 12px; height: 12px;"></i>
-                                                </button>
+                                            <span id="phone-edit-${index}" style="display: none;">
+                                                <input type="tel" class="phone-edit-input" id="phone-input-${index}" value="${escapeHtml(parent.phone)}" placeholder="Numéro">
+                                                <button class="btn btn-sm btn-success btn-save-phone" onclick="savePhone(${index})">✓</button>
+                                                <button class="btn btn-sm btn-outline-secondary btn-save-phone" onclick="cancelEditPhone(${index})">✗</button>
                                             </span>
                                         </small>
                                     </p>
                                 </div>
-                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeLinkedParent(${index})" title="Retirer ce parent">
+                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeLinkedParent(${index})" title="Retirer">
                                     <i data-feather="trash-2" style="width: 14px; height: 14px;"></i>
                                 </button>
                             </div>
                         </div>
                     `).join('');
                 }
-                
-                if (typeof feather !== 'undefined') {
-                    feather.replace();
-                }
+                if (typeof feather !== 'undefined') feather.replace();
             }
 
-            // ========================================================================
-            // FONCTIONS D'ÉDITION DU TÉLÉPHONE
-            // ========================================================================
+            // Fonctions d'édition du téléphone
             window.editPhone = function(index) {
-                const displayEl = document.getElementById('phone-display-' + index);
-                const editEl = document.getElementById('phone-edit-' + index);
-                const inputEl = document.getElementById('phone-input-' + index);
-                
-                if (displayEl && editEl) {
-                    displayEl.style.display = 'none';
-                    editEl.style.display = 'inline';
-                    inputEl.focus();
-                }
+                document.getElementById('phone-display-' + index).style.display = 'none';
+                document.getElementById('phone-edit-' + index).style.display = 'inline';
+                document.getElementById('phone-input-' + index).focus();
             };
 
             window.savePhone = function(index) {
-                const inputEl = document.getElementById('phone-input-' + index);
-                const phone = inputEl.value.trim();
-                
-                if (linkedParents[index]) {
-                    linkedParents[index].phone = phone;
-                }
-                
+                const phone = document.getElementById('phone-input-' + index).value.trim();
+                if (linkedParents[index]) linkedParents[index].phone = phone;
                 renderLinkedParents();
                 updateManualParentsData();
             };
@@ -425,154 +1074,84 @@
 
             window.removeLinkedParent = function(index) {
                 const parent = linkedParents[index];
-                
-                if (confirm('Voulez-vous retirer "' + parent.name + '" de la liste des parents liés ?')) {
+                if (confirm('Retirer "' + parent.name + '" ?')) {
+                    if (!parent.isNew && tomSelectInstance) tomSelectInstance.removeItem(parent.id);
                     linkedParents.splice(index, 1);
-                    
-                    // Retirer aussi du TomSelect si c'est un parent existant
-                    if (!parent.isNew && tomSelectInstance) {
-                        tomSelectInstance.removeItem(parent.id);
-                    }
-                    
                     renderLinkedParents();
                     updateManualParentsData();
                 }
             };
 
-            // ========================================================================
-            // MISE À JOUR DES DONNÉES CACHÉES POUR LE FORMULAIRE
-            // ========================================================================
             function updateManualParentsData() {
-                const manualParents = linkedParents
-                    .filter(p => p.isNew)
-                    .map(p => ({ name: p.name, phone: p.phone }));
-                
-                document.getElementById('manual-parents-data').value = JSON.stringify(manualParents);
+                document.getElementById('manual-parents-data').value = JSON.stringify(
+                    linkedParents.filter(p => p.isNew).map(p => ({ name: p.name, phone: p.phone }))
+                );
             }
 
-            // ========================================================================
-            // MODAL AJOUT DE PARENT (SANS CRÉER DE COMPTE)
-            // ========================================================================
+            // Modal Ajouter Parent
             const addParentModalEl = document.getElementById('addParentModal');
             if (addParentModalEl) {
-                const addParentModal = new bootstrap.Modal(addParentModalEl);
-                const saveParentBtn = document.getElementById('save-new-parent-btn');
-                const addParentForm = document.getElementById('add-parent-form');
+                const modal = new bootstrap.Modal(addParentModalEl);
+                const saveBtn = document.getElementById('save-new-parent-btn');
                 const alertEl = document.getElementById('add-parent-alert');
                 const nameInput = document.getElementById('new-parent-name');
                 const phoneInput = document.getElementById('new-parent-phone');
+                const form = document.getElementById('add-parent-form');
 
-                // Réinitialiser le bouton au cas où
-                saveParentBtn.onclick = null;
-
-                saveParentBtn.addEventListener('click', function() {
+                saveBtn.addEventListener('click', function() {
                     const name = nameInput.value.trim();
                     const phone = phoneInput.value.trim();
-
-                    if (!name) {
-                        showAlert('Veuillez entrer le nom du parent.');
-                        return;
-                    }
-
-                    if (!phone) {
-                        showAlert('Veuillez entrer le numéro de téléphone.');
-                        return;
-                    }
-
-                    // Créer un nouveau parent local (sans compte)
-                    const newParent = {
-                        id: newParentCounter++,
-                        name: name,
-                        phone: phone,
-                        isNew: true
-                    };
-
-                    // Ajouter à la liste des parents liés
-                    linkedParents.push(newParent);
                     
-                    // Mettre à jour l'affichage
+                    if (!name) { showAlert('Veuillez entrer le nom.'); return; }
+                    if (!phone) { showAlert('Veuillez entrer le téléphone.'); return; }
+                    
+                    linkedParents.push({ id: newParentCounter++, name, phone, isNew: true });
                     renderLinkedParents();
                     updateManualParentsData();
-                    
-                    // Fermer le modal et réinitialiser
-                    addParentModal.hide();
-                    addParentForm.reset();
+                    modal.hide();
+                    form.reset();
                     alertEl.style.display = 'none';
-
-                    // Notification de succès
-                    showToast('Parent "' + name + '" ajouté avec succès !');
+                    showToast('Parent "' + name + '" ajouté !');
                 });
 
                 addParentModalEl.addEventListener('hidden.bs.modal', function() {
-                    addParentForm.reset();
+                    form.reset();
                     alertEl.style.display = 'none';
-                    if (typeof feather !== 'undefined') {
-                        feather.replace();
-                    }
+                    if (typeof feather !== 'undefined') feather.replace();
                 });
 
-                function showAlert(message) {
-                    alertEl.innerHTML = '<i data-feather="alert-circle" class="me-2" style="width: 16px; height: 16px;"></i> ' + message;
+                function showAlert(msg) {
+                    alertEl.innerHTML = msg;
                     alertEl.style.display = 'block';
-                    if (typeof feather !== 'undefined') {
-                        feather.replace();
-                    }
                 }
             }
 
-            // ========================================================================
-            // TOAST NOTIFICATION
-            // ========================================================================
+            // Toast
             function showToast(message) {
-                // Créer un toast simple
-                const toastEl = document.createElement('div');
-                toastEl.className = 'alert alert-success position-fixed bottom-0 end-0 m-3';
-                toastEl.style.zIndex = '9999';
-                toastEl.style.animation = 'fadeInUp 0.3s ease';
-                toastEl.innerHTML = `
-                    <i data-feather="check-circle" class="me-2" style="width: 16px; height: 16px;"></i>
-                    ${message}
-                `;
-                document.body.appendChild(toastEl);
-                
-                if (typeof feather !== 'undefined') {
-                    feather.replace();
-                }
-                
-                setTimeout(function() {
-                    toastEl.style.animation = 'fadeOutDown 0.3s ease';
-                    setTimeout(function() {
-                        toastEl.remove();
-                    }, 300);
+                const toast = document.createElement('div');
+                toast.className = 'toast-notification';
+                toast.innerHTML = '✅ ' + message;
+                document.body.appendChild(toast);
+                setTimeout(() => {
+                    toast.style.animation = 'toastSlideOut 0.3s ease forwards';
+                    setTimeout(() => toast.remove(), 300);
                 }, 3000);
             }
 
-            // ========================================================================
-            // SOUMISSION DU FORMULAIRE
-            // ========================================================================
+            // Soumission
             document.getElementById('student-form').addEventListener('submit', function(e) {
-                // Mettre à jour les données avant soumission
                 updateManualParentsData();
-                
-                // Ajouter les IDs des parents existants comme champs cachés
                 linkedParents.filter(p => !p.isNew).forEach(parent => {
-                    let input = document.querySelector(`input[name="parent_ids[]"][value="${parent.id}"]`);
-                    if (!input) {
-                        input = document.createElement('input');
+                    if (!this.querySelector(`input[value="${parent.id}"]`)) {
+                        const input = document.createElement('input');
                         input.type = 'hidden';
                         input.name = 'parent_ids[]';
                         input.value = parent.id;
                         this.appendChild(input);
                     }
                 });
-                
-                console.log('Parents liés soumis:', linkedParents);
-                console.log('Parents manuels:', document.getElementById('manual-parents-data').value);
             });
 
-            // ========================================================================
-            // UTILITAIRES
-            // ========================================================================
             function escapeHtml(text) {
                 if (!text) return '';
                 const div = document.createElement('div');
@@ -580,9 +1159,7 @@
                 return div.innerHTML;
             }
 
-            // ========================================================================
-            // INITIALISATION
-            // ========================================================================
+            // Init
             renderLinkedParents();
             updateManualParentsData();
         });

@@ -16,12 +16,12 @@ function getUserByMatricule(matricule) {
   return db('users').where({ matricule }).first();
 }
 
-async function createUser({ name, email, password, role, establishment_id, approved = 0, subject = null, student_class = null, matricule = null, children, avatar_url = null, phone_number = null, date_of_birth = null, place_of_birth = null, address = null, parent_info, created_by = null, password_reset_required = false }, trx = db) {
+async function createUser({ name, email, password, role, establishment_id, approved = 0, subject = null, student_class = null, matricule = null, children, avatar_url = null, phone_number = null, date_of_birth = null, place_of_birth = null, address = null, parent_info, manual_parents = null, created_by = null, password_reset_required = false }, trx = db) {
   // Les propriétés 'children' et 'parent_info' sont maintenant obsolètes et gérées par la table 'parent_student_links'.
   // Elles sont conservées dans la signature pour la compatibilité mais ne sont pas insérées.
   
   const userData = {
-    name, email, password, role, establishment_id, approved, subject, student_class, matricule, avatar_url, phone_number, date_of_birth, place_of_birth, address, created_by, password_reset_required
+    name, email, password, role, establishment_id, approved, subject, student_class, matricule, avatar_url, phone_number, date_of_birth, place_of_birth, address, manual_parents, created_by, password_reset_required
   };
 
   return trx('users').insert(userData).returning('id');
@@ -159,7 +159,7 @@ async function countAllUsers() {
   return parseInt(count, 10);
 }
 
-function updateStudentDetails(id, { name, matricule, student_class, date_of_birth, place_of_birth, address }, trx = db) {
+function updateStudentDetails(id, { name, matricule, student_class, date_of_birth, place_of_birth, address, manual_parents }, trx = db) {
     return trx('users').where({ id }).update({
         name,
         matricule,
@@ -167,6 +167,7 @@ function updateStudentDetails(id, { name, matricule, student_class, date_of_birt
         date_of_birth,
         place_of_birth,
         address,
+        manual_parents,
         // Mettre à jour l'email si le matricule change, pour la cohérence
         email: `${matricule.toLowerCase().replace(/\s+/g, '')}@educos.local`
     });

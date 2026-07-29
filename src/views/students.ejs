@@ -9,7 +9,6 @@
            Page Étudiants - Style Glassmorphism
            ========================================================================== */
         
-        /* Conteneur principal */
         .glass-card-container {
             background: rgba(255, 255, 255, 0.08);
             backdrop-filter: blur(12px);
@@ -26,7 +25,6 @@
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
         
-        /* En-tête de classe */
         .glass-class-header {
             background: rgba(13, 110, 253, 0.06);
             border-radius: 0.75rem;
@@ -45,11 +43,6 @@
             border-left-color: rgba(255, 255, 255, 0.2);
         }
         
-        [data-theme="dark"] .glass-class-header:hover {
-            background: rgba(255, 255, 255, 0.08);
-        }
-        
-        /* Tableau */
         .glass-table {
             border-radius: 0.75rem;
             overflow: hidden;
@@ -71,7 +64,6 @@
             border-bottom: 2px solid rgba(255, 255, 255, 0.06);
         }
         
-        /* Lignes du tableau */
         .glass-row {
             background: transparent;
             transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -81,14 +73,8 @@
         }
         
         @keyframes row-fade-in {
-            from {
-                opacity: 0;
-                transform: translateX(-15px) scale(0.98);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0) scale(1);
-            }
+            from { opacity: 0; transform: translateX(-15px) scale(0.98); }
+            to { opacity: 1; transform: translateX(0) scale(1); }
         }
         
         .glass-row:hover {
@@ -101,7 +87,7 @@
         }
         
         .glass-row td {
-            padding: 0.75rem 0.75rem;
+            padding: 0.75rem;
             border-bottom: 1px solid rgba(0, 0, 0, 0.04);
             vertical-align: middle;
         }
@@ -110,7 +96,6 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.04);
         }
         
-        /* Avatar dans le tableau */
         .glass-avatar-table {
             width: 40px;
             height: 40px;
@@ -126,11 +111,6 @@
             box-shadow: 0 0 20px rgba(13, 110, 253, 0.15);
         }
         
-        [data-theme="dark"] .glass-avatar-table {
-            border-color: rgba(255, 255, 255, 0.15);
-        }
-        
-        /* Badges */
         .glass-badge {
             padding: 0.3rem 0.7rem;
             border-radius: 0.5rem;
@@ -143,7 +123,6 @@
             transform: scale(1.05);
         }
         
-        /* Bouton Glassmorphism */
         .glass-btn-primary {
             background: rgba(13, 110, 253, 0.1);
             backdrop-filter: blur(8px);
@@ -167,12 +146,6 @@
         [data-theme="dark"] .glass-btn-primary {
             color: #ffffff;
             border-color: rgba(255, 255, 255, 0.15);
-        }
-        
-        [data-theme="dark"] .glass-btn-primary:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: #ffffff;
-            color: #ffffff;
         }
         
         /* Modal Glassmorphism */
@@ -213,7 +186,6 @@
             border-top: 1px solid rgba(255, 255, 255, 0.06);
         }
         
-        /* Avatar dans le modal */
         .glass-avatar-modal {
             width: 120px;
             height: 120px;
@@ -230,11 +202,6 @@
             box-shadow: 0 8px 40px rgba(13, 110, 253, 0.2);
         }
         
-        [data-theme="dark"] .glass-avatar-modal {
-            border-color: rgba(255, 255, 255, 0.15);
-        }
-        
-        /* Liste dans le modal */
         .glass-list-group {
             background: transparent;
             border-radius: 0.75rem;
@@ -245,13 +212,18 @@
             background: rgba(255, 255, 255, 0.04);
             border: none;
             border-bottom: 1px solid rgba(0, 0, 0, 0.04);
-            padding: 0.7rem 0;
+            padding: 0.7rem 1rem;
             transition: all 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
         }
         
         .glass-list-group .list-group-item:hover {
             background: rgba(13, 110, 253, 0.04);
-            padding-left: 0.5rem;
+            padding-left: 1.2rem;
         }
         
         [data-theme="dark"] .glass-list-group .list-group-item {
@@ -262,7 +234,40 @@
             background: rgba(255, 255, 255, 0.04);
         }
         
-        /* Animation d'entrée pour les classes */
+        /* Style pour les parents sans téléphone */
+        .parent-phone-missing {
+            color: #dc3545;
+            font-style: italic;
+            font-size: 0.85rem;
+            cursor: pointer;
+            border-bottom: 1px dashed #dc3545;
+            transition: all 0.3s ease;
+        }
+        
+        .parent-phone-missing:hover {
+            color: #ff6b6b;
+            border-bottom-color: #ff6b6b;
+        }
+        
+        .parent-phone-ok {
+            color: #198754;
+            font-weight: 500;
+        }
+        
+        .parent-badge-new {
+            background: linear-gradient(135deg, #0dcaf0, #0d6efd);
+            color: white;
+            font-size: 0.65rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 1rem;
+            animation: badgePulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes badgePulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(13, 202, 240, 0.4); }
+            50% { box-shadow: 0 0 0 6px rgba(13, 202, 240, 0); }
+        }
+        
         .glass-class-section {
             animation: section-fade-in 0.6s ease forwards;
             opacity: 0;
@@ -270,48 +275,26 @@
         }
         
         @keyframes section-fade-in {
-            from {
-                opacity: 0;
-                transform: translateY(15px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
-        /* Les délais sont appliqués via JavaScript */
-        
-        /* Adaptation mobile */
         @media (max-width: 768px) {
             .glass-avatar-table {
                 width: 32px;
                 height: 32px;
             }
-            
             .glass-avatar-modal {
                 width: 80px;
                 height: 80px;
             }
-            
             .glass-table thead th {
                 font-size: 0.6rem;
                 padding: 0.5rem 0.4rem;
             }
-            
             .glass-row td {
                 padding: 0.5rem 0.4rem;
                 font-size: 0.8rem;
-            }
-            
-            .glass-btn-primary {
-                padding: 0.35rem 0.8rem;
-                font-size: 0.85rem;
-            }
-            
-            .glass-class-header {
-                padding: 0.5rem 1rem;
-                font-size: 0.95rem;
             }
         }
     </style>
@@ -389,6 +372,8 @@
                                                         data-matricule="<%= student.matricule || 'N/A' %>"
                                                         data-class="<%= student.student_class || 'N/A' %>"
                                                         data-avatar="<%= student.avatar_url || '/img/user.png' %>"
+                                                        data-linked-parents='<%- JSON.stringify(student.linkedParents || []) %>'
+                                                        data-manual-parents='<%- JSON.stringify(student.manualParents || []) %>'
                                                         <% if (isPlaceholder) { %>
                                                             data-parent-name="<%= student.parent_name %>"
                                                             data-parent-id="<%= student.parent_id %>"
@@ -396,7 +381,6 @@
                                                             data-birthdate="<%= student.date_of_birth ? new Date(student.date_of_birth).toLocaleDateString('fr-FR') : 'Non renseignée' %>"
                                                             data-birthplace="<%= student.place_of_birth || 'Non renseigné' %>"
                                                             data-address="<%= student.address || 'Non renseignée' %>"
-                                                            data-linked-parents='<%- JSON.stringify(student.linkedParents || []) %>'
                                                         <% } %>
                                                     >
                                                 <% } else { %>
@@ -412,9 +396,21 @@
                                                     <td><%= student.matricule %></td>
                                                     <% if (user.role === ROLES.ADMINISTRATOR || user.role === ROLES.SECRETARY || user.role === ROLES.SCHOOL_LIFE_MANAGER) { %>
                                                         <td>
-                                                            <% if (student.linkedParents && student.linkedParents.length > 0) { %>
-                                                                <% student.linkedParents.forEach(parent => { %>
-                                                                    <span class="badge bg-secondary glass-badge me-1"><i data-feather="user" class="me-1" style="width: 14px; height: 14px;"></i><%= parent.name %></span>
+                                                            <% 
+                                                            // Afficher TOUS les parents (liés + manuels)
+                                                            const allParents = [];
+                                                            if (student.linkedParents) allParents.push(...student.linkedParents);
+                                                            if (student.manualParents) allParents.push(...student.manualParents);
+                                                            %>
+                                                            <% if (allParents.length > 0) { %>
+                                                                <% allParents.forEach(parent => { %>
+                                                                    <span class="badge bg-secondary glass-badge me-1">
+                                                                        <i data-feather="user" class="me-1" style="width: 14px; height: 14px;"></i>
+                                                                        <%= parent.name %>
+                                                                        <% if (parent.isNew || parent.isManual) { %>
+                                                                            <span class="parent-badge-new ms-1">+</span>
+                                                                        <% } %>
+                                                                    </span>
                                                                 <% }); %>
                                                             <% } else { %>
                                                                 <em class="text-muted small">Aucun</em>
@@ -522,8 +518,11 @@
                 feather.replace();
             }
 
-            // Modal logic
+            // ==========================================================================
+            // MODAL LOGIC - AFFICHAGE DES PARENTS (LIÉS + MANUELS)
+            // ==========================================================================
             const studentDetailModal = document.getElementById('studentDetailModal');
+            
             studentDetailModal.addEventListener('show.bs.modal', function (event) {
                 const row = event.relatedTarget;
 
@@ -531,19 +530,47 @@
                 const editBtn = document.getElementById('modal-edit-btn');
                 const studentId = row.dataset.id;
                 const currentUserId = '<%= user.id %>';
-                // Correction: Utiliser ROLES.ADMINISTRATOR directement pour la comparaison de rôle
                 const currentUserRole = '<%= user.role %>';
 
-                // Réinitialiser l'affichage des champs
+                // Réinitialiser l'affichage
                 document.getElementById('modal-birthdate').closest('.list-group-item').style.display = '';
                 document.getElementById('modal-birthplace').closest('.list-group-item').style.display = '';
                 document.getElementById('modal-address').closest('.list-group-item').style.display = '';
                 document.getElementById('modal-parent-info').innerHTML = '';
 
+                // ========================================================================
+                // RÉCUPÉRATION DE TOUS LES PARENTS (LIÉS + MANUELS)
+                // ========================================================================
+                let linkedParents = [];
+                let manualParents = [];
+                
+                try {
+                    linkedParents = JSON.parse(row.dataset.linkedParents || '[]');
+                } catch(e) {
+                    console.error('Erreur parsing linkedParents:', e);
+                    linkedParents = [];
+                }
+                
+                try {
+                    manualParents = JSON.parse(row.dataset.manualParents || '[]');
+                } catch(e) {
+                    console.error('Erreur parsing manualParents:', e);
+                    manualParents = [];
+                }
+
+                // Fusionner tous les parents
+                const allParents = [
+                    ...linkedParents.map(p => ({ ...p, type: 'linked' })),
+                    ...manualParents.map(p => ({ ...p, type: 'manual', isNew: true }))
+                ];
+
+                console.log('👥 Tous les parents:', allParents);
+
                 if (isPlaceholder) {
                     // --- Vue pour un dossier à compléter ---
-                    // editBtn.textContent est défini plus bas pour inclure l'icône
-                    const canComplete = (currentUserRole === '<%= ROLES.ADMINISTRATOR %>' || currentUserRole === '<%= ROLES.SECRETARY %>' || currentUserRole === '<%= ROLES.SCHOOL_LIFE_MANAGER %>');
+                    const canComplete = (currentUserRole === '<%= ROLES.ADMINISTRATOR %>' || 
+                                        currentUserRole === '<%= ROLES.SECRETARY %>' || 
+                                        currentUserRole === '<%= ROLES.SCHOOL_LIFE_MANAGER %>');
 
                     if (canComplete) {
                         const query = new URLSearchParams({
@@ -556,19 +583,23 @@
                         editBtn.href = `/students/complete/form?${query.toString()}`;
                         editBtn.style.display = 'inline-flex';
                         editBtn.innerHTML = '<i data-feather="edit-2" class="me-1" style="width: 16px; height: 16px;"></i> Compléter le dossier';
-                        if (typeof feather !== 'undefined') {
-                            feather.replace();
-                        }
                     } else {
                         editBtn.style.display = 'none';
                     }
 
-                    // Remplir les infos de base
                     document.getElementById('modal-avatar').src = row.dataset.avatar;
                     document.getElementById('modal-name').textContent = row.dataset.name;
                     document.getElementById('modal-matricule').textContent = row.dataset.matricule;
                     document.getElementById('modal-class').textContent = row.dataset.class;
-                    document.getElementById('modal-parent-info').innerHTML = `<p class="text-muted ps-3"><i data-feather="info" class="me-1" style="width: 14px; height: 14px;"></i> Dossier initié par le parent : <strong>${row.dataset.parentName || 'N/A'}</strong>.</p>`;
+                    
+                    // Afficher le parent qui a créé le dossier
+                    const parentInfoContainer = document.getElementById('modal-parent-info');
+                    parentInfoContainer.innerHTML = `
+                        <div class="alert alert-info">
+                            <i data-feather="info" class="me-2" style="width: 16px; height: 16px;"></i>
+                            Dossier initié par le parent : <strong>${row.dataset.parentName || 'N/A'}</strong>.
+                        </div>
+                    `;
 
                     // Cacher les champs non pertinents
                     document.getElementById('modal-birthdate').closest('.list-group-item').style.display = 'none';
@@ -577,21 +608,18 @@
 
                 } else {
                     // --- Vue pour un élève complet ---
-                    // editBtn.textContent est défini plus bas pour inclure l'icône
-                    const canEdit = (currentUserRole === '<%= ROLES.ADMINISTRATOR %>' || currentUserRole === '<%= ROLES.SECRETARY %>' || currentUserRole === '<%= ROLES.SCHOOL_LIFE_MANAGER %>');
+                    const canEdit = (currentUserRole === '<%= ROLES.ADMINISTRATOR %>' || 
+                                    currentUserRole === '<%= ROLES.SECRETARY %>' || 
+                                    currentUserRole === '<%= ROLES.SCHOOL_LIFE_MANAGER %>');
 
                     if (canEdit) {
                         editBtn.href = `/students/${studentId}/edit`;
                         editBtn.style.display = 'inline-flex';
                         editBtn.innerHTML = '<i data-feather="edit-2" class="me-1" style="width: 16px; height: 16px;"></i> Modifier';
-                        if (typeof feather !== 'undefined') {
-                            feather.replace();
-                        }
                     } else {
                         editBtn.style.display = 'none';
                     }
 
-                    // Remplir toutes les informations
                     document.getElementById('modal-avatar').src = row.dataset.avatar;
                     document.getElementById('modal-name').textContent = row.dataset.name;
                     document.getElementById('modal-matricule').textContent = row.dataset.matricule;
@@ -600,29 +628,80 @@
                     document.getElementById('modal-birthplace').textContent = row.dataset.birthplace;
                     document.getElementById('modal-address').textContent = row.dataset.address;
 
-                    // Traitement des informations des parents
+                    // ========================================================================
+                    // AFFICHAGE DE TOUS LES PARENTS DANS LE MODAL
+                    // ========================================================================
                     const parentInfoContainer = document.getElementById('modal-parent-info');
-                    const linkedParents = JSON.parse(row.dataset.linkedParents || '[]');
-                    try {
-                        if (linkedParents && linkedParents.length > 0) {
-                            const list = document.createElement('ul');
-                            list.className = 'list-group list-group-flush glass-list-group';
-                            linkedParents.forEach(parent => {
-                                const item = document.createElement('li');
-                                item.className = 'list-group-item';
-                                item.innerHTML = `<strong>${parent.name || 'N/A'}</strong> - Contact: ${parent.phone_number || 'N/A'}`;
-                                list.appendChild(item);
-                            });
-                            parentInfoContainer.appendChild(list);
-                        } else {
-                            parentInfoContainer.innerHTML = '<p class="text-muted"><i data-feather="info" class="me-1" style="width: 14px; height: 14px;"></i> Aucune information sur les parents.</p>';
-                        }
-                    } catch (e) {
-                        console.error("Erreur lors de l'analyse des informations des parents:", e);
-                        parentInfoContainer.innerHTML = '<p class="text-danger"><i data-feather="alert-circle" class="me-1" style="width: 14px; height: 14px;"></i> Erreur de format des données parentales.</p>';
+                    
+                    if (allParents.length > 0) {
+                        const list = document.createElement('ul');
+                        list.className = 'list-group list-group-flush glass-list-group';
+                        
+                        allParents.forEach(function(parent) {
+                            const item = document.createElement('li');
+                            item.className = 'list-group-item';
+                            
+                            const hasPhone = parent.phone || parent.phone_number;
+                            const phoneDisplay = hasPhone 
+                                ? `<span class="parent-phone-ok">
+                                    <i data-feather="phone" style="width: 12px; height: 12px;"></i> 
+                                    ${escapeHtml(hasPhone)}
+                                  </span>`
+                                : `<span class="parent-phone-missing" title="Numéro non renseigné">
+                                    <i data-feather="alert-circle" style="width: 12px; height: 12px;"></i> 
+                                    Téléphone non renseigné
+                                  </span>`;
+                            
+                            const typeBadge = parent.isNew 
+                                ? '<span class="parent-badge-new ms-2">Ajouté manuellement</span>'
+                                : (parent.type === 'manual' 
+                                    ? '<span class="parent-badge-new ms-2">Manuel</span>' 
+                                    : '');
+                            
+                            item.innerHTML = `
+                                <div>
+                                    <strong>
+                                        <i data-feather="user" style="width: 14px; height: 14px;"></i>
+                                        ${escapeHtml(parent.name || 'N/A')}
+                                    </strong>
+                                    ${typeBadge}
+                                </div>
+                                <div>
+                                    ${phoneDisplay}
+                                </div>
+                            `;
+                            
+                            list.appendChild(item);
+                        });
+                        
+                        parentInfoContainer.innerHTML = '';
+                        parentInfoContainer.appendChild(list);
+                        
+                    } else {
+                        parentInfoContainer.innerHTML = `
+                            <div class="text-muted text-center py-3">
+                                <i data-feather="users" style="width: 24px; height: 24px;"></i>
+                                <p class="mb-0 mt-1">Aucun parent lié</p>
+                            </div>
+                        `;
                     }
                 }
+
+                // Réinitialiser les icônes Feather
+                if (typeof feather !== 'undefined') {
+                    feather.replace();
+                }
             });
+
+            // ==========================================================================
+            // FONCTION UTILITAIRE
+            // ==========================================================================
+            function escapeHtml(text) {
+                if (!text) return '';
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
         });
     </script>
 </body>
