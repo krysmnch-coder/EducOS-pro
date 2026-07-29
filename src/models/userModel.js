@@ -291,6 +291,7 @@ async function getStudentsAndPlaceholders() {
     // (first_name, last_name, class) qui sont stockées dans le lien lui-même.
     const firstLinkForMatricule = allParentLinks.find(link => link.student_matricule === matricule);
     if (firstLinkForMatricule) {
+      const firstParent = (parentsByMatricule[matricule] || [])[0];
       // Pour les placeholders, le nom est reconstruit à partir du lien
       const name = `${firstLinkForMatricule.student_first_name} ${firstLinkForMatricule.student_last_name}`;
       placeholderStudents.push({
@@ -300,7 +301,11 @@ async function getStudentsAndPlaceholders() {
         student_class: firstLinkForMatricule.student_class,
         is_placeholder: 1, // Marqueur pour les placeholders
         avatar_url: '/img/user.png', // Avatar par défaut
-        linkedParents: parentsByMatricule[matricule] || []
+        linkedParents: parentsByMatricule[matricule] || [],
+        // Ajout pour la compatibilité avec les vues qui attendent un parent principal
+        parent_id: firstParent ? firstParent.id : null,
+        parent_name: firstParent ? firstParent.name : null,
+        parent_phone_number: firstParent ? firstParent.phone_number : null
       });
     }
   }

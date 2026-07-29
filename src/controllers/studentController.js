@@ -203,12 +203,22 @@ const renderCompleteStudentForm = async (req, res) => {
         }
 
         // Créer un objet "student" partiel pour pré-remplir le formulaire
-        const student = { name, matricule, student_class, parent_id, parent_name, parent_phone_number, parent_profession: null };
+        const student = { name, matricule, student_class };
+
+        // Récupérer la liste de tous les parents pour le dropdown
+        const allParents = await userModel.getApprovedParents();
+
+        // Le parent qui a initié est déjà lié. On le passe à la vue.
+        const linkedParents = parent_id ? [{ id: parent_id, name: parent_name, phone_number: parent_phone_number }] : [];
+        const linkedParentIds = parent_id ? [parent_id] : [];
 
         res.render('studentForm', {
             title: `Compléter le dossier de ${name}`,
             student: student,
-            isCompletion: true // Indique au formulaire qu'il s'agit d'une complétion
+            isCompletion: true, // Indique au formulaire qu'il s'agit d'une complétion
+            parents: allParents,
+            linkedParentIds: linkedParentIds,
+            linkedParents: linkedParents
         });
     } catch (error) {
         console.error("Erreur lors du chargement du formulaire de complétion:", error);
