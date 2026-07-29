@@ -556,7 +556,7 @@
     <script src="/js/theme.js"></script>
     <script src="/js/main.js"></script>
 
-    <script>
+        <script>
         // ==========================================================================
         // INITIALISATION PRINCIPALE
         // ==========================================================================
@@ -659,16 +659,17 @@
                 if (linkedParents.length === 0) {
                     container.innerHTML = '<div class="list-group-item text-center py-3" style="color: rgba(255,255,255,0.5);"><i data-feather="users" style="width: 20px; height: 20px;"></i><p class="mb-0 mt-1">Aucun parent lié</p></div>';
                 } else {
-                    container.innerHTML = linkedParents.map(function(parent, index) {
+                    var html = '';
+                    linkedParents.forEach(function(parent, index) {
                         var phoneDisplay = parent.phone 
                             ? '<span style="color: #22c55e; font-weight: 500;">' + escapeHtml(parent.phone) + '</span>'
-                            : '<span class="phone-editable" onclick="window.editPhone(' + index + ')" title="Cliquez pour ajouter un numéro" style="color: #ef4444; cursor: pointer; border-bottom: 1px dashed #ef4444;">Non renseigné - Cliquez pour ajouter</span>';
+                            : '<span class="phone-editable" onclick="editPhoneHandler(' + index + ')" title="Cliquez pour ajouter un numéro" style="color: #ef4444; cursor: pointer; border-bottom: 1px dashed #ef4444;">Non renseigné - Cliquez pour ajouter</span>';
                         
                         var typeBadge = parent.type === 'manual' 
                             ? '<span class="badge bg-info ms-2" style="font-size: 0.65rem;">Ajouté manuellement</span>'
                             : '<span class="badge bg-success ms-2" style="font-size: 0.65rem;">Compte existant</span>';
                         
-                        return '<div class="list-group-item linked-parent-item" style="animation-delay: ' + (index * 0.05) + 's;">' +
+                        html += '<div class="list-group-item linked-parent-item" style="animation-delay: ' + (index * 0.05) + 's;">' +
                             '<div class="d-flex w-100 justify-content-between align-items-start">' +
                                 '<div>' +
                                     '<h6 class="mb-1"><i data-feather="user" style="width: 14px; height: 14px;"></i> ' + escapeHtml(parent.name) + typeBadge + '</h6>' +
@@ -676,58 +677,84 @@
                                         '<span id="phone-display-' + index + '">' + phoneDisplay + '</span>' +
                                         '<span id="phone-edit-' + index + '" style="display: none;">' +
                                             '<input type="tel" class="phone-edit-input" id="phone-input-' + index + '" value="' + escapeHtml(parent.phone) + '" placeholder="Numéro" style="width: 150px; padding: 2px 8px; border-radius: 4px; border: 1px solid #0d6efd; background: rgba(255,255,255,0.1); color: #fff;">' +
-                                            '<button class="btn btn-sm btn-success" onclick="window.savePhone(' + index + ')" style="padding: 2px 8px; font-size: 0.75rem;">✓</button>' +
-                                            '<button class="btn btn-sm btn-outline-secondary" onclick="window.cancelEditPhone(' + index + ')" style="padding: 2px 8px; font-size: 0.75rem;">✗</button>' +
+                                            '<button class="btn btn-sm btn-success" onclick="savePhoneHandler(' + index + ')" style="padding: 2px 8px; font-size: 0.75rem;">✓</button>' +
+                                            '<button class="btn btn-sm btn-outline-secondary" onclick="cancelEditPhoneHandler(' + index + ')" style="padding: 2px 8px; font-size: 0.75rem;">✗</button>' +
                                         '</span>' +
                                     '</small></p>' +
                                 '</div>' +
-                                '<button type="button" class="btn btn-sm btn-outline-danger" onclick="window.removeLinkedParent(' + index + ')" title="Retirer ce parent"><i data-feather="trash-2" style="width: 14px; height: 14px;"></i></button>' +
+                                '<button type="button" class="btn btn-sm btn-outline-danger" onclick="removeParentHandler(' + index + ')" title="Retirer ce parent"><i data-feather="trash-2" style="width: 14px; height: 14px;"></i></button>' +
                             '</div>' +
                         '</div>';
-                    }).join('');
+                    });
+                    container.innerHTML = html;
                 }
                 
                 if (typeof feather !== 'undefined') feather.replace();
             }
 
-            // Fonctions globales
-            window.editPhone = function(index) {
-                document.getElementById('phone-display-' + index).style.display = 'none';
-                document.getElementById('phone-edit-' + index).style.display = 'inline';
-                document.getElementById('phone-input-' + index).focus();
-            };
+            // ========================================================================
+            // HANDLERS (fonctions dans la portée du DOMContentLoaded)
+            // ========================================================================
+            function editPhoneHandler(index) {
+                var display = document.getElementById('phone-display-' + index);
+                var edit = document.getElementById('phone-edit-' + index);
+                var input = document.getElementById('phone-input-' + index);
+                if (display && edit) {
+                    display.style.display = 'none';
+                    edit.style.display = 'inline';
+                    if (input) input.focus();
+                }
+            }
 
-            window.savePhone = function(index) {
-                var phone = document.getElementById('phone-input-' + index).value.trim();
-                if (linkedParents[index]) linkedParents[index].phone = phone;
+            function savePhoneHandler(index) {
+                var input = document.getElementById('phone-input-' + index);
+                if (input && linkedParents[index]) {
+                    linkedParents[index].phone = input.value.trim();
+                }
                 renderLinkedParents();
                 updateManualParentsData();
-            };
+            }
 
-            window.cancelEditPhone = function(index) {
+            function cancelEditPhoneHandler(index) {
                 renderLinkedParents();
-            };
+            }
 
-            window.removeLinkedParent = function(index) {
+            function removeParentHandler(index) {
                 var parent = linkedParents[index];
+                if (!parent) return;
+                
                 if (confirm('Retirer "' + parent.name + '" de la liste ?')) {
                     if (parent.type === 'linked' && tomSelectInstance) {
-                        tomSelectInstance.removeItem(parent.id);
+                        try {
+                            tomSelectInstance.removeItem(parent.id);
+                        } catch(e) {
+                            console.log('Erreur removeItem:', e);
+                        }
                     }
                     linkedParents.splice(index, 1);
                     renderLinkedParents();
                     updateManualParentsData();
                 }
-            };
+            }
+
+            // Exposer les handlers globalement
+            window.editPhoneHandler = editPhoneHandler;
+            window.savePhoneHandler = savePhoneHandler;
+            window.cancelEditPhoneHandler = cancelEditPhoneHandler;
+            window.removeParentHandler = removeParentHandler;
 
             function updateManualParentsData() {
+                var manualParentsData = document.getElementById('manual-parents-data');
+                if (!manualParentsData) return;
                 var manualParents = linkedParents
                     .filter(function(p) { return p.type === 'manual'; })
                     .map(function(p) { return { name: p.name, phone: p.phone }; });
-                document.getElementById('manual-parents-data').value = JSON.stringify(manualParents);
+                manualParentsData.value = JSON.stringify(manualParents);
             }
 
-            // Modal
+            // ========================================================================
+            // MODAL AJOUTER PARENT (corrigé)
+            // ========================================================================
             var addParentModalEl = document.getElementById('addParentModal');
             if (addParentModalEl) {
                 var modal = new bootstrap.Modal(addParentModalEl);
@@ -737,55 +764,107 @@
                 var phoneInput = document.getElementById('new-parent-phone');
                 var form = document.getElementById('add-parent-form');
 
+                // Nettoyer les anciens listeners
+                var newSaveBtn = saveBtn.cloneNode(true);
+                saveBtn.parentNode.replaceChild(newSaveBtn, saveBtn);
+                saveBtn = newSaveBtn;
+
                 saveBtn.addEventListener('click', function() {
-                    var name = nameInput.value.trim();
-                    var phone = phoneInput.value.trim();
+                    var name = nameInput ? nameInput.value.trim() : '';
+                    var phone = phoneInput ? phoneInput.value.trim() : '';
                     
-                    if (!name) { alertEl.innerHTML = 'Veuillez entrer le nom du parent.'; alertEl.style.display = 'block'; return; }
-                    if (!phone) { alertEl.innerHTML = 'Veuillez entrer le numéro de téléphone.'; alertEl.style.display = 'block'; return; }
+                    if (!name) { 
+                        if (alertEl) {
+                            alertEl.innerHTML = 'Veuillez entrer le nom du parent.';
+                            alertEl.style.display = 'block';
+                        }
+                        return; 
+                    }
+                    if (!phone) { 
+                        if (alertEl) {
+                            alertEl.innerHTML = 'Veuillez entrer le numéro de téléphone.';
+                            alertEl.style.display = 'block';
+                        }
+                        return; 
+                    }
                     
-                    linkedParents.push({ id: newParentCounter++, name: name, phone: phone, isNew: true, type: 'manual' });
+                    linkedParents.push({ 
+                        id: newParentCounter++, 
+                        name: name, 
+                        phone: phone, 
+                        isNew: true, 
+                        type: 'manual' 
+                    });
+                    
                     renderLinkedParents();
                     updateManualParentsData();
-                    modal.hide();
-                    form.reset();
-                    alertEl.style.display = 'none';
-                    showToast('Parent "' + name + '" ajouté avec succès !');
+                    
+                    // Fermer le modal proprement
+                    try {
+                        modal.hide();
+                    } catch(e) {
+                        console.log('Erreur fermeture modal:', e);
+                    }
+                    
+                    // Réinitialiser le formulaire
+                    if (form) form.reset();
+                    if (alertEl) alertEl.style.display = 'none';
+                    
+                    // Notification simple
+                    showSimpleToast('Parent "' + name + '" ajouté !');
                 });
 
+                // Réinitialiser quand le modal est fermé
                 addParentModalEl.addEventListener('hidden.bs.modal', function() {
-                    form.reset();
-                    alertEl.style.display = 'none';
+                    if (form) form.reset();
+                    if (alertEl) alertEl.style.display = 'none';
                     if (typeof feather !== 'undefined') feather.replace();
                 });
             }
 
-            function showToast(message) {
+            // ========================================================================
+            // TOAST SIMPLE (sans animation complexe)
+            // ========================================================================
+            function showSimpleToast(message) {
+                // Supprimer les anciens toasts
+                var oldToasts = document.querySelectorAll('.simple-toast');
+                oldToasts.forEach(function(t) { t.remove(); });
+                
                 var toast = document.createElement('div');
-                toast.className = 'toast-notification';
-                toast.innerHTML = '✅ ' + message;
+                toast.className = 'simple-toast';
+                toast.textContent = '✅ ' + message;
+                toast.style.cssText = 'position: fixed; bottom: 20px; right: 20px; z-index: 9999; background: rgba(25, 135, 84, 0.9); color: white; padding: 12px 20px; border-radius: 8px; font-size: 14px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: opacity 0.3s;';
                 document.body.appendChild(toast);
+                
                 setTimeout(function() {
-                    toast.style.animation = 'toastSlideOut 0.3s ease forwards';
-                    setTimeout(function() { toast.remove(); }, 300);
-                }, 3000);
+                    toast.style.opacity = '0';
+                    setTimeout(function() { 
+                        if (toast.parentNode) toast.remove(); 
+                    }, 300);
+                }, 2500);
             }
 
-            // Soumission
+            // ========================================================================
+            // SOUMISSION DU FORMULAIRE
+            // ========================================================================
             var studentForm = document.getElementById('student-form');
             if (studentForm) {
                 studentForm.addEventListener('submit', function(e) {
                     updateManualParentsData();
+                    
+                    // Supprimer les anciens inputs cachés parent_ids[]
+                    var oldInputs = studentForm.querySelectorAll('input[type="hidden"][name="parent_ids[]"]');
+                    oldInputs.forEach(function(inp) { inp.remove(); });
+                    
+                    // Ajouter les parents liés (avec compte)
                     linkedParents.filter(function(p) { return p.type === 'linked'; }).forEach(function(parent) {
-                        var existingInput = studentForm.querySelector('input[type="hidden"][name="parent_ids[]"][value="' + parent.id + '"]');
-                        if (!existingInput) {
-                            var input = document.createElement('input');
-                            input.type = 'hidden';
-                            input.name = 'parent_ids[]';
-                            input.value = parent.id;
-                            studentForm.appendChild(input);
-                        }
+                        var input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'parent_ids[]';
+                        input.value = parent.id;
+                        studentForm.appendChild(input);
                     });
+                    
                     console.log('📤 Formulaire soumis avec ' + linkedParents.length + ' parents');
                     return true;
                 });
@@ -798,7 +877,9 @@
                 return div.innerHTML;
             }
 
-            // Init
+            // ========================================================================
+            // INITIALISATION
+            // ========================================================================
             renderLinkedParents();
             updateManualParentsData();
         });
