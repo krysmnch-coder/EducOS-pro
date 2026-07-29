@@ -37,10 +37,14 @@ const createEstablishment = async (req, res) => {
 
     await establishmentModel.create(name, subdomain.toLowerCase());
 
-    // --- Mise à jour en temps réel pour la page d'accueil ---
+    // --- Mise à jour en temps réel ---
     const broadcastDashboardStats = req.app.get('broadcastDashboardStats');
     if (broadcastDashboardStats) {
       broadcastDashboardStats();
+    }
+    const broadcastAdminStats = req.app.get('broadcastAdminStats');
+    if (broadcastAdminStats) {
+      broadcastAdminStats(); // Met à jour les stats du super admin
     }
     req.flash('success_msg', `L'établissement "${name}" a été créé avec succès.`);
     res.redirect('/establishments');
@@ -89,10 +93,14 @@ const deleteEstablishment = async (req, res) => {
   try {
     await establishmentModel.delete(id);
 
-    // --- Mise à jour en temps réel pour la page d'accueil ---
+    // --- Mise à jour en temps réel ---
     const broadcastDashboardStats = req.app.get('broadcastDashboardStats');
     if (broadcastDashboardStats) {
       broadcastDashboardStats();
+    }
+    const broadcastAdminStats = req.app.get('broadcastAdminStats');
+    if (broadcastAdminStats) {
+      broadcastAdminStats(); // Met à jour les stats du super admin
     }
     req.flash('success_msg', 'L\'établissement a été supprimé avec succès.');
     res.redirect('/establishments');

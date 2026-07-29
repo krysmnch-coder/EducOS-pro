@@ -241,31 +241,3 @@ module.exports = {
   approveUser,
   deleteUser
 };
-// Fonction à appeler quand les stats changent (ex: nouvelle inscription, approbation, etc.)
-function emitStatsUpdate(io, stats) {
-    io.emit('statsUpdate', {
-        studentCount: stats.studentCount,
-        professorCount: stats.professorCount,
-        parentCount: stats.parentCount,
-        pendingCount: stats.pendingCount,
-        totalUserCount: stats.totalUserCount,
-        adminCount: stats.adminCount,
-        establishmentCount: stats.establishmentCount
-    });
-}
-
-// Exemple d'utilisation après une action
-// Après avoir approuvé un utilisateur :
-// Ligne 259 - adminController.js
-const approveUserAction = async (req, res) => {  // ← AJOUTER async
-    try {
-        const userId = req.params.id;
-        await userModel.approveUser(userId);
-        req.flash('success_msg', 'Utilisateur approuvé');
-        res.redirect('/admin');
-    } catch (error) {
-        console.error('Erreur approbation:', error);
-        req.flash('error_msg', 'Erreur lors de l\'approbation');
-        res.redirect('/admin');
-    }
-};

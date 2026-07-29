@@ -350,6 +350,20 @@ function getAdminsByEstablishment(establishmentId) {
   return db('users').where({ role: ROLES.ADMINISTRATOR, establishment_id: establishmentId });
 }
 
+/**
+ * Compte le nombre d'administrateurs dans un établissement.
+ * @param {number} establishmentId - L'ID de l'établissement.
+ * @returns {Promise<number>}
+ */
+async function countAdminsInEstablishment(establishmentId) {
+  if (!establishmentId) return 0;
+  const result = await db('users')
+    .where({ establishment_id: establishmentId, role: ROLES.ADMINISTRATOR })
+    .count({ count: '*' })
+    .first();
+  return result ? parseInt(result.count, 10) : 0;
+}
+
 module.exports = {
   getUserByEmail,
   getUserById,
@@ -380,5 +394,6 @@ module.exports = {
   getLinkedParentIdsForStudent,
   getLinkedChildrenForParent,
   initiateChildRegistration,
-  getAdminsByEstablishment
+  getAdminsByEstablishment,
+  countAdminsInEstablishment
 };
