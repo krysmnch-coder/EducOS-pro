@@ -9,55 +9,40 @@ function getUserById(id) {
   return db('users').where({ id }).first();
 }
 
-/**
- * Récupère un utilisateur par son matricule.
- */
 function getUserByMatricule(matricule) {
   return db('users').where({ matricule }).first();
 }
 
 async function createUser({ name, email, password, role, establishment_id, approved = 0, subject = null, student_class = null, matricule = null, children, avatar_url = null, phone_number = null, date_of_birth = null, place_of_birth = null, address = null, parent_info, manual_parents = null, created_by = null, password_reset_required = false }, trx = db) {
-  // Les propriétés 'children' et 'parent_info' sont maintenant obsolètes et gérées par la table 'parent_student_links'.
-  // Elles sont conservées dans la signature pour la compatibilité mais ne sont pas insérées.
-  
   const userData = {
     name, email, password, role, establishment_id, approved, subject, student_class, matricule, avatar_url, phone_number, date_of_birth, place_of_birth, address, manual_parents, created_by, password_reset_required
   };
 
-  return trx('users').insert(userData).returning('id');
+  // Utiliser insert et récupérer l'ID - compatible MySQL
+  const [result] = await trx('users').insert(userData);
+  // MySQL retourne l'ID directement, Knex le met dans result[0] ou result selon la config
+  const insertedId = Array.isArray(result) ? result[0] : result;
+  return [{ id: insertedId }];
 }
 
 function getAllUsers() {
   return db('users')
     .select('id', 'name', 'email', 'role', 'approved', 'created_at', 'avatar_url', 'phone_number', 'establishment_id')
-    .whereNot('role', ROLES.SUPER_ADMIN) // On n'affiche jamais le super-admin dans les listes d'utilisateurs
+    .whereNot('role', ROLES.SUPER_ADMIN)
     .orderBy('created_at', 'desc');
 }
 
-/**
- * Récupère tous les utilisateurs avec le rôle 'administrateur'.
- */
 function getAllAdministrators() {
-  // On fait une jointure pour récupérer le nom de l'établissement en même temps.
   return db('users as u')
     .leftJoin('establishments as e', 'u.establishment_id', 'e.id')
     .select(
-      'u.id',
-      'u.name',
-      'u.email',
-      'u.role',
-      'u.approved',
-      'u.created_at',
-      'u.avatar_url',
-      'e.name as establishment_name' // On récupère le nom de l'établissement
+      'u.id', 'u.name', 'u.email', 'u.role', 'u.approved',
+      'u.created_at', 'u.avatar_url', 'e.name as establishment_name'
     )
     .where('u.role', ROLES.ADMINISTRATOR)
     .orderBy('u.created_at', 'desc');
 }
 
-/**
- * Récupère tous les utilisateurs avec le rôle 'eleve'.
- */
 function getAllStudents() {
   return db('users as u')
     .select('u.*', 'creator.name as creator_name')
@@ -66,12 +51,9 @@ function getAllStudents() {
     .orderBy(['u.student_class', 'u.name']);
 }
 
-/**
- * Récupère tous les parents approuvés avec les informations de leurs enfants.
- */
 function getApprovedParents() {
   return db('users')
-    .select('id', 'name')
+    .select('id', 'name', 'phone_number')
     .where({ role: 'parent', approved: 1 })
     .orderBy('name', 'asc');
 }
@@ -105,7 +87,6 @@ function approveUserById(id) {
 }
 
 async function countApprovedAdmins() {
-  // Réutilise la fonction plus générique
   return countUsersByRole('administrateur');
 }
 
@@ -117,15 +98,7 @@ function deleteUserById(id) {
   return db('users').where({ id }).del();
 }
 
-/**
- * Met à jour l'avatar d'un utilisateur.
- * @param {number} userId - L'ID de l'utilisateur.
- * @param {string|null} avatarUrl - L'URL du nouvel avatar ou null pour le supprimer.
- * @returns {Promise<number>} Le nombre de lignes mises à jour.
- */
 function updateUserAvatar(userId, avatarUrl) {
-  // Si avatarUrl est null ou undefined, on met à jour avec null
-  // Sinon, on met à jour avec la nouvelle URL
   return db('users').where({ id: userId }).update({ 
     avatar_url: avatarUrl || null 
   });
@@ -135,11 +108,6 @@ function updateUserInfo(userId, { name, phone_number }) {
   return db('users').where({ id: userId }).update({ name, phone_number });
 }
 
-/**
- * Met à jour le mot de passe d'un utilisateur et désactive le flag de réinitialisation forcée.
- * @param {number} userId - L'ID de l'utilisateur.
- * @param {string} newPassword - Le nouveau mot de passe hashé.
- */
 function updateUserPassword(userId, newPassword) {
   return db('users')
     .where({ id: userId })
@@ -149,35 +117,48 @@ function updateUserPassword(userId, newPassword) {
     });
 }
 
-/**
- * Compte le nombre total d'utilisateurs dans le système.
- */
 async function countAllUsers() {
   const result = await db('users').count({ count: '*' }).first();
-  // result est un objet comme { count: '5' } ou { count: 0 }.
   const count = result ? (result.count || 0) : 0;
   return parseInt(count, 10);
 }
 
-function updateStudentDetails(id, { name, matricule, student_class, date_of_birth, place_of_birth, address, manual_parents }, trx = db) {
-    return trx('users').where({ id }).update({
-        name,
-        matricule,
-        student_class,
-        date_of_birth,
-        place_of_birth,
-        address,
-        manual_parents,
-        // Mettre à jour l'email si le matricule change, pour la cohérence
-        email: `${matricule.toLowerCase().replace(/\s+/g, '')}@educos.local`
-    });
+/**
+ * Met à jour les détails d'un élève.
+ * CORRIGÉ - Compatible MySQL, sans returning()
+ */
+async function updateStudentDetails(id, { name, matricule, student_class, date_of_birth, place_of_birth, address, manual_parents }, trx = db) {
+    try {
+        console.log('🔄 updateStudentDetails - ID:', id);
+        console.log('📝 Données:', { name, matricule, student_class, date_of_birth, place_of_birth, address, manual_parents });
+        
+        const updateData = {
+            name,
+            matricule,
+            student_class,
+            date_of_birth: date_of_birth || null,
+            place_of_birth: place_of_birth || null,
+            address: address || null,
+            manual_parents: manual_parents || null,
+            email: `${matricule.toLowerCase().replace(/\s+/g, '')}@educos.local`
+        };
+        
+        // Ne mettre à jour l'email que si le matricule a changé
+        const currentStudent = await trx('users').where({ id }).select('matricule').first();
+        if (currentStudent && currentStudent.matricule === matricule) {
+            delete updateData.email; // Garder l'ancien email si le matricule n'a pas changé
+        }
+        
+        const result = await trx('users').where({ id }).update(updateData);
+        
+        console.log('✅ updateStudentDetails résultat:', result);
+        return result;
+    } catch (error) {
+        console.error('❌ Erreur updateStudentDetails:', error);
+        throw error;
+    }
 }
 
-/**
- * Récupère un utilisateur par son e-mail et l'ID de son établissement.
- * @param {string} email - L'adresse e-mail de l'utilisateur.
- * @param {number|null} establishmentId - L'ID de l'établissement, ou null pour le super-admin.
- */
 function getUserByEmailAndEstablishment(email, establishmentId) {
   const query = db('users').where({ email });
   if (establishmentId === null) {
@@ -188,11 +169,6 @@ function getUserByEmailAndEstablishment(email, establishmentId) {
   return query.first();
 }
 
-/**
- * Récupère tous les utilisateurs d'un établissement spécifique.
- * @param {number} establishmentId - L'ID de l'établissement.
- * @returns {Promise<Array>}
- */
 function getUsersByEstablishmentId(establishmentId) {
   return db('users')
     .select('id', 'name', 'email', 'role', 'approved', 'created_at', 'avatar_url', 'phone_number')
@@ -200,11 +176,6 @@ function getUsersByEstablishmentId(establishmentId) {
     .orderBy('created_at', 'desc');
 }
 
-/**
- * Compte le nombre total d'utilisateurs dans un établissement spécifique.
- * @param {number} establishmentId - L'ID de l'établissement.
- * @returns {Promise<number>}
- */
 async function countUsersInEstablishment(establishmentId) {
   if (!establishmentId) return 0;
   const result = await db('users').where({ establishment_id: establishmentId }).count({ count: '*' }).first();
@@ -212,11 +183,6 @@ async function countUsersInEstablishment(establishmentId) {
   return parseInt(count, 10);
 }
 
-/**
- * Compte les utilisateurs approuvés pour une liste d'établissements.
- * @param {Array<number>} establishmentIds - Un tableau d'IDs d'établissements.
- * @returns {Promise<Object>} Un objet mappant establishment_id -> count.
- */
 async function countApprovedUsersInEstablishments(establishmentIds) {
   if (!establishmentIds || establishmentIds.length === 0) {
     return {};
@@ -231,38 +197,29 @@ async function countApprovedUsersInEstablishments(establishmentIds) {
   return counts.reduce((acc, row) => ({ ...acc, [row.establishment_id]: row.count }), {});
 }
 
-/**
- * Récupère tous les élèves réels ainsi que les dossiers à compléter
- * à partir de la table de liaison parent-élève.
- * @returns {Promise<Array>} Une liste combinée d'élèves et de dossiers à compléter.
- */
 async function getStudentsAndPlaceholders() {
-  // 1. Récupérer tous les élèves ayant un compte complet.
   const realStudents = await db('users')
     .where('role', ROLES.STUDENT)
     .select(
       'id', 'name', 'email', 'matricule', 'student_class', 'date_of_birth',
-      'place_of_birth', 'address', 'avatar_url', 'created_at',
-      db.raw('0 as is_placeholder') // Marqueur pour les vrais élèves
+      'place_of_birth', 'address', 'avatar_url', 'created_at', 'manual_parents',
+      db.raw('0 as is_placeholder')
     );
 
   const realStudentMatricules = new Set(realStudents.map(s => s.matricule).filter(Boolean));
 
-  // 2. Récupérer tous les liens parent-élève avec les détails des parents.
   const allParentLinks = await db('parent_student_links as psl')
     .join('users as p', 'psl.parent_id', 'p.id')
     .select(
       'psl.student_matricule',
-      'psl.student_first_name', // Pour les placeholders
-      'psl.student_last_name',  // Pour les placeholders
-      'psl.student_class',      // Pour les placeholders
+      'psl.student_first_name',
+      'psl.student_last_name',
+      'psl.student_class',
       'psl.parent_id',
       'p.name as parent_name',
       'p.phone_number as parent_phone_number'
-      // Ajoutez d'autres champs du parent si nécessaire
     );
 
-  // 3. Organiser les liens par matricule d'élève pour un accès facile.
   const parentsByMatricule = allParentLinks.reduce((acc, link) => {
     if (!acc[link.student_matricule]) {
       acc[link.student_matricule] = [];
@@ -275,35 +232,28 @@ async function getStudentsAndPlaceholders() {
     return acc;
   }, {});
 
-  // 4. Attacher les parents aux élèves réels.
   const studentsWithParents = realStudents.map(student => ({
     ...student,
     linkedParents: parentsByMatricule[student.matricule] || []
   }));
 
-  // 5. Identifier et créer les dossiers à compléter (placeholders).
-  //    Ce sont les matricules dans `parent_student_links` qui n'ont PAS de `realStudent`.
   const placeholderMatricules = new Set(allParentLinks.map(link => link.student_matricule));
   realStudentMatricules.forEach(matricule => placeholderMatricules.delete(matricule));
 
   const placeholderStudents = [];
   for (const matricule of placeholderMatricules) {
-    // On prend le premier lien trouvé pour ce matricule pour obtenir les infos de base
-    // (first_name, last_name, class) qui sont stockées dans le lien lui-même.
     const firstLinkForMatricule = allParentLinks.find(link => link.student_matricule === matricule);
     if (firstLinkForMatricule) {
       const firstParent = (parentsByMatricule[matricule] || [])[0];
-      // Pour les placeholders, le nom est reconstruit à partir du lien
       const name = `${firstLinkForMatricule.student_first_name} ${firstLinkForMatricule.student_last_name}`;
       placeholderStudents.push({
-        id: `placeholder_${matricule}`, // ID unique pour le placeholder
+        id: `placeholder_${matricule}`,
         name: name,
         matricule: matricule,
         student_class: firstLinkForMatricule.student_class,
-        is_placeholder: 1, // Marqueur pour les placeholders
-        avatar_url: '/img/user.png', // Avatar par défaut
+        is_placeholder: 1,
+        avatar_url: '/img/user.png',
         linkedParents: parentsByMatricule[matricule] || [],
-        // Ajout pour la compatibilité avec les vues qui attendent un parent principal
         parent_id: firstParent ? firstParent.id : null,
         parent_name: firstParent ? firstParent.name : null,
         parent_phone_number: firstParent ? firstParent.phone_number : null
@@ -311,8 +261,6 @@ async function getStudentsAndPlaceholders() {
     }
   }
 
-  // 6. Combiner les deux listes et retourner le résultat.
-  // On peut trier ici si nécessaire, par exemple par classe puis par nom.
   return [...studentsWithParents, ...placeholderStudents].sort((a, b) => {
     const classA = a.student_class || '';
     const classB = b.student_class || '';
@@ -326,25 +274,14 @@ async function getStudentsAndPlaceholders() {
   });
 }
 
-/**
- * Récupère les IDs des parents liés à un élève via son matricule.
- * @param {string} studentMatricule - Le matricule de l'élève.
- * @returns {Promise<Array<number>>} Un tableau d'IDs de parents.
- */
 async function getLinkedParentIdsForStudent(studentMatricule) {
-    if (!studentMatricule) {
-        return [];
-    }
+    if (!studentMatricule) return [];
     const parentIds = await db('parent_student_links')
         .where('student_matricule', studentMatricule)
         .pluck('parent_id');
     return parentIds;
 }
 
-/**
- * Récupère les enfants (utilisateurs existants) liés à un parent.
- * @param {number} parentId - L'ID du parent.
- */
 function getLinkedChildrenForParent(parentId) {
     const studentMatriculesQuery = db('parent_student_links')
         .where('parent_id', parentId)
@@ -355,40 +292,22 @@ function getLinkedChildrenForParent(parentId) {
         .whereIn('matricule', studentMatriculesQuery);
 }
 
-/**
- * Crée un lien "placeholder" pour un enfant initié par un parent.
- * @param {object} data - Les données de l'enfant.
- * @param {import('knex').Knex.Transaction} [trx=db] - L'objet de transaction Knex.
- */
 async function initiateChildRegistration(data, trx = db) {
-    // Vérifie si une demande pour ce matricule existe déjà pour éviter les doublons
     const existing = await trx('parent_student_links')
         .where('student_matricule', data.student_matricule)
         .first();
 
     if (existing) {
-        // Lever une erreur est plus informatif, surtout dans une transaction.
-        // Cela provoquera un rollback et empêchera la création de données partielles.
         throw new Error(`Une demande pour le matricule ${data.student_matricule} existe déjà.`);
     }
     
-    // Insère les données en utilisant la transaction fournie.
     return trx('parent_student_links').insert(data);
 }
 
-/**
- * Récupère les administrateurs d'un établissement spécifique.
- * @param {number} establishmentId - L'ID de l'établissement.
- */
 function getAdminsByEstablishment(establishmentId) {
   return db('users').where({ role: ROLES.ADMINISTRATOR, establishment_id: establishmentId });
 }
 
-/**
- * Compte le nombre d'administrateurs dans un établissement.
- * @param {number} establishmentId - L'ID de l'établissement.
- * @returns {Promise<number>}
- */
 async function countAdminsInEstablishment(establishmentId) {
   if (!establishmentId) return 0;
   const result = await db('users')
