@@ -374,17 +374,18 @@ exports.postRegister = async (req, res) => {
         // Si le rôle est PARENT et qu'il y a des enfants, on crée les liens.
         if (role === ROLES.PARENT && children && Array.isArray(children)) {
             // Filtrer les enfants pour ne garder que ceux qui sont complètement remplis.
-            const validChildren = children.filter(child => child.matricule && child.first_name && child.last_name && child.student_class);
+            const validChildren = children.filter(c => c.matricule && c.first_name && c.last_name && c.student_class);
 
-            if (validChildren.length > 0) {
-                const childrenLinks = validChildren.map(child => ({
+            // On utilise la fonction du modèle qui contient la logique de vérification des doublons.
+            // On itère sur chaque enfant pour les insérer un par un.
+            for (const child of validChildren) {
+                await userModel.initiateChildRegistration({
                     parent_id: newUserId,
                     student_matricule: child.matricule,
                     student_first_name: child.first_name,
                     student_last_name: child.last_name,
                     student_class: child.student_class
-                }));
-                await trx('parent_student_links').insert(childrenLinks);
+                }, trx); // On passe la transaction pour garantir l'atomicité
             }
         }
     });

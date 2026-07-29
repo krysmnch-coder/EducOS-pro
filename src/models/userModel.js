@@ -326,20 +326,22 @@ function getLinkedChildrenForParent(parentId) {
 /**
  * Crée un lien "placeholder" pour un enfant initié par un parent.
  * @param {object} data - Les données de l'enfant.
+ * @param {import('knex').Knex.Transaction} [trx=db] - L'objet de transaction Knex.
  */
-function initiateChildRegistration(data) {
+async function initiateChildRegistration(data, trx = db) {
     // Vérifie si une demande pour ce matricule existe déjà pour éviter les doublons
-    return db('parent_student_links')
+    const existing = await trx('parent_student_links')
         .where('student_matricule', data.student_matricule)
-        .first()
-        .then(existing => {
-            if (existing) {
-                // On pourrait choisir de lever une erreur ou simplement de ne rien faire.
-                // Lever une erreur est plus informatif.
-                throw new Error('Une demande pour ce matricule existe déjà.');
-            }
-            return db('parent_student_links').insert(data);
-        });
+        .first();
+
+    if (existing) {
+        // Lever une erreur est plus informatif, surtout dans une transaction.
+        // Cela provoquera un rollback et empêchera la création de données partielles.
+        throw new Error(`Une demande pour le matricule ${data.student_matricule} existe déjà.`);
+    }
+    
+    // Insère les données en utilisant la transaction fournie.
+    return trx('parent_student_links').insert(data);
 }
 
 /**
