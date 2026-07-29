@@ -241,3 +241,21 @@ module.exports = {
   approveUser,
   deleteUser
 };
+// Fonction à appeler quand les stats changent (ex: nouvelle inscription, approbation, etc.)
+function emitStatsUpdate(io, stats) {
+    io.emit('statsUpdate', {
+        studentCount: stats.studentCount,
+        professorCount: stats.professorCount,
+        parentCount: stats.parentCount,
+        pendingCount: stats.pendingCount,
+        totalUserCount: stats.totalUserCount,
+        adminCount: stats.adminCount,
+        establishmentCount: stats.establishmentCount
+    });
+}
+
+// Exemple d'utilisation après une action
+// Après avoir approuvé un utilisateur :
+await userModel.approveUser(userId);
+const newStats = await statsModel.getStats();
+emitStatsUpdate(req.app.get('io'), newStats);

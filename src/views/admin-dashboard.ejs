@@ -164,7 +164,7 @@
                                 <div class="stat-info">
                                     <h5 class="stat-label">Élèves</h5>
                                     <div class="stat-value-wrapper">
-                                        <span class="stat-value" id="adminStudentCount" data-target="<%= stats.studentCount || 0 %>">0</span>
+                                        <span class="stat-value stat-live" id="adminStudentCount" data-target="<%= stats.studentCount || 0 %>" data-stat="studentCount"><%= stats.studentCount || 0 %></span>
                                     </div>
                                     <span class="stat-badge">Total inscrits</span>
                                 </div>
@@ -181,7 +181,7 @@
                                 <div class="stat-info">
                                     <h5 class="stat-label">Professeurs</h5>
                                     <div class="stat-value-wrapper">
-                                        <span class="stat-value" id="adminProfessorCount" data-target="<%= stats.professorCount || 0 %>">0</span>
+                                        <span class="stat-value stat-live" id="adminProfessorCount" data-target="<%= stats.professorCount || 0 %>" data-stat="professorCount"><%= stats.professorCount || 0 %></span>
                                     </div>
                                     <span class="stat-badge">Total actifs</span>
                                 </div>
@@ -198,7 +198,7 @@
                                 <div class="stat-info">
                                     <h5 class="stat-label">Parents</h5>
                                     <div class="stat-value-wrapper">
-                                        <span class="stat-value" id="adminParentCount" data-target="<%= stats.parentCount || 0 %>">0</span>
+                                        <span class="stat-value stat-live" id="adminParentCount" data-target="<%= stats.parentCount || 0 %>" data-stat="parentCount"><%= stats.parentCount || 0 %></span>
                                     </div>
                                     <span class="stat-badge">Total inscrits</span>
                                 </div>
@@ -215,7 +215,7 @@
                                 <div class="stat-info">
                                     <h5 class="stat-label">En attente</h5>
                                     <div class="stat-value-wrapper">
-                                        <span class="stat-value" id="adminPendingCount" data-target="<%= stats.pendingCount || 0 %>">0</span>
+                                        <span class="stat-value stat-live" id="adminPendingCount" data-target="<%= stats.pendingCount || 0 %>" data-stat="pendingCount"><%= stats.pendingCount || 0 %></span>
                                     </div>
                                     <span class="stat-badge">Comptes à valider</span>
                                     <a href="/admin" class="btn btn-sm btn-warning mt-2">Gérer</a>
@@ -234,7 +234,7 @@
                                 <div class="stat-info">
                                     <h5 class="stat-label">Utilisateurs</h5>
                                     <div class="stat-value-wrapper">
-                                        <span class="stat-value" id="superAdminTotalUsers" data-target="<%= stats.totalUserCount || 0 %>">0</span>
+                                        <span class="stat-value stat-live" id="superAdminTotalUsers" data-target="<%= stats.totalUserCount || 0 %>" data-stat="totalUserCount"><%= stats.totalUserCount || 0 %></span>
                                     </div>
                                     <span class="stat-badge">Total plateforme</span>
                                 </div>
@@ -251,7 +251,7 @@
                                 <div class="stat-info">
                                     <h5 class="stat-label">Administrateurs</h5>
                                     <div class="stat-value-wrapper">
-                                        <span class="stat-value" id="superAdminAdminCount" data-target="<%= stats.adminCount || 0 %>">0</span>
+                                        <span class="stat-value stat-live" id="superAdminAdminCount" data-target="<%= stats.adminCount || 0 %>" data-stat="adminCount"><%= stats.adminCount || 0 %></span>
                                     </div>
                                     <span class="stat-badge">Admins scolaires</span>
                                 </div>
@@ -268,7 +268,7 @@
                                 <div class="stat-info">
                                     <h5 class="stat-label">Établissements</h5>
                                     <div class="stat-value-wrapper">
-                                        <span class="stat-value" id="superAdminEstablishmentCount" data-target="<%= stats.establishmentCount || 0 %>">0</span>
+                                        <span class="stat-value stat-live" id="superAdminEstablishmentCount" data-target="<%= stats.establishmentCount || 0 %>" data-stat="establishmentCount"><%= stats.establishmentCount || 0 %></span>
                                     </div>
                                     <span class="stat-badge">Écoles actives</span>
                                 </div>
@@ -285,7 +285,7 @@
                                 <div class="stat-info">
                                     <h5 class="stat-label">En attente</h5>
                                     <div class="stat-value-wrapper">
-                                        <span class="stat-value" id="superAdminPendingCount" data-target="<%= stats.pendingCount || 0 %>">0</span>
+                                        <span class="stat-value stat-live" id="superAdminPendingCount" data-target="<%= stats.pendingCount || 0 %>" data-stat="pendingCount"><%= stats.pendingCount || 0 %></span>
                                     </div>
                                     <span class="stat-badge">Comptes à valider</span>
                                     <a href="/admin" class="btn btn-sm btn-warning mt-2">Gérer</a>
@@ -313,7 +313,7 @@
                                     <th class="text-end">Progression</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="establishment-table-body">
                                 <% 
                                 var maxUsers = 0;
                                 for (var j = 0; j < stats.establishmentsWithCounts.length; j++) {
@@ -326,7 +326,7 @@
                                     var est = stats.establishmentsWithCounts[j];
                                     var percentage = maxUsers > 0 ? Math.round((est.userCount / maxUsers) * 100) : 0;
                                 %>
-                                    <tr class="table-row" data-delay="<%= 1000 + (j * 100) %>">
+                                    <tr class="table-row" data-delay="<%= 1000 + (j * 100) %>" data-establishment-id="<%= est.id %>">
                                         <td>
                                             <div class="d-flex align-items-center">
                                                 <div class="establishment-icon me-2">
@@ -335,7 +335,7 @@
                                                 <%= est.name %>
                                             </div>
                                         </td>
-                                        <td class="text-end fw-bold" id="establishment-count-<%= est.id %>">
+                                        <td class="text-end fw-bold est-user-count" data-establishment-id="<%= est.id %>">
                                             <%= est.userCount || 0 %>
                                         </td>
                                         <td class="text-end">
@@ -794,6 +794,18 @@
     line-height: 1.1;
 }
 
+/* Animation de mise à jour en temps réel */
+.stat-live.updated {
+    animation: statUpdate 0.6s ease;
+}
+
+@keyframes statUpdate {
+    0% { transform: scale(1); }
+    30% { transform: scale(1.2); color: var(--success-color); }
+    60% { transform: scale(0.95); }
+    100% { transform: scale(1); }
+}
+
 .stat-card:hover .stat-value {
     transform: scale(1.08);
     filter: drop-shadow(0 0 15px var(--primary-glow));
@@ -1152,7 +1164,6 @@
                 var elapsed = timestamp - startTime;
                 var progress = Math.min(elapsed / duration, 1);
                 
-                // Fonction d'easing easeOutExpo
                 var eased = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
                 
                 var current = Math.floor(eased * target);
@@ -1188,7 +1199,6 @@
                     observer.observe(el);
                 });
             } else {
-                // Fallback pour les navigateurs sans IntersectionObserver
                 setTimeout(function() {
                     counterElements.forEach(function(el) {
                         animateCounter(el);
@@ -1231,7 +1241,7 @@
         }
 
         // ==========================================================================
-        // Socket.io pour les notifications
+        // Socket.io pour les notifications ET mises à jour en temps réel
         // ==========================================================================
         function initSocketIO() {
             if (typeof io === 'undefined') return;
@@ -1239,6 +1249,19 @@
             try {
                 var socket = io();
                 
+                // Écouter les mises à jour des statistiques en temps réel
+                socket.on('statsUpdate', function(data) {
+                    console.log('📊 Mise à jour des statistiques reçue:', data);
+                    updateStatsInRealTime(data);
+                });
+                
+                // Écouter les mises à jour des établissements
+                socket.on('establishmentStatsUpdate', function(data) {
+                    console.log('🏫 Mise à jour des établissements reçue:', data);
+                    updateEstablishmentStats(data);
+                });
+                
+                // Notification de highlight sur les raccourcis
                 socket.on('shortcutHighlight', function(data) {
                     if (data.shortcutKey) {
                         var selector = '.shortcut-link[data-shortcut-key="' + data.shortcutKey + '"]';
@@ -1251,7 +1274,6 @@
                                 void card.offsetWidth;
                                 card.classList.add('is-pulsing');
                                 
-                                // Scroll vers la carte
                                 card.scrollIntoView({ 
                                     behavior: 'smooth', 
                                     block: 'center' 
@@ -1267,6 +1289,99 @@
             } catch(e) {
                 console.log('Socket.io non disponible');
             }
+        }
+
+        // ==========================================================================
+        // Mise à jour des statistiques en temps réel
+        // ==========================================================================
+        function updateStatsInRealTime(data) {
+            // Mettre à jour chaque statistique
+            if (data.studentCount !== undefined) {
+                updateStatValue('adminStudentCount', data.studentCount);
+            }
+            if (data.professorCount !== undefined) {
+                updateStatValue('adminProfessorCount', data.professorCount);
+            }
+            if (data.parentCount !== undefined) {
+                updateStatValue('adminParentCount', data.parentCount);
+            }
+            if (data.pendingCount !== undefined) {
+                updateStatValue('adminPendingCount', data.pendingCount);
+            }
+            
+            // Super admin stats
+            if (data.totalUserCount !== undefined) {
+                updateStatValue('superAdminTotalUsers', data.totalUserCount);
+            }
+            if (data.adminCount !== undefined) {
+                updateStatValue('superAdminAdminCount', data.adminCount);
+            }
+            if (data.establishmentCount !== undefined) {
+                updateStatValue('superAdminEstablishmentCount', data.establishmentCount);
+            }
+        }
+
+        function updateStatValue(elementId, newValue) {
+            var element = document.getElementById(elementId);
+            if (!element) return;
+            
+            var currentValue = parseInt(element.textContent) || 0;
+            
+            // Ne mettre à jour que si la valeur a changé
+            if (currentValue !== newValue) {
+                // Animation de mise à jour
+                element.classList.remove('updated');
+                void element.offsetWidth; // Force reflow
+                element.classList.add('updated');
+                
+                // Animation de compteur
+                animateValue(element, currentValue, newValue, 800);
+                
+                // Mettre à jour data-target
+                element.setAttribute('data-target', newValue);
+            }
+        }
+
+        function animateValue(element, start, end, duration) {
+            var startTime = null;
+            
+            function update(timestamp) {
+                if (!startTime) startTime = timestamp;
+                var elapsed = timestamp - startTime;
+                var progress = Math.min(elapsed / duration, 1);
+                var eased = 1 - Math.pow(1 - progress, 3);
+                var current = Math.floor(start + (end - start) * eased);
+                
+                element.textContent = current;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(update);
+                } else {
+                    element.textContent = end;
+                }
+            }
+            
+            requestAnimationFrame(update);
+        }
+
+        // ==========================================================================
+        // Mise à jour des statistiques des établissements
+        // ==========================================================================
+        function updateEstablishmentStats(data) {
+            if (!data.establishments) return;
+            
+            data.establishments.forEach(function(est) {
+                var countElement = document.querySelector('.est-user-count[data-establishment-id="' + est.id + '"]');
+                if (countElement) {
+                    var currentCount = parseInt(countElement.textContent) || 0;
+                    if (currentCount !== est.userCount) {
+                        countElement.textContent = est.userCount;
+                        countElement.style.animation = 'none';
+                        void countElement.offsetWidth;
+                        countElement.style.animation = 'statUpdate 0.6s ease';
+                    }
+                }
+            });
         }
 
         // ==========================================================================
