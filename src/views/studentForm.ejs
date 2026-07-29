@@ -3,25 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modifier le dossier de l'élève</title>
+    <title><%= title %></title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/style.css">
     
     <style>
-        /* ==========================================================================
-           CSS Complet - Glassmorphism Premium avec Animations
-           ========================================================================== */
-        
         :root {
             --glass-bg: rgba(255, 255, 255, 0.08);
             --glass-border: rgba(255, 255, 255, 0.15);
             --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
             --glass-blur: blur(12px);
-            --glass-shine: rgba(255, 255, 255, 0.4);
             --primary-color: #0d6efd;
-            --primary-glow: rgba(13, 110, 253, 0.2);
             --success-color: #198754;
             --warning-color: #ffc107;
             --info-color: #0dcaf0;
@@ -31,7 +25,6 @@
             --glass-bg: rgba(255, 255, 255, 0.03);
             --glass-border: rgba(255, 255, 255, 0.06);
             --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            --glass-shine: rgba(255, 255, 255, 0.08);
         }
 
         body {
@@ -44,14 +37,8 @@
             background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
         }
 
-        .page-shell {
-            padding-top: 1rem;
-            padding-bottom: 2rem;
-        }
+        .page-shell { padding-top: 1rem; padding-bottom: 2rem; }
 
-        /* ==========================================================================
-           Carte Principale Glassmorphism
-           ========================================================================== */
         .glass-form-card {
             background: var(--glass-bg) !important;
             backdrop-filter: var(--glass-blur) !important;
@@ -63,31 +50,6 @@
             animation: cardFadeInUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards !important;
             opacity: 0;
             transform: translateY(30px) scale(0.95);
-            position: relative;
-        }
-
-        .glass-form-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.05), transparent 70%);
-            opacity: 0;
-            transition: opacity 0.6s ease;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .glass-form-card:hover::before {
-            opacity: 1;
-        }
-
-        .glass-form-card .card-body {
-            position: relative;
-            z-index: 1;
-            padding: 2rem !important;
         }
 
         @keyframes cardFadeInUp {
@@ -96,21 +58,12 @@
             100% { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        [data-theme="dark"] .glass-form-card {
-            background: rgba(255, 255, 255, 0.03) !important;
-            border: 1px solid rgba(255, 255, 255, 0.06) !important;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
-        }
+        .glass-form-card .card-body { position: relative; z-index: 1; padding: 2rem !important; }
 
-        /* ==========================================================================
-           Titre de Page avec Animation
-           ========================================================================== */
         .page-title {
-            color: #ffffff;
-            font-weight: 700;
+            color: #ffffff; font-weight: 700;
             animation: titleSlideIn 0.6s ease forwards !important;
-            opacity: 0;
-            transform: translateX(-20px);
+            opacity: 0; transform: translateX(-20px);
             text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
         }
 
@@ -119,14 +72,8 @@
             to { opacity: 1; transform: translateX(0); }
         }
 
-        [data-theme="light"] .page-title {
-            color: #212529;
-            text-shadow: none;
-        }
+        [data-theme="light"] .page-title { color: #212529; text-shadow: none; }
 
-        /* ==========================================================================
-           Bouton Retour Glassmorphism
-           ========================================================================== */
         .glass-btn-back {
             background: rgba(255, 255, 255, 0.08) !important;
             backdrop-filter: blur(10px) !important;
@@ -134,12 +81,10 @@
             border: 1px solid rgba(255, 255, 255, 0.15) !important;
             border-radius: 0.75rem !important;
             padding: 0.5rem 1.2rem !important;
-            color: #ffffff !important;
-            font-weight: 500;
+            color: #ffffff !important; font-weight: 500;
             transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
-            animation: fadeIn 0.6s ease forwards;
-            animation-delay: 0.2s;
-            opacity: 0;
+            animation: fadeIn 0.6s ease forwards; animation-delay: 0.2s; opacity: 0;
+            text-decoration: none; display: inline-block;
         }
 
         @keyframes fadeIn {
@@ -152,42 +97,16 @@
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2) !important;
             background: rgba(255, 255, 255, 0.15) !important;
             border-color: rgba(255, 255, 255, 0.3) !important;
+            color: #ffffff !important;
         }
 
-        [data-theme="light"] .glass-btn-back {
-            color: #212529 !important;
-            background: rgba(255, 255, 255, 0.6) !important;
-            border-color: rgba(0, 0, 0, 0.1) !important;
-        }
-
-        /* ==========================================================================
-           Labels avec Icônes
-           ========================================================================== */
         .form-label {
-            font-weight: 500;
-            color: rgba(255, 255, 255, 0.9) !important;
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-            margin-bottom: 0.5rem;
+            font-weight: 500; color: rgba(255, 255, 255, 0.9) !important;
+            display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.5rem;
         }
 
-        .form-label svg {
-            color: var(--primary-color);
-            transition: transform 0.3s ease;
-        }
+        [data-theme="light"] .form-label { color: #495057 !important; }
 
-        .form-label:hover svg {
-            transform: scale(1.2) rotate(5deg);
-        }
-
-        [data-theme="light"] .form-label {
-            color: #495057 !important;
-        }
-
-        /* ==========================================================================
-           Champs de Formulaire Glassmorphism
-           ========================================================================== */
         .form-control, .form-select {
             background: rgba(255, 255, 255, 0.06) !important;
             backdrop-filter: blur(5px) !important;
@@ -207,15 +126,6 @@
             transform: translateY(-2px);
         }
 
-        .form-control:hover, .form-select:hover {
-            border-color: rgba(255, 255, 255, 0.25) !important;
-            background: rgba(255, 255, 255, 0.08) !important;
-        }
-
-        .form-control::placeholder {
-            color: rgba(255, 255, 255, 0.4);
-        }
-
         [data-theme="light"] .form-control,
         [data-theme="light"] .form-select {
             background: rgba(255, 255, 255, 0.7) !important;
@@ -223,77 +133,31 @@
             color: #212529 !important;
         }
 
-        [data-theme="light"] .form-control::placeholder {
-            color: #adb5bd;
-        }
+        textarea.form-control { resize: vertical; min-height: 60px; }
 
-        textarea.form-control {
-            resize: vertical;
-            min-height: 60px;
-        }
-
-        /* ==========================================================================
-           Séparateurs Animés
-           ========================================================================== */
         hr {
-            border: none !important;
-            height: 1px !important;
+            border: none !important; height: 1px !important;
             background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent) !important;
-            margin: 1.5rem 0 !important;
-            opacity: 1 !important;
-            animation: separatorPulse 3s ease-in-out infinite;
+            margin: 1.5rem 0 !important; opacity: 1 !important;
         }
 
-        @keyframes separatorPulse {
-            0%, 100% { opacity: 0.5; }
-            50% { opacity: 1; }
-        }
-
-        [data-theme="light"] hr {
-            background: linear-gradient(90deg, transparent, rgba(13, 110, 253, 0.3), transparent) !important;
-        }
-
-        /* ==========================================================================
-           Titres de Section
-           ========================================================================== */
         .section-title {
-            color: #ffffff;
-            font-weight: 600;
-            position: relative;
-            padding-bottom: 0.6rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+            color: #ffffff; font-weight: 600; position: relative;
+            padding-bottom: 0.6rem; display: flex; align-items: center; gap: 0.5rem;
         }
 
         .section-title::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 50px;
-            height: 3px;
+            content: ''; position: absolute; bottom: 0; left: 0;
+            width: 50px; height: 3px;
             background: linear-gradient(90deg, var(--primary-color), var(--info-color));
             border-radius: 10px;
-            animation: underlineWidth 2s ease-in-out infinite;
         }
 
-        @keyframes underlineWidth {
-            0%, 100% { width: 50px; }
-            50% { width: 80px; }
-        }
+        [data-theme="light"] .section-title { color: #212529; }
 
-        [data-theme="light"] .section-title {
-            color: #212529;
-        }
-
-        /* ==========================================================================
-           Animation des Groupes de Formulaire
-           ========================================================================== */
         .form-group-animated {
             animation: formFadeIn 0.5s ease forwards !important;
-            opacity: 0;
-            transform: translateY(15px);
+            opacity: 0; transform: translateY(15px);
         }
 
         @keyframes formFadeIn {
@@ -301,49 +165,17 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .form-group-animated:nth-child(1) { animation-delay: 0.05s; }
-        .form-group-animated:nth-child(2) { animation-delay: 0.1s; }
-        .form-group-animated:nth-child(3) { animation-delay: 0.15s; }
-        .form-group-animated:nth-child(4) { animation-delay: 0.2s; }
-        .form-group-animated:nth-child(5) { animation-delay: 0.25s; }
-        .form-group-animated:nth-child(6) { animation-delay: 0.3s; }
-        .form-group-animated:nth-child(7) { animation-delay: 0.35s; }
-        .form-group-animated:nth-child(8) { animation-delay: 0.4s; }
-
-        /* ==========================================================================
-           Liste des Parents Liés - Glassmorphism
-           ========================================================================== */
-        .glass-list-group {
-            background: transparent !important;
-            border-radius: 1rem !important;
-            overflow: hidden !important;
-        }
+        .glass-list-group { background: transparent !important; border-radius: 1rem !important; overflow: hidden !important; }
 
         .glass-list-group .list-group-item {
             background: rgba(255, 255, 255, 0.04) !important;
             backdrop-filter: blur(8px) !important;
             -webkit-backdrop-filter: blur(8px) !important;
             border: 1px solid rgba(255, 255, 255, 0.08) !important;
-            border-radius: 0.75rem !important;
-            margin-bottom: 0.5rem !important;
+            border-radius: 0.75rem !important; margin-bottom: 0.5rem !important;
             padding: 1rem !important;
             transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
             color: #ffffff !important;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .glass-list-group .list-group-item::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 3px;
-            background: linear-gradient(180deg, var(--primary-color), var(--info-color));
-            border-radius: 0 4px 4px 0;
-            transform: scaleY(0);
-            transition: transform 0.4s ease;
         }
 
         .glass-list-group .list-group-item:hover {
@@ -353,147 +185,52 @@
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2) !important;
         }
 
-        .glass-list-group .list-group-item:hover::before {
-            transform: scaleY(1);
-        }
-
-        .glass-list-group .list-group-item h6 {
-            color: #ffffff;
-            font-weight: 600;
-        }
-
         [data-theme="light"] .glass-list-group .list-group-item {
-            background: rgba(255, 255, 255, 0.7) !important;
-            border-color: rgba(0, 0, 0, 0.06) !important;
-            color: #212529 !important;
+            background: rgba(255, 255, 255, 0.7) !important; color: #212529 !important;
         }
 
-        [data-theme="light"] .glass-list-group .list-group-item h6 {
-            color: #212529;
-        }
-
-        /* ==========================================================================
-           Badge Nouveau Parent
-           ========================================================================== */
         .badge-new {
             background: linear-gradient(135deg, var(--info-color), #0a58ca) !important;
-            color: white !important;
-            font-size: 0.65rem;
-            padding: 0.2rem 0.5rem;
-            border-radius: 1rem;
-            animation: badgePulse 2s ease-in-out infinite;
+            color: white !important; font-size: 0.65rem; padding: 0.2rem 0.5rem; border-radius: 1rem;
         }
 
-        @keyframes badgePulse {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(13, 202, 240, 0.4); }
-            50% { box-shadow: 0 0 0 8px rgba(13, 202, 240, 0); }
-        }
-
-        /* ==========================================================================
-           Téléphone Éditable
-           ========================================================================== */
         .phone-editable {
-            cursor: pointer;
-            border-bottom: 1px dashed rgba(255, 255, 255, 0.4);
-            transition: all 0.3s ease;
-            color: rgba(255, 255, 255, 0.5);
+            cursor: pointer; border-bottom: 1px dashed rgba(255, 255, 255, 0.4);
+            transition: all 0.3s ease; color: rgba(255, 255, 255, 0.5);
         }
 
         .phone-editable:hover {
             color: var(--primary-color) !important;
             border-bottom-color: var(--primary-color) !important;
-            text-shadow: 0 0 10px var(--primary-glow);
-        }
-
-        [data-theme="light"] .phone-editable {
-            color: #6c757d;
-            border-bottom-color: rgba(0, 0, 0, 0.2);
         }
 
         .phone-edit-input {
-            width: 160px;
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 0.5rem;
-            border: 1px solid var(--primary-color);
+            width: 160px; display: inline-block; padding: 4px 10px;
+            border-radius: 0.5rem; border: 1px solid var(--primary-color);
             background: rgba(255, 255, 255, 0.1) !important;
-            color: #ffffff;
-            font-size: 0.85rem;
-            transition: all 0.3s ease;
-        }
-
-        .phone-edit-input:focus {
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.3);
-            background: rgba(255, 255, 255, 0.15) !important;
-        }
-
-        [data-theme="light"] .phone-edit-input {
-            color: #212529;
-            background: rgba(255, 255, 255, 0.9) !important;
-        }
-
-        /* ==========================================================================
-           Boutons d'Action
-           ========================================================================== */
-        .btn-save-phone {
-            padding: 3px 10px;
-            font-size: 0.75rem;
-            border-radius: 0.5rem;
-            transition: all 0.3s ease;
-        }
-
-        .btn-save-phone:hover {
-            transform: scale(1.1);
+            color: #ffffff; font-size: 0.85rem;
         }
 
         .btn-outline-danger {
             background: rgba(220, 53, 69, 0.05) !important;
             border: 1px solid rgba(220, 53, 69, 0.2) !important;
-            border-radius: 0.5rem !important;
-            color: #dc3545 !important;
+            border-radius: 0.5rem !important; color: #dc3545 !important;
             transition: all 0.3s ease !important;
         }
 
         .btn-outline-danger:hover {
-            background: rgba(220, 53, 69, 0.15) !important;
-            transform: scale(1.05) !important;
-            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3) !important;
+            background: rgba(220, 53, 69, 0.15) !important; transform: scale(1.05) !important;
         }
 
-        /* ==========================================================================
-           Boutons Principaux
-           ========================================================================== */
         .glass-btn-primary {
             background: linear-gradient(135deg, rgba(13, 110, 253, 0.3), rgba(13, 202, 240, 0.3)) !important;
             backdrop-filter: blur(10px) !important;
             -webkit-backdrop-filter: blur(10px) !important;
             border: 1px solid rgba(13, 110, 253, 0.3) !important;
-            border-radius: 0.75rem !important;
-            padding: 0.6rem 1.8rem !important;
-            font-weight: 600 !important;
-            color: #ffffff !important;
+            border-radius: 0.75rem !important; padding: 0.6rem 1.8rem !important;
+            font-weight: 600 !important; color: #ffffff !important;
             transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .glass-btn-primary::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
-
-        .glass-btn-primary:hover::before {
-            width: 300px;
-            height: 300px;
+            cursor: pointer;
         }
 
         .glass-btn-primary:hover {
@@ -507,49 +244,30 @@
             backdrop-filter: blur(10px) !important;
             -webkit-backdrop-filter: blur(10px) !important;
             border: 1px solid rgba(255, 255, 255, 0.15) !important;
-            border-radius: 0.75rem !important;
-            padding: 0.6rem 1.8rem !important;
+            border-radius: 0.75rem !important; padding: 0.6rem 1.8rem !important;
             color: #ffffff !important;
             transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+            text-decoration: none; display: inline-block;
         }
 
         .glass-btn-secondary:hover {
             transform: translateY(-3px) scale(1.03) !important;
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3) !important;
-            background: rgba(255, 255, 255, 0.12) !important;
+            background: rgba(255, 255, 255, 0.12) !important; color: #ffffff !important;
         }
 
-        [data-theme="light"] .glass-btn-secondary {
-            color: #212529 !important;
-            background: rgba(255, 255, 255, 0.7) !important;
-            border-color: rgba(0, 0, 0, 0.1) !important;
-        }
-
-        /* ==========================================================================
-           Bouton Outline Primary
-           ========================================================================== */
         .btn-outline-primary {
             background: rgba(13, 110, 253, 0.08) !important;
             border: 1px solid rgba(13, 110, 253, 0.2) !important;
-            border-radius: 0.5rem !important;
-            color: #ffffff !important;
+            border-radius: 0.5rem !important; color: #ffffff !important;
             transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
         }
 
         .btn-outline-primary:hover {
             background: rgba(13, 110, 253, 0.2) !important;
             transform: translateY(-2px) scale(1.03) !important;
-            box-shadow: 0 6px 20px rgba(13, 110, 253, 0.3) !important;
         }
 
-        [data-theme="light"] .btn-outline-primary {
-            color: var(--primary-color) !important;
-            background: rgba(13, 110, 253, 0.05) !important;
-        }
-
-        /* ==========================================================================
-           Modal Glassmorphism
-           ========================================================================== */
         .modal-glass .modal-content {
             background: rgba(20, 20, 40, 0.95) !important;
             backdrop-filter: blur(25px) !important;
@@ -557,69 +275,17 @@
             border: 1px solid rgba(255, 255, 255, 0.1) !important;
             border-radius: 1.5rem !important;
             box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5) !important;
-            animation: modalSlideIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
         }
 
-        @keyframes modalSlideIn {
-            from { opacity: 0; transform: translateY(-30px) scale(0.95); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
+        .modal-glass .modal-header { border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important; }
+        .modal-glass .modal-title { color: #ffffff !important; font-weight: 600; }
+        .modal-glass .modal-body { padding: 1.5rem !important; color: rgba(255, 255, 255, 0.9) !important; }
+        .modal-glass .modal-footer { border-top: 1px solid rgba(255, 255, 255, 0.08) !important; }
+        .modal-glass .btn-close { filter: invert(1); }
 
-        [data-theme="light"] .modal-glass .modal-content {
-            background: rgba(255, 255, 255, 0.95) !important;
-            border-color: rgba(0, 0, 0, 0.08) !important;
-        }
-
-        .modal-glass .modal-header {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
-            padding: 1.25rem 1.5rem !important;
-        }
-
-        .modal-glass .modal-title {
-            color: #ffffff !important;
-            font-weight: 600;
-        }
-
-        [data-theme="light"] .modal-glass .modal-title {
-            color: #212529 !important;
-        }
-
-        .modal-glass .modal-body {
-            padding: 1.5rem !important;
-            color: rgba(255, 255, 255, 0.9) !important;
-        }
-
-        [data-theme="light"] .modal-glass .modal-body {
-            color: #212529 !important;
-        }
-
-        .modal-glass .modal-footer {
-            border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
-            padding: 1rem 1.5rem !important;
-        }
-
-        .modal-glass .btn-close {
-            filter: invert(1);
-        }
-
-        [data-theme="light"] .modal-glass .btn-close {
-            filter: none;
-        }
-
-        /* ==========================================================================
-           Alertes Animées
-           ========================================================================== */
         .alert {
-            border-radius: 0.75rem !important;
-            border-left-width: 4px !important;
-            animation: alertSlideIn 0.4s ease-out !important;
-            backdrop-filter: blur(8px) !important;
-            -webkit-backdrop-filter: blur(8px) !important;
-        }
-
-        @keyframes alertSlideIn {
-            from { opacity: 0; transform: translateY(-10px) scale(0.95); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
+            border-radius: 0.75rem !important; border-left-width: 4px !important;
+            backdrop-filter: blur(8px) !important; -webkit-backdrop-filter: blur(8px) !important;
         }
 
         .alert-info {
@@ -630,86 +296,15 @@
 
         .alert-danger {
             background: rgba(220, 53, 69, 0.1) !important;
-            border-color: rgba(220, 53, 69, 0.3) !important;
-            color: #ff6b6b !important;
+            border-color: rgba(220, 53, 69, 0.3) !important; color: #ff6b6b !important;
         }
 
-        [data-theme="light"] .alert-info {
-            color: #055160 !important;
-        }
-
-        /* ==========================================================================
-           TomSelect Personnalisé
-           ========================================================================== */
-        .ts-wrapper .ts-control {
-            border-radius: 0.75rem !important;
-            background: rgba(255, 255, 255, 0.06) !important;
-            backdrop-filter: blur(5px) !important;
-            border: 1px solid rgba(255, 255, 255, 0.12) !important;
-            color: #ffffff !important;
-            padding: 0.6rem 1rem !important;
-            box-shadow: none !important;
-            transition: all 0.4s ease !important;
-        }
-
-        .ts-wrapper .ts-control:focus {
-            border-color: var(--primary-color) !important;
-            box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.2) !important;
-        }
-
-        [data-theme="light"] .ts-wrapper .ts-control {
-            background: rgba(255, 255, 255, 0.7) !important;
-            border-color: rgba(0, 0, 0, 0.1) !important;
-            color: #212529 !important;
-        }
-
-        .ts-wrapper .ts-dropdown {
-            border-radius: 0.75rem !important;
-            background: rgba(20, 20, 40, 0.95) !important;
-            backdrop-filter: blur(15px) !important;
-            border: 1px solid rgba(255, 255, 255, 0.1) !important;
-        }
-
-        [data-theme="light"] .ts-wrapper .ts-dropdown {
-            background: rgba(255, 255, 255, 0.95) !important;
-            border-color: rgba(0, 0, 0, 0.08) !important;
-        }
-
-        .ts-wrapper .ts-dropdown .option {
-            color: rgba(255, 255, 255, 0.9) !important;
-            transition: all 0.3s ease !important;
-        }
-
-        .ts-wrapper .ts-dropdown .option:hover,
-        .ts-wrapper .ts-dropdown .option.active {
-            background: rgba(13, 110, 253, 0.15) !important;
-        }
-
-        [data-theme="light"] .ts-wrapper .ts-dropdown .option {
-            color: #212529 !important;
-        }
-
-        .ts-wrapper .item {
-            background: linear-gradient(135deg, rgba(13, 110, 253, 0.2), rgba(13, 202, 240, 0.2)) !important;
-            border: 1px solid rgba(13, 110, 253, 0.3) !important;
-            border-radius: 0.5rem !important;
-            color: #ffffff !important;
-        }
-
-        /* ==========================================================================
-           Toast Notification
-           ========================================================================== */
         .toast-notification {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 9999;
+            position: fixed; bottom: 20px; right: 20px; z-index: 9999;
             background: rgba(25, 135, 84, 0.2) !important;
-            backdrop-filter: blur(15px) !important;
-            -webkit-backdrop-filter: blur(15px) !important;
+            backdrop-filter: blur(15px) !important; -webkit-backdrop-filter: blur(15px) !important;
             border: 1px solid rgba(25, 135, 84, 0.3) !important;
-            border-radius: 1rem !important;
-            padding: 1rem 1.5rem !important;
+            border-radius: 1rem !important; padding: 1rem 1.5rem !important;
             color: #ffffff !important;
             animation: toastSlideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) !important;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3) !important;
@@ -725,13 +320,9 @@
             to { opacity: 0; transform: translateX(100px) scale(0.8); }
         }
 
-        /* ==========================================================================
-           Linked Parent Item Animation
-           ========================================================================== */
         .linked-parent-item {
             animation: itemSlideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards !important;
-            opacity: 0;
-            transform: translateX(-20px);
+            opacity: 0; transform: translateX(-20px);
         }
 
         @keyframes itemSlideIn {
@@ -739,61 +330,25 @@
             to { opacity: 1; transform: translateX(0) scale(1); }
         }
 
-        /* ==========================================================================
-           Responsive
-           ========================================================================== */
         @media (max-width: 768px) {
-            .glass-form-card .card-body {
-                padding: 1.25rem !important;
-            }
-
-            .glass-btn-primary,
-            .glass-btn-secondary {
-                width: 100%;
-                justify-content: center;
-                margin-top: 0.5rem;
-            }
-
-            .d-flex.justify-content-end {
-                flex-direction: column-reverse;
-            }
-
-            .d-flex.justify-content-end .me-2 {
-                margin-right: 0 !important;
-            }
-
-            .page-title {
-                font-size: 1.25rem;
-            }
-        }
-
-        /* ==========================================================================
-           Loading Spinner
-           ========================================================================== */
-        .loading-spinner {
-            display: none;
-            text-align: center;
-            padding: 2rem;
-            color: rgba(255, 255, 255, 0.6);
-        }
-
-        .loading-spinner .spinner-border {
-            width: 3rem;
-            height: 3rem;
+            .glass-form-card .card-body { padding: 1.25rem !important; }
+            .glass-btn-primary, .glass-btn-secondary { width: 100%; justify-content: center; margin-top: 0.5rem; }
+            .d-flex.justify-content-end { flex-direction: column-reverse; }
+            .d-flex.justify-content-end .me-2 { margin-right: 0 !important; }
+            .page-title { font-size: 1.25rem; }
         }
     </style>
 </head>
 <body>
-    <!-- HEADER - INCLUS VOTRE HEADER EXISTANT ICI -->
-    <!-- ... -->
+    <%- include('partials/header') %>
 
     <main class="main-content">
         <div class="container mt-4 page-shell">
             <div class="themed-container">
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h2 class="mb-0 page-title" id="page-title">
+                    <h2 class="mb-0 page-title">
                         <i data-feather="user-plus" class="me-2" style="width: 24px; height: 24px;"></i>
-                        Modifier le dossier de <span id="student-name-display">l'élève</span>
+                        <%= title %>
                     </h2>
                     <a href="/students" class="btn glass-btn-back">
                         <i data-feather="arrow-left" class="me-1" style="width: 16px; height: 16px;"></i>
@@ -801,34 +356,33 @@
                     </a>
                 </div>
 
+                <%- include('partials/messages') %>
+
                 <div class="card glass-form-card border-0">
                     <div class="card-body">
-                        <!-- Loading State -->
-                        <div class="loading-spinner" id="loading-spinner">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Chargement...</span>
-                            </div>
-                            <p class="mt-2">Chargement des données...</p>
-                        </div>
+                        <% if (student && student.id) { %>
+                        <form action="/students/<%= student.id %>/edit" method="POST" id="student-form">
+                        <% } else { %>
+                        <form action="/students" method="POST" id="student-form">
+                        <% } %>
+                            <input type="hidden" name="manual_parents" id="manual-parents-data" value='<%- JSON.stringify(manualParents || []) %>'>
 
-                        <!-- Form -->
-                        <form action="/students/5/edit" method="POST" id="student-form" style="display: none;">
-                            <input type="hidden" name="student_id" id="student-id" value="">
-                            
                             <div class="row">
                                 <div class="col-md-6 mb-3 form-group-animated">
                                     <label for="name" class="form-label">
                                         <i data-feather="user" style="width: 14px; height: 14px;"></i>
                                         Nom complet de l'élève
                                     </label>
-                                    <input type="text" class="form-control" id="name" name="name" required>
+                                    <input type="text" class="form-control" id="name" name="name" 
+                                           value="<%= student ? (student.name || '') : '' %>" required>
                                 </div>
                                 <div class="col-md-6 mb-3 form-group-animated">
                                     <label for="matricule" class="form-label">
                                         <i data-feather="hash" style="width: 14px; height: 14px;"></i>
                                         Matricule
                                     </label>
-                                    <input type="text" class="form-control" id="matricule" name="matricule" required>
+                                    <input type="text" class="form-control" id="matricule" name="matricule" 
+                                           value="<%= student ? (student.matricule || '') : '' %>" required>
                                 </div>
                             </div>
 
@@ -838,7 +392,8 @@
                                         <i data-feather="grid" style="width: 14px; height: 14px;"></i>
                                         Classe
                                     </label>
-                                    <input type="text" class="form-control" id="student_class" name="student_class" required>
+                                    <input type="text" class="form-control" id="student_class" name="student_class" 
+                                           value="<%= student ? (student.student_class || '') : '' %>" required>
                                 </div>
                             </div>
 
@@ -854,14 +409,16 @@
                                         <i data-feather="calendar" style="width: 14px; height: 14px;"></i>
                                         Date de naissance
                                     </label>
-                                    <input type="date" class="form-control" id="date_of_birth" name="date_of_birth">
+                                    <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" 
+                                           value="<%= (student && student.date_of_birth) ? new Date(student.date_of_birth).toISOString().split('T')[0] : '' %>">
                                 </div>
                                 <div class="col-md-6 mb-3 form-group-animated">
                                     <label for="place_of_birth" class="form-label">
                                         <i data-feather="map-pin" style="width: 14px; height: 14px;"></i>
                                         Lieu de naissance
                                     </label>
-                                    <input type="text" class="form-control" id="place_of_birth" name="place_of_birth">
+                                    <input type="text" class="form-control" id="place_of_birth" name="place_of_birth" 
+                                           value="<%= student ? (student.place_of_birth || '') : '' %>">
                                 </div>
                             </div>
 
@@ -870,7 +427,7 @@
                                     <i data-feather="home" style="width: 14px; height: 14px;"></i>
                                     Adresse
                                 </label>
-                                <textarea class="form-control" id="address" name="address" rows="2"></textarea>
+                                <textarea class="form-control" id="address" name="address" rows="2"><%= student ? (student.address || '') : '' %></textarea>
                             </div>
 
                             <hr>
@@ -879,7 +436,6 @@
                                 Liaison Parent
                             </h5>
 
-                            <!-- Parents actuellement liés -->
                             <div class="mb-3 form-group-animated">
                                 <label class="form-label">
                                     <i data-feather="users" style="width: 14px; height: 14px;"></i>
@@ -887,13 +443,12 @@
                                 </label>
                                 <div class="list-group glass-list-group" id="linked-parents-list">
                                     <div class="list-group-item text-center py-3" style="color: rgba(255,255,255,0.5);">
-                                        <i data-feather="loader" style="width: 20px; height: 20px; animation: spin 1s linear infinite;"></i>
+                                        <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
                                         <p class="mb-0 mt-1">Chargement des parents...</p>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Select pour ajouter des parents existants -->
                             <div class="mb-3 form-group-animated">
                                 <div class="d-flex justify-content-between align-items-center mb-1">
                                     <label for="parent_ids-ts-control" class="form-label mb-0">
@@ -905,20 +460,30 @@
                                         Nouveau Parent
                                     </button>
                                 </div>
-                                <select name="parent_ids" id="parent_ids" class="form-select" multiple></select>
+                                <select name="parent_ids" id="parent_ids" class="form-select" multiple>
+                                    <% if (typeof parents !== 'undefined' && parents.length > 0) { %>
+                                        <% parents.forEach(function(parent) { %>
+                                            <option value="<%= parent.id %>" <%= (linkedParentIds && linkedParentIds.includes(parent.id)) ? 'selected' : '' %>>
+                                                <%= parent.name %>
+                                            </option>
+                                        <% }); %>
+                                    <% } %>
+                                </select>
                                 <div class="form-text" style="color: rgba(255,255,255,0.5);">
                                     <i data-feather="info" style="width: 12px; height: 12px;"></i>
                                     Sélectionnez des parents existants ou utilisez "Nouveau Parent".
                                 </div>
                             </div>
 
-                            <input type="hidden" name="manual_parents" id="manual-parents-data" value="[]">
-
                             <div class="d-flex justify-content-end mt-4">
                                 <a href="/students" class="btn glass-btn-secondary me-2">Annuler</a>
                                 <button type="submit" class="btn glass-btn-primary">
                                     <i data-feather="save" style="width: 16px; height: 16px;"></i>
-                                    Mettre à jour le dossier
+                                    <% if (student && student.id) { %>
+                                        Mettre à jour le dossier
+                                    <% } else { %>
+                                        Créer l'élève
+                                    <% } %>
                                 </button>
                             </div>
                         </form>
@@ -973,117 +538,100 @@
         </div>
     </div>
 
+    <%- include('partials/footer') %>
+
+    <!-- DONNÉES SERVEUR (format JSON pour éviter les erreurs IDE) -->
+    <script type="application/json" id="server-data">
+        {
+            "linkedParents": <%- JSON.stringify(linkedParents || []) %>,
+            "manualParents": <%- JSON.stringify(manualParents || []) %>,
+            "studentId": <%= student && student.id ? student.id : 'null' %>,
+            "isEdit": <%= student && student.id ? 'true' : 'false' %>
+        }
+    </script>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/theme.js"></script>
+    <script src="/js/main.js"></script>
+
     <script>
+        // ==========================================================================
+        // INITIALISATION PRINCIPALE
+        // ==========================================================================
         document.addEventListener('DOMContentLoaded', function() {
             if (typeof feather !== 'undefined') feather.replace();
 
-            // ============================================================
-            // DONNÉES SIMULÉES - À REMPLACER PAR UNE VRAIE REQUÊTE API
-            // ============================================================
+            // Récupérer les données serveur depuis le script JSON
+            var serverDataEl = document.getElementById('server-data');
+            var SERVER_DATA = { linkedParents: [], manualParents: [], studentId: null, isEdit: false };
             
-            // Simule la récupération des données de l'élève depuis la base
-            function fetchStudentData() {
-                // Dans la vraie application, on récupère via l'URL (ex: /api/students/5)
-                return {
-                    id: 5,
-                    name: 'Tiana RABENJA',
-                    matricule: '0002',
-                    student_class: '4ème',
-                    date_of_birth: '2013-07-23',
-                    place_of_birth: 'Befelatanana',
-                    address: 'IbI 8 Isoraka',
-                    // Liste des parents liés (contenant l'ID du parent ou un nouvel ID)
-                    linked_parents: [
-                        { id: 3, name: 'RABENJA Albert', phone: '0341234567' },
-                        { id: 2, name: 'RAKOTO Nivo', phone: '0329876543' }
-                    ]
-                };
+            if (serverDataEl) {
+                try {
+                    SERVER_DATA = JSON.parse(serverDataEl.textContent);
+                } catch(e) {
+                    console.error('Erreur parsing server-data:', e);
+                }
             }
 
-            // Simule la récupération de tous les parents disponibles
-            function fetchAllParents() {
-                return [
-                    { id: 1, name: 'ANDRIAMANGA Jean' },
-                    { id: 2, name: 'RAKOTO Nivo' },
-                    { id: 3, name: 'RABENJA Albert' },
-                    { id: 4, name: 'RAJAONARY Mamy' },
-                    { id: 5, name: 'RAZAFINDRAMBOA Soa' },
-                    { id: 6, name: 'ANDRIANTSOA Faneva' },
-                    { id: 7, name: 'RANDRIANARISOA Henintsoa' },
-                    { id: 8, name: 'RABEMANANJARA Tiana' },
-                    { id: 9, name: 'RAKOTOARIMANANA Lova' },
-                    { id: 10, name: 'ANDRIANJAFY Rado' }
-                ];
-            }
+            console.log('📦 Données serveur:', SERVER_DATA);
 
-            // ============================================================
-            // INITIALISATION DES DONNÉES
-            // ============================================================
-            
-            const studentData = fetchStudentData();
-            const allParents = fetchAllParents();
-            
-            // Parents déjà liés à l'élève
-            let linkedParents = studentData.linked_parents.map(p => ({
-                ...p,
-                isNew: false // Par défaut, ce sont des parents existants en base
-            }));
-            
-            let newParentCounter = 1000;
-            let tomSelectInstance;
+            // ========================================================================
+            // DONNÉES INITIALES DES PARENTS
+            // ========================================================================
+            var linkedParents = [];
 
-            // ============================================================
-            // AFFICHAGE DES DONNÉES DE L'ÉLÈVE
-            // ============================================================
-            
-            // Titre
-            document.getElementById('student-name-display').textContent = studentData.name;
-            
-            // Formulaire
-            document.getElementById('student-id').value = studentData.id;
-            document.getElementById('name').value = studentData.name;
-            document.getElementById('matricule').value = studentData.matricule;
-            document.getElementById('student_class').value = studentData.student_class;
-            document.getElementById('date_of_birth').value = studentData.date_of_birth || '';
-            document.getElementById('place_of_birth').value = studentData.place_of_birth || '';
-            document.getElementById('address').value = studentData.address || '';
-
-            // ============================================================
-            // INITIALISATION TOMSELECT
-            // ============================================================
-            
-            const parentSelect = document.getElementById('parent_ids');
-            if (parentSelect) {
-                // Récupérer les IDs des parents déjà liés
-                const linkedIds = linkedParents.map(p => p.id);
-                
-                // Ajouter les options des parents non liés
-                allParents
-                    .filter(p => !linkedIds.includes(p.id))
-                    .forEach(parent => {
-                        const option = document.createElement('option');
-                        option.value = parent.id;
-                        option.textContent = parent.name;
-                        parentSelect.appendChild(option);
+            if (SERVER_DATA.linkedParents && SERVER_DATA.linkedParents.length > 0) {
+                SERVER_DATA.linkedParents.forEach(function(parent) {
+                    linkedParents.push({
+                        id: parent.id,
+                        name: parent.name || 'N/A',
+                        phone: parent.phone_number || parent.phone || '',
+                        isNew: false,
+                        type: 'linked'
                     });
-                
+                });
+            }
+
+            if (SERVER_DATA.manualParents && SERVER_DATA.manualParents.length > 0) {
+                SERVER_DATA.manualParents.forEach(function(parent) {
+                    linkedParents.push({
+                        id: parent.id || ('manual_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)),
+                        name: parent.name || 'N/A',
+                        phone: parent.phone || '',
+                        isNew: true,
+                        type: 'manual'
+                    });
+                });
+            }
+
+            console.log('👥 Tous les parents chargés:', linkedParents);
+
+            var newParentCounter = 10000;
+            var tomSelectInstance;
+
+            // ========================================================================
+            // TOM SELECT
+            // ========================================================================
+            var parentSelect = document.getElementById('parent_ids');
+            if (parentSelect && typeof TomSelect !== 'undefined') {
                 tomSelectInstance = new TomSelect(parentSelect, {
                     plugins: ['remove_button'],
                     create: false,
                     placeholder: 'Rechercher un parent existant...',
                     onChange: function(values) {
-                        values.forEach(value => {
-                            const parentId = parseInt(value);
-                            if (!linkedParents.find(p => p.id === parentId)) {
-                                const parent = allParents.find(p => p.id === parentId);
-                                if (parent) {
-                                    linkedParents.push({ 
-                                        id: parent.id, 
-                                        name: parent.name, 
-                                        phone: parent.phone || '',
-                                        isNew: false 
+                        values.forEach(function(value) {
+                            var parentId = parseInt(value);
+                            if (!linkedParents.find(function(p) { return p.id === parentId && p.type === 'linked'; })) {
+                                var option = parentSelect.querySelector('option[value="' + parentId + '"]');
+                                if (option) {
+                                    linkedParents.push({
+                                        id: parentId,
+                                        name: option.textContent.trim(),
+                                        phone: '',
+                                        isNew: false,
+                                        type: 'linked'
                                     });
                                 }
                             }
@@ -1092,64 +640,57 @@
                         updateManualParentsData();
                     },
                     onItemRemove: function(value) {
-                        linkedParents = linkedParents.filter(p => p.id !== parseInt(value));
+                        linkedParents = linkedParents.filter(function(p) {
+                            return !(p.id === parseInt(value) && p.type === 'linked');
+                        });
                         renderLinkedParents();
                         updateManualParentsData();
                     }
                 });
             }
 
-            // ============================================================
-            // RENDU DE LA LISTE DES PARENTS LIÉS
-            // ============================================================
-            
+            // ========================================================================
+            // RENDU DE LA LISTE
+            // ========================================================================
             function renderLinkedParents() {
-                const container = document.getElementById('linked-parents-list');
+                var container = document.getElementById('linked-parents-list');
                 if (!container) return;
                 
                 if (linkedParents.length === 0) {
-                    container.innerHTML = `<div class="list-group-item text-center py-3" style="color: rgba(255,255,255,0.5);">
-                        <i data-feather="users" style="width: 20px; height: 20px;"></i>
-                        <p class="mb-0 mt-1">Aucun parent lié</p>
-                    </div>`;
+                    container.innerHTML = '<div class="list-group-item text-center py-3" style="color: rgba(255,255,255,0.5);"><i data-feather="users" style="width: 20px; height: 20px;"></i><p class="mb-0 mt-1">Aucun parent lié</p></div>';
                 } else {
-                    container.innerHTML = linkedParents.map((parent, index) => `
-                        <div class="list-group-item linked-parent-item" data-parent-index="${index}">
-                            <div class="d-flex w-100 justify-content-between align-items-start">
-                                <div>
-                                    <h6 class="mb-1">
-                                        ${escapeHtml(parent.name)}
-                                        ${parent.isNew ? '<span class="badge badge-new ms-2">Nouveau</span>' : ''}
-                                    </h6>
-                                    <p class="mb-0">
-                                        <small>
-                                            <i data-feather="phone" style="width: 12px; height: 12px;"></i>
-                                            <strong>Téléphone :</strong>
-                                            <span id="phone-display-${index}">
-                                                ${parent.phone ? escapeHtml(parent.phone) : '<span class="phone-editable" onclick="editPhone(' + index + ')" title="Cliquez pour ajouter">Non renseigné</span>'}
-                                            </span>
-                                            <span id="phone-edit-${index}" style="display: none;">
-                                                <input type="tel" class="phone-edit-input" id="phone-input-${index}" value="${escapeHtml(parent.phone)}" placeholder="Numéro">
-                                                <button class="btn btn-sm btn-success btn-save-phone" onclick="savePhone(${index})">✓</button>
-                                                <button class="btn btn-sm btn-outline-secondary btn-save-phone" onclick="cancelEditPhone(${index})">✗</button>
-                                            </span>
-                                        </small>
-                                    </p>
-                                </div>
-                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeLinkedParent(${index})" title="Retirer">
-                                    <i data-feather="trash-2" style="width: 14px; height: 14px;"></i>
-                                </button>
-                            </div>
-                        </div>
-                    `).join('');
+                    container.innerHTML = linkedParents.map(function(parent, index) {
+                        var phoneDisplay = parent.phone 
+                            ? '<span style="color: #22c55e; font-weight: 500;">' + escapeHtml(parent.phone) + '</span>'
+                            : '<span class="phone-editable" onclick="window.editPhone(' + index + ')" title="Cliquez pour ajouter un numéro" style="color: #ef4444; cursor: pointer; border-bottom: 1px dashed #ef4444;">Non renseigné - Cliquez pour ajouter</span>';
+                        
+                        var typeBadge = parent.type === 'manual' 
+                            ? '<span class="badge bg-info ms-2" style="font-size: 0.65rem;">Ajouté manuellement</span>'
+                            : '<span class="badge bg-success ms-2" style="font-size: 0.65rem;">Compte existant</span>';
+                        
+                        return '<div class="list-group-item linked-parent-item" style="animation-delay: ' + (index * 0.05) + 's;">' +
+                            '<div class="d-flex w-100 justify-content-between align-items-start">' +
+                                '<div>' +
+                                    '<h6 class="mb-1"><i data-feather="user" style="width: 14px; height: 14px;"></i> ' + escapeHtml(parent.name) + typeBadge + '</h6>' +
+                                    '<p class="mb-1"><small><i data-feather="phone" style="width: 12px; height: 12px;"></i> <strong>Téléphone :</strong> ' +
+                                        '<span id="phone-display-' + index + '">' + phoneDisplay + '</span>' +
+                                        '<span id="phone-edit-' + index + '" style="display: none;">' +
+                                            '<input type="tel" class="phone-edit-input" id="phone-input-' + index + '" value="' + escapeHtml(parent.phone) + '" placeholder="Numéro" style="width: 150px; padding: 2px 8px; border-radius: 4px; border: 1px solid #0d6efd; background: rgba(255,255,255,0.1); color: #fff;">' +
+                                            '<button class="btn btn-sm btn-success" onclick="window.savePhone(' + index + ')" style="padding: 2px 8px; font-size: 0.75rem;">✓</button>' +
+                                            '<button class="btn btn-sm btn-outline-secondary" onclick="window.cancelEditPhone(' + index + ')" style="padding: 2px 8px; font-size: 0.75rem;">✗</button>' +
+                                        '</span>' +
+                                    '</small></p>' +
+                                '</div>' +
+                                '<button type="button" class="btn btn-sm btn-outline-danger" onclick="window.removeLinkedParent(' + index + ')" title="Retirer ce parent"><i data-feather="trash-2" style="width: 14px; height: 14px;"></i></button>' +
+                            '</div>' +
+                        '</div>';
+                    }).join('');
                 }
+                
                 if (typeof feather !== 'undefined') feather.replace();
             }
 
-            // ============================================================
-            // FONCTIONS D'ÉDITION DU TÉLÉPHONE
-            // ============================================================
-            
+            // Fonctions globales
             window.editPhone = function(index) {
                 document.getElementById('phone-display-' + index).style.display = 'none';
                 document.getElementById('phone-edit-' + index).style.display = 'inline';
@@ -1157,7 +698,7 @@
             };
 
             window.savePhone = function(index) {
-                const phone = document.getElementById('phone-input-' + index).value.trim();
+                var phone = document.getElementById('phone-input-' + index).value.trim();
                 if (linkedParents[index]) linkedParents[index].phone = phone;
                 renderLinkedParents();
                 updateManualParentsData();
@@ -1167,14 +708,10 @@
                 renderLinkedParents();
             };
 
-            // ============================================================
-            // SUPPRESSION D'UN PARENT LIÉ
-            // ============================================================
-            
             window.removeLinkedParent = function(index) {
-                const parent = linkedParents[index];
-                if (confirm('Retirer "' + parent.name + '" ?')) {
-                    if (!parent.isNew && tomSelectInstance) {
+                var parent = linkedParents[index];
+                if (confirm('Retirer "' + parent.name + '" de la liste ?')) {
+                    if (parent.type === 'linked' && tomSelectInstance) {
                         tomSelectInstance.removeItem(parent.id);
                     }
                     linkedParents.splice(index, 1);
@@ -1183,49 +720,37 @@
                 }
             };
 
-            // ============================================================
-            // MISE À JOUR DES DONNÉES HIDDEN
-            // ============================================================
-            
             function updateManualParentsData() {
-                document.getElementById('manual-parents-data').value = JSON.stringify(
-                    linkedParents.filter(p => p.isNew).map(p => ({ name: p.name, phone: p.phone }))
-                );
+                var manualParents = linkedParents
+                    .filter(function(p) { return p.type === 'manual'; })
+                    .map(function(p) { return { name: p.name, phone: p.phone }; });
+                document.getElementById('manual-parents-data').value = JSON.stringify(manualParents);
             }
 
-            // ============================================================
-            // MODAL AJOUTER UN PARENT
-            // ============================================================
-            
-            const addParentModalEl = document.getElementById('addParentModal');
+            // Modal
+            var addParentModalEl = document.getElementById('addParentModal');
             if (addParentModalEl) {
-                const modal = new bootstrap.Modal(addParentModalEl);
-                const saveBtn = document.getElementById('save-new-parent-btn');
-                const alertEl = document.getElementById('add-parent-alert');
-                const nameInput = document.getElementById('new-parent-name');
-                const phoneInput = document.getElementById('new-parent-phone');
-                const form = document.getElementById('add-parent-form');
+                var modal = new bootstrap.Modal(addParentModalEl);
+                var saveBtn = document.getElementById('save-new-parent-btn');
+                var alertEl = document.getElementById('add-parent-alert');
+                var nameInput = document.getElementById('new-parent-name');
+                var phoneInput = document.getElementById('new-parent-phone');
+                var form = document.getElementById('add-parent-form');
 
                 saveBtn.addEventListener('click', function() {
-                    const name = nameInput.value.trim();
-                    const phone = phoneInput.value.trim();
+                    var name = nameInput.value.trim();
+                    var phone = phoneInput.value.trim();
                     
-                    if (!name) { showAlert('Veuillez entrer le nom.'); return; }
-                    if (!phone) { showAlert('Veuillez entrer le téléphone.'); return; }
+                    if (!name) { alertEl.innerHTML = 'Veuillez entrer le nom du parent.'; alertEl.style.display = 'block'; return; }
+                    if (!phone) { alertEl.innerHTML = 'Veuillez entrer le numéro de téléphone.'; alertEl.style.display = 'block'; return; }
                     
-                    linkedParents.push({ 
-                        id: newParentCounter++, 
-                        name: name, 
-                        phone: phone, 
-                        isNew: true 
-                    });
-                    
+                    linkedParents.push({ id: newParentCounter++, name: name, phone: phone, isNew: true, type: 'manual' });
                     renderLinkedParents();
                     updateManualParentsData();
                     modal.hide();
                     form.reset();
                     alertEl.style.display = 'none';
-                    showToast('Parent "' + name + '" ajouté !');
+                    showToast('Parent "' + name + '" ajouté avec succès !');
                 });
 
                 addParentModalEl.addEventListener('hidden.bs.modal', function() {
@@ -1233,71 +758,49 @@
                     alertEl.style.display = 'none';
                     if (typeof feather !== 'undefined') feather.replace();
                 });
-
-                function showAlert(msg) {
-                    alertEl.innerHTML = msg;
-                    alertEl.style.display = 'block';
-                }
             }
 
-            // ============================================================
-            // TOAST NOTIFICATION
-            // ============================================================
-            
             function showToast(message) {
-                const toast = document.createElement('div');
+                var toast = document.createElement('div');
                 toast.className = 'toast-notification';
                 toast.innerHTML = '✅ ' + message;
                 document.body.appendChild(toast);
-                setTimeout(() => {
+                setTimeout(function() {
                     toast.style.animation = 'toastSlideOut 0.3s ease forwards';
-                    setTimeout(() => toast.remove(), 300);
+                    setTimeout(function() { toast.remove(); }, 300);
                 }, 3000);
             }
 
-            // ============================================================
-            // SOUMISSION DU FORMULAIRE
-            // ============================================================
-            
-            document.getElementById('student-form').addEventListener('submit', function(e) {
-                updateManualParentsData();
-                // Ajouter les parents existants liés
-                linkedParents.filter(p => !p.isNew).forEach(parent => {
-                    const input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = 'parent_ids[]';
-                    input.value = parent.id;
-                    this.appendChild(input);
+            // Soumission
+            var studentForm = document.getElementById('student-form');
+            if (studentForm) {
+                studentForm.addEventListener('submit', function(e) {
+                    updateManualParentsData();
+                    linkedParents.filter(function(p) { return p.type === 'linked'; }).forEach(function(parent) {
+                        var existingInput = studentForm.querySelector('input[type="hidden"][name="parent_ids[]"][value="' + parent.id + '"]');
+                        if (!existingInput) {
+                            var input = document.createElement('input');
+                            input.type = 'hidden';
+                            input.name = 'parent_ids[]';
+                            input.value = parent.id;
+                            studentForm.appendChild(input);
+                        }
+                    });
+                    console.log('📤 Formulaire soumis avec ' + linkedParents.length + ' parents');
+                    return true;
                 });
-            });
+            }
 
-            // ============================================================
-            // UTILITAIRES
-            // ============================================================
-            
             function escapeHtml(text) {
                 if (!text) return '';
-                const div = document.createElement('div');
+                var div = document.createElement('div');
                 div.textContent = text;
                 return div.innerHTML;
             }
 
-            // ============================================================
-            // AFFICHAGE DU FORMULAIRE (fin du chargement)
-            // ============================================================
-            
-            // Cacher le spinner et afficher le formulaire
-            document.getElementById('loading-spinner').style.display = 'none';
-            document.getElementById('student-form').style.display = 'block';
-            
-            // Initialiser la liste des parents
+            // Init
             renderLinkedParents();
             updateManualParentsData();
-
-            // Animation des icônes Feather
-            if (typeof feather !== 'undefined') {
-                setTimeout(() => feather.replace(), 100);
-            }
         });
     </script>
 </body>
