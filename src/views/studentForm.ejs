@@ -586,20 +586,19 @@
                                 Liaison Parent
                             </h5>
 
-                            <!-- Parents actuellement liés -->
-<div class="mb-3 form-group-animated">
-    <label class="form-label">
-        <i data-feather="users" style="width: 14px; height: 14px;"></i>
-        Parent(s) actuellement lié(s)
-    </label>
-    <div class="list-group glass-list-group" id="linked-parents-list">
-        <!-- Rempli dynamiquement par JavaScript au chargement -->
-        <div class="list-group-item text-center py-3" style="color: rgba(255,255,255,0.5);">
-            <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-            <p class="mb-0 mt-1">Chargement...</p>
-        </div>
-    </div>
-</div>
+                            <!-- Parents actuellement liés - VERSION DYNAMIQUE -->
+                            <div class="mb-3 form-group-animated">
+                                <label class="form-label">
+                                    <i data-feather="users" style="width: 14px; height: 14px;"></i>
+                                    Parent(s) actuellement lié(s)
+                                </label>
+                                <div class="list-group glass-list-group" id="linked-parents-list">
+                                    <div class="list-group-item text-center py-3" style="color: rgba(255,255,255,0.5);">
+                                        <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                                        <p class="mb-0 mt-1">Chargement...</p>
+                                    </div>
+                                </div>
+                            </div>
 
                             <!-- Select pour ajouter des parents existants -->
                             <div class="mb-3 form-group-animated">
@@ -698,6 +697,6 @@
     <script src="/socket.io/socket.io.js"></script>
     <script src="/js/theme.js"></script>
     <script src="/js/main.js"></script>
-    
+
 </body>
 </html>
