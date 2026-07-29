@@ -1,7 +1,10 @@
 <%- include('partials/head') %>
 <%- include('partials/header') %>
 
-<div class="container page-shell py-4">
+<div class="container page-shell py-4" 
+    data-user-role="<%= currentUser.role %>" 
+    data-establishment-id="<%= currentUser.establishment_id %>"
+>
     <div class="themed-container">
 
         <%- include('partials/messages') %>
@@ -1243,25 +1246,50 @@
         // ==========================================================================
         // Socket.io pour les notifications ET mises à jour en temps réel
         // ==========================================================================
-        function initSocketIO() {
-            if (typeof io === 'undefined') return;
+        function initSocketIO() {            
+            if (typeof io === 'undefined') {
+                console.warn('Socket.IO non chargé.');
+                return;
+            }
             
             try {
-                var socket = io();
-                
-                // Écouter les mises à jour des statistiques en temps réel
-                socket.on('statsUpdate', function(data) {
+                const socket = io();
+                const container = document.querySelector('.page-shell');
+                const currentUserRole = container.dataset.userRole;
+                const establishmentId = container.dataset.establishmentId;
+
+                // Écouteur unique et correct pour les mises à jour des statistiques
+                socket.on('adminStatsUpdate', function(data) {
                     console.log('📊 Mise à jour des statistiques reçue:', data);
-                    updateStatsInRealTime(data);
+
+                    // --- SUPER ADMIN ---
+                    if (data.superAdminStats && (currentUserRole === 'SUPER_ADMIN' || currentUserRole === 'superadmin')) {
+                        const stats = data.superAdminStats;
+                        updateStatValue('superAdminTotalUsers', stats.totalUserCount);
+                        updateStatValue('superAdminAdminCount', stats.adminCount);
+                        updateStatValue('superAdminEstablishmentCount', stats.establishmentCount);
+                        updateStatValue('superAdminPendingCount', stats.pendingCount);
+
+                        // Mettre à jour le tableau des établissements
+                        if (stats.establishmentsWithCounts) {
+                            updateEstablishmentTable(stats.establishmentsWithCounts);
+                        }
+                    }
+
+                    // --- ADMINISTRATEUR ---
+                    if (data.adminStats && (currentUserRole === 'ADMINISTRATOR' || currentUserRole === 'administrateur')) {
+                        // Vérifie si la mise à jour concerne cet établissement
+                        if (data.adminStats.establishmentId == establishmentId) {
+                            const stats = data.adminStats;
+                            updateStatValue('adminStudentCount', stats.studentCount);
+                            updateStatValue('adminProfessorCount', stats.professorCount);
+                            updateStatValue('adminParentCount', stats.parentCount);
+                            updateStatValue('adminPendingCount', stats.pendingCount);
+                        }
+                    }
                 });
                 
-                // Écouter les mises à jour des établissements
-                socket.on('establishmentStatsUpdate', function(data) {
-                    console.log('🏫 Mise à jour des établissements reçue:', data);
-                    updateEstablishmentStats(data);
-                });
-                
-                // Notification de highlight sur les raccourcis
+                // Notification de highlight sur les raccourcis (conserver cette partie)
                 socket.on('shortcutHighlight', function(data) {
                     if (data.shortcutKey) {
                         var selector = '.shortcut-link[data-shortcut-key="' + data.shortcutKey + '"]';
@@ -1287,40 +1315,64 @@
                     }
                 });
             } catch(e) {
-                console.log('Socket.io non disponible');
+                console.error('Erreur lors de l\'initialisation de Socket.io:', e);
             }
         }
 
         // ==========================================================================
-        // Mise à jour des statistiques en temps réel
+        // Mise à jour du tableau des établissements (FONCTION CORRIGÉE)
         // ==========================================================================
-        function updateStatsInRealTime(data) {
-            // Mettre à jour chaque statistique
-            if (data.studentCount !== undefined) {
-                updateStatValue('adminStudentCount', data.studentCount);
-            }
-            if (data.professorCount !== undefined) {
-                updateStatValue('adminProfessorCount', data.professorCount);
-            }
-            if (data.parentCount !== undefined) {
-                updateStatValue('adminParentCount', data.parentCount);
-            }
-            if (data.pendingCount !== undefined) {
-                updateStatValue('adminPendingCount', data.pendingCount);
-            }
+        function updateEstablishmentTable(establishments) {
+            const tableBody = document.getElementById('establishment-table-body');
+            if (!tableBody) return;
+
+            // Calculer le max pour les barres de progression
+            const maxUsers = Math.max(0, ...establishments.map(e => e.userCount));
+
+            let html = '';
+            establishments.forEach((est, index) => {
+                const percentage = maxUsers > 0 ? Math.round((est.userCount / maxUsers) * 100) : 0;
+                html += `
+                    <tr class="table-row" style="animation-delay: ${100 + (index * 50)}ms" data-establishment-id="${est.id}">
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="establishment-icon me-2">
+                                    <i data-feather="bookmark"></i>
+                                </div>
+                                ${est.name}
+                            </div>
+                        </td>
+                        <td class="text-end fw-bold est-user-count" data-establishment-id="${est.id}">
+                            ${est.userCount || 0}
+                        </td>
+                        <td class="text-end">
+                            <div class="progress-wrapper">
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar bg-primary progress-animated" 
+                                         role="progressbar" 
+                                         style="width: 0%;" 
+                                         data-width="${percentage}%"
+                                         aria-valuenow="${percentage}" 
+                                         aria-valuemin="0" 
+                                         aria-valuemax="100">
+                                    </div>
+                                </div>
+                                <small class="progress-text">${percentage}%</small>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            tableBody.innerHTML = html;
             
-            // Super admin stats
-            if (data.totalUserCount !== undefined) {
-                updateStatValue('superAdminTotalUsers', data.totalUserCount);
+            // Ré-appliquer Feather Icons et relancer les animations
+            if (typeof feather !== 'undefined') {
+                feather.replace();
             }
-            if (data.adminCount !== undefined) {
-                updateStatValue('superAdminAdminCount', data.adminCount);
-            }
-            if (data.establishmentCount !== undefined) {
-                updateStatValue('superAdminEstablishmentCount', data.establishmentCount);
-            }
+            initProgressBars(); // Réutiliser la fonction existante pour animer les barres
         }
-
+        
         function updateStatValue(elementId, newValue) {
             var element = document.getElementById(elementId);
             if (!element) return;
@@ -1362,26 +1414,6 @@
             }
             
             requestAnimationFrame(update);
-        }
-
-        // ==========================================================================
-        // Mise à jour des statistiques des établissements
-        // ==========================================================================
-        function updateEstablishmentStats(data) {
-            if (!data.establishments) return;
-            
-            data.establishments.forEach(function(est) {
-                var countElement = document.querySelector('.est-user-count[data-establishment-id="' + est.id + '"]');
-                if (countElement) {
-                    var currentCount = parseInt(countElement.textContent) || 0;
-                    if (currentCount !== est.userCount) {
-                        countElement.textContent = est.userCount;
-                        countElement.style.animation = 'none';
-                        void countElement.offsetWidth;
-                        countElement.style.animation = 'statUpdate 0.6s ease';
-                    }
-                }
-            });
         }
 
         // ==========================================================================
