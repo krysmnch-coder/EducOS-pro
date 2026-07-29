@@ -727,49 +727,134 @@
                 document.getElementById('manual-parents-data').value = JSON.stringify(manualParents);
             }
 
-            // Modal
-            var addParentModalEl = document.getElementById('addParentModal');
-            if (addParentModalEl) {
-                var modal = new bootstrap.Modal(addParentModalEl);
-                var saveBtn = document.getElementById('save-new-parent-btn');
-                var alertEl = document.getElementById('add-parent-alert');
-                var nameInput = document.getElementById('new-parent-name');
-                var phoneInput = document.getElementById('new-parent-phone');
-                var form = document.getElementById('add-parent-form');
+     // ========================================================================
+// MODAL AJOUTER PARENT - CORRIGÉ
+// ========================================================================
+function initModal() {
+    var modalEl = document.getElementById('addParentModal');
+    if (!modalEl) return;
+    
+    // Détruire l'ancienne instance si elle existe
+    var existingModal = bootstrap.Modal.getInstance(modalEl);
+    if (existingModal) {
+        existingModal.dispose();
+    }
+    
+    var modal = new bootstrap.Modal(modalEl, {
+        backdrop: true,
+        keyboard: true,
+        focus: true
+    });
+    
+    var saveBtn = document.getElementById('save-new-parent-btn');
+    var alertEl = document.getElementById('add-parent-alert');
+    var nameInput = document.getElementById('new-parent-name');
+    var phoneInput = document.getElementById('new-parent-phone');
+    var form = document.getElementById('add-parent-form');
 
-                saveBtn.addEventListener('click', function() {
-                    var name = nameInput.value.trim();
-                    var phone = phoneInput.value.trim();
-                    
-                    if (!name) { alertEl.innerHTML = 'Veuillez entrer le nom du parent.'; alertEl.style.display = 'block'; return; }
-                    if (!phone) { alertEl.innerHTML = 'Veuillez entrer le numéro de téléphone.'; alertEl.style.display = 'block'; return; }
-                    
-                    linkedParents.push({ id: newParentCounter++, name: name, phone: phone, isNew: true, type: 'manual' });
-                    renderLinkedParents();
-                    updateManualParentsData();
-                    modal.hide();
-                    form.reset();
-                    alertEl.style.display = 'none';
-                    showToast('Parent "' + name + '" ajouté avec succès !');
-                });
+    // Nettoyer les anciens listeners en recréant le bouton
+    if (saveBtn) {
+        var newBtn = saveBtn.cloneNode(true);
+        saveBtn.parentNode.replaceChild(newBtn, saveBtn);
+        saveBtn = newBtn;
+        
+        saveBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            addParent();
+        });
+    }
 
-                addParentModalEl.addEventListener('hidden.bs.modal', function() {
-                    form.reset();
-                    alertEl.style.display = 'none';
-                    if (typeof feather !== 'undefined') feather.replace();
-                });
+    function addParent() {
+        var name = nameInput ? nameInput.value.trim() : '';
+        var phone = phoneInput ? phoneInput.value.trim() : '';
+        
+        if (!name) { 
+            if (alertEl) {
+                alertEl.textContent = 'Veuillez entrer le nom du parent.';
+                alertEl.style.display = 'block';
             }
-
-            function showToast(message) {
-                var toast = document.createElement('div');
-                toast.className = 'toast-notification';
-                toast.innerHTML = '✅ ' + message;
-                document.body.appendChild(toast);
-                setTimeout(function() {
-                    toast.style.animation = 'toastSlideOut 0.3s ease forwards';
-                    setTimeout(function() { toast.remove(); }, 300);
-                }, 3000);
+            return; 
+        }
+        if (!phone) { 
+            if (alertEl) {
+                alertEl.textContent = 'Veuillez entrer le numéro de téléphone.';
+                alertEl.style.display = 'block';
             }
+            return; 
+        }
+        
+        // Ajouter le parent
+        linkedParents.push({ 
+            id: newParentCounter++, 
+            name: name, 
+            phone: phone, 
+            isNew: true, 
+            type: 'manual' 
+        });
+        
+        renderLinkedParents();
+        updateManualParentsData();
+        
+        // Réinitialiser le formulaire
+        if (form) form.reset();
+        if (alertEl) alertEl.style.display = 'none';
+        
+        // Fermer le modal avec un délai
+        setTimeout(function() {
+            modal.hide();
+            
+            // Supprimer manuellement le backdrop
+            setTimeout(function() {
+                var backdrops = document.querySelectorAll('.modal-backdrop');
+                backdrops.forEach(function(b) { b.remove(); });
+                document.body.classList.remove('modal-open');
+                document.body.style.overflow = '';
+                document.body.style.paddingRight = '';
+            }, 200);
+        }, 100);
+        
+        // Feedback visuel
+        var toast = document.createElement('div');
+        toast.textContent = '✅ Parent "' + name + '" ajouté !';
+        toast.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:9999;background:rgba(25,135,84,0.9);color:white;padding:12px 20px;border-radius:8px;font-size:14px;box-shadow:0 4px 15px rgba(0,0,0,0.3);';
+        document.body.appendChild(toast);
+        setTimeout(function() { 
+            toast.style.opacity = '0'; 
+            toast.style.transition = 'opacity 0.3s';
+            setTimeout(function() { if (toast.parentNode) toast.remove(); }, 300);
+        }, 2000);
+    }
+
+    // Réinitialiser quand le modal est complètement fermé
+    modalEl.addEventListener('hidden.bs.modal', function() {
+        // Supprimer les backdrops restants
+        setTimeout(function() {
+            var backdrops = document.querySelectorAll('.modal-backdrop');
+            backdrops.forEach(function(b) { b.remove(); });
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+        }, 50);
+        
+        if (form) form.reset();
+        if (alertEl) alertEl.style.display = 'none';
+        if (typeof feather !== 'undefined') feather.replace();
+    });
+
+    // Aussi nettoyer quand le modal est montré
+    modalEl.addEventListener('shown.bs.modal', function() {
+        if (nameInput) nameInput.focus();
+    });
+
+    // Permettre la soumission avec Entrée
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            addParent();
+        });
+    }
+}
 
             // Soumission
             var studentForm = document.getElementById('student-form');
