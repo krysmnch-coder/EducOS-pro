@@ -239,59 +239,85 @@ async function getStudentsAndPlaceholders() {
   // 1. Récupérer tous les élèves ayant un compte complet.
   const realStudents = await db('users')
     .where('role', ROLES.STUDENT)
-    .select('*', db.raw('0 as is_placeholder'));
+    .select(
+      'id', 'name', 'email', 'matricule', 'student_class', 'date_of_birth',
+      'place_of_birth', 'address', 'avatar_url', 'created_at',
+      db.raw('0 as is_placeholder') // Marqueur pour les vrais élèves
+    );
 
-  const realStudentMatricules = realStudents.map(s => s.matricule).filter(Boolean);
+  const realStudentMatricules = new Set(realStudents.map(s => s.matricule).filter(Boolean));
 
-  // 2. Récupérer les dossiers à compléter (liens) pour les matricules qui N'ONT PAS de compte complet.
-  // La requête utilise une jointure et un tri, mais évite les fonctions de fenêtrage (window functions)
-  // qui ne sont pas supportées par toutes les versions de SQLite, ce qui causait l'erreur "Impossible de charger la liste des élèves".
-
-  const selectColumns = [
-    'psl.student_matricule',
-    'psl.student_first_name',
-    'psl.student_last_name',
-    'psl.student_class',
-    'psl.parent_id',
-    'psl.created_at', // Nécessaire pour le tri
-    'p.name as parent_name',
-    'p.phone_number as parent_phone_number',
-  ];
-
-  const allPlaceholderLinks = await db('parent_student_links as psl')
+  // 2. Récupérer tous les liens parent-élève avec les détails des parents.
+  const allParentLinks = await db('parent_student_links as psl')
     .join('users as p', 'psl.parent_id', 'p.id')
-    .select(selectColumns)
-    .whereNotIn('psl.student_matricule', realStudentMatricules)
-    .orderBy('psl.created_at', 'asc');
+    .select(
+      'psl.student_matricule',
+      'psl.student_first_name', // Pour les placeholders
+      'psl.student_last_name',  // Pour les placeholders
+      'psl.student_class',      // Pour les placeholders
+      'psl.parent_id',
+      'p.name as parent_name',
+      'p.phone_number as parent_phone_number'
+      // Ajoutez d'autres champs du parent si nécessaire
+    );
 
-  // On filtre en JavaScript pour ne garder que la première entrée pour chaque matricule,
-  // ce qui est l'équivalent de la logique de fenêtrage précédente mais compatible avec SQLite.
-  const seenMatricules = new Set();
-  const placeholderLinks = allPlaceholderLinks.filter(link => {
-      if (seenMatricules.has(link.student_matricule)) {
-          return false;
-      }
-      seenMatricules.add(link.student_matricule);
-      return true;
-  });
+  // 3. Organiser les liens par matricule d'élève pour un accès facile.
+  const parentsByMatricule = allParentLinks.reduce((acc, link) => {
+    if (!acc[link.student_matricule]) {
+      acc[link.student_matricule] = [];
+    }
+    acc[link.student_matricule].push({
+      id: link.parent_id,
+      name: link.parent_name,
+      phone_number: link.parent_phone_number
+    });
+    return acc;
+  }, {});
 
-  // 3. Transformer les données des dossiers à compléter pour qu'elles correspondent à la structure attendue.
-  const placeholderStudents = placeholderLinks.map(p => ({
-    id: `placeholder_${p.student_matricule}`,
-    name: `${p.student_first_name} ${p.student_last_name}`,
-    matricule: p.student_matricule,
-    student_class: p.student_class,
-    is_placeholder: 1,
-    parent_id: p.parent_id,
-    parent_name: p.parent_name,
-    parent_phone_number: p.parent_phone_number,
-    parent_profession: null, // La profession est retirée pour assurer la stabilité.
-    avatar_url: '/img/user.png'
-    // Ajoutez d'autres champs avec des valeurs par défaut si nécessaire pour la vue
+  // 4. Attacher les parents aux élèves réels.
+  const studentsWithParents = realStudents.map(student => ({
+    ...student,
+    linkedParents: parentsByMatricule[student.matricule] || []
   }));
 
-  // 4. Combiner les deux listes et retourner le résultat.
-  return [...realStudents, ...placeholderStudents];
+  // 5. Identifier et créer les dossiers à compléter (placeholders).
+  //    Ce sont les matricules dans `parent_student_links` qui n'ont PAS de `realStudent`.
+  const placeholderMatricules = new Set(allParentLinks.map(link => link.student_matricule));
+  realStudentMatricules.forEach(matricule => placeholderMatricules.delete(matricule));
+
+  const placeholderStudents = [];
+  for (const matricule of placeholderMatricules) {
+    // On prend le premier lien trouvé pour ce matricule pour obtenir les infos de base
+    // (first_name, last_name, class) qui sont stockées dans le lien lui-même.
+    const firstLinkForMatricule = allParentLinks.find(link => link.student_matricule === matricule);
+    if (firstLinkForMatricule) {
+      // Pour les placeholders, le nom est reconstruit à partir du lien
+      const name = `${firstLinkForMatricule.student_first_name} ${firstLinkForMatricule.student_last_name}`;
+      placeholderStudents.push({
+        id: `placeholder_${matricule}`, // ID unique pour le placeholder
+        name: name,
+        matricule: matricule,
+        student_class: firstLinkForMatricule.student_class,
+        is_placeholder: 1, // Marqueur pour les placeholders
+        avatar_url: '/img/user.png', // Avatar par défaut
+        linkedParents: parentsByMatricule[matricule] || []
+      });
+    }
+  }
+
+  // 6. Combiner les deux listes et retourner le résultat.
+  // On peut trier ici si nécessaire, par exemple par classe puis par nom.
+  return [...studentsWithParents, ...placeholderStudents].sort((a, b) => {
+    const classA = a.student_class || '';
+    const classB = b.student_class || '';
+    if (classA < classB) return -1;
+    if (classA > classB) return 1;
+    const nameA = a.name || '';
+    const nameB = b.name || '';
+    if (nameA < nameB) return -1;
+    if (nameA > nameB) return 1;
+    return 0;
+  });
 }
 
 /**

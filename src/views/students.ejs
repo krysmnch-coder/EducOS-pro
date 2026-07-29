@@ -366,6 +366,7 @@
                                                 <th>Nom de l'élève</th>
                                                 <th>Matricule</th>
                                                 <% if (user.role === ROLES.ADMINISTRATOR || user.role === ROLES.SECRETARY || user.role === ROLES.SCHOOL_LIFE_MANAGER) { %>
+                                                    <th>Parents Liés</th>
                                                     <th>Identifiant de connexion</th>
                                                     <th>Mot de passe (défaut)</th>
                                                 <% } %>
@@ -395,7 +396,7 @@
                                                             data-birthdate="<%= student.date_of_birth ? new Date(student.date_of_birth).toLocaleDateString('fr-FR') : 'Non renseignée' %>"
                                                             data-birthplace="<%= student.place_of_birth || 'Non renseigné' %>"
                                                             data-address="<%= student.address || 'Non renseignée' %>"
-                                                            data-parent-info='<%- student.parent_info || "[]" %>'
+                                                            data-linked-parents='<%- JSON.stringify(student.linkedParents || []) %>'
                                                         <% } %>
                                                     >
                                                 <% } else { %>
@@ -409,6 +410,17 @@
                                                         <% } %>
                                                     </td>
                                                     <td><%= student.matricule %></td>
+                                                    <% if (user.role === ROLES.ADMINISTRATOR || user.role === ROLES.SECRETARY || user.role === ROLES.SCHOOL_LIFE_MANAGER) { %>
+                                                        <td>
+                                                            <% if (student.linkedParents && student.linkedParents.length > 0) { %>
+                                                                <% student.linkedParents.forEach(parent => { %>
+                                                                    <span class="badge bg-secondary glass-badge me-1"><i data-feather="user" class="me-1" style="width: 14px; height: 14px;"></i><%= parent.name %></span>
+                                                                <% }); %>
+                                                            <% } else { %>
+                                                                <em class="text-muted small">Aucun</em>
+                                                            <% } %>
+                                                        </td>
+                                                    <% } %>
                                                     <% if (user.role === ROLES.ADMINISTRATOR || user.role === ROLES.SECRETARY || user.role === ROLES.SCHOOL_LIFE_MANAGER) { %>
                                                         <% if (isPlaceholder) { %>
                                                             <td><em class="text-muted small">Non créé</em></td>
@@ -519,6 +531,7 @@
                 const editBtn = document.getElementById('modal-edit-btn');
                 const studentId = row.dataset.id;
                 const currentUserId = '<%= user.id %>';
+                // Correction: Utiliser ROLES.ADMINISTRATOR directement pour la comparaison de rôle
                 const currentUserRole = '<%= user.role %>';
 
                 // Réinitialiser l'affichage des champs
@@ -529,7 +542,7 @@
 
                 if (isPlaceholder) {
                     // --- Vue pour un dossier à compléter ---
-                    editBtn.textContent = 'Compléter le dossier';
+                    // editBtn.textContent est défini plus bas pour inclure l'icône
                     const canComplete = (currentUserRole === '<%= ROLES.ADMINISTRATOR %>' || currentUserRole === '<%= ROLES.SECRETARY %>' || currentUserRole === '<%= ROLES.SCHOOL_LIFE_MANAGER %>');
 
                     if (canComplete) {
@@ -555,7 +568,7 @@
                     document.getElementById('modal-name').textContent = row.dataset.name;
                     document.getElementById('modal-matricule').textContent = row.dataset.matricule;
                     document.getElementById('modal-class').textContent = row.dataset.class;
-                    document.getElementById('modal-parent-info').innerHTML = `<p class="text-muted ps-3"><i data-feather="info" class="me-1" style="width: 14px; height: 14px;"></i> Dossier initié par le parent : <strong>${row.dataset.parentName}</strong>.</p>`;
+                    document.getElementById('modal-parent-info').innerHTML = `<p class="text-muted ps-3"><i data-feather="info" class="me-1" style="width: 14px; height: 14px;"></i> Dossier initié par le parent : <strong>${row.dataset.parentName || 'N/A'}</strong>.</p>`;
 
                     // Cacher les champs non pertinents
                     document.getElementById('modal-birthdate').closest('.list-group-item').style.display = 'none';
@@ -564,7 +577,7 @@
 
                 } else {
                     // --- Vue pour un élève complet ---
-                    editBtn.textContent = 'Modifier';
+                    // editBtn.textContent est défini plus bas pour inclure l'icône
                     const canEdit = (currentUserRole === '<%= ROLES.ADMINISTRATOR %>' || currentUserRole === '<%= ROLES.SECRETARY %>' || currentUserRole === '<%= ROLES.SCHOOL_LIFE_MANAGER %>');
 
                     if (canEdit) {
@@ -589,15 +602,15 @@
 
                     // Traitement des informations des parents
                     const parentInfoContainer = document.getElementById('modal-parent-info');
+                    const linkedParents = JSON.parse(row.dataset.linkedParents || '[]');
                     try {
-                        const parents = JSON.parse(row.dataset.parentInfo);
-                        if (parents && parents.length > 0) {
+                        if (linkedParents && linkedParents.length > 0) {
                             const list = document.createElement('ul');
                             list.className = 'list-group list-group-flush glass-list-group';
-                            parents.forEach(parent => {
+                            linkedParents.forEach(parent => {
                                 const item = document.createElement('li');
                                 item.className = 'list-group-item';
-                                item.innerHTML = `<strong>${parent.name || 'N/A'}</strong> (${parent.profession || 'N/A'}) - Contact: ${parent.contact || 'N/A'}`;
+                                item.innerHTML = `<strong>${parent.name || 'N/A'}</strong> - Contact: ${parent.phone_number || 'N/A'}`;
                                 list.appendChild(item);
                             });
                             parentInfoContainer.appendChild(list);
