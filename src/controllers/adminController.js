@@ -256,6 +256,16 @@ function emitStatsUpdate(io, stats) {
 
 // Exemple d'utilisation après une action
 // Après avoir approuvé un utilisateur :
-await userModel.approveUser(userId);
-const newStats = await statsModel.getStats();
-emitStatsUpdate(req.app.get('io'), newStats);
+// Ligne 259 - adminController.js
+const approveUserAction = async (req, res) => {  // ← AJOUTER async
+    try {
+        const userId = req.params.id;
+        await userModel.approveUser(userId);
+        req.flash('success_msg', 'Utilisateur approuvé');
+        res.redirect('/admin');
+    } catch (error) {
+        console.error('Erreur approbation:', error);
+        req.flash('error_msg', 'Erreur lors de l\'approbation');
+        res.redirect('/admin');
+    }
+};
