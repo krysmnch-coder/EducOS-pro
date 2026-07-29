@@ -858,16 +858,80 @@
                                 Liaison Parent
                             </h5>
 
-                            <!-- Parents actuellement liés -->
-                            <div class="mb-3 form-group-animated">
-                                <label class="form-label">
-                                    <i data-feather="users" style="width: 14px; height: 14px;"></i>
-                                    Parent(s) actuellement lié(s)
-                                </label>
-                                <div class="list-group glass-list-group" id="linked-parents-list">
-                                    <!-- Rendu dynamique -->
-                                </div>
-                            </div>
+                           <!-- Parents actuellement liés -->
+<div class="mb-3 form-group-animated">
+    <label class="form-label">
+        <i data-feather="users" style="width: 14px; height: 14px;"></i>
+        Parent(s) actuellement lié(s)
+    </label>
+    <div class="list-group glass-list-group" id="linked-parents-list">
+        <% 
+        // Fusionner tous les parents (liés + manuels)
+        const allDisplayParents = [];
+        
+        // Ajouter les parents liés (avec compte)
+        if (typeof linkedParents !== 'undefined' && linkedParents.length > 0) {
+            linkedParents.forEach(function(parent) {
+                allDisplayParents.push({
+                    name: parent.name || 'N/A',
+                    phone: parent.phone_number || parent.phone || '',
+                    type: 'linked'
+                });
+            });
+        }
+        
+        // Ajouter les parents manuels (sans compte)
+        if (typeof manualParents !== 'undefined' && manualParents.length > 0) {
+            manualParents.forEach(function(parent) {
+                allDisplayParents.push({
+                    name: parent.name || 'N/A',
+                    phone: parent.phone || '',
+                    type: 'manual'
+                });
+            });
+        }
+        
+        // Si c'est un placeholder (dossier à compléter), ajouter le parent initiateur
+        if (isCompletion && typeof student !== 'undefined' && student) {
+            // Le parent initiateur est déjà dans linkedParents normalement
+        }
+        %>
+        
+        <% if (allDisplayParents.length > 0) { %>
+            <% allDisplayParents.forEach(function(parent, index) { %>
+                <div class="list-group-item linked-parent-item">
+                    <div class="d-flex w-100 justify-content-between align-items-start">
+                        <div>
+                            <h6 class="mb-1">
+                                <i data-feather="user" style="width: 14px; height: 14px;"></i>
+                                <%= parent.name %>
+                                <% if (parent.type === 'manual') { %>
+                                    <span class="badge badge-new ms-2">Ajouté manuellement</span>
+                                <% } %>
+                            </h6>
+                            <p class="mb-0">
+                                <small>
+                                    <i data-feather="phone" style="width: 12px; height: 12px;"></i>
+                                    <strong>Téléphone :</strong>
+                                    <% if (parent.phone) { %>
+                                        <span style="color: #22c55e;"><%= parent.phone %></span>
+                                    <% } else { %>
+                                        <span style="color: #ff6b6b; font-style: italic;">Non renseigné</span>
+                                    <% } %>
+                                </small>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            <% }); %>
+        <% } else { %>
+            <div class="list-group-item text-center py-3" style="color: rgba(255,255,255,0.5);">
+                <i data-feather="users" style="width: 20px; height: 20px;"></i>
+                <p class="mb-0 mt-1">Aucun parent lié</p>
+            </div>
+        <% } %>
+    </div>
+</div>
 
                             <!-- Select pour ajouter des parents existants -->
                             <div class="mb-3 form-group-animated">
