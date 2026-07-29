@@ -3,18 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title %></title>
+    <title>Modifier le dossier de Tiana RABENJA</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/style.css">
     
     <style>
+        /* ==========================================================================
+           CSS Complet - Glassmorphism Premium avec Animations
+           ========================================================================== */
+        
         :root {
             --glass-bg: rgba(255, 255, 255, 0.08);
             --glass-border: rgba(255, 255, 255, 0.15);
             --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
             --glass-blur: blur(12px);
+            --glass-shine: rgba(255, 255, 255, 0.4);
             --primary-color: #0d6efd;
             --primary-glow: rgba(13, 110, 253, 0.2);
             --success-color: #198754;
@@ -26,6 +31,7 @@
             --glass-bg: rgba(255, 255, 255, 0.03);
             --glass-border: rgba(255, 255, 255, 0.06);
             --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --glass-shine: rgba(255, 255, 255, 0.08);
         }
 
         body {
@@ -43,6 +49,9 @@
             padding-bottom: 2rem;
         }
 
+        /* ==========================================================================
+           Carte Principale Glassmorphism
+           ========================================================================== */
         .glass-form-card {
             background: var(--glass-bg) !important;
             backdrop-filter: var(--glass-blur) !important;
@@ -54,12 +63,25 @@
             animation: cardFadeInUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards !important;
             opacity: 0;
             transform: translateY(30px) scale(0.95);
+            position: relative;
         }
 
-        @keyframes cardFadeInUp {
-            0% { opacity: 0; transform: translateY(40px) scale(0.9); }
-            60% { opacity: 1; transform: translateY(-5px) scale(1.02); }
-            100% { opacity: 1; transform: translateY(0) scale(1); }
+        .glass-form-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.05), transparent 70%);
+            opacity: 0;
+            transition: opacity 0.6s ease;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .glass-form-card:hover::before {
+            opacity: 1;
         }
 
         .glass-form-card .card-body {
@@ -68,6 +90,21 @@
             padding: 2rem !important;
         }
 
+        @keyframes cardFadeInUp {
+            0% { opacity: 0; transform: translateY(40px) scale(0.9); }
+            60% { opacity: 1; transform: translateY(-5px) scale(1.02); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        [data-theme="dark"] .glass-form-card {
+            background: rgba(255, 255, 255, 0.03) !important;
+            border: 1px solid rgba(255, 255, 255, 0.06) !important;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+        }
+
+        /* ==========================================================================
+           Titre de Page avec Animation
+           ========================================================================== */
         .page-title {
             color: #ffffff;
             font-weight: 700;
@@ -87,6 +124,9 @@
             text-shadow: none;
         }
 
+        /* ==========================================================================
+           Bouton Retour Glassmorphism
+           ========================================================================== */
         .glass-btn-back {
             background: rgba(255, 255, 255, 0.08) !important;
             backdrop-filter: blur(10px) !important;
@@ -100,8 +140,6 @@
             animation: fadeIn 0.6s ease forwards;
             animation-delay: 0.2s;
             opacity: 0;
-            text-decoration: none;
-            display: inline-block;
         }
 
         @keyframes fadeIn {
@@ -114,9 +152,17 @@
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2) !important;
             background: rgba(255, 255, 255, 0.15) !important;
             border-color: rgba(255, 255, 255, 0.3) !important;
-            color: #ffffff !important;
         }
 
+        [data-theme="light"] .glass-btn-back {
+            color: #212529 !important;
+            background: rgba(255, 255, 255, 0.6) !important;
+            border-color: rgba(0, 0, 0, 0.1) !important;
+        }
+
+        /* ==========================================================================
+           Labels avec Icônes
+           ========================================================================== */
         .form-label {
             font-weight: 500;
             color: rgba(255, 255, 255, 0.9) !important;
@@ -126,10 +172,22 @@
             margin-bottom: 0.5rem;
         }
 
+        .form-label svg {
+            color: var(--primary-color);
+            transition: transform 0.3s ease;
+        }
+
+        .form-label:hover svg {
+            transform: scale(1.2) rotate(5deg);
+        }
+
         [data-theme="light"] .form-label {
             color: #495057 !important;
         }
 
+        /* ==========================================================================
+           Champs de Formulaire Glassmorphism
+           ========================================================================== */
         .form-control, .form-select {
             background: rgba(255, 255, 255, 0.06) !important;
             backdrop-filter: blur(5px) !important;
@@ -149,6 +207,11 @@
             transform: translateY(-2px);
         }
 
+        .form-control:hover, .form-select:hover {
+            border-color: rgba(255, 255, 255, 0.25) !important;
+            background: rgba(255, 255, 255, 0.08) !important;
+        }
+
         .form-control::placeholder {
             color: rgba(255, 255, 255, 0.4);
         }
@@ -160,19 +223,39 @@
             color: #212529 !important;
         }
 
+        [data-theme="light"] .form-control::placeholder {
+            color: #adb5bd;
+        }
+
         textarea.form-control {
             resize: vertical;
             min-height: 60px;
         }
 
+        /* ==========================================================================
+           Séparateurs Animés
+           ========================================================================== */
         hr {
             border: none !important;
             height: 1px !important;
             background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent) !important;
             margin: 1.5rem 0 !important;
             opacity: 1 !important;
+            animation: separatorPulse 3s ease-in-out infinite;
         }
 
+        @keyframes separatorPulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        [data-theme="light"] hr {
+            background: linear-gradient(90deg, transparent, rgba(13, 110, 253, 0.3), transparent) !important;
+        }
+
+        /* ==========================================================================
+           Titres de Section
+           ========================================================================== */
         .section-title {
             color: #ffffff;
             font-weight: 600;
@@ -192,12 +275,21 @@
             height: 3px;
             background: linear-gradient(90deg, var(--primary-color), var(--info-color));
             border-radius: 10px;
+            animation: underlineWidth 2s ease-in-out infinite;
+        }
+
+        @keyframes underlineWidth {
+            0%, 100% { width: 50px; }
+            50% { width: 80px; }
         }
 
         [data-theme="light"] .section-title {
             color: #212529;
         }
 
+        /* ==========================================================================
+           Animation des Groupes de Formulaire
+           ========================================================================== */
         .form-group-animated {
             animation: formFadeIn 0.5s ease forwards !important;
             opacity: 0;
@@ -218,6 +310,9 @@
         .form-group-animated:nth-child(7) { animation-delay: 0.35s; }
         .form-group-animated:nth-child(8) { animation-delay: 0.4s; }
 
+        /* ==========================================================================
+           Liste des Parents Liés - Glassmorphism
+           ========================================================================== */
         .glass-list-group {
             background: transparent !important;
             border-radius: 1rem !important;
@@ -234,6 +329,21 @@
             padding: 1rem !important;
             transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
             color: #ffffff !important;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-list-group .list-group-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(180deg, var(--primary-color), var(--info-color));
+            border-radius: 0 4px 4px 0;
+            transform: scaleY(0);
+            transition: transform 0.4s ease;
         }
 
         .glass-list-group .list-group-item:hover {
@@ -241,6 +351,10 @@
             transform: translateX(5px) !important;
             border-color: rgba(13, 110, 253, 0.2) !important;
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2) !important;
+        }
+
+        .glass-list-group .list-group-item:hover::before {
+            transform: scaleY(1);
         }
 
         .glass-list-group .list-group-item h6 {
@@ -258,25 +372,26 @@
             color: #212529;
         }
 
-        .linked-parent-item {
-            animation: itemSlideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards !important;
-            opacity: 0;
-            transform: translateX(-20px);
-        }
-
-        @keyframes itemSlideIn {
-            from { opacity: 0; transform: translateX(-20px) scale(0.95); }
-            to { opacity: 1; transform: translateX(0) scale(1); }
-        }
-
+        /* ==========================================================================
+           Badge Nouveau Parent
+           ========================================================================== */
         .badge-new {
             background: linear-gradient(135deg, var(--info-color), #0a58ca) !important;
             color: white !important;
             font-size: 0.65rem;
             padding: 0.2rem 0.5rem;
             border-radius: 1rem;
+            animation: badgePulse 2s ease-in-out infinite;
         }
 
+        @keyframes badgePulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(13, 202, 240, 0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(13, 202, 240, 0); }
+        }
+
+        /* ==========================================================================
+           Téléphone Éditable
+           ========================================================================== */
         .phone-editable {
             cursor: pointer;
             border-bottom: 1px dashed rgba(255, 255, 255, 0.4);
@@ -287,6 +402,12 @@
         .phone-editable:hover {
             color: var(--primary-color) !important;
             border-bottom-color: var(--primary-color) !important;
+            text-shadow: 0 0 10px var(--primary-glow);
+        }
+
+        [data-theme="light"] .phone-editable {
+            color: #6c757d;
+            border-bottom-color: rgba(0, 0, 0, 0.2);
         }
 
         .phone-edit-input {
@@ -298,18 +419,32 @@
             background: rgba(255, 255, 255, 0.1) !important;
             color: #ffffff;
             font-size: 0.85rem;
+            transition: all 0.3s ease;
         }
 
         .phone-edit-input:focus {
             outline: none;
             box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.3);
+            background: rgba(255, 255, 255, 0.15) !important;
         }
 
+        [data-theme="light"] .phone-edit-input {
+            color: #212529;
+            background: rgba(255, 255, 255, 0.9) !important;
+        }
+
+        /* ==========================================================================
+           Boutons d'Action
+           ========================================================================== */
         .btn-save-phone {
             padding: 3px 10px;
             font-size: 0.75rem;
             border-radius: 0.5rem;
             transition: all 0.3s ease;
+        }
+
+        .btn-save-phone:hover {
+            transform: scale(1.1);
         }
 
         .btn-outline-danger {
@@ -323,8 +458,12 @@
         .btn-outline-danger:hover {
             background: rgba(220, 53, 69, 0.15) !important;
             transform: scale(1.05) !important;
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3) !important;
         }
 
+        /* ==========================================================================
+           Boutons Principaux
+           ========================================================================== */
         .glass-btn-primary {
             background: linear-gradient(135deg, rgba(13, 110, 253, 0.3), rgba(13, 202, 240, 0.3)) !important;
             backdrop-filter: blur(10px) !important;
@@ -335,7 +474,26 @@
             font-weight: 600 !important;
             color: #ffffff !important;
             transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
-            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .glass-btn-primary:hover::before {
+            width: 300px;
+            height: 300px;
         }
 
         .glass-btn-primary:hover {
@@ -353,17 +511,23 @@
             padding: 0.6rem 1.8rem !important;
             color: #ffffff !important;
             transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
-            text-decoration: none;
-            display: inline-block;
         }
 
         .glass-btn-secondary:hover {
             transform: translateY(-3px) scale(1.03) !important;
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3) !important;
             background: rgba(255, 255, 255, 0.12) !important;
-            color: #ffffff !important;
         }
 
+        [data-theme="light"] .glass-btn-secondary {
+            color: #212529 !important;
+            background: rgba(255, 255, 255, 0.7) !important;
+            border-color: rgba(0, 0, 0, 0.1) !important;
+        }
+
+        /* ==========================================================================
+           Bouton Outline Primary
+           ========================================================================== */
         .btn-outline-primary {
             background: rgba(13, 110, 253, 0.08) !important;
             border: 1px solid rgba(13, 110, 253, 0.2) !important;
@@ -378,7 +542,14 @@
             box-shadow: 0 6px 20px rgba(13, 110, 253, 0.3) !important;
         }
 
-        /* Modal */
+        [data-theme="light"] .btn-outline-primary {
+            color: var(--primary-color) !important;
+            background: rgba(13, 110, 253, 0.05) !important;
+        }
+
+        /* ==========================================================================
+           Modal Glassmorphism
+           ========================================================================== */
         .modal-glass .modal-content {
             background: rgba(20, 20, 40, 0.95) !important;
             backdrop-filter: blur(25px) !important;
@@ -394,6 +565,11 @@
             to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
+        [data-theme="light"] .modal-glass .modal-content {
+            background: rgba(255, 255, 255, 0.95) !important;
+            border-color: rgba(0, 0, 0, 0.08) !important;
+        }
+
         .modal-glass .modal-header {
             border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
             padding: 1.25rem 1.5rem !important;
@@ -404,9 +580,17 @@
             font-weight: 600;
         }
 
+        [data-theme="light"] .modal-glass .modal-title {
+            color: #212529 !important;
+        }
+
         .modal-glass .modal-body {
             padding: 1.5rem !important;
             color: rgba(255, 255, 255, 0.9) !important;
+        }
+
+        [data-theme="light"] .modal-glass .modal-body {
+            color: #212529 !important;
         }
 
         .modal-glass .modal-footer {
@@ -418,10 +602,19 @@
             filter: invert(1);
         }
 
+        [data-theme="light"] .modal-glass .btn-close {
+            filter: none;
+        }
+
+        /* ==========================================================================
+           Alertes Animées
+           ========================================================================== */
         .alert {
             border-radius: 0.75rem !important;
             border-left-width: 4px !important;
             animation: alertSlideIn 0.4s ease-out !important;
+            backdrop-filter: blur(8px) !important;
+            -webkit-backdrop-filter: blur(8px) !important;
         }
 
         @keyframes alertSlideIn {
@@ -441,6 +634,71 @@
             color: #ff6b6b !important;
         }
 
+        [data-theme="light"] .alert-info {
+            color: #055160 !important;
+        }
+
+        /* ==========================================================================
+           TomSelect Personnalisé
+           ========================================================================== */
+        .ts-wrapper .ts-control {
+            border-radius: 0.75rem !important;
+            background: rgba(255, 255, 255, 0.06) !important;
+            backdrop-filter: blur(5px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.12) !important;
+            color: #ffffff !important;
+            padding: 0.6rem 1rem !important;
+            box-shadow: none !important;
+            transition: all 0.4s ease !important;
+        }
+
+        .ts-wrapper .ts-control:focus {
+            border-color: var(--primary-color) !important;
+            box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.2) !important;
+        }
+
+        [data-theme="light"] .ts-wrapper .ts-control {
+            background: rgba(255, 255, 255, 0.7) !important;
+            border-color: rgba(0, 0, 0, 0.1) !important;
+            color: #212529 !important;
+        }
+
+        .ts-wrapper .ts-dropdown {
+            border-radius: 0.75rem !important;
+            background: rgba(20, 20, 40, 0.95) !important;
+            backdrop-filter: blur(15px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        }
+
+        [data-theme="light"] .ts-wrapper .ts-dropdown {
+            background: rgba(255, 255, 255, 0.95) !important;
+            border-color: rgba(0, 0, 0, 0.08) !important;
+        }
+
+        .ts-wrapper .ts-dropdown .option {
+            color: rgba(255, 255, 255, 0.9) !important;
+            transition: all 0.3s ease !important;
+        }
+
+        .ts-wrapper .ts-dropdown .option:hover,
+        .ts-wrapper .ts-dropdown .option.active {
+            background: rgba(13, 110, 253, 0.15) !important;
+        }
+
+        [data-theme="light"] .ts-wrapper .ts-dropdown .option {
+            color: #212529 !important;
+        }
+
+        .ts-wrapper .item {
+            background: linear-gradient(135deg, rgba(13, 110, 253, 0.2), rgba(13, 202, 240, 0.2)) !important;
+            border: 1px solid rgba(13, 110, 253, 0.3) !important;
+            border-radius: 0.5rem !important;
+            color: #ffffff !important;
+        }
+
+        /* ==========================================================================
+           Toast Notification
+           ========================================================================== */
         .toast-notification {
             position: fixed;
             bottom: 20px;
@@ -467,22 +725,43 @@
             to { opacity: 0; transform: translateX(100px) scale(0.8); }
         }
 
+        /* ==========================================================================
+           Linked Parent Item Animation
+           ========================================================================== */
+        .linked-parent-item {
+            animation: itemSlideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards !important;
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+
+        @keyframes itemSlideIn {
+            from { opacity: 0; transform: translateX(-20px) scale(0.95); }
+            to { opacity: 1; transform: translateX(0) scale(1); }
+        }
+
+        /* ==========================================================================
+           Responsive
+           ========================================================================== */
         @media (max-width: 768px) {
             .glass-form-card .card-body {
                 padding: 1.25rem !important;
             }
+
             .glass-btn-primary,
             .glass-btn-secondary {
                 width: 100%;
                 justify-content: center;
                 margin-top: 0.5rem;
             }
+
             .d-flex.justify-content-end {
                 flex-direction: column-reverse;
             }
+
             .d-flex.justify-content-end .me-2 {
                 margin-right: 0 !important;
             }
+
             .page-title {
                 font-size: 1.25rem;
             }
@@ -490,7 +769,8 @@
     </style>
 </head>
 <body>
-    <%- include('partials/header') %>
+    <!-- HEADER - INCLUS VOTRE HEADER EXISTANT ICI -->
+    <!-- ... -->
 
     <main class="main-content">
         <div class="container mt-4 page-shell">
@@ -498,7 +778,7 @@
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h2 class="mb-0 page-title">
                         <i data-feather="user-plus" class="me-2" style="width: 24px; height: 24px;"></i>
-                        <%= title %>
+                        Modifier le dossier de Tiana RABENJA
                     </h2>
                     <a href="/students" class="btn glass-btn-back">
                         <i data-feather="arrow-left" class="me-1" style="width: 16px; height: 16px;"></i>
@@ -506,33 +786,24 @@
                     </a>
                 </div>
 
-                <%- include('partials/messages') %>
-
                 <div class="card glass-form-card border-0">
                     <div class="card-body">
-                        <% if (student && student.id) { %>
-                        <form action="/students/<%= student.id %>/edit" method="POST" id="student-form">
-                        <% } else { %>
-                        <form action="/students" method="POST" id="student-form">
-                        <% } %>
-                            <input type="hidden" name="manual_parents" id="manual-parents-data" value='<%- JSON.stringify(manualParents || []) %>'>
-
+                        <form action="/students/5/edit" method="POST" id="student-form">
+                            
                             <div class="row">
                                 <div class="col-md-6 mb-3 form-group-animated">
                                     <label for="name" class="form-label">
                                         <i data-feather="user" style="width: 14px; height: 14px;"></i>
                                         Nom complet de l'élève
                                     </label>
-                                    <input type="text" class="form-control" id="name" name="name" 
-                                           value="<%= student ? (student.name || '') : '' %>" required>
+                                    <input type="text" class="form-control" id="name" name="name" value="Tiana RABENJA" required>
                                 </div>
                                 <div class="col-md-6 mb-3 form-group-animated">
                                     <label for="matricule" class="form-label">
                                         <i data-feather="hash" style="width: 14px; height: 14px;"></i>
                                         Matricule
                                     </label>
-                                    <input type="text" class="form-control" id="matricule" name="matricule" 
-                                           value="<%= student ? (student.matricule || '') : '' %>" required>
+                                    <input type="text" class="form-control" id="matricule" name="matricule" value="0002" required>
                                 </div>
                             </div>
 
@@ -542,8 +813,7 @@
                                         <i data-feather="grid" style="width: 14px; height: 14px;"></i>
                                         Classe
                                     </label>
-                                    <input type="text" class="form-control" id="student_class" name="student_class" 
-                                           value="<%= student ? (student.student_class || '') : '' %>" required>
+                                    <input type="text" class="form-control" id="student_class" name="student_class" value="4ème" required>
                                 </div>
                             </div>
 
@@ -559,16 +829,14 @@
                                         <i data-feather="calendar" style="width: 14px; height: 14px;"></i>
                                         Date de naissance
                                     </label>
-                                    <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" 
-                                           value="<%= (student && student.date_of_birth) ? new Date(student.date_of_birth).toISOString().split('T')[0] : '' %>">
+                                    <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" value="2013-07-23">
                                 </div>
                                 <div class="col-md-6 mb-3 form-group-animated">
                                     <label for="place_of_birth" class="form-label">
                                         <i data-feather="map-pin" style="width: 14px; height: 14px;"></i>
                                         Lieu de naissance
                                     </label>
-                                    <input type="text" class="form-control" id="place_of_birth" name="place_of_birth" 
-                                           value="<%= student ? (student.place_of_birth || '') : '' %>">
+                                    <input type="text" class="form-control" id="place_of_birth" name="place_of_birth" value="Befelatanana">
                                 </div>
                             </div>
 
@@ -577,7 +845,7 @@
                                     <i data-feather="home" style="width: 14px; height: 14px;"></i>
                                     Adresse
                                 </label>
-                                <textarea class="form-control" id="address" name="address" rows="2"><%= student ? (student.address || '') : '' %></textarea>
+                                <textarea class="form-control" id="address" name="address" rows="2">IbI 8 Isoraka</textarea>
                             </div>
 
                             <hr>
@@ -586,17 +854,14 @@
                                 Liaison Parent
                             </h5>
 
-                            <!-- Parents actuellement liés - VERSION DYNAMIQUE -->
+                            <!-- Parents actuellement liés -->
                             <div class="mb-3 form-group-animated">
                                 <label class="form-label">
                                     <i data-feather="users" style="width: 14px; height: 14px;"></i>
                                     Parent(s) actuellement lié(s)
                                 </label>
                                 <div class="list-group glass-list-group" id="linked-parents-list">
-                                    <div class="list-group-item text-center py-3" style="color: rgba(255,255,255,0.5);">
-                                        <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-                                        <p class="mb-0 mt-1">Chargement...</p>
-                                    </div>
+                                    <!-- Rendu dynamique -->
                                 </div>
                             </div>
 
@@ -612,30 +877,20 @@
                                         Nouveau Parent
                                     </button>
                                 </div>
-                                <select name="parent_ids" id="parent_ids" class="form-select" multiple>
-                                    <% if (typeof parents !== 'undefined' && parents.length > 0) { %>
-                                        <% parents.forEach(function(parent) { %>
-                                            <option value="<%= parent.id %>" <%= (linkedParentIds && linkedParentIds.includes(parent.id)) ? 'selected' : '' %>>
-                                                <%= parent.name %>
-                                            </option>
-                                        <% }); %>
-                                    <% } %>
-                                </select>
+                                <select name="parent_ids" id="parent_ids" class="form-select" multiple></select>
                                 <div class="form-text" style="color: rgba(255,255,255,0.5);">
                                     <i data-feather="info" style="width: 12px; height: 12px;"></i>
                                     Sélectionnez des parents existants ou utilisez "Nouveau Parent".
                                 </div>
                             </div>
 
+                            <input type="hidden" name="manual_parents" id="manual-parents-data" value="[]">
+
                             <div class="d-flex justify-content-end mt-4">
                                 <a href="/students" class="btn glass-btn-secondary me-2">Annuler</a>
                                 <button type="submit" class="btn glass-btn-primary">
                                     <i data-feather="save" style="width: 16px; height: 16px;"></i>
-                                    <% if (student && student.id) { %>
-                                        Mettre à jour le dossier
-                                    <% } else { %>
-                                        Créer l'élève
-                                    <% } %>
+                                    Mettre à jour le dossier
                                 </button>
                             </div>
                         </form>
@@ -645,7 +900,7 @@
         </div>
     </main>
 
-    <!-- Modal Nouveau Parent -->
+    <!-- Modal Ajouter un Parent -->
     <div class="modal fade modal-glass" id="addParentModal" tabindex="-1" aria-labelledby="addParentModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -690,13 +945,224 @@
         </div>
     </div>
 
-    <%- include('partials/footer') %>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="/js/theme.js"></script>
-    <script src="/js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof feather !== 'undefined') feather.replace();
 
+            // Données
+            let linkedParents = [
+                { id: 3, name: 'RABENJA Albert', phone: '', isNew: false }
+            ];
+            
+            const availableParents = [
+                { id: 36, name: 'Anthony RAKOTOBE' },
+                { id: 24, name: 'Krystofer Manach' },
+                { id: 32, name: 'Lia keishalk' },
+                { id: 21, name: 'Maps andri' },
+                { id: 13, name: 'RABE Nasolo' },
+                { id: 16, name: 'RABENJA Lova' },
+                { id: 18, name: 'RABENJA Niaina' },
+                { id: 19, name: 'Rajoutons nivo' },
+                { id: 20, name: 'Rakoto nivo' },
+                { id: 25, name: 'RAKOTO Olivier' },
+                { id: 17, name: 'RAKOTOSON Fitia' },
+                { id: 15, name: 'RANAIVO marc' },
+                { id: 23, name: 'RANDRIA Thierry' },
+                { id: 30, name: 'RANORO Sendra' }
+            ];
+            
+            let newParentCounter = 1000;
+            let tomSelectInstance;
+
+            // Initialiser TomSelect
+            const parentSelect = document.getElementById('parent_ids');
+            if (parentSelect) {
+                const linkedIds = linkedParents.filter(p => !p.isNew).map(p => p.id);
+                availableParents.filter(p => !linkedIds.includes(p.id)).forEach(parent => {
+                    const option = document.createElement('option');
+                    option.value = parent.id;
+                    option.textContent = parent.name;
+                    parentSelect.appendChild(option);
+                });
+                
+                tomSelectInstance = new TomSelect(parentSelect, {
+                    plugins: ['remove_button'],
+                    create: false,
+                    placeholder: 'Rechercher un parent existant...',
+                    onChange: function(values) {
+                        values.forEach(value => {
+                            const parentId = parseInt(value);
+                            if (!linkedParents.find(p => p.id === parentId)) {
+                                const parent = availableParents.find(p => p.id === parentId);
+                                if (parent) linkedParents.push({ id: parent.id, name: parent.name, phone: '', isNew: false });
+                            }
+                        });
+                        renderLinkedParents();
+                        updateManualParentsData();
+                    },
+                    onItemRemove: function(value) {
+                        linkedParents = linkedParents.filter(p => p.id !== parseInt(value));
+                        renderLinkedParents();
+                        updateManualParentsData();
+                    }
+                });
+            }
+
+            // Rendu de la liste
+            function renderLinkedParents() {
+                const container = document.getElementById('linked-parents-list');
+                if (!container) return;
+                
+                if (linkedParents.length === 0) {
+                    container.innerHTML = `<div class="list-group-item text-center py-3" style="color: rgba(255,255,255,0.5);">
+                        <i data-feather="users" style="width: 20px; height: 20px;"></i>
+                        <p class="mb-0 mt-1">Aucun parent lié</p>
+                    </div>`;
+                } else {
+                    container.innerHTML = linkedParents.map((parent, index) => `
+                        <div class="list-group-item linked-parent-item" data-parent-index="${index}">
+                            <div class="d-flex w-100 justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-1">
+                                        ${escapeHtml(parent.name)}
+                                        ${parent.isNew ? '<span class="badge badge-new ms-2">Nouveau</span>' : ''}
+                                    </h6>
+                                    <p class="mb-0">
+                                        <small>
+                                            <i data-feather="phone" style="width: 12px; height: 12px;"></i>
+                                            <strong>Téléphone :</strong>
+                                            <span id="phone-display-${index}">
+                                                ${parent.phone ? escapeHtml(parent.phone) : '<span class="phone-editable" onclick="editPhone(' + index + ')" title="Cliquez pour ajouter">Non renseigné</span>'}
+                                            </span>
+                                            <span id="phone-edit-${index}" style="display: none;">
+                                                <input type="tel" class="phone-edit-input" id="phone-input-${index}" value="${escapeHtml(parent.phone)}" placeholder="Numéro">
+                                                <button class="btn btn-sm btn-success btn-save-phone" onclick="savePhone(${index})">✓</button>
+                                                <button class="btn btn-sm btn-outline-secondary btn-save-phone" onclick="cancelEditPhone(${index})">✗</button>
+                                            </span>
+                                        </small>
+                                    </p>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeLinkedParent(${index})" title="Retirer">
+                                    <i data-feather="trash-2" style="width: 14px; height: 14px;"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+                if (typeof feather !== 'undefined') feather.replace();
+            }
+
+            // Fonctions d'édition du téléphone
+            window.editPhone = function(index) {
+                document.getElementById('phone-display-' + index).style.display = 'none';
+                document.getElementById('phone-edit-' + index).style.display = 'inline';
+                document.getElementById('phone-input-' + index).focus();
+            };
+
+            window.savePhone = function(index) {
+                const phone = document.getElementById('phone-input-' + index).value.trim();
+                if (linkedParents[index]) linkedParents[index].phone = phone;
+                renderLinkedParents();
+                updateManualParentsData();
+            };
+
+            window.cancelEditPhone = function(index) {
+                renderLinkedParents();
+            };
+
+            window.removeLinkedParent = function(index) {
+                const parent = linkedParents[index];
+                if (confirm('Retirer "' + parent.name + '" ?')) {
+                    if (!parent.isNew && tomSelectInstance) tomSelectInstance.removeItem(parent.id);
+                    linkedParents.splice(index, 1);
+                    renderLinkedParents();
+                    updateManualParentsData();
+                }
+            };
+
+            function updateManualParentsData() {
+                document.getElementById('manual-parents-data').value = JSON.stringify(
+                    linkedParents.filter(p => p.isNew).map(p => ({ name: p.name, phone: p.phone }))
+                );
+            }
+
+            // Modal Ajouter Parent
+            const addParentModalEl = document.getElementById('addParentModal');
+            if (addParentModalEl) {
+                const modal = new bootstrap.Modal(addParentModalEl);
+                const saveBtn = document.getElementById('save-new-parent-btn');
+                const alertEl = document.getElementById('add-parent-alert');
+                const nameInput = document.getElementById('new-parent-name');
+                const phoneInput = document.getElementById('new-parent-phone');
+                const form = document.getElementById('add-parent-form');
+
+                saveBtn.addEventListener('click', function() {
+                    const name = nameInput.value.trim();
+                    const phone = phoneInput.value.trim();
+                    
+                    if (!name) { showAlert('Veuillez entrer le nom.'); return; }
+                    if (!phone) { showAlert('Veuillez entrer le téléphone.'); return; }
+                    
+                    linkedParents.push({ id: newParentCounter++, name, phone, isNew: true });
+                    renderLinkedParents();
+                    updateManualParentsData();
+                    modal.hide();
+                    form.reset();
+                    alertEl.style.display = 'none';
+                    showToast('Parent "' + name + '" ajouté !');
+                });
+
+                addParentModalEl.addEventListener('hidden.bs.modal', function() {
+                    form.reset();
+                    alertEl.style.display = 'none';
+                    if (typeof feather !== 'undefined') feather.replace();
+                });
+
+                function showAlert(msg) {
+                    alertEl.innerHTML = msg;
+                    alertEl.style.display = 'block';
+                }
+            }
+
+            // Toast
+            function showToast(message) {
+                const toast = document.createElement('div');
+                toast.className = 'toast-notification';
+                toast.innerHTML = '✅ ' + message;
+                document.body.appendChild(toast);
+                setTimeout(() => {
+                    toast.style.animation = 'toastSlideOut 0.3s ease forwards';
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+
+            // Soumission
+            document.getElementById('student-form').addEventListener('submit', function(e) {
+                updateManualParentsData();
+                linkedParents.filter(p => !p.isNew).forEach(parent => {
+                    if (!this.querySelector(`input[value="${parent.id}"]`)) {
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'parent_ids[]';
+                        input.value = parent.id;
+                        this.appendChild(input);
+                    }
+                });
+            });
+
+            function escapeHtml(text) {
+                if (!text) return '';
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            // Init
+            renderLinkedParents();
+            updateManualParentsData();
+        });
+    </script>
 </body>
 </html>
