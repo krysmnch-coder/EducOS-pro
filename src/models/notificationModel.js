@@ -63,17 +63,29 @@ const notificationModel = {
     },
 
     // Créer une notification
-    async createNotification({ user_id, user_role, type, title, body, link }, trx = null) {
+    async createNotification({ user_id, type, title, message, link }, trx = null) {
         const query = trx || db;
         return query('notifications').insert({
             user_id,
             type: type || 'info',
             title,
-            message: body,
-            link: link || null,
-            is_read: false,
-            created_at: new Date()
+            message,
+            link: link || null
         });
+    },
+
+    /**
+     * Crée plusieurs notifications en une seule requête.
+     * @param {Array<Object>} notifications - Un tableau d'objets de notification.
+     * @param {import('knex').Knex.Transaction} [trx=null] - La transaction Knex optionnelle.
+     */
+    async createBulkNotifications(notifications, trx = null) {
+        if (!notifications || notifications.length === 0) {
+            return;
+        }
+        const query = trx || db;
+        // Knex gère l'insertion de plusieurs lignes lorsque vous lui passez un tableau d'objets.
+        return query('notifications').insert(notifications);
     },
 
     // Formater le temps relatif

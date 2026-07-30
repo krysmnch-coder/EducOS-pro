@@ -12,16 +12,16 @@ const isAuthenticated = (req, res, next) => {
 };
 
 // API - Récupérer les notifications récentes (pour le popup)
-router.get('/api/notifications/recent', isAuthenticated, notificationController.getRecentNotifications);
+router.get('/api/recent', isAuthenticated, notificationController.getRecentNotifications);
 
 // API - Nombre de notifications non lues
-router.get('/api/notifications/unread-count', isAuthenticated, notificationController.getUnreadCount);
+router.get('/api/unread-count', isAuthenticated, notificationController.getUnreadCount);
 
 // API - Marquer une notification comme lue
-router.post('/api/notifications/:id/read', isAuthenticated, notificationController.markAsRead);
+router.post('/api/:id/read', isAuthenticated, notificationController.markAsRead);
 
 // API - Marquer toutes les notifications comme lues
-router.post('/api/notifications/read-all', isAuthenticated, notificationController.markAllAsRead);
+router.post('/api/read-all', isAuthenticated, notificationController.markAllAsRead);
 
 // Page complète des notifications
 router.get('/', isAuthenticated, notificationController.getAllNotifications);

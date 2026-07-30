@@ -64,7 +64,7 @@ const sendMessage = async (req, res) => {
             user_id: id,
             type: 'message',
             title: notificationTitle,
-            body: subject,
+            message: subject, // Le modèle attend 'message', pas 'body'
             link: notificationLink
         }));
         await notificationModel.createBulkNotifications(notifications);

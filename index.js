@@ -276,40 +276,8 @@ app.use('/communications', communicationRoutes);
 app.use('/admin', adminRoutes);
 app.use('/students', studentRoutes);
 app.use('/establishments', establishmentRoutes); // Utilisation des nouvelles routes
-// Dans index.js, avant les autres routes
 
-// Routes API pour les notifications (sans préfixe /notifications)
-const notificationController = require('./src/controllers/notificationController');
-
-app.get('/api/notifications/recent', async (req, res) => {
-    if (!req.user) return res.status(401).json({ error: 'Non authentifié' });
-    try {
-        const result = await notificationModel.getRecentNotifications(req.user.id);
-        res.json(result);
-    } catch (error) {
-        res.json({ notifications: [], unreadCount: 0 });
-    }
-});
-
-app.post('/api/notifications/read-all', async (req, res) => {
-    if (!req.user) return res.status(401).json({ error: 'Non authentifié' });
-    try {
-        await notificationModel.markAllAsRead(req.user.id);
-        res.json({ success: true });
-    } catch (error) {
-        res.status(500).json({ success: false });
-    }
-});
-
-app.get('/api/notifications/unread-count', async (req, res) => {
-    if (!req.user) return res.status(401).json({ error: 'Non authentifié' });
-    try {
-        const count = await notificationModel.getUnreadCount(req.user.id);
-        res.json({ count });
-    } catch (error) {
-        res.json({ count: 0 });
-    }
-});
+// Utilisation des routes pour les notifications avec le préfixe /notifications
 app.use('/notifications', notificationRoutes);
 
 // Partager la session Express avec Socket.IO (wrapper pour middleware Express)
