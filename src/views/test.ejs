@@ -1,0 +1,16 @@
+<h1>TEST FONCTIONNEL</h1>
+<p>Si vous voyez ceci, EJS fonctionne.</p>
+<p>Utilisateur : <%= user ? user.name : 'NON CONNECTÉ' %></p>
+<p>Rôle : <%= user ? user.role : 'N/A' %></p>
+<p>Widgets : <%= typeof widgets !== 'undefined' ? widgets.length : 'NON DÉFINI' %></p>
+
+<% if (typeof widgets !== 'undefined' && widgets.length > 0) { %>
+    <h3>Widgets trouvés :</h3>
+    <ul>
+    <% widgets.forEach(function(w) { %>
+        <li><%= w.title %> - <%= w.link %></li>
+    <% }); %>
+    </ul>
+<% } else { %>
+    <p style="color:red;">AUCUN WIDGET</p>
+<% } %>

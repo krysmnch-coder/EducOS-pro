@@ -158,80 +158,20 @@ exports.renderLogin = async (req, res) => {
  * @param {import('express').Response} res - The Express response object.
  */
 exports.renderDashboard = async (req, res) => {
-    const user = req.user;
-    // Le middleware ensureAuthenticated gère déjà le cas où l'utilisateur n'est pas connecté.
-
-    switch (user.role) {
-        case ROLES.SUPER_ADMIN:
-        case ROLES.ADMINISTRATOR:
-            // Affiche le tableau de bord dédié aux administrateurs.
-            return adminController.renderAdminDashboard(req, res);
-        default:
-            // Pour tous les autres rôles, on prépare un tableau de bord avec des widgets spécifiques.
-            let parentData = {};
-
-            if (user.role === ROLES.PARENT) {
-                try { // Cette fonction est à créer dans userModel.js
-                    parentData.children = await userModel.getLinkedChildrenForParent(user.id);
-
-                    if (req.session.selectedChildId) {
-                        const selectedChild = parentData.children.find(c => c.id === req.session.selectedChildId);
-                        if (selectedChild) {
-                            parentData.selectedChild = selectedChild;
-                        } else {
-                            delete req.session.selectedChildId; // Nettoie une session invalide
-                        }
-                    }
-                } catch (error) {
-                    console.error("Erreur lors de la récupération des enfants du parent:", error);
-                    parentData.children = [];
-                }
-            }
-
-            const allWidgets = [
-                // --- PARENT ---
-                { key: 'grades', title: "Notes de l'enfant", link: '/student/grades', icon: 'award', description: "Consulter les notes et appréciations.", roles: [ROLES.PARENT] },
-                { key: 'absences', title: "Suivi des Absences", link: '/student/absences', icon: 'user-x', description: "Voir les absences et retards.", roles: [ROLES.PARENT] },
-                { key: 'documents', title: "Documents Scolaires", link: '/student/documents', icon: 'file-text', description: "Télécharger les certificats et bulletins.", roles: [ROLES.PARENT] },
-
-                // --- VIE SCOLAIRE ---
-                { key: 'calendar', title: "Gestion du Calendrier", link: '/school-life/calendar', icon: 'calendar', description: "Définir les événements et vacances.", roles: [ROLES.SCHOOL_LIFE_MANAGER] },
-                { key: 'timetables', title: "Emplois du Temps", link: '/school-life/timetables', icon: 'clock', description: "Gérer les emplois du temps des classes.", roles: [ROLES.SCHOOL_LIFE_MANAGER] },
-                { key: 'school_absences', title: "Gestion des Absences", link: '/school-life/absences', icon: 'user-x', description: "Suivre et justifier les absences des élèves.", roles: [ROLES.SCHOOL_LIFE_MANAGER] },
-
-                // --- SECRETAIRE ---
-                { key: 'students_list', title: "Liste des Élèves", link: '/students', icon: 'users', description: "Consulter et gérer la liste des élèves.", roles: [ROLES.SECRETARY] },
-                { key: 'payments', title: "Suivi des Paiements", link: '/secretary/payments', icon: 'dollar-sign', description: "Suivre les frais de scolarité et paiements.", roles: [ROLES.SECRETARY] },
-                { key: 'school_documents', title: "Documents Scolaires", link: '/secretary/documents', icon: 'archive', description: "Générer et archiver les certificats.", roles: [ROLES.SECRETARY] },
-
-                // --- PROFESSEUR ---
-                { key: 'professor_grades', title: "Saisie des Notes", link: '/professor/grades', icon: 'edit', description: "Entrer et modifier les notes des élèves.", roles: [ROLES.PROFESSOR] },
-                { key: 'professor_resources', title: "Ressources Pédagogiques", link: '/professor/resources', icon: 'book-open', description: "Partager des cours et des exercices.", roles: [ROLES.PROFESSOR] },
-                { key: 'logbook', title: "Cahier de Texte", link: '/professor/logbook', icon: 'book', description: "Renseigner le contenu des séances.", roles: [ROLES.PROFESSOR] },
-
-                // --- ELEVE ---
-                { key: 'student_grades', title: "Mes Notes", link: '/student/grades', icon: 'award', description: "Consulter mes notes et classements.", roles: [ROLES.STUDENT] },
-                { key: 'student_resources', title: "Ressources de Cours", link: '/student/resources', icon: 'book-open', description: "Accéder aux documents partagés par les professeurs.", roles: [ROLES.STUDENT] },
-                { key: 'student_timetable', title: "Mon Emploi du Temps", link: '/student/timetable', icon: 'clock', description: "Voir mon emploi du temps de la semaine.", roles: [ROLES.STUDENT] },
-            ];
-
-            const availableWidgets = allWidgets.filter(widget => widget.roles.includes(user.role));
-
-            // Si un enfant est sélectionné, mettre à jour les liens des widgets du parent
-            if (user.role === ROLES.PARENT && parentData.selectedChild) {
-                availableWidgets.forEach(widget => {
-                    // Remplace le lien générique par un lien spécifique à l'enfant
-                    widget.link = widget.link.replace('/student/', `/student/${parentData.selectedChild.id}/`);
-                });
-            }
-
-            return res.render('dashboard', { 
-                title: 'Tableau de bord | EducOS-pro', 
-                user: req.user,
-                widgets: availableWidgets,
-                parentData
-            });
-    }
+    // Test direct - sans EJS, sans rien
+    res.send(`
+        <!DOCTYPE html>
+        <html>
+        <head><title>Dashboard Test</title></head>
+        <body style="background:#1a1a2e; color:white; padding:50px; font-family:Arial;">
+            <h1 style="color:#0d6efd;">✅ Dashboard OK</h1>
+            <p>Utilisateur : <b>${req.user.name}</b></p>
+            <p>Rôle : <b>${req.user.role}</b></p>
+            <hr>
+            <a href="/logout" style="color:#ff6b6b;">Déconnexion</a>
+        </body>
+        </html>
+    `);
 };
 
 /**
