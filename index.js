@@ -361,7 +361,7 @@ authNamespace.on('connection', (socket) => { // Note: les gestionnaires à l'int
           user_role: 'all',
           type: 'message',
           title: `Nouveau message de ${socket.user.name}`,
-          body: message.trim().substring(0, 100),
+          message: message.trim().substring(0, 100), // Correction ici : 'body' doit être 'message'
           link: '/chat'
         }, trx);
 
