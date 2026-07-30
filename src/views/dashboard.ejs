@@ -2,9 +2,43 @@
 <%- include('partials/header') %>
 
 <div class="container py-4">
-    <h1>Dashboard</h1>
-    <p>Bienvenue <%= user.name %></p>
-    <p>Rôle : <%= user.role %></p>
+    <h1 class="mb-3">Bonjour, <%= user.name %> !</h1>
+    <p class="text-muted mb-4">Bienvenue sur votre tableau de bord.</p>
+
+    <% if (typeof widgets !== 'undefined' && widgets.length > 0) { %>
+        <h3 class="mb-3">Raccourcis</h3>
+        <div class="row">
+            <% widgets.forEach(function(widget) { %>
+            <div class="col-xl-3 col-md-6 mb-4">
+                <a href="<%= widget.link || '#' %>" style="text-decoration: none;">
+                    <div style="
+                        background: rgba(13, 110, 253, 0.08);
+                        border: 2px solid rgba(13, 110, 253, 0.2);
+                        border-radius: 16px;
+                        padding: 25px 20px;
+                        text-align: center;
+                        transition: all 0.3s ease;
+                        min-height: 180px;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: center;
+                    " onmouseover="this.style.transform='translateY(-5px)';this.style.boxShadow='0 10px 30px rgba(13,110,253,0.2)';this.style.borderColor='#0d6efd';" onmouseout="this.style.transform='';this.style.boxShadow='';this.style.borderColor='rgba(13,110,253,0.2)';">
+                        <div style="font-size: 40px; margin-bottom: 12px; color: #0d6efd;">
+                            <i data-feather="<%= widget.icon || 'box' %>"></i>
+                        </div>
+                        <h5 style="color: #0d6efd; font-weight: 600; margin-bottom: 6px;"><%= widget.title %></h5>
+                        <p style="color: #6c757d; font-size: 13px; margin: 0;"><%= widget.description %></p>
+                    </div>
+                </a>
+            </div>
+            <% }); %>
+        </div>
+    <% } %>
 </div>
+
+<script>
+    if (typeof feather !== 'undefined') feather.replace();
+</script>
 
 <%- include('partials/footer') %>
