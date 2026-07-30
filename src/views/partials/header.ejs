@@ -107,23 +107,20 @@
 
           <!-- Notifications avec Popup -->
           <li class="nav-item position-relative">
-            <button class="nav-icon-btn border-0 bg-transparent <%= currentPath === '/notifications' ? 'active' : '' %>" id="notificationBtn" title="Notifications">
+            <button class="nav-icon-btn border-0 bg-transparent" id="notificationBtn" title="Notifications">
               <span class="icon-badge-wrapper">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
                 <span id="notification-badge" class="badge rounded-pill bg-danger" style="position: absolute; top: -5px; right: -8px; display: none; border: 2px solid var(--card-bg);">0</span>
               </span>
             </button>
             
-            <!-- Popup Notifications -->
             <div class="notification-popup" id="notificationPopup">
               <div class="notification-popup-header">
-                <h6><i data-feather="bell" style="width: 16px; height: 16px;"></i> Notifications</h6>
+                <h6>🔔 Notifications</h6>
                 <button class="btn btn-sm btn-outline-primary" onclick="markAllAsRead()">Tout lu</button>
               </div>
               <div class="notification-list" id="notificationList">
-                <div class="text-center py-3">
-                  <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-                </div>
+                <div class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary"></div></div>
               </div>
               <div class="notification-popup-footer">
                 <a href="/notifications">Voir toutes les notifications →</a>
@@ -158,12 +155,8 @@
         </ul>
       <% } else { %>
         <ul class="navbar-nav ms-auto">
-          <li class="nav-item">
-            <a class="nav-link <%= currentPath === '/login' ? 'active' : '' %>" href="/login">Connexion</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link <%= currentPath === '/register' ? 'active' : '' %>" href="/register">Inscription</a>
-          </li>
+          <li class="nav-item"><a class="nav-link" href="/login">Connexion</a></li>
+          <li class="nav-item"><a class="nav-link" href="/register">Inscription</a></li>
         </ul>
       <% } %>
     </div>
@@ -171,365 +164,220 @@
 </nav>
 
 <!-- ========================================================================== -->
-<!-- Style du Popup Notifications -->
+<!-- CSS Complet : Navbar + Popup Notifications + Thème -->
 <!-- ========================================================================== -->
 <style>
-  .notification-popup {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    margin-top: 10px;
-    width: 380px;
-    max-height: 420px;
-    background: rgba(255, 255, 255, 0.97);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 1rem;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-    z-index: 1060;
-    display: none;
-    flex-direction: column;
-    overflow: hidden;
-    animation: popupIn 0.2s ease;
-  }
-  
-  .notification-popup.show {
-    display: flex;
-  }
-  
-  @keyframes popupIn {
-    from {
-      opacity: 0;
-      transform: translateY(-8px) scale(0.96);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
-  }
-  
-  [data-theme="dark"] .notification-popup {
-    background: rgba(25, 25, 45, 0.98);
-    border-color: rgba(255, 255, 255, 0.08);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-  }
-  
-  .notification-popup-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.85rem 1.1rem;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-    flex-shrink: 0;
-  }
-  
-  [data-theme="dark"] .notification-popup-header {
-    border-bottom-color: rgba(255, 255, 255, 0.06);
-  }
-  
-  .notification-popup-header h6 {
-    margin: 0;
-    font-weight: 600;
-    font-size: 0.9rem;
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-  }
-  
-  .notification-popup-header .btn-sm {
-    font-size: 0.7rem;
-    padding: 0.2rem 0.6rem;
-    border-radius: 0.4rem;
-  }
-  
-  .notification-list {
-    overflow-y: auto;
-    max-height: 300px;
-    padding: 0.4rem;
-  }
-  
-  .notification-list::-webkit-scrollbar {
-    width: 3px;
-  }
-  
-  .notification-list::-webkit-scrollbar-thumb {
-    background: rgba(13, 110, 253, 0.2);
-    border-radius: 10px;
-  }
-  
-  .notification-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.6rem;
-    padding: 0.6rem 0.8rem;
-    border-radius: 0.6rem;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    margin-bottom: 2px;
-    text-decoration: none;
-    color: inherit;
-    position: relative;
-  }
-  
-  .notification-item:hover {
-    background: rgba(13, 110, 253, 0.04);
-    transform: translateX(2px);
-  }
-  
-  [data-theme="dark"] .notification-item:hover {
-    background: rgba(255, 255, 255, 0.03);
-  }
-  
-  .notification-item.unread {
-    background: rgba(13, 110, 253, 0.03);
-    border-left: 3px solid #0d6efd;
-  }
-  
-  [data-theme="dark"] .notification-item.unread {
-    background: rgba(255, 255, 255, 0.02);
-    border-left-color: #ffffff;
-  }
-  
-  .notification-icon-circle {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    font-size: 1rem;
-  }
-  
-  .notification-icon-circle.info {
-    background: rgba(13, 202, 240, 0.1);
-    color: #0dcaf0;
-  }
-  
-  .notification-icon-circle.success {
-    background: rgba(25, 135, 84, 0.1);
-    color: #198754;
-  }
-  
-  .notification-icon-circle.warning {
-    background: rgba(255, 193, 7, 0.1);
-    color: #ffc107;
-  }
-  
-  .notification-icon-circle.danger {
-    background: rgba(220, 53, 69, 0.1);
-    color: #dc3545;
-  }
-  
-  .notification-content {
-    flex: 1;
-    min-width: 0;
-  }
-  
-  .notification-content .notif-title {
-    font-weight: 600;
-    font-size: 0.8rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  
-  .notification-content .notif-msg {
-    font-size: 0.73rem;
-    color: #6c757d;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-  
-  [data-theme="dark"] .notification-content .notif-msg {
-    color: rgba(255, 255, 255, 0.45);
-  }
-  
-  .notification-content .notif-time {
-    font-size: 0.65rem;
-    color: #adb5bd;
-    margin-top: 2px;
-  }
-  
-  [data-theme="dark"] .notification-content .notif-time {
-    color: rgba(255, 255, 255, 0.3);
-  }
-  
-  .notification-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: #0d6efd;
-    position: absolute;
-    top: 10px;
-    right: 10px;
-  }
-  
-  .notification-popup-footer {
-    padding: 0.6rem 1.1rem;
-    border-top: 1px solid rgba(0, 0, 0, 0.06);
-    text-align: center;
-    flex-shrink: 0;
-  }
-  
-  [data-theme="dark"] .notification-popup-footer {
-    border-top-color: rgba(255, 255, 255, 0.06);
-  }
-  
-  .notification-popup-footer a {
-    font-size: 0.8rem;
-    font-weight: 500;
-    text-decoration: none;
-    color: #0d6efd;
-  }
-  
-  .notification-popup-footer a:hover {
-    color: #0a58ca;
-    text-decoration: underline;
-  }
-  
-  [data-theme="dark"] .notification-popup-footer a {
-    color: #8ab4f8;
-  }
-  
-  .notification-empty {
-    text-align: center;
-    padding: 2rem 1rem;
-    color: #adb5bd;
-  }
-  
-  /* Responsive */
-  @media (max-width: 576px) {
-    .notification-popup {
-      width: 300px;
-      right: -40px;
-    }
-  }
+:root {
+  --navbar-bg: rgba(255, 255, 255, 0.85); --card-bg: #ffffff;
+  --border-color: rgba(0, 0, 0, 0.1); --text-color: #212529;
+  --nav-divider-color: rgba(0, 0, 0, 0.08); --dropdown-bg: #ffffff; --dropdown-text: #212529;
+  --hover-color: var(--bs-primary, #0d6efd); --hover-text-color: var(--bs-primary, #0d6efd);
+  --hover-shadow-color: rgba(13, 110, 253, 0.3);
+}
+[data-theme="dark"] {
+  --navbar-bg: rgba(18, 18, 30, 0.92); --card-bg: #1a1a2e;
+  --border-color: rgba(255, 255, 255, 0.1); --text-color: #e4e4e4;
+  --nav-divider-color: rgba(255, 255, 255, 0.08); --dropdown-bg: #1a1a2e; --dropdown-text: #e4e4e4;
+  --hover-color: #ffffff; --hover-text-color: #ffffff;
+  --hover-shadow-color: rgba(255, 255, 255, 0.3);
+}
+.navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 1030; display: flex; align-items: center; justify-content: space-between; padding: 0.4rem 1.5rem; background-color: var(--navbar-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--nav-divider-color); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); transition: background-color 0.3s ease, border-color 0.3s ease; min-height: 60px; }
+[data-theme="dark"] .navbar { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3); }
+.app-header { max-width: 1400px; margin: 0 auto; padding: 0 1rem; }
+.navbar-brand { display: flex; align-items: center; gap: 0.6rem; font-weight: 700; text-decoration: none; color: var(--bs-primary, #0d6efd); font-size: 1.1rem; }
+.navbar-brand .brand-icon { display: inline-flex; align-items: center; justify-content: center; border-radius: 0.5rem; background-color: var(--bs-primary, #0d6efd) !important; padding: 0.35rem; }
+.navbar-toggler { border: none; padding: 0.35rem; color: #6c757d; background-color: transparent !important; }
+.navbar-nav { display: flex; align-items: center; gap: 0.4rem; }
+.nav-item-spaced { margin: 0 0.1rem; }
+.navbar-nav .nav-item .nav-link { display: flex; flex-direction: column; align-items: center; gap: 0.25rem; padding: 0.6rem 1.2rem; color: #6c757d; background-color: transparent !important; border-radius: 0.7rem; transition: color 0.3s ease, transform 0.3s ease; text-decoration: none; min-width: 70px; }
+.navbar-nav .nav-item .nav-link svg { width: 24px !important; height: 24px !important; color: #6c757d; stroke: currentColor; fill: none; stroke-width: 2; }
+.navbar-nav .nav-item .nav-link .nav-text { font-size: 0.7rem; font-weight: 500; color: #6c757d; }
+.navbar-nav .nav-item .nav-link.active, .navbar-nav .nav-item .nav-link.active svg, .navbar-nav .nav-item .nav-link.active .nav-text { color: var(--bs-primary, #0d6efd); }
+.navbar-nav .nav-item .nav-link.active .nav-text { font-weight: 600; }
+.navbar-nav .nav-item .nav-link:hover { color: var(--hover-text-color) !important; transform: translateY(-1px); }
+.navbar-nav .nav-item .nav-link:hover svg { color: var(--hover-color) !important; filter: drop-shadow(0 0 12px var(--hover-shadow-color)); }
+.navbar-nav .nav-item .nav-link:hover .nav-text { color: var(--hover-text-color) !important; }
+.nav-divider { color: var(--nav-divider-color); padding: 0 0.3rem; user-select: none; }
+.nav-icon-btn { display: flex; align-items: center; justify-content: center; padding: 0.6rem 0.8rem; color: #6c757d; background-color: transparent !important; border: none !important; border-radius: 0.7rem; cursor: pointer; min-width: 50px; }
+.nav-icon-btn svg { width: 24px !important; height: 24px !important; color: #6c757d; stroke: currentColor; fill: none; stroke-width: 2; }
+.nav-icon-btn:hover { color: var(--hover-text-color) !important; }
+.nav-icon-btn:hover svg { color: var(--hover-color) !important; filter: drop-shadow(0 0 12px var(--hover-shadow-color)); }
+.icon-badge-wrapper { position: relative; display: inline-flex; align-items: center; justify-content: center; }
+.icon-badge-wrapper .badge { position: absolute; top: -5px; right: -8px; border: 2px solid var(--navbar-bg); background-color: #dc3545; color: #fff; font-size: 0.5rem; padding: 0.1rem 0.3rem; border-radius: 50%; min-width: 16px; height: 16px; display: none; align-items: center; justify-content: center; font-weight: 600; }
+#themeToggle .sun-icon, #themeToggle .moon-icon { transition: opacity 0.3s; }
+html:not([data-theme="dark"]) #themeToggle .sun-icon { display: inline-block; }
+html:not([data-theme="dark"]) #themeToggle .moon-icon { display: none; }
+[data-theme="dark"] #themeToggle .moon-icon { display: inline-block; }
+[data-theme="dark"] #themeToggle .sun-icon { display: none; }
+.navbar-avatar { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; border: 2px solid #6c757d; }
+.navbar-avatar-placeholder { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--bs-primary, #0d6efd), var(--bs-info, #0dcaf0)); color: #fff; font-weight: 600; font-size: 0.9rem; border: 2px solid #6c757d; }
+.dropdown-toggle { display: flex; align-items: center; gap: 0.5rem; padding: 0.35rem 0.7rem; background-color: transparent !important; border-radius: 0.7rem; }
+.dropdown-toggle::after { margin-left: 0.15rem; }
+.dropdown-menu { background-color: var(--dropdown-bg) !important; border: 1px solid var(--border-color); backdrop-filter: blur(12px); border-radius: 0.75rem; padding: 0.5rem; min-width: 200px; }
+.dropdown-menu .dropdown-item { color: var(--dropdown-text) !important; padding: 0.5rem 1rem; border-radius: 0.5rem; }
+.dropdown-menu .dropdown-item:hover { background-color: rgba(255,255,255,0.05); }
+.dropdown-menu .dropdown-item.text-danger { color: #ff6b6b !important; }
+@media (max-width: 992px) {
+  .navbar-nav .nav-item .nav-link { flex-direction: row; padding: 0.6rem 1rem; gap: 0.75rem; width: 100%; min-width: auto; }
+  .navbar-nav .nav-item .nav-link .nav-text { font-size: 0.85rem; }
+  .nav-divider { display: none; }
+  .nav-icon-btn { padding: 0.6rem 1rem; width: 100%; justify-content: flex-start; gap: 0.75rem; }
+  .dropdown-toggle { width: 100%; justify-content: flex-start; padding: 0.6rem 1rem; }
+}
+
+/* Popup Notifications */
+.notification-popup { position: absolute; top: 100%; right: 0; margin-top: 10px; width: 380px; max-height: 420px; background: rgba(255,255,255,0.97); backdrop-filter: blur(20px); border: 1px solid rgba(0,0,0,0.08); border-radius: 1rem; box-shadow: 0 20px 60px rgba(0,0,0,0.15); z-index: 1060; display: none; flex-direction: column; overflow: hidden; }
+.notification-popup.show { display: flex; }
+[data-theme="dark"] .notification-popup { background: rgba(25,25,45,0.98); border-color: rgba(255,255,255,0.08); }
+.notification-popup-header { display: flex; justify-content: space-between; align-items: center; padding: 0.85rem 1.1rem; border-bottom: 1px solid rgba(0,0,0,0.06); }
+[data-theme="dark"] .notification-popup-header { border-bottom-color: rgba(255,255,255,0.06); }
+.notification-popup-header h6 { margin: 0; font-weight: 600; font-size: 0.9rem; }
+.notification-list { overflow-y: auto; max-height: 300px; padding: 0.4rem; }
+.notification-item { display: flex; align-items: flex-start; gap: 0.6rem; padding: 0.6rem 0.8rem; border-radius: 0.6rem; cursor: pointer; text-decoration: none; color: inherit; margin-bottom: 2px; }
+.notification-item:hover { background: rgba(13,110,253,0.04); }
+.notification-item.unread { background: rgba(13,110,253,0.03); border-left: 3px solid #0d6efd; }
+.notification-icon-circle { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.notification-icon-circle.info { background: rgba(13,202,240,0.1); color: #0dcaf0; }
+.notification-icon-circle.success { background: rgba(25,135,84,0.1); color: #198754; }
+.notification-icon-circle.warning { background: rgba(255,193,7,0.1); color: #ffc107; }
+.notification-content { flex: 1; min-width: 0; }
+.notification-content .notif-title { font-weight: 600; font-size: 0.8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.notification-content .notif-msg { font-size: 0.73rem; color: #6c757d; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.notification-content .notif-time { font-size: 0.65rem; color: #adb5bd; margin-top: 2px; }
+.notification-dot { width: 7px; height: 7px; border-radius: 50%; background: #0d6efd; position: absolute; top: 10px; right: 10px; }
+.notification-popup-footer { padding: 0.6rem 1.1rem; border-top: 1px solid rgba(0,0,0,0.06); text-align: center; }
+.notification-popup-footer a { font-size: 0.8rem; text-decoration: none; color: #0d6efd; }
+.notification-empty { text-align: center; padding: 2rem 1rem; color: #adb5bd; }
+@media (max-width: 576px) { .notification-popup { width: 300px; right: -40px; } }
 </style>
 
 <!-- ========================================================================== -->
-<!-- Script du Popup Notifications - CORRIGÉ V2 -->
+<!-- Script : Thème + Popup Notifications -->
 <!-- ========================================================================== -->
 <script>
-  (function() {
-    var btn = document.getElementById('notificationBtn');
-    var popup = document.getElementById('notificationPopup');
-    var badge = document.getElementById('notification-badge');
-    var isOpen = false;
-
-    if (btn) {
-      btn.addEventListener('click', function(e) {
+(function() {
+  'use strict';
+  
+  // ========================================================================
+  // GESTION DU THÈME
+  // ========================================================================
+  function setTheme(theme) {
+    if (theme === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('theme', 'light');
+    }
+  }
+  
+  function toggleTheme() {
+    var currentTheme = localStorage.getItem('theme') || 'light';
+    var newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+  }
+  
+  function applySavedTheme() {
+    var savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+    }
+  }
+  
+  // Appliquer immédiatement
+  applySavedTheme();
+  
+  document.addEventListener('DOMContentLoaded', function() {
+    var themeToggle = document.getElementById('themeToggle');
+    if (themeToggle) {
+      themeToggle.addEventListener('click', function(e) {
         e.preventDefault();
-        e.stopPropagation();
-        if (isOpen) { closePopup(); } else { openPopup(); }
+        toggleTheme();
       });
     }
+  });
+  
+  window.addEventListener('storage', function(e) {
+    if (e.key === 'theme') applySavedTheme();
+  });
 
-    document.addEventListener('click', function(e) {
-      if (isOpen && popup && !popup.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
-        closePopup();
-      }
+  // ========================================================================
+  // POPUP NOTIFICATIONS
+  // ========================================================================
+  var btn = document.getElementById('notificationBtn');
+  var popup = document.getElementById('notificationPopup');
+  var badge = document.getElementById('notification-badge');
+  var isOpen = false;
+
+  if (btn) {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (isOpen) { closePopup(); } else { openPopup(); }
     });
+  }
 
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && isOpen) closePopup();
-    });
-
-    function openPopup() {
-      if (popup) { popup.classList.add('show'); isOpen = true; loadNotifications(); }
+  document.addEventListener('click', function(e) {
+    if (isOpen && popup && !popup.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
+      closePopup();
     }
+  });
 
-    function closePopup() {
-      if (popup) { popup.classList.remove('show'); isOpen = false; }
-    }
+  function openPopup() {
+    if (popup) { popup.classList.add('show'); isOpen = true; loadNotifications(); }
+  }
 
-    function loadNotifications() {
-      var list = document.getElementById('notificationList');
-      if (!list) return;
-      list.innerHTML = '<div class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary"></div></div>';
+  function closePopup() {
+    if (popup) { popup.classList.remove('show'); isOpen = false; }
+  }
 
-      fetch('/api/notifications/recent')
-        .then(function(r) { return r.json(); })
-        .then(function(data) {
-          renderNotifications(data.notifications || [], data.unreadCount || 0);
-        })
-        .catch(function() {
-          renderNotifications([], 0);
-        });
-    }
-
-    function renderNotifications(notifs, unreadCount) {
-      var list = document.getElementById('notificationList');
-      if (!list) return;
-
-      updateBadge(unreadCount);
-
-      if (!notifs || notifs.length === 0) {
-        list.innerHTML = '<div class="notification-empty">🔔<p class="small mt-1 mb-0">Aucune notification</p></div>';
-        return;
-      }
-
-      var icons = { success: '✅', warning: '⚠️', danger: '❌', info: '📢', message: '💬' };
-      var html = '';
-      notifs.forEach(function(n) {
-        html += '<a href="' + (n.link || '#') + '" class="notification-item' + (n.unread ? ' unread' : '') + '">';
-        html += '<div class="notification-icon-circle ' + (n.type || 'info') + '">' + (icons[n.type] || '📢') + '</div>';
-        html += '<div class="notification-content">';
-        html += '<div class="notif-title">' + escapeHtml(n.title) + '</div>';
-        html += '<div class="notif-msg">' + escapeHtml(n.message) + '</div>';
-        html += '<div class="notif-time">' + escapeHtml(n.time) + '</div>';
-        html += '</div>';
-        if (n.unread) html += '<div class="notification-dot"></div>';
-        html += '</a>';
-      });
-      list.innerHTML = html;
-    }
-
-    function updateBadge(count) {
-      if (badge) {
-        count = parseInt(count) || 0;
-        if (count > 0) {
-          badge.textContent = count > 99 ? '99+' : count;
-          badge.style.display = 'flex';
-        } else {
-          badge.style.display = 'none';
-        }
-      }
-    }
-
-    // MARQUER TOUT COMME LU
-    window.markAllAsRead = function() {
-      fetch('/api/notifications/read-all', { method: 'POST' })
-        .then(function(r) { return r.json(); })
-        .then(function(data) {
-          console.log('✅ Tout lu - Réponse:', data);
-          updateBadge(0);
-          loadNotifications(); // Recharger pour avoir l'état réel
-        })
-        .catch(function(err) {
-          console.error('❌ Erreur:', err);
-          // Fallback visuel
-          document.querySelectorAll('.notification-dot').forEach(function(d) { d.remove(); });
-          document.querySelectorAll('.notification-item.unread').forEach(function(i) { i.classList.remove('unread'); });
-          updateBadge(0);
-        });
-    };
-
-    function escapeHtml(t) {
-      if (!t) return '';
-      var d = document.createElement('div');
-      d.textContent = t;
-      return d.innerHTML;
-    }
-
-    // Charger le badge au démarrage
-    fetch('/api/notifications/unread-count')
+  function loadNotifications() {
+    var list = document.getElementById('notificationList');
+    if (!list) return;
+    list.innerHTML = '<div class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary"></div></div>';
+    fetch('/api/notifications/recent')
       .then(function(r) { return r.json(); })
-      .then(function(data) { updateBadge(data.count || 0); })
-      .catch(function() {});
-  })();
+      .then(function(data) { renderNotifications(data.notifications || [], data.unreadCount || 0); })
+      .catch(function() { renderNotifications([], 0); });
+  }
+
+  function renderNotifications(notifs, unreadCount) {
+    var list = document.getElementById('notificationList');
+    if (!list) return;
+    updateBadge(unreadCount);
+    if (!notifs || notifs.length === 0) {
+      list.innerHTML = '<div class="notification-empty">🔔<p class="small mt-1 mb-0">Aucune notification</p></div>';
+      return;
+    }
+    var icons = { success: '✅', warning: '⚠️', danger: '❌', info: '📢' };
+    list.innerHTML = notifs.map(function(n) {
+      return '<a href="' + (n.link || '#') + '" class="notification-item' + (n.unread ? ' unread' : '') + '"><div class="notification-icon-circle ' + (n.type || 'info') + '">' + (icons[n.type] || '📢') + '</div><div class="notification-content"><div class="notif-title">' + escapeHtml(n.title) + '</div><div class="notif-msg">' + escapeHtml(n.message) + '</div><div class="notif-time">' + escapeHtml(n.time) + '</div></div>' + (n.unread ? '<div class="notification-dot"></div>' : '') + '</a>';
+    }).join('');
+  }
+
+  function updateBadge(count) {
+    if (badge) {
+      count = parseInt(count) || 0;
+      if (count > 0) { badge.textContent = count > 99 ? '99+' : count; badge.style.display = 'flex'; }
+      else { badge.style.display = 'none'; }
+    }
+  }
+
+  window.markAllAsRead = function() {
+    fetch('/api/notifications/read-all', { method: 'POST' })
+      .then(function() { updateBadge(0); loadNotifications(); })
+      .catch(function() { updateBadge(0); });
+  };
+
+  function escapeHtml(t) { if (!t) return ''; var d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+
+  // Charger le badge au démarrage
+  fetch('/api/notifications/unread-count')
+    .then(function(r) { return r.json(); })
+    .then(function(data) { updateBadge(data.count || 0); })
+    .catch(function() {});
+
+})();
 </script>
