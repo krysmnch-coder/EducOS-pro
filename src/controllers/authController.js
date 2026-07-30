@@ -158,20 +158,45 @@ exports.renderLogin = async (req, res) => {
  * @param {import('express').Response} res - The Express response object.
  */
 exports.renderDashboard = async (req, res) => {
-    // Test direct - sans EJS, sans rien
-    res.send(`
-        <!DOCTYPE html>
-        <html>
-        <head><title>Dashboard Test</title></head>
-        <body style="background:#1a1a2e; color:white; padding:50px; font-family:Arial;">
-            <h1 style="color:#0d6efd;">✅ Dashboard OK</h1>
-            <p>Utilisateur : <b>${req.user.name}</b></p>
-            <p>Rôle : <b>${req.user.role}</b></p>
-            <hr>
-            <a href="/logout" style="color:#ff6b6b;">Déconnexion</a>
-        </body>
-        </html>
-    `);
+    const user = req.user;
+
+    switch (user.role) {
+        case ROLES.SUPER_ADMIN:
+        case ROLES.ADMINISTRATOR:
+            return adminController.renderAdminDashboard(req, res);
+        default:
+            let parentData = {};
+
+            if (user.role === ROLES.PARENT) {
+                try {
+                    parentData.children = await userModel.getLinkedChildrenForParent(user.id);
+                    if (req.session.selectedChildId) {
+                        const selectedChild = parentData.children.find(c => c.id == req.session.selectedChildId);
+                        if (selectedChild) {
+                            parentData.selectedChild = selectedChild;
+                        } else {
+                            delete req.session.selectedChildId;
+                        }
+                    }
+                } catch (error) {
+                    parentData.children = [];
+                }
+            }
+
+            let widgets = [
+                { key: 'profile', icon: 'user', title: 'Mon Profil', link: '/profile', description: 'Gérer mon profil' },
+                { key: 'messages', icon: 'mail', title: 'Messages', link: '/communications', description: 'Consulter mes messages' },
+                { key: 'documents', icon: 'file-text', title: 'Documents', link: '/documents', description: 'Accéder aux documents' },
+                { key: 'chat', icon: 'message-circle', title: 'Chat', link: '/chat', description: 'Messagerie instantanée' },
+            ];
+
+            return res.render('dashboard', { 
+                title: 'Tableau de bord | EducOS-pro', 
+                user: req.user,
+                widgets: widgets,
+                parentData
+            });
+    }
 };
 
 /**
