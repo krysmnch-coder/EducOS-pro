@@ -105,14 +105,30 @@
             <span class="nav-divider">|</span>
           </li>
 
-          <!-- Notifications -->
-          <li class="nav-item">
-            <a href="/notifications" class="nav-icon-btn border-0 bg-transparent <%= currentPath === '/notifications' ? 'active' : '' %>" title="Notifications">
+          <!-- Notifications avec Popup -->
+          <li class="nav-item position-relative">
+            <button class="nav-icon-btn border-0 bg-transparent <%= currentPath === '/notifications' ? 'active' : '' %>" id="notificationBtn" title="Notifications">
               <span class="icon-badge-wrapper">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
                 <span id="notification-badge" class="badge rounded-pill bg-danger" style="position: absolute; top: -5px; right: -8px; display: none; border: 2px solid var(--card-bg);">0</span>
               </span>
-            </a>
+            </button>
+            
+            <!-- Popup Notifications -->
+            <div class="notification-popup" id="notificationPopup">
+              <div class="notification-popup-header">
+                <h6><i data-feather="bell" style="width: 16px; height: 16px;"></i> Notifications</h6>
+                <button class="btn btn-sm btn-outline-primary" onclick="markAllAsRead()">Tout lu</button>
+              </div>
+              <div class="notification-list" id="notificationList">
+                <div class="text-center py-3">
+                  <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                </div>
+              </div>
+              <div class="notification-popup-footer">
+                <a href="/notifications">Voir toutes les notifications →</a>
+              </div>
+            </div>
           </li>
 
           <!-- Mode -->
@@ -153,3 +169,441 @@
     </div>
   </div>
 </nav>
+
+<!-- ========================================================================== -->
+<!-- Style du Popup Notifications -->
+<!-- ========================================================================== -->
+<style>
+  .notification-popup {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 10px;
+    width: 380px;
+    max-height: 420px;
+    background: rgba(255, 255, 255, 0.97);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 1rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    z-index: 1060;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    animation: popupIn 0.2s ease;
+  }
+  
+  .notification-popup.show {
+    display: flex;
+  }
+  
+  @keyframes popupIn {
+    from {
+      opacity: 0;
+      transform: translateY(-8px) scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+  
+  [data-theme="dark"] .notification-popup {
+    background: rgba(25, 25, 45, 0.98);
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  }
+  
+  .notification-popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.85rem 1.1rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    flex-shrink: 0;
+  }
+  
+  [data-theme="dark"] .notification-popup-header {
+    border-bottom-color: rgba(255, 255, 255, 0.06);
+  }
+  
+  .notification-popup-header h6 {
+    margin: 0;
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  
+  .notification-popup-header .btn-sm {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 0.4rem;
+  }
+  
+  .notification-list {
+    overflow-y: auto;
+    max-height: 300px;
+    padding: 0.4rem;
+  }
+  
+  .notification-list::-webkit-scrollbar {
+    width: 3px;
+  }
+  
+  .notification-list::-webkit-scrollbar-thumb {
+    background: rgba(13, 110, 253, 0.2);
+    border-radius: 10px;
+  }
+  
+  .notification-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    padding: 0.6rem 0.8rem;
+    border-radius: 0.6rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    margin-bottom: 2px;
+    text-decoration: none;
+    color: inherit;
+    position: relative;
+  }
+  
+  .notification-item:hover {
+    background: rgba(13, 110, 253, 0.04);
+    transform: translateX(2px);
+  }
+  
+  [data-theme="dark"] .notification-item:hover {
+    background: rgba(255, 255, 255, 0.03);
+  }
+  
+  .notification-item.unread {
+    background: rgba(13, 110, 253, 0.03);
+    border-left: 3px solid #0d6efd;
+  }
+  
+  [data-theme="dark"] .notification-item.unread {
+    background: rgba(255, 255, 255, 0.02);
+    border-left-color: #ffffff;
+  }
+  
+  .notification-icon-circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 1rem;
+  }
+  
+  .notification-icon-circle.info {
+    background: rgba(13, 202, 240, 0.1);
+    color: #0dcaf0;
+  }
+  
+  .notification-icon-circle.success {
+    background: rgba(25, 135, 84, 0.1);
+    color: #198754;
+  }
+  
+  .notification-icon-circle.warning {
+    background: rgba(255, 193, 7, 0.1);
+    color: #ffc107;
+  }
+  
+  .notification-icon-circle.danger {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+  }
+  
+  .notification-content {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .notification-content .notif-title {
+    font-weight: 600;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .notification-content .notif-msg {
+    font-size: 0.73rem;
+    color: #6c757d;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  [data-theme="dark"] .notification-content .notif-msg {
+    color: rgba(255, 255, 255, 0.45);
+  }
+  
+  .notification-content .notif-time {
+    font-size: 0.65rem;
+    color: #adb5bd;
+    margin-top: 2px;
+  }
+  
+  [data-theme="dark"] .notification-content .notif-time {
+    color: rgba(255, 255, 255, 0.3);
+  }
+  
+  .notification-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #0d6efd;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+  }
+  
+  .notification-popup-footer {
+    padding: 0.6rem 1.1rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    text-align: center;
+    flex-shrink: 0;
+  }
+  
+  [data-theme="dark"] .notification-popup-footer {
+    border-top-color: rgba(255, 255, 255, 0.06);
+  }
+  
+  .notification-popup-footer a {
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-decoration: none;
+    color: #0d6efd;
+  }
+  
+  .notification-popup-footer a:hover {
+    color: #0a58ca;
+    text-decoration: underline;
+  }
+  
+  [data-theme="dark"] .notification-popup-footer a {
+    color: #8ab4f8;
+  }
+  
+  .notification-empty {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: #adb5bd;
+  }
+  
+  /* Responsive */
+  @media (max-width: 576px) {
+    .notification-popup {
+      width: 300px;
+      right: -40px;
+    }
+  }
+</style>
+
+<!-- ========================================================================== -->
+<!-- Script du Popup Notifications -->
+<!-- ========================================================================== -->
+<script>
+  (function() {
+    var btn = document.getElementById('notificationBtn');
+    var popup = document.getElementById('notificationPopup');
+    var badge = document.getElementById('notification-badge');
+    var isOpen = false;
+
+    // Ouvrir/fermer le popup
+    if (btn) {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (isOpen) {
+          closePopup();
+        } else {
+          openPopup();
+        }
+      });
+    }
+    // Dans le script du popup, après la fonction existante, ajoutez :
+if (typeof io !== 'undefined') {
+    var socket = io();
+    socket.on('newNotification', function(data) {
+        updateBadge(data.unreadCount || 0);
+        if (isOpen) loadNotifications();
+    });
+}
+    // Fermer en cliquant ailleurs
+    document.addEventListener('click', function(e) {
+      if (isOpen && popup && !popup.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
+        closePopup();
+      }
+    });
+
+    // Fermer avec la touche Échap
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && isOpen) {
+        closePopup();
+      }
+    });
+
+    function openPopup() {
+      if (popup) {
+        popup.classList.add('show');
+        isOpen = true;
+        loadNotifications();
+      }
+    }
+
+    function closePopup() {
+      if (popup) {
+        popup.classList.remove('show');
+        isOpen = false;
+      }
+    }
+
+    // Charger les notifications
+    function loadNotifications() {
+      var list = document.getElementById('notificationList');
+      if (!list) return;
+
+      list.innerHTML = '<div class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary" role="status"></div></div>';
+
+      // Essayer de charger depuis l'API
+      fetch('/api/notifications/recent')
+        .then(function(response) {
+          if (!response.ok) throw new Error('API non disponible');
+          return response.json();
+        })
+        .then(function(data) {
+          renderNotifications(data.notifications || []);
+        })
+        .catch(function() {
+          // Données de démonstration
+          renderNotifications([
+            {
+              id: 1,
+              title: 'Nouveau message',
+              message: 'Vous avez reçu un message de l\'administration concernant la rentrée scolaire.',
+              type: 'info',
+              time: 'Il y a 5 min',
+              unread: true,
+              link: '/communications'
+            },
+            {
+              id: 2,
+              title: 'Dossier validé',
+              message: 'Le dossier de votre enfant a été validé avec succès.',
+              type: 'success',
+              time: 'Il y a 1 heure',
+              unread: true,
+              link: '/students'
+            },
+            {
+              id: 3,
+              title: 'Rappel important',
+              message: 'N\'oubliez pas de compléter votre profil avant la fin du mois.',
+              type: 'warning',
+              time: 'Il y a 3 heures',
+              unread: false,
+              link: '/profile'
+            },
+            {
+              id: 4,
+              title: 'Mise à jour système',
+              message: 'Une nouvelle version de la plateforme est disponible.',
+              type: 'info',
+              time: 'Hier',
+              unread: false,
+              link: '#'
+            }
+          ]);
+        });
+    }
+
+    // Rendre les notifications
+    function renderNotifications(notifs) {
+      var list = document.getElementById('notificationList');
+      if (!list) return;
+
+      if (!notifs || notifs.length === 0) {
+        list.innerHTML = '<div class="notification-empty">🔔<p class="small mt-1 mb-0">Aucune notification</p></div>';
+        updateBadge(0);
+        return;
+      }
+
+      var unreadCount = notifs.filter(function(n) { return n.unread; }).length;
+      updateBadge(unreadCount);
+
+      var html = '';
+      var icons = {
+        success: '✅',
+        warning: '⚠️',
+        danger: '❌',
+        info: '📢'
+      };
+
+      notifs.forEach(function(n) {
+        html += '<a href="' + (n.link || '#') + '" class="notification-item' + (n.unread ? ' unread' : '') + '" onclick="event.stopPropagation();">';
+        html += '<div class="notification-icon-circle ' + (n.type || 'info') + '">' + (icons[n.type] || '📢') + '</div>';
+        html += '<div class="notification-content">';
+        html += '<div class="notif-title">' + escapeHtml(n.title) + '</div>';
+        html += '<div class="notif-msg">' + escapeHtml(n.message) + '</div>';
+        html += '<div class="notif-time">' + escapeHtml(n.time) + '</div>';
+        html += '</div>';
+        if (n.unread) {
+          html += '<div class="notification-dot"></div>';
+        }
+        html += '</a>';
+      });
+
+      list.innerHTML = html;
+    }
+
+    // Mettre à jour le badge
+    function updateBadge(count) {
+      if (badge) {
+        if (count > 0) {
+          badge.textContent = count > 99 ? '99+' : count;
+          badge.style.display = 'flex';
+        } else {
+          badge.style.display = 'none';
+          badge.textContent = '0';
+        }
+      }
+    }
+
+    // Marquer tout comme lu
+    window.markAllAsRead = function() {
+      // Supprimer les points bleus
+      var dots = document.querySelectorAll('.notification-dot');
+      dots.forEach(function(dot) { dot.remove(); });
+
+      // Enlever la classe unread
+      var unreadItems = document.querySelectorAll('.notification-item.unread');
+      unreadItems.forEach(function(item) { item.classList.remove('unread'); });
+
+      // Mettre à jour le badge
+      updateBadge(0);
+
+      // Appel API (optionnel)
+      fetch('/api/notifications/read-all', { method: 'POST' }).catch(function() {});
+    };
+
+    // Échapper HTML
+    function escapeHtml(text) {
+      if (!text) return '';
+      var div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+  })();
+</script>

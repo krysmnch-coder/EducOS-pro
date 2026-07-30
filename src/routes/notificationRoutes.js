@@ -1,24 +1,29 @@
 const express = require('express');
 const router = express.Router();
-const { isAuthenticated: ensureAuthenticated } = require('../middleware/authMiddleware');
 const notificationController = require('../controllers/notificationController');
 
-// Main notifications page
-router.get('/', ensureAuthenticated, notificationController.listNotifications);
+// Middleware d'authentification
+const isAuthenticated = (req, res, next) => {
+    if (req.user) return next();
+    if (req.headers.accept && req.headers.accept.includes('application/json')) {
+        return res.status(401).json({ error: 'Non authentifié' });
+    }
+    res.redirect('/login');
+};
 
-// API endpoint to get notifications as JSON (for the popup)
-router.get('/json', ensureAuthenticated, notificationController.getJsonNotifications);
+// API - Récupérer les notifications récentes (pour le popup)
+router.get('/api/notifications/recent', isAuthenticated, notificationController.getRecentNotifications);
 
-// API endpoint to get unread count
-router.get('/unread-count', ensureAuthenticated, notificationController.getUnreadCount);
+// API - Nombre de notifications non lues
+router.get('/api/notifications/unread-count', isAuthenticated, notificationController.getUnreadCount);
 
-// API endpoint to mark all as read
-router.post('/mark-all-read', ensureAuthenticated, notificationController.markAllRead);
+// API - Marquer une notification comme lue
+router.post('/api/notifications/:id/read', isAuthenticated, notificationController.markAsRead);
 
-// API endpoint to mark a single notification as read
-router.post('/:id/mark-read', ensureAuthenticated, notificationController.markOneAsRead);
+// API - Marquer toutes les notifications comme lues
+router.post('/api/notifications/read-all', isAuthenticated, notificationController.markAllAsRead);
 
-// API endpoint to delete a notification
-router.post('/:id/delete', ensureAuthenticated, notificationController.deleteNotification);
+// Page complète des notifications
+router.get('/', isAuthenticated, notificationController.getAllNotifications);
 
 module.exports = router;
