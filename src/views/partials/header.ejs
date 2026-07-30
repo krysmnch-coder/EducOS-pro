@@ -412,7 +412,7 @@
 </style>
 
 <!-- ========================================================================== -->
-<!-- Script du Popup Notifications -->
+<!-- Script du Popup Notifications - CORRIGÉ -->
 <!-- ========================================================================== -->
 <script>
   (function() {
@@ -433,14 +433,7 @@
         }
       });
     }
-    // Dans le script du popup, après la fonction existante, ajoutez :
-if (typeof io !== 'undefined') {
-    var socket = io();
-    socket.on('newNotification', function(data) {
-        updateBadge(data.unreadCount || 0);
-        if (isOpen) loadNotifications();
-    });
-}
+
     // Fermer en cliquant ailleurs
     document.addEventListener('click', function(e) {
       if (isOpen && popup && !popup.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
@@ -470,89 +463,53 @@ if (typeof io !== 'undefined') {
       }
     }
 
-    // Charger les notifications
+    // Charger les notifications depuis l'API
     function loadNotifications() {
       var list = document.getElementById('notificationList');
       if (!list) return;
 
       list.innerHTML = '<div class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary" role="status"></div></div>';
 
-      // Essayer de charger depuis l'API
       fetch('/api/notifications/recent')
         .then(function(response) {
           if (!response.ok) throw new Error('API non disponible');
           return response.json();
         })
         .then(function(data) {
-          renderNotifications(data.notifications || []);
+          renderNotifications(data.notifications || [], data.unreadCount || 0);
         })
         .catch(function() {
-          // Données de démonstration
+          // Données de démonstration si API non disponible
           renderNotifications([
-            {
-              id: 1,
-              title: 'Nouveau message',
-              message: 'Vous avez reçu un message de l\'administration concernant la rentrée scolaire.',
-              type: 'info',
-              time: 'Il y a 5 min',
-              unread: true,
-              link: '/communications'
-            },
-            {
-              id: 2,
-              title: 'Dossier validé',
-              message: 'Le dossier de votre enfant a été validé avec succès.',
-              type: 'success',
-              time: 'Il y a 1 heure',
-              unread: true,
-              link: '/students'
-            },
-            {
-              id: 3,
-              title: 'Rappel important',
-              message: 'N\'oubliez pas de compléter votre profil avant la fin du mois.',
-              type: 'warning',
-              time: 'Il y a 3 heures',
-              unread: false,
-              link: '/profile'
-            },
-            {
-              id: 4,
-              title: 'Mise à jour système',
-              message: 'Une nouvelle version de la plateforme est disponible.',
-              type: 'info',
-              time: 'Hier',
-              unread: false,
-              link: '#'
-            }
-          ]);
+            { id: 1, title: 'Nouveau message', message: 'Message de test', type: 'info', time: 'Maintenant', unread: true, link: '/communications' }
+          ], 1);
         });
     }
 
     // Rendre les notifications
-    function renderNotifications(notifs) {
+    function renderNotifications(notifs, unreadCount) {
       var list = document.getElementById('notificationList');
       if (!list) return;
 
+      // Mettre à jour le badge avec le VRAI nombre depuis l'API
+      updateBadge(unreadCount);
+
       if (!notifs || notifs.length === 0) {
         list.innerHTML = '<div class="notification-empty">🔔<p class="small mt-1 mb-0">Aucune notification</p></div>';
-        updateBadge(0);
         return;
       }
-
-      var unreadCount = notifs.filter(function(n) { return n.unread; }).length;
-      updateBadge(unreadCount);
 
       var html = '';
       var icons = {
         success: '✅',
         warning: '⚠️',
         danger: '❌',
-        info: '📢'
+        info: '📢',
+        message: '💬'
       };
 
       notifs.forEach(function(n) {
-        html += '<a href="' + (n.link || '#') + '" class="notification-item' + (n.unread ? ' unread' : '') + '" onclick="event.stopPropagation();">';
+        html += '<a href="' + (n.link || '#') + '" class="notification-item' + (n.unread ? ' unread' : '') + '">';
         html += '<div class="notification-icon-circle ' + (n.type || 'info') + '">' + (icons[n.type] || '📢') + '</div>';
         html += '<div class="notification-content">';
         html += '<div class="notif-title">' + escapeHtml(n.title) + '</div>';
@@ -581,22 +538,58 @@ if (typeof io !== 'undefined') {
       }
     }
 
-    // Marquer tout comme lu
+    // ========================================================================
+    // MARQUER TOUT COMME LU - CORRIGÉ (avec appel API réel)
+    // ========================================================================
     window.markAllAsRead = function() {
-      // Supprimer les points bleus
-      var dots = document.querySelectorAll('.notification-dot');
-      dots.forEach(function(dot) { dot.remove(); });
-
-      // Enlever la classe unread
-      var unreadItems = document.querySelectorAll('.notification-item.unread');
-      unreadItems.forEach(function(item) { item.classList.remove('unread'); });
-
-      // Mettre à jour le badge
-      updateBadge(0);
-
-      // Appel API (optionnel)
-      fetch('/api/notifications/read-all', { method: 'POST' }).catch(function() {});
+      // Appel API pour marquer tout comme lu dans la base de données
+      fetch('/api/notifications/read-all', { 
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      })
+      .then(function(response) {
+        if (!response.ok) throw new Error('Erreur API');
+        return response.json();
+      })
+      .then(function() {
+        // Mettre à jour le badge
+        updateBadge(0);
+        // Recharger les notifications pour avoir l'état réel
+        loadNotifications();
+        console.log('✅ Toutes les notifications marquées comme lues');
+      })
+      .catch(function(error) {
+        console.error('❌ Erreur markAllAsRead:', error);
+        // Fallback : mise à jour visuelle même si l'API échoue
+        var dots = document.querySelectorAll('.notification-dot');
+        dots.forEach(function(dot) { dot.remove(); });
+        var unreadItems = document.querySelectorAll('.notification-item.unread');
+        unreadItems.forEach(function(item) { item.classList.remove('unread'); });
+        updateBadge(0);
+      });
     };
+
+    // ========================================================================
+    // SOCKET.IO - Mise à jour en temps réel
+    // ========================================================================
+    if (typeof io !== 'undefined') {
+      try {
+        var socket = io();
+        socket.on('newNotification', function(data) {
+          console.log('📩 Nouvelle notification reçue:', data);
+          // Mettre à jour le badge
+          if (data.unreadCount !== undefined) {
+            updateBadge(data.unreadCount);
+          }
+          // Recharger si le popup est ouvert
+          if (isOpen) {
+            loadNotifications();
+          }
+        });
+      } catch(e) {
+        console.log('Socket.io non disponible pour les notifications');
+      }
+    }
 
     // Échapper HTML
     function escapeHtml(text) {
