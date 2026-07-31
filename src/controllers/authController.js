@@ -209,7 +209,7 @@ exports.renderDashboard = async (req, res) => {
             { key: 'docs', icon: 'archive', title: "Documents", link: '/secretary/documents', description: "Certificats" },
             { key: 'messages', icon: 'mail', title: "Messages", link: '/communications', description: "Messagerie" },
         ];
-    } else if (role === 'school_life_manager' || role === 'responsable_vie_scolaire') {
+    } else if (role === 'school_life_manager' || role === 'responsable_vie_scolaire' || role === 'vie_scolaire') {
         widgets = [
             { key: 'calendar', icon: 'calendar', title: "Calendrier", link: '/school-life/calendar', description: "Événements" },
             { key: 'timetables', icon: 'clock', title: "Emplois du Temps", link: '/school-life/timetables', description: "Gérer les EDT" },
@@ -225,7 +225,6 @@ exports.renderDashboard = async (req, res) => {
             { key: 'chat', icon: 'message-circle', title: "Chat", link: '/chat', description: "Messagerie instantanée" },
         ];
     }
-
     console.log('Rôle:', role, '| Widgets:', widgets.length);
 
     return res.render('dashboard', { 
