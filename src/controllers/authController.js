@@ -209,7 +209,7 @@ exports.renderDashboard = async (req, res) => {
             { key: 'docs', icon: 'archive', title: "Documents", link: '/secretary/documents', description: "Certificats" },
             { key: 'messages', icon: 'mail', title: "Messages", link: '/communications', description: "Messagerie" },
         ];
-    } else if (role === 'school_life_manager' || role === 'responsable_vie_scolaire' || role === 'vie_scolaire' || role === 'school_life_manager') {
+    } else if (role === 'school_life_manager' || role === 'school_life_manager' || role === 'vie_scolaire' || role === 'responsable_vie_scolaire' || role.includes('school') || role.includes('vie')) {
         widgets = [
             { key: 'calendar', icon: 'calendar', title: "Calendrier", link: '/school-life/calendar', description: "Événements" },
             { key: 'timetables', icon: 'clock', title: "Emplois du Temps", link: '/school-life/timetables', description: "Gérer les EDT" },
