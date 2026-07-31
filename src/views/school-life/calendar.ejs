@@ -1,0 +1,253 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+
+<div class="container page-shell py-4">
+    <div class="themed-container">
+        
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i data-feather="calendar"></i> Calendrier Scolaire</h2>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#eventModal" onclick="clearForm()">
+                <i data-feather="plus"></i> Ajouter un événement
+            </button>
+        </div>
+
+        <%- include('../partials/messages') %>
+
+        <div class="card glass-card p-3">
+            <div id="calendar"></div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Modal Ajout/Modification -->
+<div class="modal fade modal-glass" id="eventModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">Ajouter un événement</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="eventId">
+                <div class="mb-3">
+                    <label class="form-label">Titre</label>
+                    <input type="text" class="form-control" id="eventTitle" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Type</label>
+                    <select class="form-select" id="eventType">
+                        <option value="event">Événement</option>
+                        <option value="holiday">Vacances/Jour férié</option>
+                        <option value="exam">Examen</option>
+                        <option value="meeting">Réunion</option>
+                        <option value="other">Autre</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-control" id="eventDesc" rows="2"></textarea>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Date début</label>
+                        <input type="date" class="form-control" id="eventStart" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Date fin</label>
+                        <input type="date" class="form-control" id="eventEnd" required>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Couleur</label>
+                    <input type="color" class="form-control form-control-color" id="eventColor" value="#0d6efd" style="height: 40px; width: 80px;">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger me-auto" id="btnDelete" style="display:none;" onclick="deleteEvent()">
+                    Supprimer
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" onclick="saveEvent()">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FullCalendar CSS -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
+
+<style>
+    .glass-card {
+        background: rgba(255,255,255,0.06);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 16px;
+    }
+    [data-theme="dark"] .glass-card { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.06); }
+    
+    /* FullCalendar dark mode */
+    [data-theme="dark"] .fc { color: #e4e4e4; }
+    [data-theme="dark"] .fc .fc-daygrid-day-number { color: #e4e4e4; }
+    [data-theme="dark"] .fc .fc-col-header-cell-cushion { color: #e4e4e4; }
+    [data-theme="dark"] .fc .fc-toolbar-title { color: #ffffff; }
+    [data-theme="dark"] .fc .fc-button { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.15); color: #fff; }
+    [data-theme="dark"] .fc .fc-button:hover { background: rgba(255,255,255,0.2); }
+    [data-theme="dark"] .fc .fc-button-active { background: #0d6efd !important; }
+    [data-theme="dark"] .fc-theme-standard td, [data-theme="dark"] .fc-theme-standard th { border-color: rgba(255,255,255,0.08); }
+</style>
+
+<!-- FullCalendar JS -->
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+
+<script>
+    let calendar;
+    let currentEventId = null;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof feather !== 'undefined') feather.replace();
+
+        var calendarEl = document.getElementById('calendar');
+        calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            locale: 'fr',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,listMonth'
+            },
+            buttonText: {
+                today: 'Aujourd\'hui',
+                month: 'Mois',
+                week: 'Semaine',
+                list: 'Liste'
+            },
+            editable: true,
+            selectable: true,
+            events: '/api/calendar/events',
+            
+            // Cliquer sur un événement existant
+            eventClick: function(info) {
+                openEditModal(info.event);
+            },
+            
+            // Sélectionner une plage de dates
+            select: function(info) {
+                clearForm();
+                document.getElementById('eventStart').value = info.startStr;
+                document.getElementById('eventEnd').value = info.endStr || info.startStr;
+                var modal = new bootstrap.Modal(document.getElementById('eventModal'));
+                modal.show();
+            },
+            
+            // Drag & drop
+            eventDrop: function(info) {
+                updateEventDates(info.event);
+            },
+            eventResize: function(info) {
+                updateEventDates(info.event);
+            }
+        });
+
+        calendar.render();
+    });
+
+    function clearForm() {
+        currentEventId = null;
+        document.getElementById('eventId').value = '';
+        document.getElementById('eventTitle').value = '';
+        document.getElementById('eventType').value = 'event';
+        document.getElementById('eventDesc').value = '';
+        document.getElementById('eventStart').value = '';
+        document.getElementById('eventEnd').value = '';
+        document.getElementById('eventColor').value = '#0d6efd';
+        document.getElementById('btnDelete').style.display = 'none';
+        document.getElementById('modalTitle').textContent = 'Ajouter un événement';
+    }
+
+    function openEditModal(event) {
+        currentEventId = event.id;
+        document.getElementById('eventId').value = event.id;
+        document.getElementById('eventTitle').value = event.title;
+        document.getElementById('eventType').value = event.extendedProps.type || 'event';
+        document.getElementById('eventDesc').value = event.extendedProps.description || '';
+        document.getElementById('eventStart').value = event.startStr;
+        document.getElementById('eventEnd').value = event.endStr || event.startStr;
+        document.getElementById('eventColor').value = event.backgroundColor || '#0d6efd';
+        document.getElementById('btnDelete').style.display = 'block';
+        document.getElementById('modalTitle').textContent = 'Modifier l\'événement';
+        
+        var modal = new bootstrap.Modal(document.getElementById('eventModal'));
+        modal.show();
+    }
+
+    function saveEvent() {
+        var title = document.getElementById('eventTitle').value.trim();
+        var type = document.getElementById('eventType').value;
+        var desc = document.getElementById('eventDesc').value.trim();
+        var start = document.getElementById('eventStart').value;
+        var end = document.getElementById('eventEnd').value;
+        var color = document.getElementById('eventColor').value;
+
+        if (!title || !start || !end) {
+            alert('Veuillez remplir le titre, la date de début et la date de fin.');
+            return;
+        }
+
+        var data = { title, event_type: type, description: desc, start_date: start, end_date: end, color };
+
+        if (currentEventId) {
+            // Mise à jour
+            fetch('/api/calendar/events/' + currentEventId, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(r => r.json())
+            .then(() => {
+                calendar.refetchEvents();
+                bootstrap.Modal.getInstance(document.getElementById('eventModal')).hide();
+            });
+        } else {
+            // Création
+            fetch('/api/calendar/events', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(r => r.json())
+            .then(() => {
+                calendar.refetchEvents();
+                bootstrap.Modal.getInstance(document.getElementById('eventModal')).hide();
+            });
+        }
+    }
+
+    function deleteEvent() {
+        if (!currentEventId || !confirm('Supprimer cet événement ?')) return;
+        
+        fetch('/api/calendar/events/' + currentEventId, { method: 'DELETE' })
+            .then(r => r.json())
+            .then(() => {
+                calendar.refetchEvents();
+                bootstrap.Modal.getInstance(document.getElementById('eventModal')).hide();
+            });
+    }
+
+    function updateEventDates(event) {
+        fetch('/api/calendar/events/' + event.id, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                title: event.title,
+                start_date: event.startStr,
+                end_date: event.endStr || event.startStr,
+                event_type: event.extendedProps.type || 'event',
+                description: event.extendedProps.description || '',
+                color: event.backgroundColor
+            })
+        });
+    }
+</script>
+
+<%- include('../partials/footer') %>

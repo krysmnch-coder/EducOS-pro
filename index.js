@@ -549,5 +549,8 @@ process.once('SIGUSR2', () => {
   });
 });
 
+const schoolLifeRoutes = require('./src/routes/schoolLifeRoutes');
+app.use('/', schoolLifeRoutes);
+
 // Lancement de l'application
 startServer();
