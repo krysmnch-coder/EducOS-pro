@@ -549,6 +549,88 @@ process.once('SIGUSR2', () => {
   });
 });
 
+// Routes calendrier scolaire
+app.get('/school-life/calendar', ensureAuthenticated, async (req, res) => {
+    try {
+        const establishmentId = req.user.establishment_id;
+        const events = await db('events')
+            .where({ establishment_id: establishmentId })
+            .orderBy('start_date', 'asc')
+            .select('*');
+
+        res.render('school-life/calendar', {
+            title: 'Calendrier Scolaire',
+            events: events,
+            user: req.user
+        });
+    } catch (error) {
+        console.error('Erreur calendrier:', error);
+        req.flash('error_msg', 'Erreur lors du chargement du calendrier.');
+        res.redirect('/dashboard');
+    }
+});
+
+// API calendrier
+app.get('/api/calendar/events', ensureAuthenticated, async (req, res) => {
+    try {
+        const events = await db('events')
+            .where({ establishment_id: req.user.establishment_id })
+            .select('*');
+
+        res.json(events.map(e => ({
+            id: e.id,
+            title: e.title,
+            start: e.start_date,
+            end: e.end_date,
+            backgroundColor: e.color,
+            borderColor: e.color,
+            extendedProps: { description: e.description, type: e.event_type }
+        })));
+    } catch (error) {
+        res.status(500).json({ error: 'Erreur' });
+    }
+});
+
+app.post('/api/calendar/events', ensureAuthenticated, async (req, res) => {
+    try {
+        const { title, description, event_type, start_date, end_date, color } = req.body;
+        const [id] = await db('events').insert({
+            establishment_id: req.user.establishment_id,
+            title, description: description || '', event_type: event_type || 'event',
+            start_date, end_date, color: color || '#0d6efd',
+            created_by: req.user.id
+        });
+        res.status(201).json({ success: true, event: { id, title, start: start_date, end: end_date, backgroundColor: color } });
+    } catch (error) {
+        res.status(500).json({ error: 'Erreur' });
+    }
+});
+
+app.put('/api/calendar/events/:id', ensureAuthenticated, async (req, res) => {
+    try {
+        const { title, description, event_type, start_date, end_date, color } = req.body;
+        await db('events').where({ id: req.params.id, establishment_id: req.user.establishment_id })
+            .update({ title, description, event_type, start_date, end_date, color, updated_at: new Date() });
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: 'Erreur' });
+    }
+});
+
+app.delete('/api/calendar/events/:id', ensureAuthenticated, async (req, res) => {
+    try {
+        await db('events').where({ id: req.params.id, establishment_id: req.user.establishment_id }).del();
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: 'Erreur' });
+    }
+});
+
+function ensureAuthenticated(req, res, next) {
+    if (req.isAuthenticated()) return next();
+    res.redirect('/login');
+}
+
 const schoolLifeRoutes = require('./src/routes/schoolLifeRoutes');
 app.use('/', schoolLifeRoutes);
 
