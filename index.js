@@ -666,58 +666,35 @@ app.delete('/api/calendar/events/:id', async (req, res) => {
 const schoolLifeRoutes = require('./src/routes/schoolLifeRoutes');
 app.use('/', schoolLifeRoutes);
 
+// Créer la table events si elle n'existe pas (sans migration)
+async function createEventsTable() {
+    try {
+        const hasTable = await db.schema.hasTable('events');
+        if (!hasTable) {
+            await db.schema.createTable('events', function(table) {
+                table.increments('id').primary();
+                table.integer('establishment_id').notNullable();
+                table.string('title', 255).notNullable();
+                table.text('description');
+                table.string('event_type', 50).defaultTo('Période scolaire');
+                table.date('start_date').notNullable();
+                table.date('end_date').notNullable();
+                table.string('color', 7).defaultTo('#0d6efd');
+                table.integer('created_by').notNullable();
+                table.timestamps(true, true);
+            });
+            console.log('✅ Table events créée avec succès');
+        } else {
+            console.log('✅ Table events existe déjà');
+        }
+    } catch (error) {
+        console.error('❌ Erreur création table events:', error.message);
+    }
+}
+
+// Appeler après le démarrage
+createEventsTable();
+
 // Lancement de l'application
 startServer();
 
-// TEST - Vérifier la table events
-app.get('/test-events', async (req, res) => {
-    try {
-        // Vérifier si la table existe
-        const tableExists = await db.schema.hasTable('events');
-        
-        if (!tableExists) {
-            return res.send('<h1>❌ La table "events" n\'existe pas !</h1><p>Créez-la avec le SQL fourni.</p>');
-        }
-        
-        // Vérifier les colonnes
-        const columns = await db('events').columnInfo();
-        
-        // Compter les événements
-        const count = await db('events').count('id as count').first();
-        
-        // Récupérer tous les événements
-        const events = await db('events').select('*');
-        
-        let html = '<h1>✅ Table events existe</h1>';
-        html += '<h3>Colonnes :</h3><ul>';
-        for (let col in columns) {
-            html += `<li>${col} (${columns[col].type})</li>`;
-        }
-        html += '</ul>';
-        html += `<h3>Nombre d'événements : ${count.count}</h3>`;
-        html += '<h3>Événements :</h3><pre>' + JSON.stringify(events, null, 2) + '</pre>';
-        
-        // Test d'insertion
-        try {
-            await db('events').insert({
-                establishment_id: req.user ? req.user.establishment_id : 1,
-                title: 'TEST',
-                event_type: 'Période scolaire',
-                start_date: '2024-01-01',
-                end_date: '2024-01-02',
-                color: '#0d6efd',
-                created_by: req.user ? req.user.id : 1
-            });
-            html += '<h2 style="color:green;">✅ Insertion réussie !</h2>';
-            
-            // Supprimer le test
-            await db('events').where({ title: 'TEST' }).del();
-        } catch (insertError) {
-            html += `<h2 style="color:red;">❌ Erreur insertion : ${insertError.message}</h2>`;
-        }
-        
-        res.send(html);
-    } catch (error) {
-        res.send(`<h1>❌ Erreur : ${error.message}</h1>`);
-    }
-});
