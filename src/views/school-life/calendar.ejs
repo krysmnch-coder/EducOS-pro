@@ -6,9 +6,6 @@
         
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2><i data-feather="calendar"></i> Calendrier Scolaire</h2>
-            <button class="btn btn-primary" id="btnAddEvent">
-                <i data-feather="plus"></i> Ajouter un événement
-            </button>
         </div>
 
         <%- include('../partials/messages') %>
@@ -80,7 +77,7 @@
     </div>
 </div>
 
-<!-- Modal avec boutons de type -->
+<!-- Modal -->
 <div class="modal fade" id="eventModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content glass-modal" style="background: rgba(30,30,50,0.92); color: white; border-radius: 16px; backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1);">
@@ -101,32 +98,32 @@
                 
                 <div class="mb-4">
                     <label class="form-label" style="font-weight: 500; display: block; margin-bottom: 10px;">Type d'événement</label>
-                    <div class="row" style="gap: 8px;">
-                        <div class="col-md-4 col-6" style="padding: 0 4px;">
+                    <div class="row g-2">
+                        <div class="col-md-4 col-6">
                             <button type="button" class="btn btn-type w-100" data-type="Rentrée des classes" data-color="#198754" style="background: rgba(25, 135, 84, 0.2); border: 2px solid #198754; color: #fff; border-radius: 10px; padding: 8px 12px; transition: all 0.3s ease;">
                                 <span style="display: inline-block; width: 12px; height: 12px; border-radius: 3px; background: #198754; margin-right: 8px;"></span>
                                 Rentrée
                             </button>
                         </div>
-                        <div class="col-md-4 col-6" style="padding: 0 4px;">
+                        <div class="col-md-4 col-6">
                             <button type="button" class="btn btn-type w-100" data-type="Période scolaire" data-color="#0d6efd" style="background: rgba(13, 110, 253, 0.2); border: 2px solid #0d6efd; color: #fff; border-radius: 10px; padding: 8px 12px; transition: all 0.3s ease;">
                                 <span style="display: inline-block; width: 12px; height: 12px; border-radius: 3px; background: #0d6efd; margin-right: 8px;"></span>
                                 Période scolaire
                             </button>
                         </div>
-                        <div class="col-md-4 col-6" style="padding: 0 4px;">
+                        <div class="col-md-4 col-6">
                             <button type="button" class="btn btn-type w-100" data-type="Vacances scolaires" data-color="#fd7e14" style="background: rgba(253, 126, 20, 0.2); border: 2px solid #fd7e14; color: #fff; border-radius: 10px; padding: 8px 12px; transition: all 0.3s ease;">
                                 <span style="display: inline-block; width: 12px; height: 12px; border-radius: 3px; background: #fd7e14; margin-right: 8px;"></span>
                                 Vacances
                             </button>
                         </div>
-                        <div class="col-md-4 col-6" style="padding: 0 4px;">
+                        <div class="col-md-4 col-6">
                             <button type="button" class="btn btn-type w-100" data-type="Jours fériés" data-color="#dc3545" style="background: rgba(220, 53, 69, 0.2); border: 2px solid #dc3545; color: #fff; border-radius: 10px; padding: 8px 12px; transition: all 0.3s ease;">
                                 <span style="display: inline-block; width: 12px; height: 12px; border-radius: 3px; background: #dc3545; margin-right: 8px;"></span>
                                 Jours fériés
                             </button>
                         </div>
-                        <div class="col-md-4 col-6" style="padding: 0 4px;">
+                        <div class="col-md-4 col-6">
                             <button type="button" class="btn btn-type w-100" data-type="Événements" data-color="#6f42c1" style="background: rgba(111, 66, 193, 0.2); border: 2px solid #6f42c1; color: #fff; border-radius: 10px; padding: 8px 12px; transition: all 0.3s ease;">
                                 <span style="display: inline-block; width: 12px; height: 12px; border-radius: 3px; background: #6f42c1; margin-right: 8px;"></span>
                                 Événements
@@ -180,26 +177,21 @@
     document.addEventListener('DOMContentLoaded', function() {
         if (typeof feather !== 'undefined') feather.replace();
 
-        // Gestion des boutons de type dans le modal
         document.querySelectorAll('.btn-type').forEach(btn => {
             btn.addEventListener('click', function() {
-                // Retirer la sélection de tous les boutons
                 document.querySelectorAll('.btn-type').forEach(b => {
                     b.style.background = b.dataset.color + '33';
                     b.style.borderColor = b.dataset.color;
                     b.style.boxShadow = 'none';
                 });
-                // Sélectionner celui-ci
                 this.style.background = this.dataset.color + '66';
                 this.style.borderColor = this.dataset.color;
                 this.style.boxShadow = '0 0 20px ' + this.dataset.color + '44';
-                // Mettre à jour les champs cachés
                 document.getElementById('eventType').value = this.dataset.type;
                 document.getElementById('eventColor').value = this.dataset.color;
             });
         });
 
-        // Gestion du survol des légendes
         document.querySelectorAll('.legend-item').forEach(item => {
             item.addEventListener('mouseenter', function() {
                 this.style.background = 'rgba(255,255,255,0.08)';
@@ -210,8 +202,7 @@
                 this.style.transform = 'translateX(0)';
             });
             item.addEventListener('click', function() {
-                const type = this.dataset.type;
-                document.getElementById('typeFilter').value = type;
+                document.getElementById('typeFilter').value = this.dataset.type;
                 calendar.refetchEvents();
             });
         });
@@ -245,50 +236,12 @@
                 new bootstrap.Modal(document.getElementById('eventModal')).show();
             },
             eventDrop: function(info) { updateEvent(info.event); },
-            eventResize: function(info) { updateEvent(info.event); },
-            eventDidMount: function(info) {
-                const type = info.event.extendedProps.type || '';
-                info.el.setAttribute('data-type', type);
-                info.el.style.fontSize = '0.7rem';
-                info.el.style.padding = '2px 6px';
-                info.el.style.margin = '1px 0';
-                info.el.style.borderRadius = '4px';
-                info.el.style.border = 'none';
-                info.el.style.lineHeight = '1.4';
-                info.el.style.whiteSpace = 'nowrap';
-                info.el.style.overflow = 'hidden';
-                info.el.style.textOverflow = 'ellipsis';
-                info.el.style.color = '#fff';
-                info.el.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
-
-                if (!info.event.backgroundColor) {
-                    const colors = {
-                        'Rentrée des classes': '#198754',
-                        'Période scolaire': '#0d6efd',
-                        'Vacances scolaires': '#fd7e14',
-                        'Jours fériés': '#dc3545',
-                        'Événements': '#6f42c1'
-                    };
-                    info.el.style.backgroundColor = colors[type] || '#0d6efd';
-                }
-
-                const start = info.event.start;
-                const end = info.event.end;
-                if (end && (end - start) > 86400000) {
-                    info.el.style.borderLeft = '4px solid ' + (info.event.backgroundColor || '#0d6efd');
-                    info.el.style.borderRadius = '0 4px 4px 0';
-                }
-            }
+            eventResize: function(info) { updateEvent(info.event); }
         });
         calendar.render();
 
         document.getElementById('typeFilter').addEventListener('change', function() {
             calendar.refetchEvents();
-        });
-
-        document.getElementById('btnAddEvent').addEventListener('click', function() {
-            clearForm();
-            new bootstrap.Modal(document.getElementById('eventModal')).show();
         });
 
         document.getElementById('btnSave').addEventListener('click', saveEvent);
@@ -313,9 +266,8 @@
         document.getElementById('eventStart').value = '';
         document.getElementById('eventEnd').value = '';
         document.getElementById('btnDelete').style.display = 'none';
-        document.getElementById('modalTitle').textContent = 'Ajouter un événement';
+        document.getElementById('modalTitle').innerHTML = '<i data-feather="plus-circle" style="width: 20px; height: 20px; margin-right: 8px;"></i>Ajouter un événement';
         
-        // Réinitialiser les boutons de type
         document.querySelectorAll('.btn-type').forEach(b => {
             b.style.background = b.dataset.color + '33';
             b.style.borderColor = b.dataset.color;
@@ -325,6 +277,7 @@
                 b.style.boxShadow = '0 0 20px ' + b.dataset.color + '44';
             }
         });
+        if (typeof feather !== 'undefined') feather.replace();
     }
 
     function openEditModal(event) {
@@ -337,9 +290,8 @@
         document.getElementById('eventStart').value = event.startStr;
         document.getElementById('eventEnd').value = event.endStr || event.startStr;
         document.getElementById('btnDelete').style.display = 'block';
-        document.getElementById('modalTitle').textContent = 'Modifier l\'événement';
+        document.getElementById('modalTitle').innerHTML = '<i data-feather="edit" style="width: 20px; height: 20px; margin-right: 8px;"></i>Modifier l\'événement';
         
-        // Mettre à jour les boutons de type
         const type = event.extendedProps.type || 'Période scolaire';
         document.querySelectorAll('.btn-type').forEach(b => {
             b.style.background = b.dataset.color + '33';
@@ -352,6 +304,7 @@
         });
         
         new bootstrap.Modal(document.getElementById('eventModal')).show();
+        if (typeof feather !== 'undefined') feather.replace();
     }
 
     function saveEvent() {
@@ -408,7 +361,6 @@
 </script>
 
 <style>
-    /* Glassmorphism */
     .glass-card {
         background: rgba(255, 255, 255, 0.05) !important;
         backdrop-filter: blur(20px) !important;
@@ -432,7 +384,6 @@
         box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5) !important;
     }
 
-    /* FullCalendar Styles */
     .fc { color: #e4e4e4; }
     .fc .fc-toolbar-title { color: #fff; font-size: 1.3rem; font-weight: 600; }
     .fc .fc-button { 
@@ -461,49 +412,6 @@
     .fc .fc-day-today { background: rgba(13, 110, 253, 0.08) !important; }
     .fc .fc-highlight { background: rgba(13, 110, 253, 0.15) !important; }
 
-    /* Événements */
-    .fc-daygrid-day-events {
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-        padding: 0 3px;
-    }
-    .fc-daygrid-event {
-        font-size: 0.7rem !important;
-        padding: 2px 6px !important;
-        margin: 0 !important;
-        border-radius: 4px !important;
-        border: none !important;
-        line-height: 1.4 !important;
-        white-space: nowrap !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-        color: #fff !important;
-        font-weight: 500 !important;
-        transition: all 0.3s ease !important;
-        cursor: pointer !important;
-    }
-    .fc-daygrid-event:hover {
-        transform: scale(1.02);
-        box-shadow: 0 4px 16px rgba(0,0,0,0.3) !important;
-    }
-    .fc-daygrid-event .fc-event-title {
-        color: #fff !important;
-        font-weight: 500 !important;
-    }
-
-    .fc-daygrid-day-frame {
-        min-height: 85px !important;
-        padding: 4px !important;
-    }
-    .fc-daygrid-day-events {
-        min-height: 22px;
-    }
-    .fc-daygrid-event-harness {
-        margin: 1px 0 !important;
-    }
-
-    /* Légende interactive */
     .legend-item {
         border-radius: 8px !important;
         transition: all 0.3s ease !important;
@@ -516,7 +424,6 @@
         box-shadow: 0 2px 12px rgba(0,0,0,0.2) !important;
     }
 
-    /* Boutons de type dans le modal */
     .btn-type {
         transition: all 0.3s ease !important;
         font-weight: 500 !important;
@@ -532,11 +439,7 @@
         transform: translateY(-2px) !important;
         box-shadow: 0 4px 20px rgba(0,0,0,0.3) !important;
     }
-    .btn-type:active {
-        transform: scale(0.95) !important;
-    }
 
-    /* Responsive */
     @media (max-width: 768px) {
         .col-md-3, .col-md-9 {
             width: 100% !important;
@@ -544,45 +447,10 @@
             max-width: 100% !important;
             padding: 0 !important;
         }
-        .col-md-3 {
-            margin-bottom: 20px !important;
-            padding-right: 0 !important;
-        }
-        .col-md-9 {
-            padding-left: 0 !important;
-        }
-        .legend-container {
-            height: auto !important;
-        }
-        .btn-type {
-            font-size: 0.75rem !important;
-            padding: 6px 8px !important;
-            height: 36px !important;
-        }
-        .fc-daygrid-day-frame {
-            min-height: 60px !important;
-        }
-        .fc-daygrid-event {
-            font-size: 0.6rem !important;
-            padding: 1px 3px !important;
-        }
-    }
-    
-    /* Scroll personnalisé */
-    ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
-    }
-    ::-webkit-scrollbar-track {
-        background: rgba(255,255,255,0.05);
-        border-radius: 10px;
-    }
-    ::-webkit-scrollbar-thumb {
-        background: rgba(255,255,255,0.2);
-        border-radius: 10px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-        background: rgba(255,255,255,0.3);
+        .col-md-3 { margin-bottom: 20px !important; padding-right: 0 !important; }
+        .col-md-9 { padding-left: 0 !important; }
+        .legend-container { height: auto !important; }
+        .btn-type { font-size: 0.75rem !important; padding: 6px 8px !important; height: 36px !important; }
     }
 </style>
 
