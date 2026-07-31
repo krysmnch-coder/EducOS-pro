@@ -695,6 +695,22 @@ async function createEventsTable() {
 // Appeler après le démarrage
 createEventsTable();
 
+// Page emplois du temps
+app.get('/school-life/timetables', async (req, res) => {
+    if (!req.user) return res.redirect('/login');
+    
+    try {
+        res.render('school-life/timetables', {
+            title: 'Emplois du Temps',
+            user: req.user
+        });
+    } catch (error) {
+        console.error('Erreur timetables:', error);
+        req.flash('error_msg', 'Erreur lors du chargement.');
+        res.redirect('/dashboard');
+    }
+});
+
 // Lancement de l'application
 startServer();
 
