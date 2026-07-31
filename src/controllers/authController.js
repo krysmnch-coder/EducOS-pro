@@ -160,43 +160,80 @@ exports.renderLogin = async (req, res) => {
 exports.renderDashboard = async (req, res) => {
     const user = req.user;
 
-    switch (user.role) {
-        case ROLES.SUPER_ADMIN:
-        case ROLES.ADMINISTRATOR:
-            return adminController.renderAdminDashboard(req, res);
-        default:
-            let parentData = {};
-
-            if (user.role === ROLES.PARENT) {
-                try {
-                    parentData.children = await userModel.getLinkedChildrenForParent(user.id);
-                    if (req.session.selectedChildId) {
-                        const selectedChild = parentData.children.find(c => c.id == req.session.selectedChildId);
-                        if (selectedChild) {
-                            parentData.selectedChild = selectedChild;
-                        } else {
-                            delete req.session.selectedChildId;
-                        }
-                    }
-                } catch (error) {
-                    parentData.children = [];
-                }
-            }
-
-            let widgets = [
-                { key: 'profile', icon: 'user', title: 'Mon Profil', link: '/profile', description: 'Gérer mon profil' },
-                { key: 'messages', icon: 'mail', title: 'Messages', link: '/communications', description: 'Consulter mes messages' },
-                { key: 'documents', icon: 'file-text', title: 'Documents', link: '/documents', description: 'Accéder aux documents' },
-                { key: 'chat', icon: 'message-circle', title: 'Chat', link: '/chat', description: 'Messagerie instantanée' },
-            ];
-
-            return res.render('dashboard', { 
-                title: 'Tableau de bord | EducOS-pro', 
-                user: req.user,
-                widgets: widgets,
-                parentData
-            });
+    if (['SUPER_ADMIN', 'ADMINISTRATOR', 'superadmin', 'administrateur'].includes(user.role)) {
+        return adminController.renderAdminDashboard(req, res);
     }
+
+    let parentData = {};
+    if (user.role === 'PARENT' || user.role === 'parent') {
+        try {
+            parentData.children = await userModel.getLinkedChildrenForParent(user.id);
+        } catch (error) {
+            parentData.children = [];
+        }
+    }
+
+    // Widgets selon le rôle (en minuscules)
+    const role = user.role.toLowerCase();
+    console.log('========== RÔLE UTILISATEUR ==========');
+    console.log('Role brut:', user.role);
+    console.log('Role.toLowerCase():', user.role.toLowerCase());
+    console.log('======================================');
+    let widgets = [];
+
+    if (role === 'parent') {
+        widgets = [
+            { key: 'grades', icon: 'award', title: "Notes de l'enfant", link: '/student/grades', description: "Consulter les notes" },
+            { key: 'absences', icon: 'user-x', title: "Absences", link: '/student/absences', description: "Voir les absences" },
+            { key: 'docs', icon: 'file-text', title: "Documents", link: '/student/documents', description: "Documents scolaires" },
+            { key: 'messages', icon: 'mail', title: "Messages", link: '/communications', description: "Messagerie" },
+        ];
+    } else if (role === 'student' || role === 'eleve') {
+        widgets = [
+            { key: 'grades', icon: 'award', title: "Mes Notes", link: '/student/grades', description: "Consulter mes notes" },
+            { key: 'resources', icon: 'book-open', title: "Ressources", link: '/student/resources', description: "Documents de cours" },
+            { key: 'timetable', icon: 'clock', title: "Emploi du temps", link: '/student/timetable', description: "Mon planning" },
+            { key: 'messages', icon: 'mail', title: "Messages", link: '/communications', description: "Messagerie" },
+        ];
+    } else if (role === 'professor' || role === 'professeur') {
+        widgets = [
+            { key: 'grades', icon: 'edit', title: "Saisie Notes", link: '/professor/grades', description: "Entrer les notes" },
+            { key: 'resources', icon: 'book-open', title: "Ressources", link: '/professor/resources', description: "Partager des cours" },
+            { key: 'logbook', icon: 'book', title: "Cahier de Texte", link: '/professor/logbook', description: "Contenu des séances" },
+            { key: 'messages', icon: 'mail', title: "Messages", link: '/communications', description: "Messagerie" },
+        ];
+    } else if (role === 'secretary' || role === 'secretaire') {
+        widgets = [
+            { key: 'students', icon: 'users', title: "Élèves", link: '/students', description: "Liste des élèves" },
+            { key: 'payments', icon: 'dollar-sign', title: "Paiements", link: '/secretary/payments', description: "Frais de scolarité" },
+            { key: 'docs', icon: 'archive', title: "Documents", link: '/secretary/documents', description: "Certificats" },
+            { key: 'messages', icon: 'mail', title: "Messages", link: '/communications', description: "Messagerie" },
+        ];
+    } else if (role === 'school_life_manager') {
+        widgets = [
+            { key: 'calendar', icon: 'calendar', title: "Calendrier", link: '/school-life/calendar', description: "Événements" },
+            { key: 'timetables', icon: 'clock', title: "Emplois du Temps", link: '/school-life/timetables', description: "Gérer les EDT" },
+            { key: 'absences', icon: 'user-x', title: "Absences", link: '/school-life/absences', description: "Suivi des absences" },
+            { key: 'messages', icon: 'mail', title: "Messages", link: '/communications', description: "Messagerie" },
+        ];
+    } else {
+        // Widgets par défaut
+        widgets = [
+            { key: 'profile', icon: 'user', title: "Mon Profil", link: '/profile', description: "Gérer mon profil" },
+            { key: 'messages', icon: 'mail', title: "Messages", link: '/communications', description: "Messagerie" },
+            { key: 'docs', icon: 'file-text', title: "Documents", link: '/documents', description: "Documents" },
+            { key: 'chat', icon: 'message-circle', title: "Chat", link: '/chat', description: "Messagerie instantanée" },
+        ];
+    }
+
+    console.log('Rôle:', role, '| Widgets:', widgets.length);
+
+    return res.render('dashboard', { 
+        title: 'Tableau de bord | EducOS-pro', 
+        user: req.user,
+        widgets: widgets,
+        parentData
+    });
 };
 
 /**
