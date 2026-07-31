@@ -550,25 +550,8 @@ process.once('SIGUSR2', () => {
 });
 
 // Routes calendrier scolaire
-app.get('/school-life/calendar', ensureAuthenticated, async (req, res) => {
-    try {
-        const establishmentId = req.user.establishment_id;
-        const events = await db('events')
-            .where({ establishment_id: establishmentId })
-            .orderBy('start_date', 'asc')
-            .select('*');
 
-        res.render('school-life/calendar', {
-            title: 'Calendrier Scolaire',
-            events: events,
-            user: req.user
-        });
-    } catch (error) {
-        console.error('Erreur calendrier:', error);
-        req.flash('error_msg', 'Erreur lors du chargement du calendrier.');
-        res.redirect('/dashboard');
-    }
-});
+
 
 // API calendrier
 app.get('/api/calendar/events', ensureAuthenticated, async (req, res) => {
