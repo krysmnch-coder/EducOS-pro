@@ -177,7 +177,6 @@
     document.addEventListener('DOMContentLoaded', function() {
         if (typeof feather !== 'undefined') feather.replace();
 
-        // Gestion des boutons de type dans le modal
         document.querySelectorAll('.btn-type').forEach(btn => {
             btn.addEventListener('click', function() {
                 document.querySelectorAll('.btn-type').forEach(b => {
@@ -193,7 +192,6 @@
             });
         });
 
-        // Gestion du survol des légendes
         document.querySelectorAll('.legend-item').forEach(item => {
             item.addEventListener('mouseenter', function() {
                 this.style.background = 'rgba(255,255,255,0.08)';
@@ -219,11 +217,6 @@
                 right: 'dayGridMonth,timeGridWeek,listMonth'
             },
             buttonText: { today: 'Aujourd\'hui', month: 'Mois', week: 'Semaine', list: 'Liste' },
-            views: {
-                listMonth: {
-                    displayEventTime: false
-                }
-            },
             editable: true,
             selectable: true,
             displayEventTime: false,
@@ -233,7 +226,13 @@
                 if (type !== 'all') url += '?type=' + encodeURIComponent(type);
                 fetch(url)
                     .then(r => r.json())
-                    .then(data => successCallback(data))
+                    .then(data => {
+                        // ✅ Regrouper les événements multi-jours dans la vue liste
+                        if (calendar.view.type === 'listMonth') {
+                            data = groupMultiDayEvents(data);
+                        }
+                        successCallback(data);
+                    })
                     .catch(err => failureCallback(err));
             },
             eventClick: function(info) { openEditModal(info.event); },
@@ -288,12 +287,6 @@
                     info.el.style.borderRadius = '0 6px 6px 0';
                     info.el.style.paddingLeft = '10px';
                 }
-
-                // Vue liste : bordure gauche colorée
-                if (calendar.view.type === 'listMonth') {
-                    info.el.style.borderLeft = '4px solid ' + (info.event.backgroundColor || '#0d6efd');
-                    info.el.style.padding = '8px 12px';
-                }
             }
         });
         calendar.render();
@@ -313,6 +306,54 @@
                 });
         });
     });
+
+    // ✅ Regrouper les événements multi-jours en une seule ligne dans la vue liste
+    function groupMultiDayEvents(events) {
+        const grouped = [];
+        const processed = new Set();
+
+        events.forEach(event => {
+            if (processed.has(event.id)) return;
+            
+            const start = new Date(event.start);
+            const end = new Date(event.end);
+            const diffDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+            
+            // Si c'est un événement multi-jours (> 1 jour)
+            if (diffDays > 1) {
+                // Chercher tous les événements du même groupe (même titre + dates consécutives)
+                const groupEvents = events.filter(e => 
+                    e.title === event.title && 
+                    e.extendedProps.type === event.extendedProps.type &&
+                    !processed.has(e.id)
+                );
+                
+                // Trouver la date de début la plus ancienne et la date de fin la plus récente
+                let minStart = start;
+                let maxEnd = end;
+                groupEvents.forEach(e => {
+                    processed.add(e.id);
+                    const eStart = new Date(e.start);
+                    const eEnd = new Date(e.end);
+                    if (eStart < minStart) minStart = eStart;
+                    if (eEnd > maxEnd) maxEnd = eEnd;
+                });
+
+                // Créer un événement groupé
+                grouped.push({
+                    ...event,
+                    title: event.title,
+                    start: minStart.toISOString().split('T')[0],
+                    end: maxEnd.toISOString().split('T')[0]
+                });
+            } else {
+                processed.add(event.id);
+                grouped.push(event);
+            }
+        });
+
+        return grouped;
+    }
 
     function clearForm() {
         currentEventId = null;
@@ -497,17 +538,18 @@
     }
     .fc-timegrid-event-harness { margin: 1px 0 !important; }
 
-    /* Vue liste */
-    .fc-list-event-graphic { display: none !important; }
-    .fc-list-event-time { display: inline !important; font-size: 0.8rem !important; color: #adb5bd !important; margin-right: 8px !important; }
-    .fc-list-event-title { display: inline !important; font-weight: 500 !important; font-size: 0.85rem !important; }
-    .fc-list-event { padding: 8px 12px !important; border-radius: 6px !important; margin: 2px 0 !important; transition: all 0.2s ease !important; border-left: 4px solid transparent !important; }
-    .fc-list-event:hover { background: rgba(255,255,255,0.05) !important; transform: translateX(3px) !important; }
-    .fc-list-day-cushion { background: rgba(13, 110, 253, 0.1) !important; padding: 8px 12px !important; border-radius: 6px !important; margin: 4px 0 !important; font-weight: 600 !important; }
-    .fc-list-day-text { color: #fff !important; }
-    .fc-list-day-side-text { color: #adb5bd !important; }
-    .fc-list-table td { border-color: rgba(255,255,255,0.04) !important; padding: 4px 8px !important; }
-    .fc-list-event-dot { display: none !important; }
+    /* ✅ Vue liste - événements regroupés */
+    .fc-list-event {
+        border-radius: 6px !important;
+        margin: 2px 4px !important;
+        border: none !important;
+    }
+    .fc-list-event-graphic {
+        padding: 8px !important;
+    }
+    .fc-list-event-title {
+        font-weight: 500 !important;
+    }
 
     .legend-item {
         border-radius: 8px !important;
