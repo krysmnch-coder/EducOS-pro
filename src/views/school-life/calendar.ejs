@@ -98,32 +98,32 @@
                 
                 <div class="mb-4">
                     <label class="form-label" style="font-weight: 500; display: block; margin-bottom: 10px;">Type d'événement</label>
-                    <div class="row g-2">
-                        <div class="col-md-4 col-6">
+                    <div class="row" style="gap: 8px;">
+                        <div class="col-md-4 col-6" style="padding: 0 4px;">
                             <button type="button" class="btn btn-type w-100" data-type="Rentrée des classes" data-color="#198754" style="background: rgba(25, 135, 84, 0.2); border: 2px solid #198754; color: #fff; border-radius: 10px; padding: 8px 12px; transition: all 0.3s ease;">
                                 <span style="display: inline-block; width: 12px; height: 12px; border-radius: 3px; background: #198754; margin-right: 8px;"></span>
                                 Rentrée
                             </button>
                         </div>
-                        <div class="col-md-4 col-6">
+                        <div class="col-md-4 col-6" style="padding: 0 4px;">
                             <button type="button" class="btn btn-type w-100" data-type="Période scolaire" data-color="#0d6efd" style="background: rgba(13, 110, 253, 0.2); border: 2px solid #0d6efd; color: #fff; border-radius: 10px; padding: 8px 12px; transition: all 0.3s ease;">
                                 <span style="display: inline-block; width: 12px; height: 12px; border-radius: 3px; background: #0d6efd; margin-right: 8px;"></span>
                                 Période scolaire
                             </button>
                         </div>
-                        <div class="col-md-4 col-6">
+                        <div class="col-md-4 col-6" style="padding: 0 4px;">
                             <button type="button" class="btn btn-type w-100" data-type="Vacances scolaires" data-color="#fd7e14" style="background: rgba(253, 126, 20, 0.2); border: 2px solid #fd7e14; color: #fff; border-radius: 10px; padding: 8px 12px; transition: all 0.3s ease;">
                                 <span style="display: inline-block; width: 12px; height: 12px; border-radius: 3px; background: #fd7e14; margin-right: 8px;"></span>
                                 Vacances
                             </button>
                         </div>
-                        <div class="col-md-4 col-6">
+                        <div class="col-md-4 col-6" style="padding: 0 4px;">
                             <button type="button" class="btn btn-type w-100" data-type="Jours fériés" data-color="#dc3545" style="background: rgba(220, 53, 69, 0.2); border: 2px solid #dc3545; color: #fff; border-radius: 10px; padding: 8px 12px; transition: all 0.3s ease;">
                                 <span style="display: inline-block; width: 12px; height: 12px; border-radius: 3px; background: #dc3545; margin-right: 8px;"></span>
                                 Jours fériés
                             </button>
                         </div>
-                        <div class="col-md-4 col-6">
+                        <div class="col-md-4 col-6" style="padding: 0 4px;">
                             <button type="button" class="btn btn-type w-100" data-type="Événements" data-color="#6f42c1" style="background: rgba(111, 66, 193, 0.2); border: 2px solid #6f42c1; color: #fff; border-radius: 10px; padding: 8px 12px; transition: all 0.3s ease;">
                                 <span style="display: inline-block; width: 12px; height: 12px; border-radius: 3px; background: #6f42c1; margin-right: 8px;"></span>
                                 Événements
@@ -177,6 +177,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         if (typeof feather !== 'undefined') feather.replace();
 
+        // Gestion des boutons de type dans le modal
         document.querySelectorAll('.btn-type').forEach(btn => {
             btn.addEventListener('click', function() {
                 document.querySelectorAll('.btn-type').forEach(b => {
@@ -192,6 +193,7 @@
             });
         });
 
+        // Gestion du survol des légendes
         document.querySelectorAll('.legend-item').forEach(item => {
             item.addEventListener('mouseenter', function() {
                 this.style.background = 'rgba(255,255,255,0.08)';
@@ -219,6 +221,7 @@
             buttonText: { today: 'Aujourd\'hui', month: 'Mois', week: 'Semaine', list: 'Liste' },
             editable: true,
             selectable: true,
+            displayEventTime: false,
             events: function(fetchInfo, successCallback, failureCallback) {
                 const type = document.getElementById('typeFilter').value;
                 let url = '/api/calendar/events';
@@ -236,7 +239,51 @@
                 new bootstrap.Modal(document.getElementById('eventModal')).show();
             },
             eventDrop: function(info) { updateEvent(info.event); },
-            eventResize: function(info) { updateEvent(info.event); }
+            eventResize: function(info) { updateEvent(info.event); },
+            eventDidMount: function(info) {
+                const type = info.event.extendedProps.type || '';
+                info.el.style.fontSize = '0.8rem';
+                info.el.style.padding = '5px 8px';
+                info.el.style.margin = '2px 0';
+                info.el.style.borderRadius = '6px';
+                info.el.style.border = 'none';
+                info.el.style.color = '#fff';
+                info.el.style.fontWeight = '500';
+                info.el.style.boxShadow = '0 2px 8px rgba(0,0,0,0.25)';
+                info.el.style.minHeight = '22px';
+                info.el.style.display = 'flex';
+                info.el.style.alignItems = 'center';
+                info.el.style.overflow = 'hidden';
+                info.el.style.textOverflow = 'ellipsis';
+                info.el.style.whiteSpace = 'nowrap';
+
+                if (calendar.view.type === 'timeGridWeek') {
+                    info.el.style.justifyContent = 'center';
+                    info.el.style.textAlign = 'center';
+                    info.el.style.whiteSpace = 'normal';
+                    info.el.style.fontSize = '0.75rem';
+                    info.el.style.padding = '2px 4px';
+                }
+
+                if (!info.event.backgroundColor) {
+                    const colors = {
+                        'Rentrée des classes': '#198754',
+                        'Période scolaire': '#0d6efd',
+                        'Vacances scolaires': '#fd7e14',
+                        'Jours fériés': '#dc3545',
+                        'Événements': '#6f42c1'
+                    };
+                    info.el.style.backgroundColor = colors[type] || '#0d6efd';
+                }
+
+                const start = info.event.start;
+                const end = info.event.end;
+                if (end && (end - start) > 86400000) {
+                    info.el.style.borderLeft = '5px solid ' + (info.event.backgroundColor || '#0d6efd');
+                    info.el.style.borderRadius = '0 6px 6px 0';
+                    info.el.style.paddingLeft = '10px';
+                }
+            }
         });
         calendar.render();
 
@@ -266,7 +313,7 @@
         document.getElementById('eventStart').value = '';
         document.getElementById('eventEnd').value = '';
         document.getElementById('btnDelete').style.display = 'none';
-        document.getElementById('modalTitle').innerHTML = '<i data-feather="plus-circle" style="width: 20px; height: 20px; margin-right: 8px;"></i>Ajouter un événement';
+        document.getElementById('modalTitle').innerHTML = '<i data-feather="plus-circle" style="width:20px;height:20px;margin-right:8px;"></i> Ajouter un événement';
         
         document.querySelectorAll('.btn-type').forEach(b => {
             b.style.background = b.dataset.color + '33';
@@ -290,7 +337,7 @@
         document.getElementById('eventStart').value = event.startStr;
         document.getElementById('eventEnd').value = event.endStr || event.startStr;
         document.getElementById('btnDelete').style.display = 'block';
-        document.getElementById('modalTitle').innerHTML = '<i data-feather="edit" style="width: 20px; height: 20px; margin-right: 8px;"></i>Modifier l\'événement';
+        document.getElementById('modalTitle').innerHTML = '<i data-feather="edit-2" style="width:20px;height:20px;margin-right:8px;"></i> Modifier l\'événement';
         
         const type = event.extendedProps.type || 'Période scolaire';
         document.querySelectorAll('.btn-type').forEach(b => {
@@ -311,11 +358,24 @@
         var title = document.getElementById('eventTitle').value.trim();
         var start = document.getElementById('eventStart').value;
         var end = document.getElementById('eventEnd').value;
+        var type = document.getElementById('eventType').value;
+        
         if (!title || !start || !end) return alert('Titre et dates requis.');
+
+        if (type === 'Période scolaire') {
+            var startDate = new Date(start + 'T00:00:00');
+            var endDate = new Date(end + 'T00:00:00');
+            if (startDate.getDay() === 6) startDate.setDate(startDate.getDate() + 2);
+            if (startDate.getDay() === 0) startDate.setDate(startDate.getDate() + 1);
+            if (endDate.getDay() === 6) endDate.setDate(endDate.getDate() - 1);
+            if (endDate.getDay() === 0) endDate.setDate(endDate.getDate() - 2);
+            start = startDate.toISOString().split('T')[0];
+            end = endDate.toISOString().split('T')[0];
+        }
 
         var data = {
             title: title,
-            event_type: document.getElementById('eventType').value,
+            event_type: type,
             description: document.getElementById('eventDesc').value.trim(),
             start_date: start,
             end_date: end,
@@ -339,9 +399,7 @@
             calendar.refetchEvents();
             bootstrap.Modal.getInstance(document.getElementById('eventModal')).hide();
         })
-        .catch(function(err) {
-            alert('Erreur: ' + err.message);
-        });
+        .catch(function(err) { alert('Erreur: ' + err.message); });
     }
 
     function updateEvent(event) {
@@ -389,28 +447,44 @@
     .fc .fc-button { 
         background: rgba(255,255,255,0.08); 
         border: 1px solid rgba(255,255,255,0.12); 
-        color: #fff; 
-        text-transform: capitalize;
-        backdrop-filter: blur(10px);
-        border-radius: 8px;
-        padding: 6px 14px;
-        transition: all 0.3s ease;
+        color: #fff; text-transform: capitalize;
+        backdrop-filter: blur(10px); border-radius: 8px;
+        padding: 6px 14px; transition: all 0.3s ease;
     }
-    .fc .fc-button:hover { 
-        background: rgba(255,255,255,0.15); 
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    }
-    .fc .fc-button-active { 
-        background: rgba(13, 110, 253, 0.3) !important; 
-        border-color: #0d6efd !important; 
-        box-shadow: 0 0 20px rgba(13, 110, 253, 0.2);
-    }
+    .fc .fc-button:hover { background: rgba(255,255,255,0.15); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+    .fc .fc-button-active { background: rgba(13, 110, 253, 0.3) !important; border-color: #0d6efd !important; box-shadow: 0 0 20px rgba(13, 110, 253, 0.2); }
     .fc-theme-standard td, .fc-theme-standard th { border-color: rgba(255,255,255,0.06); }
     .fc .fc-daygrid-day-number { color: #ccc; font-weight: 500; }
     .fc .fc-col-header-cell-cushion { color: #ccc; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px; }
     .fc .fc-day-today { background: rgba(13, 110, 253, 0.08) !important; }
     .fc .fc-highlight { background: rgba(13, 110, 253, 0.15) !important; }
+
+    .fc-daygrid-event {
+        font-size: 0.8rem !important;
+        padding: 5px 8px !important;
+        margin: 2px 0 !important;
+        border-radius: 6px !important;
+        border: none !important;
+        min-height: 24px !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+    .fc-daygrid-event .fc-event-title { color: #fff !important; font-weight: 500 !important; }
+    .fc-daygrid-event-harness { margin: 1px 0 !important; }
+
+    .fc-timegrid-event {
+        border-radius: 6px !important;
+        border: none !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
+        min-height: 24px !important;
+    }
+    .fc-timegrid-event .fc-event-title {
+        text-align: center !important;
+        font-weight: 500 !important;
+        font-size: 0.8rem !important;
+        padding: 2px 4px !important;
+    }
+    .fc-timegrid-event-harness { margin: 1px 0 !important; }
 
     .legend-item {
         border-radius: 8px !important;
@@ -435,23 +509,21 @@
         align-items: center !important;
         justify-content: center !important;
     }
-    .btn-type:hover {
-        transform: translateY(-2px) !important;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.3) !important;
-    }
+    .btn-type:hover { transform: translateY(-2px) !important; box-shadow: 0 4px 20px rgba(0,0,0,0.3) !important; }
+    .btn-type:active { transform: scale(0.95) !important; }
 
     @media (max-width: 768px) {
-        .col-md-3, .col-md-9 {
-            width: 100% !important;
-            flex: 0 0 100% !important;
-            max-width: 100% !important;
-            padding: 0 !important;
-        }
+        .col-md-3, .col-md-9 { width: 100% !important; flex: 0 0 100% !important; max-width: 100% !important; padding: 0 !important; }
         .col-md-3 { margin-bottom: 20px !important; padding-right: 0 !important; }
         .col-md-9 { padding-left: 0 !important; }
         .legend-container { height: auto !important; }
         .btn-type { font-size: 0.75rem !important; padding: 6px 8px !important; height: 36px !important; }
     }
+
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
 </style>
 
 <%- include('../partials/footer') %>
