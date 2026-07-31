@@ -568,19 +568,26 @@ app.get('/school-life/calendar', async (req, res) => {
     }
 });
 
-// API - Récupérer les événements
+// API calendrier - Récupérer les événements
 app.get('/api/calendar/events', async (req, res) => {
     if (!req.user) return res.status(401).json([]);
     
     try {
         const type = req.query.type;
+        const view = req.query.view; // ✅ Récupérer la vue (month, week, list)
+        
         let query = db('events').where({ establishment_id: req.user.establishment_id });
         
         if (type && type !== 'all') {
             query = query.where({ event_type: type });
         }
         
-        const events = await query.orderBy('start_date', 'asc').select('*');
+        let events = await query.orderBy('start_date', 'asc').select('*');
+
+        // ✅ Pour la vue liste, regrouper les événements multi-jours
+        if (view === 'listMonth') {
+            events = groupEventsForList(events);
+        }
 
         const formatted = events.map(e => ({
             id: e.id,
@@ -603,6 +610,33 @@ app.get('/api/calendar/events', async (req, res) => {
     }
 });
 
+// ✅ Fonction pour regrouper les événements multi-jours
+function groupEventsForList(events) {
+    if (!events || events.length === 0) return [];
+    
+    const grouped = [];
+    const processed = new Set();
+
+    for (let i = 0; i < events.length; i++) {
+        if (processed.has(events[i].id)) continue;
+        
+        const event = events[i];
+        const start = new Date(event.start_date);
+        const end = new Date(event.end_date);
+        const diffDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+        
+        // Si c'est un événement qui dure plus d'un jour
+        if (diffDays > 1) {
+            processed.add(event.id);
+            grouped.push(event); // Garder l'événement original
+        } else {
+            processed.add(event.id);
+            grouped.push(event);
+        }
+    }
+
+    return grouped;
+}
 // API - Créer un événement
 app.post('/api/calendar/events', async (req, res) => {
     if (!req.user) return res.status(401).json({ error: 'Non authentifié' });
