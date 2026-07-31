@@ -1,8 +1,8 @@
 <%- include('../partials/head') %>
 <%- include('../partials/header') %>
 
-<div class="container page-shell py-4">
-    <div class="themed-container">
+<div class="container-fluid page-shell py-4">
+    <div class="themed-container" style="max-width: 100%; padding: 0 20px;">
         
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2><i data-feather="calendar"></i> Calendrier Scolaire</h2>
@@ -13,60 +13,158 @@
 
         <%- include('../partials/messages') %>
 
-        <div class="card" style="background: rgba(255,255,255,0.05); border-radius: 16px; padding: 20px;">
-            <div id="calendar"></div>
+        <div class="card glass-card" style="border-radius: 16px; padding: 20px;">
+            <div class="row" style="margin: 0; gap: 0;">
+                <!-- Légende à gauche -->
+                <div class="col-md-3" style="padding: 0; padding-right: 15px;">
+                    <div class="legend-container glass-panel" style="border-radius: 12px; padding: 20px; height: 100%;">
+                        <h5 style="color: #fff; margin-bottom: 20px; font-weight: 600;">
+                            <i data-feather="info" style="width: 18px; height: 18px; margin-right: 8px;"></i>
+                            Légende
+                        </h5>
+                        <div class="legend-item" data-type="Rentrée des classes" style="display: flex; align-items: center; margin-bottom: 12px; cursor: pointer; padding: 8px 12px; border-radius: 8px; transition: all 0.3s ease;">
+                            <span style="display: inline-block; width: 24px; height: 24px; border-radius: 6px; background: #198754; margin-right: 12px; box-shadow: 0 2px 8px rgba(25, 135, 84, 0.3);"></span>
+                            <span style="color: #e4e4e4; font-size: 0.95rem;">Rentrée des classes</span>
+                        </div>
+                        <div class="legend-item" data-type="Période scolaire" style="display: flex; align-items: center; margin-bottom: 12px; cursor: pointer; padding: 8px 12px; border-radius: 8px; transition: all 0.3s ease;">
+                            <span style="display: inline-block; width: 24px; height: 24px; border-radius: 6px; background: #0d6efd; margin-right: 12px; box-shadow: 0 2px 8px rgba(13, 110, 253, 0.3);"></span>
+                            <span style="color: #e4e4e4; font-size: 0.95rem;">Période scolaire</span>
+                        </div>
+                        <div class="legend-item" data-type="Vacances scolaires" style="display: flex; align-items: center; margin-bottom: 12px; cursor: pointer; padding: 8px 12px; border-radius: 8px; transition: all 0.3s ease;">
+                            <span style="display: inline-block; width: 24px; height: 24px; border-radius: 6px; background: #fd7e14; margin-right: 12px; box-shadow: 0 2px 8px rgba(253, 126, 20, 0.3);"></span>
+                            <span style="color: #e4e4e4; font-size: 0.95rem;">Vacances scolaires</span>
+                        </div>
+                        <div class="legend-item" data-type="Jours fériés" style="display: flex; align-items: center; margin-bottom: 12px; cursor: pointer; padding: 8px 12px; border-radius: 8px; transition: all 0.3s ease;">
+                            <span style="display: inline-block; width: 24px; height: 24px; border-radius: 6px; background: #dc3545; margin-right: 12px; box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);"></span>
+                            <span style="color: #e4e4e4; font-size: 0.95rem;">Jours fériés</span>
+                        </div>
+                        <div class="legend-item" data-type="Événements" style="display: flex; align-items: center; margin-bottom: 12px; cursor: pointer; padding: 8px 12px; border-radius: 8px; transition: all 0.3s ease;">
+                            <span style="display: inline-block; width: 24px; height: 24px; border-radius: 6px; background: #6f42c1; margin-right: 12px; box-shadow: 0 2px 8px rgba(111, 66, 193, 0.3);"></span>
+                            <span style="color: #e4e4e4; font-size: 0.95rem;">Événements</span>
+                        </div>
+                        <hr style="border-color: rgba(255,255,255,0.1); margin: 20px 0;">
+                        <div style="color: #888; font-size: 0.85rem;">
+                            <p style="margin: 8px 0; display: flex; align-items: center;">
+                                <i data-feather="mouse-pointer" style="width: 16px; height: 16px; margin-right: 8px;"></i>
+                                Cliquez sur une date pour ajouter
+                            </p>
+                            <p style="margin: 8px 0; display: flex; align-items: center;">
+                                <i data-feather="edit-2" style="width: 16px; height: 16px; margin-right: 8px;"></i>
+                                Cliquez sur un événement pour modifier
+                            </p>
+                            <p style="margin: 8px 0; display: flex; align-items: center;">
+                                <i data-feather="filter" style="width: 16px; height: 16px; margin-right: 8px;"></i>
+                                Filtrez par type ci-dessus
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Calendrier -->
+                <div class="col-md-9" style="padding: 0; padding-left: 15px;">
+                    <div class="mb-3">
+                        <select class="form-select" id="typeFilter" style="width: 200px; background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(10px);">
+                            <option value="all" style="background:#1a1a2e;">📅 Tous les types</option>
+                            <option value="Rentrée des classes" style="background:#1a1a2e;">🎓 Rentrée des classes</option>
+                            <option value="Période scolaire" style="background:#1a1a2e;">📚 Période scolaire</option>
+                            <option value="Vacances scolaires" style="background:#1a1a2e;">🏖️ Vacances scolaires</option>
+                            <option value="Jours fériés" style="background:#1a1a2e;">🎉 Jours fériés</option>
+                            <option value="Événements" style="background:#1a1a2e;">⭐ Événements</option>
+                        </select>
+                    </div>
+                    <div id="calendar"></div>
+                </div>
+            </div>
         </div>
 
     </div>
 </div>
 
-<!-- Modal -->
+<!-- Modal avec boutons de type -->
 <div class="modal fade" id="eventModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content" style="background: rgba(30,30,50,0.95); color: white; border-radius: 16px;">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content glass-modal" style="background: rgba(30,30,50,0.92); color: white; border-radius: 16px; backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1);">
             <div class="modal-header" style="border-bottom: 1px solid rgba(255,255,255,0.1);">
-                <h5 class="modal-title" id="modalTitle">Ajouter un événement</h5>
+                <h5 class="modal-title" id="modalTitle">
+                    <i data-feather="plus-circle" style="width: 20px; height: 20px; margin-right: 8px;"></i>
+                    Ajouter un événement
+                </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="eventId">
+                
                 <div class="mb-3">
-                    <label class="form-label">Titre *</label>
-                    <input type="text" class="form-control" id="eventTitle" required style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2);">
+                    <label class="form-label" style="font-weight: 500;">Titre *</label>
+                    <input type="text" class="form-control" id="eventTitle" placeholder="Ex: Rentrée des classes" required style="background: rgba(255,255,255,0.08); color: white; border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 10px; padding: 12px;">
                 </div>
+                
+                <div class="mb-4">
+                    <label class="form-label" style="font-weight: 500; display: block; margin-bottom: 10px;">Type d'événement</label>
+                    <div class="row" style="gap: 8px;">
+                        <div class="col-md-4 col-6" style="padding: 0 4px;">
+                            <button type="button" class="btn btn-type w-100" data-type="Rentrée des classes" data-color="#198754" style="background: rgba(25, 135, 84, 0.2); border: 2px solid #198754; color: #fff; border-radius: 10px; padding: 8px 12px; transition: all 0.3s ease;">
+                                <span style="display: inline-block; width: 12px; height: 12px; border-radius: 3px; background: #198754; margin-right: 8px;"></span>
+                                Rentrée
+                            </button>
+                        </div>
+                        <div class="col-md-4 col-6" style="padding: 0 4px;">
+                            <button type="button" class="btn btn-type w-100" data-type="Période scolaire" data-color="#0d6efd" style="background: rgba(13, 110, 253, 0.2); border: 2px solid #0d6efd; color: #fff; border-radius: 10px; padding: 8px 12px; transition: all 0.3s ease;">
+                                <span style="display: inline-block; width: 12px; height: 12px; border-radius: 3px; background: #0d6efd; margin-right: 8px;"></span>
+                                Période scolaire
+                            </button>
+                        </div>
+                        <div class="col-md-4 col-6" style="padding: 0 4px;">
+                            <button type="button" class="btn btn-type w-100" data-type="Vacances scolaires" data-color="#fd7e14" style="background: rgba(253, 126, 20, 0.2); border: 2px solid #fd7e14; color: #fff; border-radius: 10px; padding: 8px 12px; transition: all 0.3s ease;">
+                                <span style="display: inline-block; width: 12px; height: 12px; border-radius: 3px; background: #fd7e14; margin-right: 8px;"></span>
+                                Vacances
+                            </button>
+                        </div>
+                        <div class="col-md-4 col-6" style="padding: 0 4px;">
+                            <button type="button" class="btn btn-type w-100" data-type="Jours fériés" data-color="#dc3545" style="background: rgba(220, 53, 69, 0.2); border: 2px solid #dc3545; color: #fff; border-radius: 10px; padding: 8px 12px; transition: all 0.3s ease;">
+                                <span style="display: inline-block; width: 12px; height: 12px; border-radius: 3px; background: #dc3545; margin-right: 8px;"></span>
+                                Jours fériés
+                            </button>
+                        </div>
+                        <div class="col-md-4 col-6" style="padding: 0 4px;">
+                            <button type="button" class="btn btn-type w-100" data-type="Événements" data-color="#6f42c1" style="background: rgba(111, 66, 193, 0.2); border: 2px solid #6f42c1; color: #fff; border-radius: 10px; padding: 8px 12px; transition: all 0.3s ease;">
+                                <span style="display: inline-block; width: 12px; height: 12px; border-radius: 3px; background: #6f42c1; margin-right: 8px;"></span>
+                                Événements
+                            </button>
+                        </div>
+                    </div>
+                    <input type="hidden" id="eventType" value="Période scolaire">
+                    <input type="hidden" id="eventColor" value="#0d6efd">
+                </div>
+                
                 <div class="mb-3">
-                    <label class="form-label">Type</label>
-                    <select class="form-select" id="eventType" style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2);">
-                        <option value="event" style="background:#1a1a2e;">Événement</option>
-                        <option value="holiday" style="background:#1a1a2e;">Vacances/Jour férié</option>
-                        <option value="exam" style="background:#1a1a2e;">Examen</option>
-                        <option value="meeting" style="background:#1a1a2e;">Réunion</option>
-                        <option value="other" style="background:#1a1a2e;">Autre</option>
-                    </select>
+                    <label class="form-label" style="font-weight: 500;">Description</label>
+                    <textarea class="form-control" id="eventDesc" rows="2" placeholder="Description de l'événement..." style="background: rgba(255,255,255,0.08); color: white; border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 10px; padding: 12px;"></textarea>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Description</label>
-                    <textarea class="form-control" id="eventDesc" rows="2" style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2);"></textarea>
-                </div>
+                
                 <div class="row">
                     <div class="col-6 mb-3">
-                        <label class="form-label">Date début *</label>
-                        <input type="date" class="form-control" id="eventStart" required style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2);">
+                        <label class="form-label" style="font-weight: 500;">Date début *</label>
+                        <input type="date" class="form-control" id="eventStart" required style="background: rgba(255,255,255,0.08); color: white; border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 10px; padding: 12px;">
                     </div>
                     <div class="col-6 mb-3">
-                        <label class="form-label">Date fin *</label>
-                        <input type="date" class="form-control" id="eventEnd" required style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2);">
+                        <label class="form-label" style="font-weight: 500;">Date fin *</label>
+                        <input type="date" class="form-control" id="eventEnd" required style="background: rgba(255,255,255,0.08); color: white; border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 10px; padding: 12px;">
                     </div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Couleur</label>
-                    <input type="color" id="eventColor" value="#0d6efd" style="width: 60px; height: 40px; border: none; cursor: pointer;">
-                </div>
             </div>
-            <div class="modal-footer" style="border-top: 1px solid rgba(255,255,255,0.1);">
-                <button type="button" class="btn btn-danger me-auto" id="btnDelete" style="display:none;">Supprimer</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                <button type="button" class="btn btn-primary" id="btnSave">Enregistrer</button>
+            <div class="modal-footer" style="border-top: 1px solid rgba(255,255,255,0.1); padding: 16px 24px;">
+                <button type="button" class="btn btn-danger me-auto" id="btnDelete" style="display:none; border-radius: 10px; padding: 10px 24px;">
+                    <i data-feather="trash-2" style="width: 16px; height: 16px; margin-right: 6px;"></i>
+                    Supprimer
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius: 10px; padding: 10px 24px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);">
+                    Annuler
+                </button>
+                <button type="button" class="btn btn-primary" id="btnSave" style="border-radius: 10px; padding: 10px 32px;">
+                    <i data-feather="save" style="width: 16px; height: 16px; margin-right: 6px;"></i>
+                    Enregistrer
+                </button>
             </div>
         </div>
     </div>
@@ -82,6 +180,42 @@
     document.addEventListener('DOMContentLoaded', function() {
         if (typeof feather !== 'undefined') feather.replace();
 
+        // Gestion des boutons de type dans le modal
+        document.querySelectorAll('.btn-type').forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Retirer la sélection de tous les boutons
+                document.querySelectorAll('.btn-type').forEach(b => {
+                    b.style.background = b.dataset.color + '33';
+                    b.style.borderColor = b.dataset.color;
+                    b.style.boxShadow = 'none';
+                });
+                // Sélectionner celui-ci
+                this.style.background = this.dataset.color + '66';
+                this.style.borderColor = this.dataset.color;
+                this.style.boxShadow = '0 0 20px ' + this.dataset.color + '44';
+                // Mettre à jour les champs cachés
+                document.getElementById('eventType').value = this.dataset.type;
+                document.getElementById('eventColor').value = this.dataset.color;
+            });
+        });
+
+        // Gestion du survol des légendes
+        document.querySelectorAll('.legend-item').forEach(item => {
+            item.addEventListener('mouseenter', function() {
+                this.style.background = 'rgba(255,255,255,0.08)';
+                this.style.transform = 'translateX(5px)';
+            });
+            item.addEventListener('mouseleave', function() {
+                this.style.background = 'transparent';
+                this.style.transform = 'translateX(0)';
+            });
+            item.addEventListener('click', function() {
+                const type = this.dataset.type;
+                document.getElementById('typeFilter').value = type;
+                calendar.refetchEvents();
+            });
+        });
+
         var calendarEl = document.getElementById('calendar');
         calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
@@ -94,7 +228,15 @@
             buttonText: { today: 'Aujourd\'hui', month: 'Mois', week: 'Semaine', list: 'Liste' },
             editable: true,
             selectable: true,
-            events: '/api/calendar/events',
+            events: function(fetchInfo, successCallback, failureCallback) {
+                const type = document.getElementById('typeFilter').value;
+                let url = '/api/calendar/events';
+                if (type !== 'all') url += '?type=' + encodeURIComponent(type);
+                fetch(url)
+                    .then(r => r.json())
+                    .then(data => successCallback(data))
+                    .catch(err => failureCallback(err));
+            },
             eventClick: function(info) { openEditModal(info.event); },
             select: function(info) {
                 clearForm();
@@ -103,20 +245,54 @@
                 new bootstrap.Modal(document.getElementById('eventModal')).show();
             },
             eventDrop: function(info) { updateEvent(info.event); },
-            eventResize: function(info) { updateEvent(info.event); }
+            eventResize: function(info) { updateEvent(info.event); },
+            eventDidMount: function(info) {
+                const type = info.event.extendedProps.type || '';
+                info.el.setAttribute('data-type', type);
+                info.el.style.fontSize = '0.7rem';
+                info.el.style.padding = '2px 6px';
+                info.el.style.margin = '1px 0';
+                info.el.style.borderRadius = '4px';
+                info.el.style.border = 'none';
+                info.el.style.lineHeight = '1.4';
+                info.el.style.whiteSpace = 'nowrap';
+                info.el.style.overflow = 'hidden';
+                info.el.style.textOverflow = 'ellipsis';
+                info.el.style.color = '#fff';
+                info.el.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
+
+                if (!info.event.backgroundColor) {
+                    const colors = {
+                        'Rentrée des classes': '#198754',
+                        'Période scolaire': '#0d6efd',
+                        'Vacances scolaires': '#fd7e14',
+                        'Jours fériés': '#dc3545',
+                        'Événements': '#6f42c1'
+                    };
+                    info.el.style.backgroundColor = colors[type] || '#0d6efd';
+                }
+
+                const start = info.event.start;
+                const end = info.event.end;
+                if (end && (end - start) > 86400000) {
+                    info.el.style.borderLeft = '4px solid ' + (info.event.backgroundColor || '#0d6efd');
+                    info.el.style.borderRadius = '0 4px 4px 0';
+                }
+            }
         });
         calendar.render();
 
-        // Bouton Ajouter
+        document.getElementById('typeFilter').addEventListener('change', function() {
+            calendar.refetchEvents();
+        });
+
         document.getElementById('btnAddEvent').addEventListener('click', function() {
             clearForm();
             new bootstrap.Modal(document.getElementById('eventModal')).show();
         });
 
-        // Bouton Enregistrer
         document.getElementById('btnSave').addEventListener('click', saveEvent);
 
-        // Bouton Supprimer
         document.getElementById('btnDelete').addEventListener('click', function() {
             if (!currentEventId || !confirm('Supprimer cet événement ?')) return;
             fetch('/api/calendar/events/' + currentEventId, { method: 'DELETE' })
@@ -131,26 +307,50 @@
         currentEventId = null;
         document.getElementById('eventId').value = '';
         document.getElementById('eventTitle').value = '';
-        document.getElementById('eventType').value = 'event';
+        document.getElementById('eventType').value = 'Période scolaire';
+        document.getElementById('eventColor').value = '#0d6efd';
         document.getElementById('eventDesc').value = '';
         document.getElementById('eventStart').value = '';
         document.getElementById('eventEnd').value = '';
-        document.getElementById('eventColor').value = '#0d6efd';
         document.getElementById('btnDelete').style.display = 'none';
         document.getElementById('modalTitle').textContent = 'Ajouter un événement';
+        
+        // Réinitialiser les boutons de type
+        document.querySelectorAll('.btn-type').forEach(b => {
+            b.style.background = b.dataset.color + '33';
+            b.style.borderColor = b.dataset.color;
+            b.style.boxShadow = 'none';
+            if (b.dataset.type === 'Période scolaire') {
+                b.style.background = b.dataset.color + '66';
+                b.style.boxShadow = '0 0 20px ' + b.dataset.color + '44';
+            }
+        });
     }
 
     function openEditModal(event) {
         currentEventId = event.id;
         document.getElementById('eventId').value = event.id;
         document.getElementById('eventTitle').value = event.title;
-        document.getElementById('eventType').value = event.extendedProps.type || 'event';
+        document.getElementById('eventType').value = event.extendedProps.type || 'Période scolaire';
+        document.getElementById('eventColor').value = event.backgroundColor || '#0d6efd';
         document.getElementById('eventDesc').value = event.extendedProps.description || '';
         document.getElementById('eventStart').value = event.startStr;
         document.getElementById('eventEnd').value = event.endStr || event.startStr;
-        document.getElementById('eventColor').value = event.backgroundColor || '#0d6efd';
         document.getElementById('btnDelete').style.display = 'block';
-        document.getElementById('modalTitle').textContent = 'Modifier';
+        document.getElementById('modalTitle').textContent = 'Modifier l\'événement';
+        
+        // Mettre à jour les boutons de type
+        const type = event.extendedProps.type || 'Période scolaire';
+        document.querySelectorAll('.btn-type').forEach(b => {
+            b.style.background = b.dataset.color + '33';
+            b.style.borderColor = b.dataset.color;
+            b.style.boxShadow = 'none';
+            if (b.dataset.type === type) {
+                b.style.background = b.dataset.color + '66';
+                b.style.boxShadow = '0 0 20px ' + b.dataset.color + '44';
+            }
+        });
+        
         new bootstrap.Modal(document.getElementById('eventModal')).show();
     }
 
@@ -199,7 +399,7 @@
                 title: event.title,
                 start_date: event.startStr,
                 end_date: event.endStr || event.startStr,
-                event_type: event.extendedProps.type || 'event',
+                event_type: event.extendedProps.type || 'Période scolaire',
                 description: event.extendedProps.description || '',
                 color: event.backgroundColor
             })
@@ -208,16 +408,182 @@
 </script>
 
 <style>
+    /* Glassmorphism */
+    .glass-card {
+        background: rgba(255, 255, 255, 0.05) !important;
+        backdrop-filter: blur(20px) !important;
+        -webkit-backdrop-filter: blur(20px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+    }
+    
+    .glass-panel {
+        background: rgba(255, 255, 255, 0.05) !important;
+        backdrop-filter: blur(15px) !important;
+        -webkit-backdrop-filter: blur(15px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2) !important;
+    }
+    
+    .glass-modal {
+        backdrop-filter: blur(25px) !important;
+        -webkit-backdrop-filter: blur(25px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5) !important;
+    }
+
+    /* FullCalendar Styles */
     .fc { color: #e4e4e4; }
-    .fc .fc-toolbar-title { color: #fff; font-size: 1.3rem; }
-    .fc .fc-button { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; text-transform: capitalize; }
-    .fc .fc-button:hover { background: rgba(255,255,255,0.15); }
-    .fc .fc-button-active { background: #0d6efd !important; border-color: #0d6efd !important; }
+    .fc .fc-toolbar-title { color: #fff; font-size: 1.3rem; font-weight: 600; }
+    .fc .fc-button { 
+        background: rgba(255,255,255,0.08); 
+        border: 1px solid rgba(255,255,255,0.12); 
+        color: #fff; 
+        text-transform: capitalize;
+        backdrop-filter: blur(10px);
+        border-radius: 8px;
+        padding: 6px 14px;
+        transition: all 0.3s ease;
+    }
+    .fc .fc-button:hover { 
+        background: rgba(255,255,255,0.15); 
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .fc .fc-button-active { 
+        background: rgba(13, 110, 253, 0.3) !important; 
+        border-color: #0d6efd !important; 
+        box-shadow: 0 0 20px rgba(13, 110, 253, 0.2);
+    }
     .fc-theme-standard td, .fc-theme-standard th { border-color: rgba(255,255,255,0.06); }
-    .fc .fc-daygrid-day-number { color: #ccc; }
-    .fc .fc-col-header-cell-cushion { color: #ccc; }
-    .fc .fc-day-today { background: rgba(13,110,253,0.1) !important; }
-    .fc .fc-highlight { background: rgba(13,110,253,0.2) !important; }
+    .fc .fc-daygrid-day-number { color: #ccc; font-weight: 500; }
+    .fc .fc-col-header-cell-cushion { color: #ccc; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px; }
+    .fc .fc-day-today { background: rgba(13, 110, 253, 0.08) !important; }
+    .fc .fc-highlight { background: rgba(13, 110, 253, 0.15) !important; }
+
+    /* Événements */
+    .fc-daygrid-day-events {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        padding: 0 3px;
+    }
+    .fc-daygrid-event {
+        font-size: 0.7rem !important;
+        padding: 2px 6px !important;
+        margin: 0 !important;
+        border-radius: 4px !important;
+        border: none !important;
+        line-height: 1.4 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        color: #fff !important;
+        font-weight: 500 !important;
+        transition: all 0.3s ease !important;
+        cursor: pointer !important;
+    }
+    .fc-daygrid-event:hover {
+        transform: scale(1.02);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.3) !important;
+    }
+    .fc-daygrid-event .fc-event-title {
+        color: #fff !important;
+        font-weight: 500 !important;
+    }
+
+    .fc-daygrid-day-frame {
+        min-height: 85px !important;
+        padding: 4px !important;
+    }
+    .fc-daygrid-day-events {
+        min-height: 22px;
+    }
+    .fc-daygrid-event-harness {
+        margin: 1px 0 !important;
+    }
+
+    /* Légende interactive */
+    .legend-item {
+        border-radius: 8px !important;
+        transition: all 0.3s ease !important;
+        cursor: pointer !important;
+        user-select: none !important;
+    }
+    .legend-item:hover {
+        background: rgba(255,255,255,0.08) !important;
+        transform: translateX(5px) !important;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.2) !important;
+    }
+
+    /* Boutons de type dans le modal */
+    .btn-type {
+        transition: all 0.3s ease !important;
+        font-weight: 500 !important;
+        font-size: 0.85rem !important;
+        border-radius: 10px !important;
+        padding: 10px 12px !important;
+        height: 44px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    .btn-type:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3) !important;
+    }
+    .btn-type:active {
+        transform: scale(0.95) !important;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .col-md-3, .col-md-9 {
+            width: 100% !important;
+            flex: 0 0 100% !important;
+            max-width: 100% !important;
+            padding: 0 !important;
+        }
+        .col-md-3 {
+            margin-bottom: 20px !important;
+            padding-right: 0 !important;
+        }
+        .col-md-9 {
+            padding-left: 0 !important;
+        }
+        .legend-container {
+            height: auto !important;
+        }
+        .btn-type {
+            font-size: 0.75rem !important;
+            padding: 6px 8px !important;
+            height: 36px !important;
+        }
+        .fc-daygrid-day-frame {
+            min-height: 60px !important;
+        }
+        .fc-daygrid-event {
+            font-size: 0.6rem !important;
+            padding: 1px 3px !important;
+        }
+    }
+    
+    /* Scroll personnalisé */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+        background: rgba(255,255,255,0.05);
+        border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,0.2);
+        border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: rgba(255,255,255,0.3);
+    }
 </style>
 
 <%- include('../partials/footer') %>
