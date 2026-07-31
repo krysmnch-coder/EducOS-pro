@@ -551,7 +551,10 @@ process.once('SIGUSR2', () => {
 
 // Routes calendrier scolaire
 
-
+// ROUTE DE TEST
+app.get('/test-calendar', (req, res) => {
+    res.send('<h1>Test calendrier OK</h1><p>Si vous voyez ceci, la route fonctionne.</p>');
+});
 
 // API calendrier
 app.get('/api/calendar/events', ensureAuthenticated, async (req, res) => {
