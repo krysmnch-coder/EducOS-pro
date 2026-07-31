@@ -14,54 +14,7 @@
         <%- include('../partials/messages') %>
 
         <div class="card" style="background: rgba(255,255,255,0.05); border-radius: 16px; padding: 20px;">
-            <div class="row">
-                <!-- Calendrier -->
-                <div class="col-md-9">
-                    <div class="mb-3">
-                        <select class="form-select" id="typeFilter" style="width: auto; background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2);">
-                            <option value="all" style="background:#1a1a2e;">Tous les types</option>
-                            <option value="Rentrée des classes" style="background:#1a1a2e;">Rentrée des classes</option>
-                            <option value="Période scolaire" style="background:#1a1a2e;">Période scolaire</option>
-                            <option value="Vacances scolaires" style="background:#1a1a2e;">Vacances scolaires</option>
-                            <option value="Jours fériés" style="background:#1a1a2e;">Jours fériés</option>
-                            <option value="Événements" style="background:#1a1a2e;">Événements</option>
-                        </select>
-                    </div>
-                    <div id="calendar"></div>
-                </div>
-                
-                <!-- Légende -->
-                <div class="col-md-3">
-                    <div class="legend-container" style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 20px; border: 1px solid rgba(255,255,255,0.1);">
-                        <h5 style="color: #fff; margin-bottom: 15px;">Légende</h5>
-                        <div class="legend-item" style="display: flex; align-items: center; margin-bottom: 10px;">
-                            <span style="display: inline-block; width: 20px; height: 20px; border-radius: 4px; background: #198754; margin-right: 10px;"></span>
-                            <span style="color: #ccc;">Rentrée des classes</span>
-                        </div>
-                        <div class="legend-item" style="display: flex; align-items: center; margin-bottom: 10px;">
-                            <span style="display: inline-block; width: 20px; height: 20px; border-radius: 4px; background: #0d6efd; margin-right: 10px;"></span>
-                            <span style="color: #ccc;">Période scolaire</span>
-                        </div>
-                        <div class="legend-item" style="display: flex; align-items: center; margin-bottom: 10px;">
-                            <span style="display: inline-block; width: 20px; height: 20px; border-radius: 4px; background: #fd7e14; margin-right: 10px;"></span>
-                            <span style="color: #ccc;">Vacances scolaires</span>
-                        </div>
-                        <div class="legend-item" style="display: flex; align-items: center; margin-bottom: 10px;">
-                            <span style="display: inline-block; width: 20px; height: 20px; border-radius: 4px; background: #dc3545; margin-right: 10px;"></span>
-                            <span style="color: #ccc;">Jours fériés</span>
-                        </div>
-                        <div class="legend-item" style="display: flex; align-items: center; margin-bottom: 10px;">
-                            <span style="display: inline-block; width: 20px; height: 20px; border-radius: 4px; background: #6f42c1; margin-right: 10px;"></span>
-                            <span style="color: #ccc;">Événements</span>
-                        </div>
-                        <hr style="border-color: rgba(255,255,255,0.1); margin: 15px 0;">
-                        <div style="color: #888; font-size: 0.85rem;">
-                            <p style="margin: 5px 0;"><i data-feather="calendar" style="width: 14px; height: 14px;"></i> Cliquez sur une date pour ajouter</p>
-                            <p style="margin: 5px 0;"><i data-feather="edit-2" style="width: 14px; height: 14px;"></i> Cliquez sur un événement pour modifier</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <div id="calendar"></div>
         </div>
 
     </div>
@@ -84,11 +37,11 @@
                 <div class="mb-3">
                     <label class="form-label">Type</label>
                     <select class="form-select" id="eventType" style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2);">
-                        <option value="Rentrée des classes" style="background:#1a1a2e;">Rentrée des classes</option>
-                        <option value="Période scolaire" style="background:#1a1a2e;">Période scolaire</option>
-                        <option value="Vacances scolaires" style="background:#1a1a2e;">Vacances scolaires</option>
-                        <option value="Jours fériés" style="background:#1a1a2e;">Jours fériés</option>
-                        <option value="Événements" style="background:#1a1a2e;">Événements</option>
+                        <option value="event" style="background:#1a1a2e;">Événement</option>
+                        <option value="holiday" style="background:#1a1a2e;">Vacances/Jour férié</option>
+                        <option value="exam" style="background:#1a1a2e;">Examen</option>
+                        <option value="meeting" style="background:#1a1a2e;">Réunion</option>
+                        <option value="other" style="background:#1a1a2e;">Autre</option>
                     </select>
                 </div>
                 <div class="mb-3">
@@ -141,15 +94,7 @@
             buttonText: { today: 'Aujourd\'hui', month: 'Mois', week: 'Semaine', list: 'Liste' },
             editable: true,
             selectable: true,
-            events: function(fetchInfo, successCallback, failureCallback) {
-                const type = document.getElementById('typeFilter').value;
-                let url = '/api/calendar/events';
-                if (type !== 'all') url += '?type=' + encodeURIComponent(type);
-                fetch(url)
-                    .then(r => r.json())
-                    .then(data => successCallback(data))
-                    .catch(err => failureCallback(err));
-            },
+            events: '/api/calendar/events',
             eventClick: function(info) { openEditModal(info.event); },
             select: function(info) {
                 clearForm();
@@ -158,51 +103,9 @@
                 new bootstrap.Modal(document.getElementById('eventModal')).show();
             },
             eventDrop: function(info) { updateEvent(info.event); },
-            eventResize: function(info) { updateEvent(info.event); },
-            eventDidMount: function(info) {
-                // Ajouter l'attribut data-type pour le styling
-                const type = info.event.extendedProps.type || '';
-                info.el.setAttribute('data-type', type);
-                
-                // Style compact pour les événements
-                info.el.style.fontSize = '0.7rem';
-                info.el.style.padding = '1px 4px';
-                info.el.style.margin = '1px 0';
-                info.el.style.borderRadius = '3px';
-                info.el.style.border = 'none';
-                info.el.style.lineHeight = '1.4';
-                info.el.style.whiteSpace = 'nowrap';
-                info.el.style.overflow = 'hidden';
-                info.el.style.textOverflow = 'ellipsis';
-                info.el.style.color = '#fff';
-
-                // Couleur par défaut si non définie
-                if (!info.event.backgroundColor) {
-                    const colors = {
-                        'Rentrée des classes': '#198754',
-                        'Période scolaire': '#0d6efd',
-                        'Vacances scolaires': '#fd7e14',
-                        'Jours fériés': '#dc3545',
-                        'Événements': '#6f42c1'
-                    };
-                    info.el.style.backgroundColor = colors[type] || '#0d6efd';
-                }
-
-                // Pour les événements multi-jours
-                const start = info.event.start;
-                const end = info.event.end;
-                if (end && (end - start) > 86400000) {
-                    info.el.style.borderLeft = '3px solid ' + (info.event.backgroundColor || '#0d6efd');
-                    info.el.style.borderRadius = '0 3px 3px 0';
-                }
-            }
+            eventResize: function(info) { updateEvent(info.event); }
         });
         calendar.render();
-
-        // Filtre par type
-        document.getElementById('typeFilter').addEventListener('change', function() {
-            calendar.refetchEvents();
-        });
 
         // Bouton Ajouter
         document.getElementById('btnAddEvent').addEventListener('click', function() {
@@ -228,7 +131,7 @@
         currentEventId = null;
         document.getElementById('eventId').value = '';
         document.getElementById('eventTitle').value = '';
-        document.getElementById('eventType').value = 'Période scolaire';
+        document.getElementById('eventType').value = 'event';
         document.getElementById('eventDesc').value = '';
         document.getElementById('eventStart').value = '';
         document.getElementById('eventEnd').value = '';
@@ -241,7 +144,7 @@
         currentEventId = event.id;
         document.getElementById('eventId').value = event.id;
         document.getElementById('eventTitle').value = event.title;
-        document.getElementById('eventType').value = event.extendedProps.type || 'Période scolaire';
+        document.getElementById('eventType').value = event.extendedProps.type || 'event';
         document.getElementById('eventDesc').value = event.extendedProps.description || '';
         document.getElementById('eventStart').value = event.startStr;
         document.getElementById('eventEnd').value = event.endStr || event.startStr;
@@ -296,7 +199,7 @@
                 title: event.title,
                 start_date: event.startStr,
                 end_date: event.endStr || event.startStr,
-                event_type: event.extendedProps.type || 'Période scolaire',
+                event_type: event.extendedProps.type || 'event',
                 description: event.extendedProps.description || '',
                 color: event.backgroundColor
             })
@@ -315,77 +218,6 @@
     .fc .fc-col-header-cell-cushion { color: #ccc; }
     .fc .fc-day-today { background: rgba(13,110,253,0.1) !important; }
     .fc .fc-highlight { background: rgba(13,110,253,0.2) !important; }
-
-    /* Style des événements */
-    .fc-daygrid-day-events {
-        display: flex;
-        flex-direction: column;
-        gap: 1px;
-        padding: 0 2px;
-    }
-    .fc-daygrid-event {
-        font-size: 0.7rem !important;
-        padding: 1px 4px !important;
-        margin: 0 !important;
-        border-radius: 3px !important;
-        border: none !important;
-        line-height: 1.4 !important;
-        white-space: nowrap !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-        color: #fff !important;
-    }
-    .fc-daygrid-event .fc-event-title {
-        color: #fff !important;
-    }
-
-    /* Couleurs par type */
-    .fc-event[data-type="Rentrée des classes"] { background: #198754 !important; }
-    .fc-event[data-type="Période scolaire"] { background: #0d6efd !important; }
-    .fc-event[data-type="Vacances scolaires"] { background: #fd7e14 !important; }
-    .fc-event[data-type="Jours fériés"] { background: #dc3545 !important; }
-    .fc-event[data-type="Événements"] { background: #6f42c1 !important; }
-
-    .fc-daygrid-day-frame {
-        min-height: 80px !important;
-    }
-    .fc-daygrid-day-events {
-        min-height: 20px;
-    }
-    .fc-daygrid-event-harness {
-        margin: 1px 0 !important;
-    }
-
-    /* Style de la légende */
-    .legend-container {
-        position: sticky;
-        top: 20px;
-    }
-    .legend-item:hover {
-        background: rgba(255,255,255,0.05);
-        border-radius: 6px;
-        padding: 5px 10px;
-        margin: 5px -10px;
-        transition: all 0.2s ease;
-    }
-    .legend-item span {
-        transition: color 0.2s ease;
-    }
-    .legend-item:hover span {
-        color: #fff !important;
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-        .col-md-9, .col-md-3 {
-            width: 100%;
-        }
-        .legend-container {
-            margin-top: 20px;
-            position: relative;
-            top: 0;
-        }
-    }
 </style>
 
 <%- include('../partials/footer') %>
