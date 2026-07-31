@@ -221,14 +221,20 @@
             selectable: true,
             displayEventTime: false,
             events: function(fetchInfo, successCallback, failureCallback) {
-    const type = document.getElementById('typeFilter').value;
-    let url = '/api/calendar/events?view=' + calendar.view.type;
-    if (type !== 'all') url += '&type=' + encodeURIComponent(type);
-    fetch(url)
-        .then(r => r.json())
-        .then(data => successCallback(data))
-        .catch(err => failureCallback(err));
-},
+                const type = document.getElementById('typeFilter').value;
+                let url = '/api/calendar/events';
+                if (type !== 'all') url += '?type=' + encodeURIComponent(type);
+                fetch(url)
+                    .then(r => r.json())
+                    .then(data => {
+                        // ✅ Regrouper les événements multi-jours dans la vue liste
+                        if (calendar.view.type === 'listMonth') {
+                            data = groupMultiDayEvents(data);
+                        }
+                        successCallback(data);
+                    })
+                    .catch(err => failureCallback(err));
+            },
             eventClick: function(info) { openEditModal(info.event); },
             select: function(info) {
                 clearForm();
