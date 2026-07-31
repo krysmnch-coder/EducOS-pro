@@ -6,24 +6,80 @@
         
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2><i data-feather="clock"></i> Emplois du Temps</h2>
-            <div class="d-flex gap-3 align-items-center">
-                <select class="form-select" id="classSelector" style="width: 250px; background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.15);">
-                    <option value="" style="background:#1a1a2e;">-- Choisir une classe --</option>
-                    <% if (typeof classes !== 'undefined') { %>
-                        <% classes.forEach(function(cls) { %>
-                            <option value="<%= cls %>" style="background:#1a1a2e;"><%= cls %></option>
-                        <% }); %>
-                    <% } %>
-                </select>
-                <button class="btn btn-primary" id="btnAddEntry" style="display:none;">
-                    <i data-feather="plus"></i> Ajouter
-                </button>
-            </div>
+            <button class="btn btn-primary" id="btnAddEntry" style="display:none;">
+                <i data-feather="plus"></i> Ajouter un cours
+            </button>
         </div>
 
         <%- include('../partials/messages') %>
 
+        <!-- Sélecteur de classe avancé -->
+        <div class="card glass-card mb-4" style="border-radius: 16px; padding: 20px;">
+            <div class="row align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label" style="color: #fff; font-weight: 500;">Niveau</label>
+                    <select class="form-select" id="classLevel" style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.15);">
+                        <option value="" disabled selected style="background:#1a1a2e;">-- Choisir un niveau --</option>
+                        <optgroup label="Lycée">
+                            <option value="Terminale" style="background:#1a1a2e;">Terminale</option>
+                            <option value="Première" style="background:#1a1a2e;">Première</option>
+                            <option value="Seconde" style="background:#1a1a2e;">Seconde</option>
+                        </optgroup>
+                        <optgroup label="Collège">
+                            <option value="Troisième" style="background:#1a1a2e;">Troisième</option>
+                            <option value="Quatrième" style="background:#1a1a2e;">Quatrième</option>
+                            <option value="Cinquième" style="background:#1a1a2e;">Cinquième</option>
+                            <option value="Sixième" style="background:#1a1a2e;">Sixième</option>
+                        </optgroup>
+                        <optgroup label="Primaire">
+                            <option value="CM2" style="background:#1a1a2e;">CM2</option>
+                            <option value="CM1" style="background:#1a1a2e;">CM1</option>
+                            <option value="CE2" style="background:#1a1a2e;">CE2</option>
+                            <option value="CE1" style="background:#1a1a2e;">CE1</option>
+                            <option value="CP" style="background:#1a1a2e;">CP</option>
+                        </optgroup>
+                        <optgroup label="Maternelle">
+                            <option value="Grande Section" style="background:#1a1a2e;">Grande Section</option>
+                            <option value="Moyenne Section" style="background:#1a1a2e;">Moyenne Section</option>
+                            <option value="Petite Section" style="background:#1a1a2e;">Petite Section</option>
+                            <option value="Toute Petite Section" style="background:#1a1a2e;">Toute Petite Section</option>
+                        </optgroup>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label" style="color: #fff; font-weight: 500;">Lettre</label>
+                    <select class="form-select" id="classLetter" style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.15);">
+                        <option value="" selected style="background:#1a1a2e;">Aucune</option>
+                        <% 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(function(l) { %>
+                            <option value="<%= l %>" style="background:#1a1a2e;"><%= l %></option>
+                        <% }); %>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label" style="color: #fff; font-weight: 500;">N°</label>
+                    <select class="form-select" id="classNumber" style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.15);">
+                        <option value="" selected style="background:#1a1a2e;">Aucun</option>
+                        <% for (var i = 1; i <= 20; i++) { %>
+                            <option value="<%= i %>" style="background:#1a1a2e;"><%= i %></option>
+                        <% } %>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button class="btn btn-primary w-100" id="btnLoadTimetable" style="height: 42px;">
+                        <i data-feather="search"></i> Afficher l'emploi du temps
+                    </button>
+                </div>
+                <div class="col-md-1">
+                    <span id="classNameDisplay" style="color: #0d6efd; font-weight: 600; font-size: 1.1rem;"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tableau emploi du temps -->
         <div class="card glass-card" style="border-radius: 16px; padding: 20px; display: none;" id="timetableContainer">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 style="color: #fff;" id="timetableTitle">Emploi du temps</h4>
+            </div>
             <div class="table-responsive">
                 <table class="table table-bordered" id="timetableTable">
                     <thead>
@@ -41,10 +97,10 @@
             </div>
         </div>
 
-        <div class="text-center py-5" id="emptyState" style="display:none;">
+        <div class="text-center py-5" id="emptyState">
             <i data-feather="clock" style="width: 64px; height: 64px; color: #666; margin-bottom: 20px;"></i>
             <h4 style="color: #fff;">Sélectionnez une classe</h4>
-            <p style="color: #888;">Choisissez une classe pour afficher son emploi du temps.</p>
+            <p style="color: #888;">Choisissez un niveau, une lettre et un numéro pour afficher l'emploi du temps.</p>
         </div>
 
     </div>
@@ -105,23 +161,37 @@
     document.addEventListener('DOMContentLoaded', function() {
         if (typeof feather !== 'undefined') feather.replace();
 
-        document.getElementById('classSelector').addEventListener('change', function() {
-            currentClass = this.value;
-            if (currentClass) {
-                loadTimetable(currentClass);
+        // Afficher/Masquer le nom de la classe
+        function updateClassNameDisplay() {
+            const level = document.getElementById('classLevel').value || '';
+            const letter = document.getElementById('classLetter').value || '';
+            const number = document.getElementById('classNumber').value || '';
+            currentClass = level + (letter ? ' ' + letter : '') + (number ? ' ' + number : '');
+            document.getElementById('classNameDisplay').textContent = currentClass.trim();
+        }
+
+        document.getElementById('classLevel').addEventListener('change', updateClassNameDisplay);
+        document.getElementById('classLetter').addEventListener('change', updateClassNameDisplay);
+        document.getElementById('classNumber').addEventListener('change', updateClassNameDisplay);
+
+        // Charger l'emploi du temps
+        document.getElementById('btnLoadTimetable').addEventListener('click', function() {
+            const level = document.getElementById('classLevel').value;
+            if (!level) return alert('Veuillez sélectionner un niveau.');
+
+            updateClassNameDisplay();
+            
+            if (currentClass.trim()) {
+                loadTimetable(currentClass.trim());
                 document.getElementById('timetableContainer').style.display = 'block';
                 document.getElementById('emptyState').style.display = 'none';
                 document.getElementById('btnAddEntry').style.display = 'block';
-            } else {
-                document.getElementById('timetableContainer').style.display = 'none';
-                document.getElementById('emptyState').style.display = 'block';
-                document.getElementById('btnAddEntry').style.display = 'none';
+                document.getElementById('timetableTitle').textContent = 'Emploi du temps - ' + currentClass.trim();
             }
         });
 
         document.getElementById('btnSaveEntry').addEventListener('click', saveEntry);
         document.getElementById('btnDeleteEntry').addEventListener('click', deleteEntry);
-        document.getElementById('emptyState').style.display = 'block';
     });
 
     function loadTimetable(className) {
@@ -145,7 +215,7 @@
                 const entry = data.find(e => e.day === day && e.time_slot === slot);
                 if (entry) {
                     html += '<td style="background:' + (entry.color || '#0d6efd') + '22; cursor:pointer; text-align:center; vertical-align:middle; padding:8px; border-left:4px solid ' + (entry.color || '#0d6efd') + ';" ' +
-                        'onclick="editEntry(\'' + day + '\', \'' + slot + '\', ' + entry.id + ', \'' + escapeHtml(entry.subject) + '\', \'' + escapeHtml(entry.teacher || '') + '\', \'' + escapeHtml(entry.room || '') + '\', \'' + (entry.color || '#0d6efd') + '\')">' +
+                        'onclick="editEntry(\'' + day + '\', \'' + slot + '\', ' + entry.id + ', \'' + escapeJs(entry.subject) + '\', \'' + escapeJs(entry.teacher || '') + '\', \'' + escapeJs(entry.room || '') + '\', \'' + (entry.color || '#0d6efd') + '\')">' +
                         '<strong style="color:#fff;font-size:0.85rem;">' + escapeHtml(entry.subject) + '</strong>' +
                         (entry.teacher ? '<br><small style="color:#ccc;">' + escapeHtml(entry.teacher) + '</small>' : '') +
                         (entry.room ? '<br><small style="color:#aaa;">🏫 ' + escapeHtml(entry.room) + '</small>' : '') +
@@ -172,7 +242,7 @@
         document.getElementById('entryRoom').value = '';
         document.getElementById('entryColor').value = '#0d6efd';
         document.getElementById('btnDeleteEntry').style.display = 'none';
-        document.getElementById('modalTitle').textContent = 'Ajouter un cours - ' + day + ' ' + timeSlot;
+        document.getElementById('modalTitle').textContent = 'Ajouter - ' + day + ' ' + timeSlot;
         new bootstrap.Modal(document.getElementById('entryModal')).show();
     }
 
@@ -194,7 +264,7 @@
         if (!subject) return alert('La matière est requise.');
 
         const data = {
-            class_name: currentClass,
+            class_name: currentClass.trim(),
             day: document.getElementById('entryDay').value,
             time_slot: document.getElementById('entryTimeSlot').value,
             subject: subject,
@@ -210,7 +280,7 @@
         })
         .then(r => r.json())
         .then(() => {
-            loadTimetable(currentClass);
+            loadTimetable(currentClass.trim());
             bootstrap.Modal.getInstance(document.getElementById('entryModal')).hide();
         });
     }
@@ -221,7 +291,7 @@
         
         fetch('/api/timetables/' + id, { method: 'DELETE' })
             .then(() => {
-                loadTimetable(currentClass);
+                loadTimetable(currentClass.trim());
                 bootstrap.Modal.getInstance(document.getElementById('entryModal')).hide();
             });
     }
@@ -231,6 +301,11 @@
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    function escapeJs(text) {
+        if (!text) return '';
+        return text.replace(/'/g, "\\'").replace(/"/g, '\\"').replace(/\n/g, '\\n');
     }
 </script>
 
