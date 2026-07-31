@@ -557,23 +557,19 @@ app.get('/test-calendar', (req, res) => {
 });
 
 // API calendrier
-app.get('/api/calendar/events', ensureAuthenticated, async (req, res) => {
+app.get('/school-life/calendar', async (req, res) => {
+    if (!req.user) return res.redirect('/login');
+    
     try {
-        const events = await db('events')
-            .where({ establishment_id: req.user.establishment_id })
-            .select('*');
-
-        res.json(events.map(e => ({
-            id: e.id,
-            title: e.title,
-            start: e.start_date,
-            end: e.end_date,
-            backgroundColor: e.color,
-            borderColor: e.color,
-            extendedProps: { description: e.description, type: e.event_type }
-        })));
+        res.render('school-life/calendar', {
+            title: 'Calendrier Scolaire',
+            events: [],
+            user: req.user
+        });
     } catch (error) {
-        res.status(500).json({ error: 'Erreur' });
+        console.error('Erreur calendrier:', error);
+        req.flash('error_msg', 'Erreur: ' + error.message);
+        res.redirect('/dashboard');
     }
 });
 
