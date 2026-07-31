@@ -219,6 +219,11 @@
                 right: 'dayGridMonth,timeGridWeek,listMonth'
             },
             buttonText: { today: 'Aujourd\'hui', month: 'Mois', week: 'Semaine', list: 'Liste' },
+            views: {
+                listMonth: {
+                    displayEventTime: false
+                }
+            },
             editable: true,
             selectable: true,
             displayEventTime: false,
@@ -282,6 +287,12 @@
                     info.el.style.borderLeft = '5px solid ' + (info.event.backgroundColor || '#0d6efd');
                     info.el.style.borderRadius = '0 6px 6px 0';
                     info.el.style.paddingLeft = '10px';
+                }
+
+                // Vue liste : bordure gauche colorée
+                if (calendar.view.type === 'listMonth') {
+                    info.el.style.borderLeft = '4px solid ' + (info.event.backgroundColor || '#0d6efd');
+                    info.el.style.padding = '8px 12px';
                 }
             }
         });
@@ -485,6 +496,18 @@
         padding: 2px 4px !important;
     }
     .fc-timegrid-event-harness { margin: 1px 0 !important; }
+
+    /* Vue liste */
+    .fc-list-event-graphic { display: none !important; }
+    .fc-list-event-time { display: inline !important; font-size: 0.8rem !important; color: #adb5bd !important; margin-right: 8px !important; }
+    .fc-list-event-title { display: inline !important; font-weight: 500 !important; font-size: 0.85rem !important; }
+    .fc-list-event { padding: 8px 12px !important; border-radius: 6px !important; margin: 2px 0 !important; transition: all 0.2s ease !important; border-left: 4px solid transparent !important; }
+    .fc-list-event:hover { background: rgba(255,255,255,0.05) !important; transform: translateX(3px) !important; }
+    .fc-list-day-cushion { background: rgba(13, 110, 253, 0.1) !important; padding: 8px 12px !important; border-radius: 6px !important; margin: 4px 0 !important; font-weight: 600 !important; }
+    .fc-list-day-text { color: #fff !important; }
+    .fc-list-day-side-text { color: #adb5bd !important; }
+    .fc-list-table td { border-color: rgba(255,255,255,0.04) !important; padding: 4px 8px !important; }
+    .fc-list-event-dot { display: none !important; }
 
     .legend-item {
         border-radius: 8px !important;
