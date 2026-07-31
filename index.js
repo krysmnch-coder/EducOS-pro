@@ -778,7 +778,7 @@ app.post('/api/timetables', async (req, res) => {
                 created_by: req.user.id
             });
         }
-        
+         
         res.json({ success: true });
     } catch (error) {
         res.status(500).json({ error: error.message });
