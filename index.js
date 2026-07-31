@@ -710,6 +710,94 @@ app.get('/school-life/timetables', async (req, res) => {
         res.redirect('/dashboard');
     }
 });
+// Page emplois du temps
+app.get('/school-life/timetables', async (req, res) => {
+    if (!req.user) return res.redirect('/login');
+    
+    try {
+        // Récupérer la liste des classes
+        const classes = await db('users')
+            .where({ establishment_id: req.user.establishment_id, role: 'STUDENT' })
+            .distinct('student_class')
+            .whereNotNull('student_class')
+            .orderBy('student_class')
+            .pluck('student_class');
+
+        res.render('school-life/timetables', {
+            title: 'Emplois du Temps',
+            user: req.user,
+            classes: classes
+        });
+    } catch (error) {
+        console.error('Erreur timetables:', error);
+        req.flash('error_msg', 'Erreur lors du chargement.');
+        res.redirect('/dashboard');
+    }
+});
+
+// API - Récupérer l'emploi du temps d'une classe
+app.get('/api/timetables/:className', async (req, res) => {
+    if (!req.user) return res.status(401).json([]);
+    
+    try {
+        const entries = await db('timetables')
+            .where({ 
+                establishment_id: req.user.establishment_id,
+                class_name: req.params.className 
+            })
+            .orderBy('day')
+            .orderBy('time_slot')
+            .select('*');
+        
+        res.json(entries);
+    } catch (error) {
+        res.status(500).json([]);
+    }
+});
+
+// API - Sauvegarder une entrée d'emploi du temps
+app.post('/api/timetables', async (req, res) => {
+    if (!req.user) return res.status(401).json({ error: 'Non authentifié' });
+    
+    try {
+        const { class_name, day, time_slot, subject, teacher, room, color } = req.body;
+        
+        // Vérifier si l'entrée existe déjà
+        const existing = await db('timetables')
+            .where({ establishment_id: req.user.establishment_id, class_name, day, time_slot })
+            .first();
+        
+        if (existing) {
+            await db('timetables').where({ id: existing.id }).update({
+                subject, teacher, room, color, updated_at: new Date()
+            });
+        } else {
+            await db('timetables').insert({
+                establishment_id: req.user.establishment_id,
+                class_name, day, time_slot, subject, teacher, room, color: color || '#0d6efd',
+                created_by: req.user.id
+            });
+        }
+        
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// API - Supprimer une entrée
+app.delete('/api/timetables/:id', async (req, res) => {
+    if (!req.user) return res.status(401).json({ error: 'Non authentifié' });
+    
+    try {
+        await db('timetables')
+            .where({ id: req.params.id, establishment_id: req.user.establishment_id })
+            .del();
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
 
 // Lancement de l'application
 startServer();

@@ -1,20 +1,251 @@
 <%- include('../partials/head') %>
 <%- include('../partials/header') %>
 
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i data-feather="clock"></i> Emplois du Temps</h2>
-    </div>
+<div class="container-fluid page-shell py-4">
+    <div class="themed-container" style="max-width: 100%; padding: 0 20px;">
+        
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i data-feather="clock"></i> Emplois du Temps</h2>
+            <div class="d-flex gap-3 align-items-center">
+                <select class="form-select" id="classSelector" style="width: 250px; background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.15);">
+                    <option value="" style="background:#1a1a2e;">-- Choisir une classe --</option>
+                    <% if (typeof classes !== 'undefined') { %>
+                        <% classes.forEach(function(cls) { %>
+                            <option value="<%= cls %>" style="background:#1a1a2e;"><%= cls %></option>
+                        <% }); %>
+                    <% } %>
+                </select>
+                <button class="btn btn-primary" id="btnAddEntry" style="display:none;">
+                    <i data-feather="plus"></i> Ajouter
+                </button>
+            </div>
+        </div>
 
-    <div class="card" style="background: rgba(255,255,255,0.05); border-radius: 16px; padding: 30px; text-align: center;">
-        <i data-feather="clock" style="width: 64px; height: 64px; color: #0d6efd; margin-bottom: 20px;"></i>
-        <h4 style="color: #fff;">Gestion des Emplois du Temps</h4>
-        <p style="color: #888;">Cette fonctionnalité sera disponible prochainement.</p>
+        <%- include('../partials/messages') %>
+
+        <div class="card glass-card" style="border-radius: 16px; padding: 20px; display: none;" id="timetableContainer">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="timetableTable">
+                    <thead>
+                        <tr style="background: rgba(13,110,253,0.1);">
+                            <th style="color:#fff; text-align:center; width:100px;">Heures</th>
+                            <th style="color:#fff; text-align:center;">Lundi</th>
+                            <th style="color:#fff; text-align:center;">Mardi</th>
+                            <th style="color:#fff; text-align:center;">Mercredi</th>
+                            <th style="color:#fff; text-align:center;">Jeudi</th>
+                            <th style="color:#fff; text-align:center;">Vendredi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="timetableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="text-center py-5" id="emptyState" style="display:none;">
+            <i data-feather="clock" style="width: 64px; height: 64px; color: #666; margin-bottom: 20px;"></i>
+            <h4 style="color: #fff;">Sélectionnez une classe</h4>
+            <p style="color: #888;">Choisissez une classe pour afficher son emploi du temps.</p>
+        </div>
+
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="entryModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="background: rgba(30,30,50,0.95); color: white; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1);">
+            <div class="modal-header" style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                <h5 class="modal-title" id="modalTitle">Ajouter un cours</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="entryId">
+                <input type="hidden" id="entryDay">
+                <input type="hidden" id="entryTimeSlot">
+                
+                <div class="mb-3">
+                    <label class="form-label">Matière *</label>
+                    <input type="text" class="form-control" id="entrySubject" required style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Professeur</label>
+                    <input type="text" class="form-control" id="entryTeacher" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Salle</label>
+                    <input type="text" class="form-control" id="entryRoom" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Couleur</label>
+                    <select class="form-select" id="entryColor" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);">
+                        <option value="#0d6efd" style="background:#1a1a2e;">🔵 Bleu</option>
+                        <option value="#198754" style="background:#1a1a2e;">🟢 Vert</option>
+                        <option value="#fd7e14" style="background:#1a1a2e;">🟠 Orange</option>
+                        <option value="#dc3545" style="background:#1a1a2e;">🔴 Rouge</option>
+                        <option value="#6f42c1" style="background:#1a1a2e;">🟣 Violet</option>
+                        <option value="#0dcaf0" style="background:#1a1a2e;">🔵 Cyan</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer" style="border-top: 1px solid rgba(255,255,255,0.1);">
+                <button type="button" class="btn btn-danger me-auto" id="btnDeleteEntry" style="display:none;">Supprimer</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" id="btnSaveEntry">Enregistrer</button>
+            </div>
+        </div>
     </div>
 </div>
 
 <script>
-    if (typeof feather !== 'undefined') feather.replace();
+    const timeSlots = ['08:00-09:00', '09:00-10:00', '10:00-11:00', '11:00-12:00', '12:00-13:00', '13:00-14:00', '14:00-15:00', '15:00-16:00', '16:00-17:00'];
+    const days = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'];
+    let currentClass = '';
+    let timetableData = [];
+
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof feather !== 'undefined') feather.replace();
+
+        document.getElementById('classSelector').addEventListener('change', function() {
+            currentClass = this.value;
+            if (currentClass) {
+                loadTimetable(currentClass);
+                document.getElementById('timetableContainer').style.display = 'block';
+                document.getElementById('emptyState').style.display = 'none';
+                document.getElementById('btnAddEntry').style.display = 'block';
+            } else {
+                document.getElementById('timetableContainer').style.display = 'none';
+                document.getElementById('emptyState').style.display = 'block';
+                document.getElementById('btnAddEntry').style.display = 'none';
+            }
+        });
+
+        document.getElementById('btnSaveEntry').addEventListener('click', saveEntry);
+        document.getElementById('btnDeleteEntry').addEventListener('click', deleteEntry);
+        document.getElementById('emptyState').style.display = 'block';
+    });
+
+    function loadTimetable(className) {
+        fetch('/api/timetables/' + encodeURIComponent(className))
+            .then(r => r.json())
+            .then(data => {
+                timetableData = data;
+                renderTimetable(data);
+            });
+    }
+
+    function renderTimetable(data) {
+        const tbody = document.getElementById('timetableBody');
+        let html = '';
+        
+        timeSlots.forEach(slot => {
+            html += '<tr>';
+            html += '<td style="color:#fff;text-align:center;vertical-align:middle;font-weight:600;font-size:0.85rem;">' + slot + '</td>';
+            
+            days.forEach(day => {
+                const entry = data.find(e => e.day === day && e.time_slot === slot);
+                if (entry) {
+                    html += '<td style="background:' + (entry.color || '#0d6efd') + '22; cursor:pointer; text-align:center; vertical-align:middle; padding:8px; border-left:4px solid ' + (entry.color || '#0d6efd') + ';" ' +
+                        'onclick="editEntry(\'' + day + '\', \'' + slot + '\', ' + entry.id + ', \'' + escapeHtml(entry.subject) + '\', \'' + escapeHtml(entry.teacher || '') + '\', \'' + escapeHtml(entry.room || '') + '\', \'' + (entry.color || '#0d6efd') + '\')">' +
+                        '<strong style="color:#fff;font-size:0.85rem;">' + escapeHtml(entry.subject) + '</strong>' +
+                        (entry.teacher ? '<br><small style="color:#ccc;">' + escapeHtml(entry.teacher) + '</small>' : '') +
+                        (entry.room ? '<br><small style="color:#aaa;">🏫 ' + escapeHtml(entry.room) + '</small>' : '') +
+                    '</td>';
+                } else {
+                    html += '<td style="text-align:center;vertical-align:middle;cursor:pointer;padding:8px;color:#555;" onclick="addEntry(\'' + day + '\', \'' + slot + '\')">' +
+                        '<span style="font-size:1.5rem;">+</span>' +
+                    '</td>';
+                }
+            });
+            
+            html += '</tr>';
+        });
+        
+        tbody.innerHTML = html;
+    }
+
+    function addEntry(day, timeSlot) {
+        document.getElementById('entryId').value = '';
+        document.getElementById('entryDay').value = day;
+        document.getElementById('entryTimeSlot').value = timeSlot;
+        document.getElementById('entrySubject').value = '';
+        document.getElementById('entryTeacher').value = '';
+        document.getElementById('entryRoom').value = '';
+        document.getElementById('entryColor').value = '#0d6efd';
+        document.getElementById('btnDeleteEntry').style.display = 'none';
+        document.getElementById('modalTitle').textContent = 'Ajouter un cours - ' + day + ' ' + timeSlot;
+        new bootstrap.Modal(document.getElementById('entryModal')).show();
+    }
+
+    function editEntry(day, timeSlot, id, subject, teacher, room, color) {
+        document.getElementById('entryId').value = id;
+        document.getElementById('entryDay').value = day;
+        document.getElementById('entryTimeSlot').value = timeSlot;
+        document.getElementById('entrySubject').value = subject;
+        document.getElementById('entryTeacher').value = teacher;
+        document.getElementById('entryRoom').value = room;
+        document.getElementById('entryColor').value = color || '#0d6efd';
+        document.getElementById('btnDeleteEntry').style.display = 'block';
+        document.getElementById('modalTitle').textContent = 'Modifier - ' + day + ' ' + timeSlot;
+        new bootstrap.Modal(document.getElementById('entryModal')).show();
+    }
+
+    function saveEntry() {
+        const subject = document.getElementById('entrySubject').value.trim();
+        if (!subject) return alert('La matière est requise.');
+
+        const data = {
+            class_name: currentClass,
+            day: document.getElementById('entryDay').value,
+            time_slot: document.getElementById('entryTimeSlot').value,
+            subject: subject,
+            teacher: document.getElementById('entryTeacher').value.trim(),
+            room: document.getElementById('entryRoom').value.trim(),
+            color: document.getElementById('entryColor').value
+        };
+
+        fetch('/api/timetables', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+        .then(r => r.json())
+        .then(() => {
+            loadTimetable(currentClass);
+            bootstrap.Modal.getInstance(document.getElementById('entryModal')).hide();
+        });
+    }
+
+    function deleteEntry() {
+        const id = document.getElementById('entryId').value;
+        if (!id || !confirm('Supprimer ce cours ?')) return;
+        
+        fetch('/api/timetables/' + id, { method: 'DELETE' })
+            .then(() => {
+                loadTimetable(currentClass);
+                bootstrap.Modal.getInstance(document.getElementById('entryModal')).hide();
+            });
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
 </script>
+
+<style>
+    .glass-card {
+        background: rgba(255, 255, 255, 0.05) !important;
+        backdrop-filter: blur(20px) !important;
+        -webkit-backdrop-filter: blur(20px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+    }
+    
+    #timetableTable { border-collapse: collapse; width: 100%; }
+    #timetableTable th, #timetableTable td { border: 1px solid rgba(255,255,255,0.08); }
+    #timetableTable td:hover { background: rgba(255,255,255,0.05) !important; }
+</style>
 
 <%- include('../partials/footer') %>
