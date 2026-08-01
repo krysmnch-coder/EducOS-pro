@@ -14,8 +14,8 @@
         <%- include('../partials/messages') %>
 
         <!-- Message de succès -->
-        <div id="successMessage" class="alert alert-success" style="display:none; border-radius:10px;">
-            ✅ <span id="successText"></span>
+        <div id="successMessage" class="alert alert-success" style="display:none; position:fixed; top:80px; right:20px; z-index:9999; min-width:300px; border-radius:10px; box-shadow:0 8px 25px rgba(0,0,0,0.3);">
+            <span id="successText"></span>
         </div>
 
         <!-- Filtres -->
@@ -35,14 +35,6 @@
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <label class="form-label" style="color:#fff;">Nature</label>
-                    <select class="form-select" id="filterNature" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);">
-                        <option value="">Tous</option>
-                        <option value="absence">Absence</option>
-                        <option value="retard">Retard</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
                     <label class="form-label" style="color:#fff;">Statut</label>
                     <select class="form-select" id="filterStatus" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);">
                         <option value="">Tous</option>
@@ -58,7 +50,7 @@
                     <label class="form-label" style="color:#fff;">Date fin</label>
                     <input type="date" class="form-control" id="filterDateFin" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);">
                 </div>
-                <div class="col-md-2 mt-3">
+                <div class="col-md-2">
                     <button class="btn btn-primary w-100" id="btnFilter" style="height:42px;">
                         <i data-feather="search"></i> Filtrer
                     </button>
@@ -76,7 +68,7 @@
                             <th style="color:#fff;">Nom</th>
                             <th style="color:#fff;">Classe</th>
                             <th style="color:#fff;">Type</th>
-                            <th style="color:#fff;">Retard</th>
+                            <th style="color:#fff;">Heure arrivée</th>
                             <th style="color:#fff;">Justifié</th>
                             <th style="color:#fff;">Motif</th>
                             <th style="color:#fff;width:100px;">Actions</th>
@@ -138,10 +130,10 @@
                     </select>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Type</label>
+                    <label class="form-label">Type *</label>
                     <select class="form-select" id="absenceType" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);">
-                        <option value="absence">Absence</option>
-                        <option value="retard">Retard</option>
+                        <option value="absence">❌ Absence</option>
+                        <option value="retard">⏰ Retard</option>
                     </select>
                 </div>
                 <div class="mb-3" id="heureArriveeDiv" style="display:none;">
@@ -154,7 +146,7 @@
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Motif</label>
-                    <input type="text" class="form-control" id="absenceMotif" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);">
+                    <input type="text" class="form-control" id="absenceMotif" placeholder="Maladie, rendez-vous..." style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);">
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Commentaire</label>
@@ -163,8 +155,8 @@
                 <div class="mb-3">
                     <label class="form-label">Justifié</label>
                     <select class="form-select" id="absenceJustified" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);">
-                        <option value="non_justifiee">Non justifiée</option>
-                        <option value="justifiee">Justifiée</option>
+                        <option value="non_justifiee">❌ Non justifiée</option>
+                        <option value="justifiee">✅ Justifiée</option>
                     </select>
                 </div>
             </div>
@@ -195,8 +187,10 @@
         opt2.value = j; opt2.textContent = j; numberSel.appendChild(opt2);
     }
 
+    // Gestion des modals
     function hideModal(id) {
         var el = document.getElementById(id);
+        if (!el) return;
         el.classList.remove('show'); el.style.display = 'none';
         document.body.classList.remove('modal-open');
         var bd = document.querySelector('.modal-backdrop'); if (bd) bd.remove();
@@ -204,6 +198,7 @@
     }
     function showModal(id) {
         var el = document.getElementById(id);
+        if (!el) return;
         el.classList.add('show'); el.style.display = 'block';
         document.body.classList.add('modal-open');
         var bd = document.createElement('div'); bd.className = 'modal-backdrop fade show'; document.body.appendChild(bd);
@@ -217,9 +212,12 @@
         }
     });
 
+    // Message de succès
     function showSuccess(msg) {
         var el = document.getElementById('successMessage');
-        document.getElementById('successText').textContent = msg;
+        var txt = document.getElementById('successText');
+        if (!el || !txt) return;
+        txt.textContent = msg;
         el.style.display = 'block';
         setTimeout(function() { el.style.display = 'none'; }, 3000);
     }
@@ -238,6 +236,7 @@
     };
     xhrC.send();
 
+    // Type personne
     document.getElementById('absenceUserType').addEventListener('change', function() {
         document.getElementById('classSelectDiv').style.display = (this.value === 'student') ? 'block' : 'none';
         if (this.value === 'professor') {
@@ -257,10 +256,12 @@
         }
     });
 
+    // Type absence/retard
     document.getElementById('absenceType').addEventListener('change', function() {
         document.getElementById('heureArriveeDiv').style.display = (this.value === 'retard') ? 'block' : 'none';
     });
 
+    // Charger élèves
     document.getElementById('btnLoadStudents').addEventListener('click', function() {
         var level = document.getElementById('modalClassLevel').value;
         if (!level) { alert('Sélectionnez un niveau'); return; }
@@ -289,12 +290,10 @@
         var url = '/api/absences?user_type=' + document.getElementById('filterType').value;
         var cls = document.getElementById('filterClass').value;
         var st = document.getElementById('filterStatus').value;
-        var nat = document.getElementById('filterNature').value;
         var d1 = document.getElementById('filterDateDebut').value;
         var d2 = document.getElementById('filterDateFin').value;
         if (cls) url += '&class_name=' + encodeURIComponent(cls);
         if (st) url += '&status=' + encodeURIComponent(st);
-        if (nat) url += '&type=' + encodeURIComponent(nat);
         if (d1) url += '&date_debut=' + d1;
         if (d2) url += '&date_fin=' + d2;
 
@@ -311,15 +310,11 @@
                 }
                 for (var i = 0; i < data.length; i++) {
                     var a = data[i];
-                    var typeLabel = (a.type === 'absence') ? 'Absence' : 'Retard';
+                    var typeLabel = (a.type === 'absence') ? '❌ Absence' : '⏰ Retard';
                     var typeColor = (a.type === 'absence') ? '#dc3545' : '#fd7e14';
-                    var retardMin = '';
-                    if (a.type === 'retard' && a.heure_arrivee) {
-                        var h = parseInt(a.heure_arrivee.split(':')[0]);
-                        var m = parseInt(a.heure_arrivee.split(':')[1]);
-                        retardMin = (h * 60 + m) + ' min';
-                    }
+                    var heureArrivee = (a.type === 'retard' && a.heure_arrivee) ? a.heure_arrivee.substring(0, 5) : '-';
                     var justifiedChecked = (a.status === 'justifiee') ? 'checked' : '';
+                    var statusLabel = (a.status === 'justifiee') ? '✅ Justifiée' : '❌ Non justifiée';
 
                     var tr = document.createElement('tr');
                     tr.innerHTML = 
@@ -327,8 +322,8 @@
                         '<td style="color:#fff;">' + (a.user_name || '-') + '</td>' +
                         '<td style="color:#fff;">' + (a.student_class || '-') + '</td>' +
                         '<td><span class="badge" style="background:' + typeColor + '">' + typeLabel + '</span></td>' +
-                        '<td style="color:#fff;">' + (retardMin || '-') + '</td>' +
-                        '<td><input type="checkbox" ' + justifiedChecked + ' onchange="toggleJustify(' + a.id + ', this.checked)" style="accent-color:#198754;width:18px;height:18px;cursor:pointer;"></td>' +
+                        '<td style="color:#fff;">' + heureArrivee + '</td>' +
+                        '<td><label style="cursor:pointer;display:flex;align-items:center;gap:6px;"><input type="checkbox" ' + justifiedChecked + ' onchange="toggleJustify(' + a.id + ', this.checked)" style="accent-color:#198754;width:18px;height:18px;cursor:pointer;"><span style="font-size:0.75rem;color:#ccc;">' + statusLabel + '</span></label></td>' +
                         '<td style="color:#ccc;">' + (a.motif || '-') + '</td>' +
                         '<td><a href="#" onclick="event.preventDefault(); deleteAbsence(' + a.id + ')" class="btn btn-sm btn-outline-danger">🗑️</a></td>';
                     tbody.appendChild(tr);
@@ -338,20 +333,20 @@
         xhr.send();
     }
 
-    // COCHER JUSTIFIÉ
+    // Cocher justifié
     function toggleJustify(id, checked) {
         var xhr = new XMLHttpRequest();
         xhr.open('PUT', '/api/absences/' + id);
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.onload = function() {
-            var msg = checked ? 'Absence marquée comme justifiée ✅' : 'Absence marquée comme non justifiée ❌';
+            var msg = checked ? '✅ Absence/retard marqué(e) comme justifié(e)' : '❌ Absence/retard marqué(e) comme non justifié(e)';
             showSuccess(msg);
             loadAbsences();
         };
         xhr.send(JSON.stringify({ status: checked ? 'justifiee' : 'non_justifiee' }));
     }
 
-    // AJOUTER
+    // Ajouter
     document.getElementById('btnAddAbsence').addEventListener('click', function() {
         document.getElementById('absenceUserType').value = 'student';
         document.getElementById('classSelectDiv').style.display = 'block';
@@ -364,21 +359,22 @@
         showModal('absenceModal');
     });
 
-    // ENREGISTRER
+    // Enregistrer
     document.getElementById('btnSaveAbsence').addEventListener('click', function() {
         var uid = document.getElementById('absenceUser').value;
         if (!uid) { alert('Sélectionnez une personne'); return; }
+        var type = document.getElementById('absenceType').value;
         var data = {
             user_id: parseInt(uid),
             user_type: document.getElementById('absenceUserType').value,
-            type: document.getElementById('absenceType').value,
+            type: type,
             date: document.getElementById('absenceDate').value,
             heure_arrivee: null,
             motif: document.getElementById('absenceMotif').value.trim(),
             commentaire: document.getElementById('absenceCommentaire').value.trim(),
             status: document.getElementById('absenceJustified').value
         };
-        if (data.type === 'retard') data.heure_arrivee = document.getElementById('absenceHeure').value;
+        if (type === 'retard') data.heure_arrivee = document.getElementById('absenceHeure').value;
 
         var xhr = new XMLHttpRequest();
         xhr.open('POST', '/api/absences');
@@ -388,7 +384,8 @@
                 var result = JSON.parse(xhr.responseText);
                 if (result.success) {
                     hideModal('absenceModal');
-                    showSuccess('Absence/retard enregistré avec succès ✅');
+                    var msg = (type === 'absence') ? '✅ Absence enregistrée avec succès' : '⏰ Retard enregistré avec succès';
+                    showSuccess(msg);
                     loadAbsences();
                 } else {
                     alert('Erreur: ' + (result.error || 'Inconnue'));
@@ -398,11 +395,12 @@
         xhr.send(JSON.stringify(data));
     });
 
+    // Supprimer
     function deleteAbsence(id) {
         if (!confirm('Supprimer cette entrée ?')) return;
         var xhr = new XMLHttpRequest();
         xhr.open('DELETE', '/api/absences/' + id);
-        xhr.onload = function() { showSuccess('Entrée supprimée 🗑️'); loadAbsences(); };
+        xhr.onload = function() { showSuccess('🗑️ Entrée supprimée'); loadAbsences(); };
         xhr.send();
     }
 </script>
@@ -418,7 +416,6 @@
     #absencesTable { color: #e4e4e4; }
     #absencesTable td { border-color: rgba(255,255,255,0.06); vertical-align: middle; }
     #absencesTable tr:hover { background: rgba(255,255,255,0.03); }
-    #successMessage { position: fixed; top: 80px; right: 20px; z-index: 9999; min-width: 300px; }
 </style>
 
 <%- include('../partials/footer') %>
