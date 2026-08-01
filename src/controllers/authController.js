@@ -160,6 +160,7 @@ exports.renderLogin = async (req, res) => {
 exports.renderDashboard = async (req, res) => {
     const user = req.user;
 
+    // Redirection admin
     if (['SUPER_ADMIN', 'ADMINISTRATOR', 'superadmin', 'administrateur'].includes(user.role)) {
         return adminController.renderAdminDashboard(req, res);
     }
@@ -168,81 +169,102 @@ exports.renderDashboard = async (req, res) => {
     if (user.role === 'PARENT' || user.role === 'parent') {
         try {
             parentData.children = await userModel.getLinkedChildrenForParent(user.id);
+            if (req.session.selectedChildId) {
+                const selectedChild = parentData.children.find(c => c.id == req.session.selectedChildId);
+                if (selectedChild) {
+                    parentData.selectedChild = selectedChild;
+                } else {
+                    delete req.session.selectedChildId;
+                }
+            }
         } catch (error) {
             parentData.children = [];
         }
     }
 
-    // Widgets selon le rôle (en minuscules)
-    const role = user.role.toLowerCase();
-    console.log('========== RÔLE UTILISATEUR ==========');
-    console.log('Role brut:', user.role);
-    console.log('Role.toLowerCase():', user.role.toLowerCase());
-    console.log('======================================');
+    // ✅ Rôle en minuscules pour comparaison
+    const role = (user.role || '').toLowerCase();
     let widgets = [];
 
-    // Dans la section des widgets par rôle, ajoutez/modifiez :
+    // ==========================================================================
+    // WIDGETS PAR RÔLE
+    // ==========================================================================
 
-// PROFESSEUR
-if (role === 'professor' || role === 'professeur') {
-    widgets = [
-        { key: 'grades', icon: 'edit', title: "Saisie Notes", link: '/professor/grades', description: "Entrer les notes" },
-        { key: 'resources', icon: 'book-open', title: "Ressources", link: '/professor/resources', description: "Partager des cours" },
-        { key: 'logbook', icon: 'book', title: "Cahier de Texte", link: '/professor/logbook', description: "Contenu des séances" },
-        { key: 'calendar', icon: 'calendar', title: "Calendrier", link: '/calendar-view', description: "Voir le calendrier" },
-        { key: 'timetable', icon: 'clock', title: "Emploi du temps", link: '/timetable-view', description: "Consulter l'EDT" },
-        { key: 'absences', icon: 'user-x', title: "Absences", link: '/absences-view', description: "Voir les absences" },
-        { key: 'messages', icon: 'mail', title: "Messages", link: '/communications', description: "Messagerie" },
-    ];
-}
-
-// PARENT
-if (role === 'parent') {
-    widgets = [
-        { key: 'grades', icon: 'award', title: "Notes de l'enfant", link: '/student/grades', description: "Consulter les notes" },
-        { key: 'absences', icon: 'user-x', title: "Absences", link: '/absences-view', description: "Voir les absences" },
-        { key: 'timetable', icon: 'clock', title: "Emploi du temps", link: '/timetable-view', description: "Consulter l'EDT" },
-        { key: 'calendar', icon: 'calendar', title: "Calendrier", link: '/calendar-view', description: "Voir le calendrier" },
-        { key: 'docs', icon: 'file-text', title: "Documents", link: '/student/documents', description: "Documents scolaires" },
-        { key: 'messages', icon: 'mail', title: "Messages", link: '/communications', description: "Messagerie" },
-    ];
-}
-
-// ELEVE
-if (role === 'student' || role === 'eleve') {
-    widgets = [
-        { key: 'grades', icon: 'award', title: "Mes Notes", link: '/student/grades', description: "Consulter mes notes" },
-        { key: 'resources', icon: 'book-open', title: "Ressources", link: '/student/resources', description: "Documents de cours" },
-        { key: 'timetable', icon: 'clock', title: "Mon Emploi du temps", link: '/timetable-view', description: "Mon planning" },
-        { key: 'calendar', icon: 'calendar', title: "Calendrier", link: '/calendar-view', description: "Voir le calendrier" },
-        { key: 'absences', icon: 'user-x', title: "Mes Absences", link: '/absences-view', description: "Voir mes absences" },
-        { key: 'messages', icon: 'mail', title: "Messages", link: '/communications', description: "Messagerie" },
-    ];
-
-    } else if (role === 'secretary' || role === 'secretaire') {
+    if (role === 'parent') {
         widgets = [
-            { key: 'students', icon: 'users', title: "Élèves", link: '/students', description: "Liste des élèves" },
-            { key: 'payments', icon: 'dollar-sign', title: "Paiements", link: '/secretary/payments', description: "Frais de scolarité" },
-            { key: 'docs', icon: 'archive', title: "Documents", link: '/secretary/documents', description: "Certificats" },
+            { key: 'grades', icon: 'award', title: "Notes de l'enfant", link: '/student/grades', description: "Consulter les notes et appréciations" },
+            { key: 'absences', icon: 'user-x', title: "Absences", link: '/absences-view', description: "Voir les absences et retards" },
+            { key: 'timetable', icon: 'clock', title: "Emploi du temps", link: '/timetable-view', description: "Consulter l'emploi du temps" },
+            { key: 'calendar', icon: 'calendar', title: "Calendrier", link: '/calendar-view', description: "Voir le calendrier scolaire" },
+            { key: 'documents', icon: 'file-text', title: "Documents", link: '/student/documents', description: "Documents administratifs" },
             { key: 'messages', icon: 'mail', title: "Messages", link: '/communications', description: "Messagerie" },
+            { key: 'profile', icon: 'user', title: "Mon Profil", link: '/profile', description: "Gérer mon profil" },
+            { key: 'chat', icon: 'message-circle', title: "Chat", link: '/chat', description: "Messagerie instantanée" },
         ];
-    } else if (role === 'school_life_manager' || role === 'school_life_manager' || role === 'vie_scolaire' || role === 'responsable_vie_scolaire' || role.includes('school') || role.includes('vie')) {
+    } 
+    else if (role === 'professor' || role === 'professeur') {
         widgets = [
-            { key: 'calendar', icon: 'calendar', title: "Calendrier", link: '/school-life/calendar', description: "Événements" },
+            { key: 'professor_grades', icon: 'edit', title: "Saisie des Notes", link: '/professor/grades', description: "Entrer et modifier les notes" },
+            { key: 'professor_resources', icon: 'book-open', title: "Ressources", link: '/professor/resources', description: "Partager des cours et exercices" },
+            { key: 'logbook', icon: 'book', title: "Cahier de Texte", link: '/professor/logbook', description: "Renseigner le contenu des séances" },
+            { key: 'timetable', icon: 'clock', title: "Emploi du temps", link: '/timetable-view', description: "Consulter les emplois du temps" },
+            { key: 'calendar', icon: 'calendar', title: "Calendrier", link: '/calendar-view', description: "Voir le calendrier scolaire" },
+            { key: 'absences', icon: 'user-x', title: "Mes Absences", link: '/absences-view', description: "Voir mes absences" },
+            { key: 'messages', icon: 'mail', title: "Messages", link: '/communications', description: "Messagerie" },
+            { key: 'chat', icon: 'message-circle', title: "Chat", link: '/chat', description: "Messagerie instantanée" },
+        ];
+    } 
+    else if (role === 'student' || role === 'eleve') {
+        widgets = [
+            { key: 'student_grades', icon: 'award', title: "Mes Notes", link: '/student/grades', description: "Consulter mes notes" },
+            { key: 'student_resources', icon: 'book-open', title: "Ressources", link: '/student/resources', description: "Documents de cours" },
+            { key: 'student_timetable', icon: 'clock', title: "Mon Emploi du temps", link: '/timetable-view', description: "Mon planning" },
+            { key: 'calendar', icon: 'calendar', title: "Calendrier", link: '/calendar-view', description: "Voir le calendrier" },
+            { key: 'absences', icon: 'user-x', title: "Mes Absences", link: '/absences-view', description: "Voir mes absences" },
+            { key: 'messages', icon: 'mail', title: "Messages", link: '/communications', description: "Messagerie" },
+            { key: 'profile', icon: 'user', title: "Mon Profil", link: '/profile', description: "Gérer mon profil" },
+            { key: 'chat', icon: 'message-circle', title: "Chat", link: '/chat', description: "Messagerie instantanée" },
+        ];
+    } 
+    else if (role === 'secretary' || role === 'secretaire') {
+        widgets = [
+            { key: 'students_list', icon: 'users', title: "Liste des Élèves", link: '/students', description: "Consulter et gérer les élèves" },
+            { key: 'payments', icon: 'dollar-sign', title: "Suivi des Paiements", link: '/secretary/payments', description: "Frais de scolarité" },
+            { key: 'school_documents', icon: 'archive', title: "Documents Scolaires", link: '/secretary/documents', description: "Générer les certificats" },
+            { key: 'calendar', icon: 'calendar', title: "Calendrier", link: '/calendar-view', description: "Voir le calendrier" },
+            { key: 'messages', icon: 'mail', title: "Messages", link: '/communications', description: "Messagerie" },
+            { key: 'chat', icon: 'message-circle', title: "Chat", link: '/chat', description: "Messagerie instantanée" },
+        ];
+    } 
+    else if (role === 'school_life_manager' || role === 'responsable_vie_scolaire' || role === 'vie_scolaire') {
+        widgets = [
+            { key: 'calendar', icon: 'calendar', title: "Calendrier", link: '/school-life/calendar', description: "Gérer le calendrier" },
             { key: 'timetables', icon: 'clock', title: "Emplois du Temps", link: '/school-life/timetables', description: "Gérer les EDT" },
-            { key: 'absences', icon: 'user-x', title: "Absences", link: '/school-life/absences', description: "Suivi des absences" },
+            { key: 'school_absences', icon: 'user-x', title: "Absences & Retards", link: '/school-life/absences', description: "Suivi des absences" },
             { key: 'messages', icon: 'mail', title: "Messages", link: '/communications', description: "Messagerie" },
+            { key: 'profile', icon: 'user', title: "Mon Profil", link: '/profile', description: "Gérer mon profil" },
+            { key: 'chat', icon: 'message-circle', title: "Chat", link: '/chat', description: "Messagerie instantanée" },
         ];
-    } else {
+    } 
+    else {
         // Widgets par défaut
         widgets = [
             { key: 'profile', icon: 'user', title: "Mon Profil", link: '/profile', description: "Gérer mon profil" },
             { key: 'messages', icon: 'mail', title: "Messages", link: '/communications', description: "Messagerie" },
-            { key: 'docs', icon: 'file-text', title: "Documents", link: '/documents', description: "Documents" },
+            { key: 'documents', icon: 'file-text', title: "Documents", link: '/documents', description: "Accéder aux documents" },
             { key: 'chat', icon: 'message-circle', title: "Chat", link: '/chat', description: "Messagerie instantanée" },
         ];
     }
-    console.log('Rôle:', role, '| Widgets:', widgets.length);
+
+    // Mise à jour des liens pour le parent avec enfant sélectionné
+    if ((role === 'parent') && parentData.selectedChild) {
+        widgets = widgets.map(w => ({
+            ...w,
+            link: w.link.replace('/student/', `/student/${parentData.selectedChild.id}/`)
+        }));
+    }
+
+    console.log('👤 Rôle:', role, '| 📦 Widgets:', widgets.length);
 
     return res.render('dashboard', { 
         title: 'Tableau de bord | EducOS-pro', 
