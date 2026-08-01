@@ -960,6 +960,35 @@ app.get('/api/students-by-class/:className', async (req, res) => {
         res.status(500).json([]);
     }
 });
+// API - Récupérer toutes les classes existantes
+app.get('/api/all-classes', async (req, res) => {
+    if (!req.user) return res.status(401).json([]);
+    try {
+        const classes = await db('users')
+            .where({ establishment_id: req.user.establishment_id, role: 'STUDENT' })
+            .distinct('student_class')
+            .whereNotNull('student_class')
+            .orderBy('student_class')
+            .pluck('student_class');
+        res.json(classes);
+    } catch (error) {
+        res.status(500).json([]);
+    }
+});
+
+// API - Récupérer la liste des professeurs
+app.get('/api/professors-list', async (req, res) => {
+    if (!req.user) return res.status(401).json([]);
+    try {
+        const professors = await db('users')
+            .where({ establishment_id: req.user.establishment_id, role: 'PROFESSOR' })
+            .select('id', 'name')
+            .orderBy('name');
+        res.json(professors);
+    } catch (error) {
+        res.status(500).json([]);
+    }
+});
 
 // Créer la table absences si elle n'existe pas
 async function createAbsencesTable() {

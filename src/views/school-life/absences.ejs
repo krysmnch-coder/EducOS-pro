@@ -69,7 +69,7 @@
                         </tr>
                     </thead>
                     <tbody id="absencesBody">
-                        <tr><td colspan="7" class="text-center text-muted py-4">Sélectionnez des filtres et cliquez sur Filtrer</td></tr>
+                        <tr><td colspan="7" class="text-center text-muted py-4">Cliquez sur Filtrer pour afficher les absences</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -80,7 +80,7 @@
 
 <!-- Modal Ajouter -->
 <div class="modal fade" id="absenceModal" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content" style="background:rgba(30,30,50,0.95);color:white;border-radius:16px;border:1px solid rgba(255,255,255,0.1);">
             <div class="modal-header" style="border-bottom:1px solid rgba(255,255,255,0.1);">
                 <h5 class="modal-title">Signaler une absence/retard</h5>
@@ -90,27 +90,72 @@
                 <div class="mb-3">
                     <label class="form-label">Type de personne</label>
                     <select class="form-select" id="absenceUserType" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);">
-                        <option value="student" style="background:#1a1a2e;">Élève</option>
-                        <option value="professor" style="background:#1a1a2e;">Professeur</option>
+                        <option value="student" style="background:#1a1a2e;">👨‍🎓 Élève</option>
+                        <option value="professor" style="background:#1a1a2e;">👨‍🏫 Professeur</option>
                     </select>
                 </div>
-                <div class="mb-3" id="classSelectDiv">
-                    <label class="form-label">Classe</label>
-                    <select class="form-select" id="absenceClass" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);">
-                        <option value="" style="background:#1a1a2e;">-- Choisir une classe --</option>
-                    </select>
+                
+                <!-- Sélecteur de classe avancé (comme timetables) -->
+                <div id="classSelectDiv">
+                    <label class="form-label" style="color:#fff; font-weight:500;">Sélectionner la classe</label>
+                    <div class="row mb-3">
+                        <div class="col-md-5">
+                            <select class="form-select" id="modalClassLevel" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);">
+                                <option value="" disabled selected style="background:#1a1a2e;">-- Niveau --</option>
+                                <optgroup label="Lycée">
+                                    <option value="Terminale" style="background:#1a1a2e;">Terminale</option>
+                                    <option value="Première" style="background:#1a1a2e;">Première</option>
+                                    <option value="Seconde" style="background:#1a1a2e;">Seconde</option>
+                                </optgroup>
+                                <optgroup label="Collège">
+                                    <option value="Troisième" style="background:#1a1a2e;">Troisième</option>
+                                    <option value="Quatrième" style="background:#1a1a2e;">Quatrième</option>
+                                    <option value="Cinquième" style="background:#1a1a2e;">Cinquième</option>
+                                    <option value="Sixième" style="background:#1a1a2e;">Sixième</option>
+                                </optgroup>
+                                <optgroup label="Primaire">
+                                    <option value="CM2" style="background:#1a1a2e;">CM2</option><option value="CM1" style="background:#1a1a2e;">CM1</option><option value="CE2" style="background:#1a1a2e;">CE2</option><option value="CE1" style="background:#1a1a2e;">CE1</option><option value="CP" style="background:#1a1a2e;">CP</option>
+                                </optgroup>
+                                <optgroup label="Maternelle">
+                                    <option value="Grande Section" style="background:#1a1a2e;">Grande Section</option><option value="Moyenne Section" style="background:#1a1a2e;">Moyenne Section</option><option value="Petite Section" style="background:#1a1a2e;">Petite Section</option><option value="Toute Petite Section" style="background:#1a1a2e;">Toute Petite Section</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <select class="form-select" id="modalClassLetter" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);">
+                                <option value="" selected style="background:#1a1a2e;">Lettre</option>
+                                <% 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(function(l) { %>
+                                    <option value="<%= l %>" style="background:#1a1a2e;"><%= l %></option>
+                                <% }); %>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <select class="form-select" id="modalClassNumber" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);">
+                                <option value="" selected style="background:#1a1a2e;">N°</option>
+                                <% for (var i = 1; i <= 20; i++) { %>
+                                    <option value="<%= i %>" style="background:#1a1a2e;"><%= i %></option>
+                                <% } %>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn btn-outline-light w-100" id="btnLoadStudents" style="height:42px;">
+                                <i data-feather="search"></i> Charger
+                            </button>
+                        </div>
+                    </div>
                 </div>
+
                 <div class="mb-3">
-                    <label class="form-label">Personne</label>
+                    <label class="form-label">Personne *</label>
                     <select class="form-select" id="absenceUser" required style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);">
-                        <option value="" style="background:#1a1a2e;">-- Choisir --</option>
+                        <option value="" style="background:#1a1a2e;">-- Sélectionnez une classe d'abord --</option>
                     </select>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Type</label>
                     <select class="form-select" id="absenceType" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);">
-                        <option value="absence" style="background:#1a1a2e;">Absence</option>
-                        <option value="retard" style="background:#1a1a2e;">Retard</option>
+                        <option value="absence" style="background:#1a1a2e;">❌ Absence</option>
+                        <option value="retard" style="background:#1a1a2e;">⏰ Retard</option>
                     </select>
                 </div>
                 <div class="mb-3" id="heureArriveeDiv" style="display:none;">
@@ -118,7 +163,7 @@
                     <input type="time" class="form-control" id="absenceHeure" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);">
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Date</label>
+                    <label class="form-label">Date *</label>
                     <input type="date" class="form-control" id="absenceDate" required style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);">
                 </div>
                 <div class="mb-3">
@@ -172,20 +217,7 @@
     </div>
 </div>
 
-<!-- Données serveur -->
-<script type="application/json" id="serverData">
-{
-    "classes": <%- JSON.stringify(classes || []) %>,
-    "professors": <%- JSON.stringify(professors || []) %>
-}
-</script>
-
 <script>
-    // Récupérer les données serveur
-    var serverData = JSON.parse(document.getElementById('serverData').textContent);
-    var classesList = serverData.classes || [];
-    var professorsList = serverData.professors || [];
-
     document.addEventListener('DOMContentLoaded', function() {
         if (typeof feather !== 'undefined') feather.replace();
 
@@ -193,66 +225,89 @@
         document.getElementById('absenceDate').value = today;
         document.getElementById('filterDateDebut').value = today;
 
-        // Charger les classes dans les selects
-        loadClassesInSelect('absenceClass');
-        loadClassesInSelect('filterClass');
-
         // Afficher/masquer heure arrivée
         document.getElementById('absenceType').addEventListener('change', function() {
             document.getElementById('heureArriveeDiv').style.display = this.value === 'retard' ? 'block' : 'none';
         });
 
-        // Changer type de personne
+        // Type de personne
         document.getElementById('absenceUserType').addEventListener('change', function() {
             var isStudent = this.value === 'student';
             document.getElementById('classSelectDiv').style.display = isStudent ? 'block' : 'none';
-            if (isStudent) {
-                document.getElementById('absenceUser').innerHTML = '<option value="" style="background:#1a1a2e;">-- Choisir une classe d\'abord --</option>';
+            if (!isStudent) {
+                loadProfessorsForModal();
             } else {
-                loadProfessorsInSelect();
+                document.getElementById('absenceUser').innerHTML = '<option value="" style="background:#1a1a2e;">-- Sélectionnez une classe --</option>';
             }
         });
 
-        // Charger élèves quand classe sélectionnée
-        document.getElementById('absenceClass').addEventListener('change', function() {
-            if (this.value) loadStudentsInSelect(this.value);
+        // Charger les élèves
+        document.getElementById('btnLoadStudents').addEventListener('click', function() {
+            var level = document.getElementById('modalClassLevel').value;
+            if (!level) return alert('Veuillez sélectionner un niveau.');
+            var letter = document.getElementById('modalClassLetter').value || '';
+            var number = document.getElementById('modalClassNumber').value || '';
+            var className = level + (letter ? ' ' + letter : '') + (number ? ' ' + number : '');
+            loadStudentsForModal(className.trim());
         });
+
+        // Charger les classes pour le filtre
+        loadAllClasses();
 
         document.getElementById('btnFilter').addEventListener('click', loadAbsences);
         document.getElementById('btnAddAbsence').addEventListener('click', function() {
+            document.getElementById('absenceUserType').value = 'student';
+            document.getElementById('classSelectDiv').style.display = 'block';
+            document.getElementById('absenceUser').innerHTML = '<option value="" style="background:#1a1a2e;">-- Sélectionnez une classe --</option>';
             new bootstrap.Modal(document.getElementById('absenceModal')).show();
         });
         document.getElementById('btnSaveAbsence').addEventListener('click', saveAbsence);
         document.getElementById('btnSaveJustify').addEventListener('click', saveJustify);
     });
 
-    function loadClassesInSelect(selectId) {
-        var select = document.getElementById(selectId);
-        if (!select) return;
-        select.innerHTML = '<option value="" style="background:#1a1a2e;">' + (selectId === 'filterClass' ? 'Toutes' : '-- Choisir une classe --') + '</option>';
-        classesList.forEach(function(cls) {
-            select.innerHTML += '<option value="' + cls + '" style="background:#1a1a2e;">' + cls + '</option>';
-        });
+    // Charger toutes les classes existantes dans la base
+    function loadAllClasses() {
+        fetch('/api/all-classes')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                var filterSelect = document.getElementById('filterClass');
+                filterSelect.innerHTML = '<option value="" style="background:#1a1a2e;">Toutes</option>';
+                data.forEach(function(cls) {
+                    filterSelect.innerHTML += '<option value="' + cls + '" style="background:#1a1a2e;">' + cls + '</option>';
+                });
+            })
+            .catch(function() {});
     }
 
-    function loadStudentsInSelect(className) {
+    function loadStudentsForModal(className) {
         fetch('/api/students-by-class/' + encodeURIComponent(className))
             .then(function(r) { return r.json(); })
             .then(function(data) {
                 var select = document.getElementById('absenceUser');
-                select.innerHTML = '<option value="" style="background:#1a1a2e;">-- Choisir un élève --</option>';
-                data.forEach(function(s) {
-                    select.innerHTML += '<option value="' + s.id + '" style="background:#1a1a2e;">' + s.name + ' (' + s.matricule + ')</option>';
-                });
+                if (data.length === 0) {
+                    select.innerHTML = '<option value="" style="background:#1a1a2e;">Aucun élève dans cette classe</option>';
+                } else {
+                    select.innerHTML = '<option value="" style="background:#1a1a2e;">-- Choisir un élève --</option>';
+                    data.forEach(function(s) {
+                        select.innerHTML += '<option value="' + s.id + '" style="background:#1a1a2e;">' + s.name + ' (' + s.matricule + ')</option>';
+                    });
+                }
+            })
+            .catch(function() {
+                document.getElementById('absenceUser').innerHTML = '<option value="" style="background:#1a1a2e;">Erreur chargement</option>';
             });
     }
 
-    function loadProfessorsInSelect() {
-        var select = document.getElementById('absenceUser');
-        select.innerHTML = '<option value="" style="background:#1a1a2e;">-- Choisir un professeur --</option>';
-        professorsList.forEach(function(p) {
-            select.innerHTML += '<option value="' + p.id + '" style="background:#1a1a2e;">' + p.name + '</option>';
-        });
+    function loadProfessorsForModal() {
+        fetch('/api/professors-list')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                var select = document.getElementById('absenceUser');
+                select.innerHTML = '<option value="" style="background:#1a1a2e;">-- Choisir un professeur --</option>';
+                data.forEach(function(p) {
+                    select.innerHTML += '<option value="' + p.id + '" style="background:#1a1a2e;">' + p.name + '</option>';
+                });
+            });
     }
 
     function loadAbsences() {
@@ -285,8 +340,8 @@
                 '<td><span class="badge" style="background:' + (a.status === 'justifiee' ? '#198754' : '#dc3545') + ';">' + (a.status === 'justifiee' ? 'Justifiée' : 'Non justifiée') + '</span></td>' +
                 '<td style="color:#ccc;">' + (a.motif || '-') + '</td>' +
                 '<td>' +
-                    '<button class="btn btn-sm btn-outline-success me-1" onclick="openJustify(' + a.id + ', \'' + escapeJs(a.motif || '') + '\', \'' + escapeJs(a.commentaire || '') + '\', \'' + (a.status || '') + '\')" title="Justifier">✓</button>' +
-                    '<button class="btn btn-sm btn-outline-danger" onclick="deleteAbsence(' + a.id + ')" title="Supprimer">🗑️</button>' +
+                    '<button class="btn btn-sm btn-outline-success me-1" onclick="openJustify(' + a.id + ', \'' + escapeJs(a.motif || '') + '\', \'' + escapeJs(a.commentaire || '') + '\', \'' + (a.status || '') + '\')">✓</button>' +
+                    '<button class="btn btn-sm btn-outline-danger" onclick="deleteAbsence(' + a.id + ')">🗑️</button>' +
                 '</td>' +
             '</tr>';
         }).join('');
@@ -316,6 +371,8 @@
             if (result.success) {
                 bootstrap.Modal.getInstance(document.getElementById('absenceModal')).hide();
                 loadAbsences();
+            } else {
+                alert('Erreur: ' + (result.error || 'Inconnue'));
             }
         });
     }
