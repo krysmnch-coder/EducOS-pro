@@ -1026,10 +1026,10 @@ async function createAbsencesTable() {
                 table.integer('establishment_id').notNullable();
                 table.integer('user_id').notNullable(); // ID de l'élève ou du professeur
                 table.string('user_type', 20).notNullable(); // 'student' ou 'professor'
-                table.enum('type', ['absence', 'retard']).notNullable();
-                table.enum('status', ['non_justifiee', 'justifiee', 'en_attente']).defaultTo('non_justifiee');
+                table.string('type', 20).notNullable();
+                table.string('status', 20).defaultTo('non_justifiee');
                 table.date('date').notNullable();
-                table.time('heure_arrivee');
+                table.string('heure_arrivee', 10);
                 table.string('motif', 500);
                 table.string('justificatif_url', 500);
                 table.text('commentaire');
