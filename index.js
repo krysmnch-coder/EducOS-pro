@@ -865,28 +865,39 @@ app.get('/api/absences', async (req, res) => {
     
     try {
         const { user_type, class_name, date_debut, date_fin, status } = req.query;
-        let query = db('absences').where({ establishment_id: req.user.establishment_id });
         
-        if (user_type) query = query.where({ user_type });
-        if (status) query = query.where({ status });
-        if (date_debut) query = query.where('date', '>=', date_debut);
-        if (date_fin) query = query.where('date', '<=', date_fin);
+        console.log('📋 Filtres reçus:', { user_type, class_name, date_debut, date_fin, status });
         
+        let query = db('absences')
+            .where({ 'absences.establishment_id': req.user.establishment_id })
+            .leftJoin('users', 'absences.user_id', 'users.id')
+            .select('absences.*', 'users.name as user_name', 'users.student_class');
+        
+        if (user_type) {
+            query = query.where('absences.user_type', user_type);
+        }
+        if (status) {
+            query = query.where('absences.status', status);
+        }
+        if (date_debut) {
+            query = query.where('absences.date', '>=', date_debut);
+        }
+        if (date_fin) {
+            query = query.where('absences.date', '<=', date_fin);
+        }
         if (class_name && user_type === 'student') {
-            query = query.whereIn('user_id', function() {
-                this.select('id').from('users').where({ student_class: class_name });
-            });
+            query = query.where('users.student_class', class_name);
         }
 
         const absences = await query
-            .leftJoin('users', 'absences.user_id', 'users.id')
-            .select('absences.*', 'users.name as user_name', 'users.student_class')
             .orderBy('absences.date', 'desc')
             .orderBy('absences.created_at', 'desc');
 
+        console.log('✅ Absences trouvées:', absences.length);
         res.json(absences);
     } catch (error) {
-        res.status(500).json([]);
+        console.error('❌ Erreur API absences:', error.message);
+        res.json([]); // ✅ Toujours retourner un tableau
     }
 });
 
