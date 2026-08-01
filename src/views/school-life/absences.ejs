@@ -19,8 +19,8 @@
                 <div class="col-md-2">
                     <label class="form-label" style="color:#fff;">Type</label>
                     <select class="form-select" id="filterType" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);">
-                        <option value="student"> Élèves</option>
-                        <option value="professor"> Professeurs</option>
+                        <option value="student">👨‍🎓 Élèves</option>
+                        <option value="professor">👨‍🏫 Professeurs</option>
                     </select>
                 </div>
                 <div class="col-md-2">
@@ -225,7 +225,7 @@
         opt2.value = j; opt2.textContent = j; numberSel.appendChild(opt2);
     }
 
-    // === FONCTION POUR FERMER UN MODAL ===
+    // === FONCTIONS MODAL ===
     function hideModal(modalId) {
         var el = document.getElementById(modalId);
         el.classList.remove('show');
@@ -237,7 +237,6 @@
         document.body.style.paddingRight = '';
     }
 
-    // === FONCTION POUR OUVRIR UN MODAL ===
     function showModal(modalId) {
         var el = document.getElementById(modalId);
         el.classList.add('show');
@@ -248,7 +247,7 @@
         document.body.appendChild(bd);
     }
 
-    // Fermer les modals avec boutons data-bs-dismiss
+    // Fermer modals
     document.querySelectorAll('[data-bs-dismiss="modal"]').forEach(function(btn) {
         btn.addEventListener('click', function() {
             var modal = this.closest('.modal');
@@ -256,30 +255,48 @@
         });
     });
 
-    // Fermer en cliquant sur le backdrop
     document.addEventListener('click', function(e) {
         if (e.target.classList.contains('modal-backdrop')) {
             document.querySelectorAll('.modal.show').forEach(function(m) { hideModal(m.id); });
         }
     });
 
-    // === CHARGER CLASSES DANS LE FILTRE ===
-    fetch('/api/all-classes')
-        .then(function(r) { return r.json(); })
-        .then(function(data) {
+    // === CHARGER CLASSES FILTRE ===
+    var xhrClasses = new XMLHttpRequest();
+    xhrClasses.open('GET', '/api/all-classes');
+    xhrClasses.onload = function() {
+        if (xhrClasses.status === 200) {
+            var data = JSON.parse(xhrClasses.responseText);
             var sel = document.getElementById('filterClass');
-            if (Array.isArray(data)) {
+            if (data && data.length > 0) {
                 for (var i = 0; i < data.length; i++) {
                     var opt = document.createElement('option');
                     opt.value = data[i]; opt.textContent = data[i]; sel.appendChild(opt);
                 }
             }
-        });
+        }
+    };
+    xhrClasses.send();
 
     // === TYPE PERSONNE ===
     document.getElementById('absenceUserType').addEventListener('change', function() {
         document.getElementById('classSelectDiv').style.display = (this.value === 'student') ? 'block' : 'none';
-        if (this.value === 'professor') loadProfessors();
+        if (this.value === 'professor') {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', '/api/professors-list');
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    var data = JSON.parse(xhr.responseText);
+                    var sel = document.getElementById('absenceUser');
+                    sel.innerHTML = '<option value="">-- Choisir --</option>';
+                    for (var i = 0; i < data.length; i++) {
+                        var opt = document.createElement('option');
+                        opt.value = data[i].id; opt.textContent = data[i].name; sel.appendChild(opt);
+                    }
+                }
+            };
+            xhr.send();
+        }
     });
 
     // === TYPE ABSENCE/RETARD ===
@@ -295,37 +312,27 @@
         var number = document.getElementById('modalClassNumber').value;
         var className = level + (letter ? ' ' + letter : '') + (number ? ' ' + number : '');
 
-        fetch('/api/students-by-class/' + encodeURIComponent(className.trim()))
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', '/api/students-by-class/' + encodeURIComponent(className.trim()));
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                var data = JSON.parse(xhr.responseText);
                 var sel = document.getElementById('absenceUser');
                 sel.innerHTML = '<option value="">-- Choisir --</option>';
-                if (Array.isArray(data)) {
+                if (data && data.length > 0) {
                     for (var i = 0; i < data.length; i++) {
                         var opt = document.createElement('option');
-                        opt.value = data[i].id; opt.textContent = data[i].name + ' (' + data[i].matricule + ')'; sel.appendChild(opt);
+                        opt.value = data[i].id;
+                        opt.textContent = data[i].name + ' (' + (data[i].matricule || 'N/A') + ')';
+                        sel.appendChild(opt);
                     }
                 }
-            });
+            }
+        };
+        xhr.send();
     });
 
-    // === CHARGER PROFESSEURS ===
-    function loadProfessors() {
-        fetch('/api/professors-list')
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
-                var sel = document.getElementById('absenceUser');
-                sel.innerHTML = '<option value="">-- Choisir --</option>';
-                if (Array.isArray(data)) {
-                    for (var i = 0; i < data.length; i++) {
-                        var opt = document.createElement('option');
-                        opt.value = data[i].id; opt.textContent = data[i].name; sel.appendChild(opt);
-                    }
-                }
-            });
-    }
-
-    // === BOUTON FILTRER ===
+    // === FILTRER ===
     document.getElementById('btnFilter').addEventListener('click', loadAbsences);
 
     function loadAbsences() {
@@ -339,12 +346,14 @@
         if (d1) url += '&date_debut=' + d1;
         if (d2) url += '&date_fin=' + d2;
 
-        fetch(url)
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url);
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                var data = JSON.parse(xhr.responseText);
                 var tbody = document.getElementById('absencesBody');
                 tbody.innerHTML = '';
-                if (!Array.isArray(data) || data.length === 0) {
+                if (!data || data.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">Aucun résultat</td></tr>';
                     return;
                 }
@@ -354,31 +363,25 @@
                     var typeColor = (a.type === 'absence') ? '#dc3545' : '#fd7e14';
                     var statusLabel = (a.status === 'justifiee') ? 'Justifiée' : 'Non justifiée';
                     var statusColor = (a.status === 'justifiee') ? '#198754' : '#dc3545';
+                    var dateStr = a.date ? new Date(a.date).toLocaleDateString('fr-FR') : '-';
 
                     var tr = document.createElement('tr');
-                    tr.innerHTML =
-                        '<td style="color:#fff;">' + formatDate(a.date) + '</td>' +
+                    tr.innerHTML = '<td style="color:#fff;">' + dateStr + '</td>' +
                         '<td style="color:#fff;">' + (a.user_name || '-') + '</td>' +
                         '<td style="color:#fff;">' + (a.student_class || '-') + '</td>' +
                         '<td><span class="badge" style="background:' + typeColor + '">' + typeLabel + '</span></td>' +
                         '<td><span class="badge" style="background:' + statusColor + '">' + statusLabel + '</span></td>' +
                         '<td style="color:#ccc;">' + (a.motif || '-') + '</td>' +
-                        '<td>' +
-                            '<a href="#" onclick="event.preventDefault(); openJustify(' + a.id + ')" class="btn btn-sm btn-outline-success me-1">✓</a>' +
-                            '<a href="#" onclick="event.preventDefault(); deleteAbsence(' + a.id + ')" class="btn btn-sm btn-outline-danger">🗑️</a>' +
-                        '</td>';
+                        '<td><a href="#" onclick="event.preventDefault(); openJustify(' + a.id + ')" class="btn btn-sm btn-outline-success me-1">✓</a>' +
+                        '<a href="#" onclick="event.preventDefault(); deleteAbsence(' + a.id + ')" class="btn btn-sm btn-outline-danger">🗑️</a></td>';
                     tbody.appendChild(tr);
                 }
-            });
+            }
+        };
+        xhr.send();
     }
 
-    function formatDate(dateStr) {
-        if (!dateStr) return '-';
-        var d = new Date(dateStr);
-        return d.toLocaleDateString('fr-FR');
-    }
-
-    // === BOUTON AJOUTER ===
+    // === AJOUTER ===
     document.getElementById('btnAddAbsence').addEventListener('click', function() {
         document.getElementById('absenceUserType').value = 'student';
         document.getElementById('classSelectDiv').style.display = 'block';
@@ -390,7 +393,7 @@
         showModal('absenceModal');
     });
 
-    // === ENREGISTRER ABSENCE ===
+    // === ENREGISTRER ===
     document.getElementById('btnSaveAbsence').addEventListener('click', function() {
         var uid = document.getElementById('absenceUser').value;
         if (!uid) { alert('Sélectionnez une personne'); return; }
@@ -406,20 +409,21 @@
         };
         if (data.type === 'retard') data.heure_arrivee = document.getElementById('absenceHeure').value;
 
-        fetch('/api/absences', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        })
-        .then(function(r) { return r.json(); })
-        .then(function(result) {
-            if (result.success) {
-                hideModal('absenceModal');
-                loadAbsences();
-            } else {
-                alert('Erreur: ' + (result.error || 'Inconnue'));
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/api/absences');
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.onload = function() {
+            if (xhr.status === 201 || xhr.status === 200) {
+                var result = JSON.parse(xhr.responseText);
+                if (result.success) {
+                    hideModal('absenceModal');
+                    loadAbsences();
+                } else {
+                    alert('Erreur: ' + (result.error || 'Inconnue'));
+                }
             }
-        });
+        };
+        xhr.send(JSON.stringify(data));
     });
 
     // === JUSTIFIER ===
@@ -433,28 +437,32 @@
 
     document.getElementById('btnSaveJustify').addEventListener('click', function() {
         var id = document.getElementById('justifyId').value;
-        fetch('/api/absences/' + id, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                status: document.getElementById('justifyStatus').value,
-                motif: document.getElementById('justifyMotif').value.trim(),
-                commentaire: document.getElementById('justifyCommentaire').value.trim()
-            })
-        })
-        .then(function() {
+        var data = {
+            status: document.getElementById('justifyStatus').value,
+            motif: document.getElementById('justifyMotif').value.trim(),
+            commentaire: document.getElementById('justifyCommentaire').value.trim()
+        };
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('PUT', '/api/absences/' + id);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.onload = function() {
             hideModal('justifyModal');
             loadAbsences();
-        });
+        };
+        xhr.send(JSON.stringify(data));
     });
 
     // === SUPPRIMER ===
     function deleteAbsence(id) {
         if (!confirm('Supprimer cette entrée ?')) return;
-        fetch('/api/absences/' + id, { method: 'DELETE' })
-            .then(function() { loadAbsences(); });
+        var xhr = new XMLHttpRequest();
+        xhr.open('DELETE', '/api/absences/' + id);
+        xhr.onload = function() { loadAbsences(); };
+        xhr.send();
     }
 </script>
+
 <style>
     .glass-card {
         background: rgba(255, 255, 255, 0.05) !important;
