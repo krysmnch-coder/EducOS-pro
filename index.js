@@ -906,24 +906,33 @@ app.post('/api/absences', async (req, res) => {
     if (!req.user) return res.status(401).json({ error: 'Non authentifié' });
     
     try {
-        const { user_id, user_type, type, date, heure_arrivee, motif, commentaire } = req.body;
+        const { user_id, user_type, type, date, heure_arrivee, motif, commentaire, status } = req.body;
+        
+        console.log('📝 Création absence:', req.body);
         
         const [id] = await db('absences').insert({
             establishment_id: req.user.establishment_id,
             user_id,
             user_type,
             type: type || 'absence',
-            status: 'non_justifiee',
+            status: status || 'non_justifiee',
             date,
             heure_arrivee: type === 'retard' ? heure_arrivee : null,
             motif: motif || '',
             commentaire: commentaire || '',
-            created_by: req.user.id
+            created_by: req.user.id,
+            created_at: new Date(),
+            updated_at: new Date()
         });
 
-        res.status(201).json({ success: true, id });
+        console.log('✅ Absence créée, ID:', id);
+        
+        // TOUJOURS retourner un succès
+        res.status(201).json({ success: true, id: id });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error('❌ Erreur création absence:', error.message);
+        // Même en cas d'erreur, retourner un JSON valide
+        res.status(500).json({ success: false, error: error.message });
     }
 });
 
