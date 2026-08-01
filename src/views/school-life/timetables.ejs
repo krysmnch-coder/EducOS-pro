@@ -13,7 +13,6 @@
 
         <%- include('../partials/messages') %>
 
-        <!-- Sélecteur de classe avancé -->
         <div class="card glass-card mb-4" style="border-radius: 16px; padding: 20px;">
             <div class="row align-items-end">
                 <div class="col-md-4">
@@ -75,7 +74,6 @@
             </div>
         </div>
 
-        <!-- Tableau emploi du temps -->
         <div class="card glass-card" style="border-radius: 16px; padding: 20px; display: none;" id="timetableContainer">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h4 style="color: #fff;" id="timetableTitle">Emploi du temps</h4>
@@ -121,7 +119,9 @@
                 
                 <div class="mb-3">
                     <label class="form-label">Matière *</label>
-                    <input type="text" class="form-control" id="entrySubject" required style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);">
+                    <select class="form-select" id="entrySubject" required style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);">
+                        <option value="" disabled selected style="background:#1a1a2e;">-- Choisir une matière --</option>
+                    </select>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Professeur</label>
@@ -158,10 +158,35 @@
     let currentClass = '';
     let timetableData = [];
 
+    // ✅ Matières par niveau
+    const subjectsByLevel = {
+        'Maternelle': ['Accueil', 'Motricité', 'Chant', 'Dessin', 'Sieste', 'Jeux libres', 'Langage', 'Découverte'],
+        'Primaire': ['Français', 'Mathématiques', 'Sciences', 'Histoire-Géo', 'EPS', 'Anglais', 'Arts plastiques', 'Musique', 'Informatique', 'Éducation civique'],
+        'Collège': ['Français', 'Mathématiques', 'SVT', 'Physique-Chimie', 'Histoire-Géo', 'Anglais', 'EPS', 'Arts plastiques', 'Musique', 'Technologie', 'Espagnol', 'Allemand', 'Latin'],
+        'Lycée': ['Français', 'Mathématiques', 'SVT', 'Physique-Chimie', 'Histoire-Géo', 'Anglais', 'EPS', 'Philosophie', 'SES', 'Espagnol', 'Allemand', 'Informatique', 'SNT']
+    };
+
+    function getLevelCategory(level) {
+        if (!level) return 'Collège';
+        if (['Terminale', 'Première', 'Seconde'].includes(level)) return 'Lycée';
+        if (['Troisième', 'Quatrième', 'Cinquième', 'Sixième'].includes(level)) return 'Collège';
+        if (['CM2', 'CM1', 'CE2', 'CE1', 'CP'].includes(level)) return 'Primaire';
+        return 'Maternelle';
+    }
+
+    function populateSubjects(level) {
+        const category = getLevelCategory(level);
+        const subjects = subjectsByLevel[category] || subjectsByLevel['Collège'];
+        const select = document.getElementById('entrySubject');
+        select.innerHTML = '<option value="" disabled selected style="background:#1a1a2e;">-- Choisir une matière --</option>';
+        subjects.forEach(function(s) {
+            select.innerHTML += '<option value="' + s + '" style="background:#1a1a2e;">' + s + '</option>';
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         if (typeof feather !== 'undefined') feather.replace();
 
-        // Afficher/Masquer le nom de la classe
         function updateClassNameDisplay() {
             const level = document.getElementById('classLevel').value || '';
             const letter = document.getElementById('classLetter').value || '';
@@ -170,16 +195,19 @@
             document.getElementById('classNameDisplay').textContent = currentClass.trim();
         }
 
-        document.getElementById('classLevel').addEventListener('change', updateClassNameDisplay);
+        document.getElementById('classLevel').addEventListener('change', function() {
+            updateClassNameDisplay();
+            populateSubjects(this.value);
+        });
         document.getElementById('classLetter').addEventListener('change', updateClassNameDisplay);
         document.getElementById('classNumber').addEventListener('change', updateClassNameDisplay);
 
-        // Charger l'emploi du temps
         document.getElementById('btnLoadTimetable').addEventListener('click', function() {
             const level = document.getElementById('classLevel').value;
             if (!level) return alert('Veuillez sélectionner un niveau.');
 
             updateClassNameDisplay();
+            populateSubjects(level);
             
             if (currentClass.trim()) {
                 loadTimetable(currentClass.trim());
@@ -196,10 +224,14 @@
 
     function loadTimetable(className) {
         fetch('/api/timetables/' + encodeURIComponent(className))
-            .then(r => r.json())
-            .then(data => {
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
                 timetableData = data;
                 renderTimetable(data);
+            })
+            .catch(function() {
+                timetableData = [];
+                renderTimetable([]);
             });
     }
 
@@ -207,12 +239,12 @@
         const tbody = document.getElementById('timetableBody');
         let html = '';
         
-        timeSlots.forEach(slot => {
+        timeSlots.forEach(function(slot) {
             html += '<tr>';
             html += '<td style="color:#fff;text-align:center;vertical-align:middle;font-weight:600;font-size:0.85rem;">' + slot + '</td>';
             
-            days.forEach(day => {
-                const entry = data.find(e => e.day === day && e.time_slot === slot);
+            days.forEach(function(day) {
+                const entry = data.find(function(e) { return e.day === day && e.time_slot === slot; });
                 if (entry) {
                     html += '<td style="background:' + (entry.color || '#0d6efd') + '22; cursor:pointer; text-align:center; vertical-align:middle; padding:8px; border-left:4px solid ' + (entry.color || '#0d6efd') + ';" ' +
                         'onclick="editEntry(\'' + day + '\', \'' + slot + '\', ' + entry.id + ', \'' + escapeJs(entry.subject) + '\', \'' + escapeJs(entry.teacher || '') + '\', \'' + escapeJs(entry.room || '') + '\', \'' + (entry.color || '#0d6efd') + '\')">' +
@@ -243,6 +275,11 @@
         document.getElementById('entryColor').value = '#0d6efd';
         document.getElementById('btnDeleteEntry').style.display = 'none';
         document.getElementById('modalTitle').textContent = 'Ajouter - ' + day + ' ' + timeSlot;
+        
+        // Mettre à jour les matières selon le niveau
+        const level = document.getElementById('classLevel').value;
+        populateSubjects(level);
+        
         new bootstrap.Modal(document.getElementById('entryModal')).show();
     }
 
@@ -250,18 +287,23 @@
         document.getElementById('entryId').value = id;
         document.getElementById('entryDay').value = day;
         document.getElementById('entryTimeSlot').value = timeSlot;
-        document.getElementById('entrySubject').value = subject;
         document.getElementById('entryTeacher').value = teacher;
         document.getElementById('entryRoom').value = room;
         document.getElementById('entryColor').value = color || '#0d6efd';
         document.getElementById('btnDeleteEntry').style.display = 'block';
         document.getElementById('modalTitle').textContent = 'Modifier - ' + day + ' ' + timeSlot;
+        
+        // Mettre à jour les matières et sélectionner la bonne
+        const level = document.getElementById('classLevel').value;
+        populateSubjects(level);
+        document.getElementById('entrySubject').value = subject;
+        
         new bootstrap.Modal(document.getElementById('entryModal')).show();
     }
 
     function saveEntry() {
-        const subject = document.getElementById('entrySubject').value.trim();
-        if (!subject) return alert('La matière est requise.');
+        const subject = document.getElementById('entrySubject').value;
+        if (!subject) return alert('Veuillez choisir une matière.');
 
         const data = {
             class_name: currentClass.trim(),
@@ -273,15 +315,26 @@
             color: document.getElementById('entryColor').value
         };
 
+        console.log('Envoi:', data);
+
         fetch('/api/timetables', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         })
-        .then(r => r.json())
-        .then(() => {
-            loadTimetable(currentClass.trim());
-            bootstrap.Modal.getInstance(document.getElementById('entryModal')).hide();
+        .then(function(r) { return r.json(); })
+        .then(function(result) {
+            console.log('Réponse:', result);
+            if (result.success) {
+                loadTimetable(currentClass.trim());
+                bootstrap.Modal.getInstance(document.getElementById('entryModal')).hide();
+            } else {
+                alert('Erreur: ' + (result.error || 'Inconnue'));
+            }
+        })
+        .catch(function(err) {
+            console.error('Erreur:', err);
+            alert('Erreur réseau: ' + err.message);
         });
     }
 
@@ -290,7 +343,7 @@
         if (!id || !confirm('Supprimer ce cours ?')) return;
         
         fetch('/api/timetables/' + id, { method: 'DELETE' })
-            .then(() => {
+            .then(function() {
                 loadTimetable(currentClass.trim());
                 bootstrap.Modal.getInstance(document.getElementById('entryModal')).hide();
             });
@@ -307,7 +360,7 @@
         if (!text) return '';
         return text.replace(/'/g, "\\'").replace(/"/g, '\\"').replace(/\n/g, '\\n');
     }
-</script> 
+</script>
 
 <style>
     .glass-card {
