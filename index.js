@@ -899,13 +899,10 @@ app.post('/api/absences', async (req, res) => {
         
         console.log('📝 Données reçues:', JSON.stringify(req.body));
         
-        // Vérifier que les champs obligatoires sont présents
         if (!user_id || !date) {
-            console.log('❌ Champs manquants');
             return res.status(400).json({ success: false, error: 'Champs obligatoires manquants' });
         }
         
-        // Insérer avec seulement les colonnes qui existent
         const insertData = {
             establishment_id: req.user.establishment_id,
             user_id: parseInt(user_id),
@@ -919,18 +916,15 @@ app.post('/api/absences', async (req, res) => {
             created_by: req.user.id
         };
         
-        console.log('📝 Données à insérer:', JSON.stringify(insertData));
-        
+        // ✅ Correction : insert retourne directement l'ID avec SQLite, ou un tableau avec MySQL
         const result = await db('absences').insert(insertData);
-        const id = result[0];
+        const id = Array.isArray(result) ? result[0] : result;
         
         console.log('✅ Absence créée, ID:', id);
         
         res.status(201).json({ success: true, id: id });
     } catch (error) {
-        console.error('❌ Erreur complète:', error);
-        console.error('❌ Message:', error.message);
-        console.error('❌ Stack:', error.stack);
+        console.error('❌ Erreur:', error.message);
         res.status(500).json({ success: false, error: error.message });
     }
 });
@@ -1186,26 +1180,7 @@ app.get('/absences-view', async (req, res) => {
         res.redirect('/dashboard');
     }
 });
-app.get('/test-insert-absence', async (req, res) => {
-    try {
-        const [id] = await db('absences').insert({
-            establishment_id: req.user.establishment_id,
-            user_id: req.user.id,
-            user_type: 'professor',
-            type: 'absence',
-            status: 'non_justifiee',
-            date: new Date().toISOString().split('T')[0],
-            created_by: req.user.id
-        });
-        
-        // Supprimer le test
-        await db('absences').where({ id }).del();
-        
-        res.json({ success: true, message: 'Insertion OK' });
-    } catch (error) {
-        res.json({ success: false, error: error.message });
-    }
-});
+
 // Lancement de l'application
 startServer();
 
