@@ -897,43 +897,31 @@ app.post('/api/absences', async (req, res) => {
     try {
         const { user_id, user_type, type, date, heure_arrivee, motif, commentaire, status } = req.body;
         
-        console.log('📝 Données reçues:', JSON.stringify(req.body));
+        console.log('📝 Création absence:', req.body); // Log pour déboguer
         
-        // Vérifier que les champs obligatoires sont présents
-        if (!user_id || !date) {
-            console.log('❌ Champs manquants');
-            return res.status(400).json({ success: false, error: 'Champs obligatoires manquants' });
-        }
-        
-        // Insérer avec seulement les colonnes qui existent
-        const insertData = {
+        const [id] = await db('absences').insert({
             establishment_id: req.user.establishment_id,
-            user_id: parseInt(user_id),
-            user_type: user_type || 'student',
+            user_id,
+            user_type,
             type: type || 'absence',
-            status: status || 'non_justifiee',
-            date: date,
+            status: status || 'non_justifiee', // ✅ Prendre en compte le statut
+            date,
             heure_arrivee: type === 'retard' ? heure_arrivee : null,
             motif: motif || '',
             commentaire: commentaire || '',
-            created_by: req.user.id
-        };
-        
-        console.log('📝 Données à insérer:', JSON.stringify(insertData));
-        
-        const result = await db('absences').insert(insertData);
-        const id = result[0];
-        
+            created_by: req.user.id,
+            created_at: new Date(),
+            updated_at: new Date()
+        });
+
         console.log('✅ Absence créée, ID:', id);
-        
-        res.status(201).json({ success: true, id: id });
+        res.status(201).json({ success: true, id });
     } catch (error) {
-        console.error('❌ Erreur complète:', error);
-        console.error('❌ Message:', error.message);
-        console.error('❌ Stack:', error.stack);
-        res.status(500).json({ success: false, error: error.message });
+        console.error('❌ Erreur création absence:', error);
+        res.status(500).json({ error: error.message });
     }
 });
+
 // API - Mettre à jour le statut
 app.put('/api/absences/:id', async (req, res) => {
     if (!req.user) return res.status(401).json({ error: 'Non authentifié' });
