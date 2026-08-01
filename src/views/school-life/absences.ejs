@@ -297,18 +297,18 @@
         var xhr = new XMLHttpRequest();
         xhr.open('GET', url);
         xhr.onload = function() {
+            var tbody = document.getElementById('absencesBody');
             if (xhr.status === 200) {
                 try {
                     var data = JSON.parse(xhr.responseText);
                     console.log('📊 Résultats:', Array.isArray(data) ? data.length : 0, 'entrées');
-                    var tbody = document.getElementById('absencesBody');
                     tbody.innerHTML = '';
-                    
+
                     if (!data || !Array.isArray(data) || data.length === 0) {
                         tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4">Aucun résultat</td></tr>';
                         return;
                     }
-                    
+
                     for (var i = 0; i < data.length; i++) {
                         var a = data[i];
                         var typeLabel = (a.type === 'absence') ? 'Absence' : 'Retard';
@@ -319,7 +319,7 @@
                         var displayDate = a.date ? new Date(a.date + 'T00:00:00').toLocaleDateString('fr-FR') : '-';
 
                         var tr = document.createElement('tr');
-                        tr.innerHTML = 
+                        tr.innerHTML =
                             '<td>' + displayDate + '</td>' +
                             '<td>' + (a.user_name || '-') + '</td>' +
                             '<td>' + (a.student_class || '-') + '</td>' +
@@ -332,11 +332,14 @@
                     }
                 } catch(e) {
                     console.error('Erreur parsing:', e);
-                    document.getElementById('absencesBody').innerHTML = '<tr><td colspan="8" class="text-center py-4 text-danger">Erreur de chargement</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-danger">Erreur de chargement</td></tr>';
                 }
+            } else {
+                console.error('API error', xhr.status, xhr.responseText);
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-danger">Erreur API ' + xhr.status + (xhr.responseText ? (': ' + xhr.responseText) : '') + '</td></tr>';
             }
         };
-        xhr.onerror = function() { console.error('Erreur réseau'); };
+        xhr.onerror = function() { console.error('Erreur réseau'); var tbody = document.getElementById('absencesBody'); tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-danger">Erreur réseau</td></tr>'; };
         xhr.send();
     }
 
