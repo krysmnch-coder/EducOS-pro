@@ -316,8 +316,7 @@
                         var heureArrivee = (a.type === 'retard' && a.heure_arrivee) ? a.heure_arrivee.substring(0, 5) : '-';
                         var justifiedChecked = (a.status === 'justifiee') ? 'checked' : '';
                         var statusLabel = (a.status === 'justifiee') ? 'Justifiée' : 'Non justifiée';
-                        var displayDate = a.date ? new Date(a.date + 'T00:00:00').toLocaleDateString('fr-FR') : '-';
-
+                        var displayDate = a.date ? a.date.split('T')[0].split('-').reverse().join('/') : '-';
                         var tr = document.createElement('tr');
                         tr.innerHTML =
                             '<td>' + displayDate + '</td>' +
