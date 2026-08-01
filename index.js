@@ -890,34 +890,44 @@ app.get('/api/absences', async (req, res) => {
     }
 });
 
-// API - Créer une absence/retard
+// API - Créer une absence/retard (AVEC LOGS DÉTAILLÉS)
 app.post('/api/absences', async (req, res) => {
     if (!req.user) return res.status(401).json({ error: 'Non authentifié' });
     
     try {
+        console.log('=== CRÉATION ABSENCE ===');
+        console.log('Body reçu:', JSON.stringify(req.body));
+        console.log('User:', req.user.id, req.user.establishment_id);
+        
         const { user_id, user_type, type, date, heure_arrivee, motif, commentaire, status } = req.body;
         
-        console.log('📝 Création absence:', req.body); // Log pour déboguer
+        // Vérifier les champs requis
+        if (!user_id) return res.status(400).json({ error: 'user_id requis' });
+        if (!user_type) return res.status(400).json({ error: 'user_type requis' });
+        if (!date) return res.status(400).json({ error: 'date requis' });
         
-        const [id] = await db('absences').insert({
+        const insertData = {
             establishment_id: req.user.establishment_id,
-            user_id,
-            user_type,
+            user_id: parseInt(user_id),
+            user_type: user_type,
             type: type || 'absence',
-            status: status || 'non_justifiee', // ✅ Prendre en compte le statut
-            date,
+            status: status || 'non_justifiee',
+            date: date,
             heure_arrivee: type === 'retard' ? heure_arrivee : null,
             motif: motif || '',
             commentaire: commentaire || '',
-            created_by: req.user.id,
-            created_at: new Date(),
-            updated_at: new Date()
-        });
-
+            created_by: req.user.id
+        };
+        
+        console.log('Données à insérer:', JSON.stringify(insertData));
+        
+        const [id] = await db('absences').insert(insertData);
+        
         console.log('✅ Absence créée, ID:', id);
         res.status(201).json({ success: true, id });
     } catch (error) {
-        console.error('❌ Erreur création absence:', error);
+        console.error('❌ ERREUR:', error.message);
+        console.error('❌ STACK:', error.stack);
         res.status(500).json({ error: error.message });
     }
 });
