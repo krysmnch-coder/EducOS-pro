@@ -19,8 +19,8 @@
                 <div class="col-md-2">
                     <label class="form-label" style="color:#fff;">Type</label>
                     <select class="form-select" id="filterType" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);">
-                        <option value="student">👨‍🎓 Élèves</option>
-                        <option value="professor">👨‍🏫 Professeurs</option>
+                        <option value="student"> Élèves</option>
+                        <option value="professor"> Professeurs</option>
                     </select>
                 </div>
                 <div class="col-md-2">
@@ -380,78 +380,76 @@
     });
 
     // Bouton Enregistrer absence
-    document.getElementById('btnSaveAbsence').addEventListener('click', function() {
-        var uid = document.getElementById('absenceUser').value;
-        if (!uid) { alert('Sélectionnez une personne'); return; }
+document.getElementById('btnSaveAbsence').addEventListener('click', function() {
+    var uid = document.getElementById('absenceUser').value;
+    if (!uid) { alert('Sélectionnez une personne'); return; }
 
-        var data = {
-            user_id: parseInt(uid),
-            user_type: document.getElementById('absenceUserType').value,
-            type: document.getElementById('absenceType').value,
-            date: document.getElementById('absenceDate').value,
-            heure_arrivee: null,
-            motif: document.getElementById('absenceMotif').value.trim(),
-            commentaire: document.getElementById('absenceCommentaire').value.trim()
-        };
+    var data = {
+        user_id: parseInt(uid),
+        user_type: document.getElementById('absenceUserType').value,
+        type: document.getElementById('absenceType').value,
+        date: document.getElementById('absenceDate').value,
+        heure_arrivee: null,
+        motif: document.getElementById('absenceMotif').value.trim(),
+        commentaire: document.getElementById('absenceCommentaire').value.trim()
+    };
 
-        if (data.type === 'retard') {
-            data.heure_arrivee = document.getElementById('absenceHeure').value;
-        }
-
-        fetch('/api/absences', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        })
-        .then(function(r) { return r.json(); })
-        .then(function(result) {
-            if (result.success) {
-                // Fermer le modal
-                var modalEl = document.getElementById('absenceModal');
-                var modal = bootstrap.Modal.getInstance(modalEl);
-                if (modal) modal.hide();
-                else { modalEl.classList.remove('show'); document.body.classList.remove('modal-open'); }
-                document.getElementById('btnFilter').click();
-            } else {
-                alert('Erreur: ' + (result.error || 'Inconnue'));
-            }
-        });
-    });
-
-    function openJustify(id) {
-        document.getElementById('justifyId').value = id;
-        document.getElementById('justifyMotif').value = '';
-        document.getElementById('justifyCommentaire').value = '';
-        document.getElementById('justifyStatus').value = 'justifiee';
-        var modal = new bootstrap.Modal(document.getElementById('justifyModal'));
-        modal.show();
+    if (data.type === 'retard') {
+        data.heure_arrivee = document.getElementById('absenceHeure').value;
     }
 
-    document.getElementById('btnSaveJustify').addEventListener('click', function() {
-        var id = document.getElementById('justifyId').value;
-        fetch('/api/absences/' + id, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                status: document.getElementById('justifyStatus').value,
-                motif: document.getElementById('justifyMotif').value.trim(),
-                commentaire: document.getElementById('justifyCommentaire').value.trim()
-            })
-        })
-        .then(function() {
-            var modalEl = document.getElementById('justifyModal');
-            var modal = bootstrap.Modal.getInstance(modalEl);
-            if (modal) modal.hide();
-            else { modalEl.classList.remove('show'); document.body.classList.remove('modal-open'); }
+    fetch('/api/absences', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(result) {
+        if (result.success) {
+            // Fermer le modal manuellement
+            var modalEl = document.getElementById('absenceModal');
+            modalEl.classList.remove('show');
+            modalEl.style.display = 'none';
+            document.body.classList.remove('modal-open');
+            var backdrop = document.querySelector('.modal-backdrop');
+            if (backdrop) backdrop.remove();
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+            
+            // Recharger
             document.getElementById('btnFilter').click();
-        });
+        } else {
+            alert('Erreur: ' + (result.error || 'Inconnue'));
+        }
     });
+});
 
-    function deleteAbsence(id) {
-        if (!confirm('Supprimer cette entrée ?')) return;
-        fetch('/api/absences/' + id, { method: 'DELETE' })
-            .then(function() { document.getElementById('btnFilter').click(); });
-    }
+// Bouton Justifier
+document.getElementById('btnSaveJustify').addEventListener('click', function() {
+    var id = document.getElementById('justifyId').value;
+    fetch('/api/absences/' + id, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            status: document.getElementById('justifyStatus').value,
+            motif: document.getElementById('justifyMotif').value.trim(),
+            commentaire: document.getElementById('justifyCommentaire').value.trim()
+        })
+    })
+    .then(function() {
+        // Fermer le modal manuellement
+        var modalEl = document.getElementById('justifyModal');
+        modalEl.classList.remove('show');
+        modalEl.style.display = 'none';
+        document.body.classList.remove('modal-open');
+        var backdrop = document.querySelector('.modal-backdrop');
+        if (backdrop) backdrop.remove();
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+        
+        document.getElementById('btnFilter').click();
+    });
+});
 </script>
 <style>
     .glass-card {
