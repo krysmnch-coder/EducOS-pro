@@ -441,7 +441,70 @@
     }
 
     // Charger au démarrage
-    loadAbsences();
+    function loadAbsences() {
+    var type = document.getElementById('filterType').value;
+    var cls = document.getElementById('filterClass').value;
+    var st = document.getElementById('filterStatus').value;
+    var d1 = document.getElementById('filterDateDebut').value;
+    var d2 = document.getElementById('filterDateFin').value;
+    
+    var url = '/api/absences?user_type=' + type;
+    if (cls && cls !== '') url += '&class_name=' + encodeURIComponent(cls);
+    if (st && st !== '') url += '&status=' + st;
+    if (d1 && d1 !== '') url += '&date_debut=' + d1;
+    if (d2 && d2 !== '') url += '&date_fin=' + d2;
+
+    console.log('🔍 Filtrage:', url);
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', url);
+    xhr.onload = function() {
+        var tbody = document.getElementById('absencesBody');
+        if (xhr.status === 200) {
+            try {
+                var data = JSON.parse(xhr.responseText);
+                console.log('📊 Résultats:', Array.isArray(data) ? data.length : 0);
+                tbody.innerHTML = '';
+
+                if (!data || !Array.isArray(data) || data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4">Aucun résultat</td></tr>';
+                    return;
+                }
+
+                for (var i = 0; i < data.length; i++) {
+                    var a = data[i];
+                    var typeLabel = (a.type === 'absence') ? 'Absence' : 'Retard';
+                    var typeColor = (a.type === 'absence') ? '#dc3545' : '#fd7e14';
+                    var heureArrivee = (a.type === 'retard' && a.heure_arrivee) ? a.heure_arrivee.substring(0, 5) : '-';
+                    var justifiedChecked = (a.status === 'justifiee') ? 'checked' : '';
+                    var statusLabel = (a.status === 'justifiee') ? 'Justifiée' : 'Non justifiée';
+                    var displayDate = a.date ? a.date.split('T')[0].split('-').reverse().join('/') : '-';
+
+                    var tr = document.createElement('tr');
+                    tr.innerHTML =
+                        '<td>' + displayDate + '</td>' +
+                        '<td>' + (a.user_name || '-') + '</td>' +
+                        '<td>' + (a.student_class || '-') + '</td>' +
+                        '<td><span class="badge" style="background:' + typeColor + '">' + typeLabel + '</span></td>' +
+                        '<td>' + heureArrivee + '</td>' +
+                        '<td><label style="cursor:pointer;"><input type="checkbox" ' + justifiedChecked + ' onchange="toggleJustify(' + a.id + ', this.checked)"> ' + statusLabel + '</label></td>' +
+                        '<td>' + (a.motif || '-') + '</td>' +
+                        '<td><button class="btn btn-sm btn-outline-danger" onclick="deleteAbsence(' + a.id + ')">Supprimer</button></td>';
+                    tbody.appendChild(tr);
+                }
+            } catch(e) {
+                console.error('Erreur parsing:', e);
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-danger">Erreur</td></tr>';
+            }
+        } else {
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-danger">Erreur ' + xhr.status + '</td></tr>';
+        }
+    };
+    xhr.onerror = function() {
+        document.getElementById('absencesBody').innerHTML = '<tr><td colspan="8" class="text-center py-4 text-danger">Erreur réseau</td></tr>';
+    };
+    xhr.send();
+};
 </script>
 
 <style>
