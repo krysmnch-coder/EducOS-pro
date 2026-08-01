@@ -890,26 +890,26 @@ app.get('/api/absences', async (req, res) => {
     }
 });
 
-// API - Créer une absence/retard (AVEC LOGS DÉTAILLÉS)
+// API - Créer une absence/retard
 app.post('/api/absences', async (req, res) => {
     if (!req.user) return res.status(401).json({ error: 'Non authentifié' });
     
     try {
-        console.log('=== CRÉATION ABSENCE ===');
-        console.log('Body reçu:', JSON.stringify(req.body));
-        console.log('User:', req.user.id, req.user.establishment_id);
-        
         const { user_id, user_type, type, date, heure_arrivee, motif, commentaire, status } = req.body;
         
-        // Vérifier les champs requis
-        if (!user_id) return res.status(400).json({ error: 'user_id requis' });
-        if (!user_type) return res.status(400).json({ error: 'user_type requis' });
-        if (!date) return res.status(400).json({ error: 'date requis' });
+        console.log('📝 Données reçues:', JSON.stringify(req.body));
         
+        // Vérifier que les champs obligatoires sont présents
+        if (!user_id || !date) {
+            console.log('❌ Champs manquants');
+            return res.status(400).json({ success: false, error: 'Champs obligatoires manquants' });
+        }
+        
+        // Insérer avec seulement les colonnes qui existent
         const insertData = {
             establishment_id: req.user.establishment_id,
             user_id: parseInt(user_id),
-            user_type: user_type,
+            user_type: user_type || 'student',
             type: type || 'absence',
             status: status || 'non_justifiee',
             date: date,
@@ -919,16 +919,19 @@ app.post('/api/absences', async (req, res) => {
             created_by: req.user.id
         };
         
-        console.log('Données à insérer:', JSON.stringify(insertData));
+        console.log('📝 Données à insérer:', JSON.stringify(insertData));
         
-        const [id] = await db('absences').insert(insertData);
+        const result = await db('absences').insert(insertData);
+        const id = result[0];
         
         console.log('✅ Absence créée, ID:', id);
-        res.status(201).json({ success: true, id });
+        
+        res.status(201).json({ success: true, id: id });
     } catch (error) {
-        console.error('❌ ERREUR:', error.message);
-        console.error('❌ STACK:', error.stack);
-        res.status(500).json({ error: error.message });
+        console.error('❌ Erreur complète:', error);
+        console.error('❌ Message:', error.message);
+        console.error('❌ Stack:', error.stack);
+        res.status(500).json({ success: false, error: error.message });
     }
 });
 
@@ -1184,6 +1187,14 @@ app.get('/absences-view', async (req, res) => {
     }
 });
 
+app.get('/test-absences-table', async (req, res) => {
+    try {
+        const columns = await db('absences').columnInfo();
+        res.json(columns);
+    } catch (error) {
+        res.json({ error: error.message });
+    }
+});
 // Lancement de l'application
 startServer();
 
