@@ -6,7 +6,7 @@
     <%- include('../partials/messages') %>
     
     <div style="margin-bottom:15px;">
-        <select id="typeFilter" style="padding:8px 15px; border-radius:8px; width:200px;">
+        <select id="typeFilter" style="padding:8px 15px; border-radius:8px; width:200px; background:rgba(255,255,255,0.1); color:inherit; border:1px solid rgba(128,128,128,0.3);">
             <option value="all">📅 Tous les types</option>
             <option value="Rentrée des classes">🎓 Rentrée des classes</option>
             <option value="Période scolaire">📚 Période scolaire</option>
@@ -16,142 +16,85 @@
         </select>
     </div>
     
-    <div id="calendar"></div>
+    <div id="eventsList" style="background:rgba(255,255,255,0.05); border-radius:16px; padding:20px; min-height:200px;">
+        <p style="text-align:center; color:#888;">Chargement des événements...</p>
+    </div>
 </div>
 
-<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
-
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var calendarEl = document.getElementById('calendar');
+    function loadEvents() {
+        var type = document.getElementById('typeFilter').value;
+        var url = '/api/calendar/events';
+        if (type !== 'all') url += '?type=' + encodeURIComponent(type);
         
-        if (!calendarEl) {
-            console.error('❌ Élément #calendar introuvable');
-            return;
-        }
+        document.getElementById('eventsList').innerHTML = '<p style="text-align:center;color:#888;">Chargement...</p>';
         
-        console.log('✅ Initialisation du calendrier...');
-        
-        var calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'dayGridMonth',
-            locale: 'fr',
-            height: 'auto',
-            headerToolbar: {
-                left: 'prev,next today',
-                center: 'title',
-                right: 'dayGridMonth,timeGridWeek,listMonth'
-            },
-            buttonText: { 
-                today: 'Aujourd\'hui', 
-                month: 'Mois', 
-                week: 'Semaine', 
-                list: 'Liste' 
-            },
-            displayEventTime: false,
-            events: function(fetchInfo, successCallback, failureCallback) {
-                var type = document.getElementById('typeFilter').value;
-                var url = '/api/calendar/events?view=' + calendar.view.type;
-                if (type !== 'all') {
-                    url += '&type=' + encodeURIComponent(type);
+        fetch(url)
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                var container = document.getElementById('eventsList');
+                
+                if (!data || data.length === 0) {
+                    container.innerHTML = '<p style="text-align:center;color:#888;padding:40px;">Aucun événement trouvé</p>';
+                    return;
                 }
                 
-                console.log('📡 Chargement événements:', url);
+                // Grouper par mois
+                var grouped = {};
+                data.forEach(function(e) {
+                    var date = new Date(e.start);
+                    var monthKey = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0');
+                    var monthName = date.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+                    if (!grouped[monthKey]) {
+                        grouped[monthKey] = { name: monthName, events: [] };
+                    }
+                    grouped[monthKey].events.push(e);
+                });
                 
-                fetch(url)
-                    .then(function(response) {
-                        if (!response.ok) throw new Error('HTTP ' + response.status);
-                        return response.json();
-                    })
-                    .then(function(data) {
-                        console.log('✅ Événements reçus:', data.length);
-                        successCallback(data);
-                    })
-                    .catch(function(error) {
-                        console.error('❌ Erreur chargement:', error);
-                        failureCallback(error);
+                var html = '';
+                var colors = {
+                    'Rentrée des classes': '#198754',
+                    'Période scolaire': '#0d6efd',
+                    'Vacances scolaires': '#fd7e14',
+                    'Jours fériés': '#dc3545',
+                    'Événements': '#6f42c1'
+                };
+                
+                Object.keys(grouped).sort().forEach(function(key) {
+                    var group = grouped[key];
+                    html += '<h4 style="margin-top:20px; margin-bottom:10px; color:#0d6efd;">' + group.name + '</h4>';
+                    
+                    group.events.forEach(function(e) {
+                        var start = new Date(e.start).toLocaleDateString('fr-FR');
+                        var end = new Date(e.end).toLocaleDateString('fr-FR');
+                        var dateDisplay = (e.start === e.end) ? start : start + ' → ' + end;
+                        var type = e.extendedProps.type || 'Événements';
+                        var color = e.backgroundColor || colors[type] || '#0d6efd';
+                        
+                        html += '<div style="display:flex; align-items:center; margin-bottom:8px; padding:10px 15px; background:rgba(255,255,255,0.05); border-radius:10px; border-left:4px solid ' + color + ';">';
+                        html += '<span style="display:inline-block; width:12px; height:12px; border-radius:3px; background:' + color + '; margin-right:12px; flex-shrink:0;"></span>';
+                        html += '<div style="flex:1;">';
+                        html += '<strong>' + e.title + '</strong>';
+                        html += '<br><small style="color:#888;">' + dateDisplay + ' • ' + type + '</small>';
+                        if (e.extendedProps.description) {
+                            html += '<br><small style="color:#aaa;">' + e.extendedProps.description + '</small>';
+                        }
+                        html += '</div>';
+                        html += '</div>';
                     });
-            },
-            eventDidMount: function(info) {
-                info.el.style.fontSize = '0.8rem';
-                info.el.style.padding = '4px 8px';
-                info.el.style.borderRadius = '6px';
-                info.el.style.border = 'none';
-                info.el.style.color = '#fff';
-                info.el.style.fontWeight = '500';
-            },
-            loading: function(isLoading) {
-                console.log('⏳ Chargement:', isLoading);
-            }
-        });
-        
-        calendar.render();
-        console.log('✅ Calendrier affiché');
-        
-        document.getElementById('typeFilter').addEventListener('change', function() {
-            calendar.refetchEvents();
-        });
-    });
+                });
+                
+                container.innerHTML = html;
+            })
+            .catch(function(err) {
+                document.getElementById('eventsList').innerHTML = '<p style="text-align:center;color:#dc3545;padding:40px;">Erreur de chargement: ' + err.message + '</p>';
+            });
+    }
+    
+    document.getElementById('typeFilter').addEventListener('change', loadEvents);
+    
+    // Charger au démarrage
+    loadEvents();
 </script>
-
-<style>
-    #calendar {
-        max-width: 100%;
-        margin: 0 auto;
-        padding: 20px;
-        background: rgba(255,255,255,0.05);
-        border-radius: 16px;
-        min-height: 500px;
-    }
-    
-    .fc {
-        color: inherit;
-    }
-    
-    .fc .fc-toolbar-title {
-        font-size: 1.2rem;
-    }
-    
-    .fc .fc-button {
-        text-transform: capitalize;
-    }
-    
-    .fc-theme-standard td, 
-    .fc-theme-standard th {
-        border-color: rgba(128,128,128,0.15);
-    }
-    
-    /* Mode sombre */
-    [data-theme="dark"] #calendar {
-        background: rgba(255,255,255,0.03);
-    }
-    
-    [data-theme="dark"] .fc .fc-toolbar-title {
-        color: #e4e4e4;
-    }
-    
-    [data-theme="dark"] .fc .fc-button {
-        background: rgba(255,255,255,0.1);
-        border-color: rgba(255,255,255,0.15);
-        color: #e4e4e4;
-    }
-    
-    [data-theme="dark"] .fc .fc-button:hover {
-        background: rgba(255,255,255,0.2);
-    }
-    
-    [data-theme="dark"] .fc .fc-button-active {
-        background: #0d6efd !important;
-        border-color: #0d6efd !important;
-    }
-    
-    [data-theme="dark"] .fc .fc-daygrid-day-number {
-        color: #ccc;
-    }
-    
-    [data-theme="dark"] .fc .fc-col-header-cell-cushion {
-        color: #ccc;
-    }
-</style>
 
 <%- include('../partials/footer') %>
