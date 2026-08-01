@@ -235,17 +235,17 @@ exports.renderDashboard = async (req, res) => {
             { key: 'messages', icon: 'mail', title: "Messages", link: '/communications', description: "Messagerie" },
             { key: 'chat', icon: 'message-circle', title: "Chat", link: '/chat', description: "Messagerie instantanée" },
         ];
-    } 
-    else if (role === 'school_life_manager' || role === 'responsable_vie_scolaire' || role === 'vie_scolaire') {
-        widgets = [
-            { key: 'calendar', icon: 'calendar', title: "Calendrier", link: '/school-life/calendar', description: "Gérer le calendrier" },
-            { key: 'timetables', icon: 'clock', title: "Emplois du Temps", link: '/school-life/timetables', description: "Gérer les EDT" },
-            { key: 'school_absences', icon: 'user-x', title: "Absences & Retards", link: '/school-life/absences', description: "Suivi des absences" },
-            { key: 'messages', icon: 'mail', title: "Messages", link: '/communications', description: "Messagerie" },
-            { key: 'profile', icon: 'user', title: "Mon Profil", link: '/profile', description: "Gérer mon profil" },
-            { key: 'chat', icon: 'message-circle', title: "Chat", link: '/chat', description: "Messagerie instantanée" },
-        ];
-    } 
+    
+   } else if (role === 'school_life_manager' || role === 'responsable_vie_scolaire' || role === 'vie_scolaire' || role === 'school_life' || role === 'vie' || role === 'cpe' || role === 'CPE' || role === 'conseiller' || role === 'surveillant') {
+    widgets = [
+        { key: 'calendar', icon: 'calendar', title: "Calendrier", link: '/school-life/calendar', description: "Gérer le calendrier" },
+        { key: 'timetables', icon: 'clock', title: "Emplois du Temps", link: '/school-life/timetables', description: "Gérer les EDT" },
+        { key: 'school_absences', icon: 'user-x', title: "Absences & Retards", link: '/school-life/absences', description: "Suivi des absences" },
+        { key: 'messages', icon: 'mail', title: "Messages", link: '/communications', description: "Messagerie" },
+        { key: 'profile', icon: 'user', title: "Mon Profil", link: '/profile', description: "Gérer mon profil" },
+        { key: 'chat', icon: 'message-circle', title: "Chat", link: '/chat', description: "Messagerie instantanée" },
+    ];
+}
     else {
         // Widgets par défaut
         widgets = [
