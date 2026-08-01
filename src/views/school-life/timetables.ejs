@@ -69,6 +69,17 @@
                     <span id="classNameDisplay" style="color: #0d6efd; font-weight: 600; font-size: 1.1rem;"></span>
                 </div>
             </div>
+            <div class="row mt-2" id="selectionInfo" style="display:none;">
+                <div class="col-12">
+                    <small style="color: #0dcaf0;">
+                        <i data-feather="info" style="width: 14px; height: 14px;"></i>
+                        <strong>Ctrl+clic</strong> pour sélectionner plusieurs cases. <strong>Ctrl+A</strong> pour tout sélectionner. 
+                        <span id="selectedCount" style="color: #ffc107;"></span>
+                        <button class="btn btn-sm btn-success ms-2" id="btnBulkAdd" style="display:none;">Ajouter aux cases sélectionnées</button>
+                        <button class="btn btn-sm btn-outline-light ms-1" id="btnClearSelection" style="display:none;">Annuler</button>
+                    </small>
+                </div>
+            </div>
         </div>
 
         <div class="card glass-card" style="border-radius: 16px; padding: 20px; display: none;" id="timetableContainer">
@@ -111,8 +122,13 @@
             </div>
             <div class="modal-body">
                 <input type="hidden" id="entryId">
+                <div id="bulkModeInfo" style="display:none; background: rgba(13,202,240,0.1); padding: 8px 12px; border-radius: 8px; margin-bottom: 15px; color: #0dcaf0; font-size: 0.85rem;">
+                    📌 <span id="bulkCount"></span> cases sélectionnées
+                </div>
                 <input type="hidden" id="entryDay">
                 <input type="hidden" id="entryTimeSlot">
+                <input type="hidden" id="isBulkMode" value="false">
+                <div id="bulkSlotsContainer"></div>
                 
                 <div class="mb-3">
                     <label class="form-label">Matière *</label>
@@ -168,16 +184,13 @@
     const days = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'];
     let currentClass = '';
     let timetableData = [];
+    let selectedCells = []; // ✅ Stocke les cases sélectionnées
 
     const subjectsByLevel = {
         'Maternelle': ['Accueil', 'Motricité', 'Chant', 'Dessin', 'Sieste', 'Jeux libres', 'Langage', 'Découverte'],
         'Primaire': ['Français', 'Mathématiques', 'Sciences', 'Histoire-Géo', 'EPS', 'Anglais', 'Arts plastiques', 'Musique', 'Informatique', 'Éducation civique'],
         'Collège': ['Français', 'Mathématiques', 'SVT', 'Physique-Chimie', 'Histoire-Géo', 'Anglais', 'EPS', 'Arts plastiques', 'Musique', 'Technologie', 'Espagnol', 'Allemand', 'Latin'],
-        'Lycée': [
-            'Français', 'Mathématiques', 'SVT', 'Physique-Chimie', 'Histoire-Géo', 'Anglais', 'EPS', 'Philosophie', 'SES',
-            'Espagnol', 'Allemand', 'Informatique', 'SNT', 'NSI', 'LLCE', 'HLP', 'HGGSP', 'SVT', 'SI', 'PC', 'Maths Expertes',
-            'Maths Complémentaires', 'Droit', 'Économie', 'Management', 'STMG', 'STI2D', 'STL', 'ST2S', 'STD2A', 'Arts', 'Cinéma', 'Théâtre'
-        ]
+        'Lycée': ['Français', 'Mathématiques', 'SVT', 'Physique-Chimie', 'Histoire-Géo', 'Anglais', 'EPS', 'Philosophie', 'SES', 'Espagnol', 'Allemand', 'Informatique', 'SNT', 'NSI', 'LLCE', 'HLP', 'HGGSP', 'SI', 'PC', 'Maths Expertes', 'Maths Complémentaires', 'Droit', 'Économie', 'Management', 'STMG', 'STI2D', 'STL', 'ST2S', 'STD2A', 'Arts', 'Cinéma', 'Théâtre']
     };
 
     function getLevelCategory(level) {
@@ -222,10 +235,32 @@
             updateClassNameDisplay();
             populateSubjects(level);
             if (currentClass.trim()) {
+                selectedCells = [];
+                updateSelectionUI();
                 loadTimetable(currentClass.trim());
                 document.getElementById('timetableContainer').style.display = 'block';
                 document.getElementById('emptyState').style.display = 'none';
                 document.getElementById('timetableTitle').textContent = 'Emploi du temps - ' + currentClass.trim();
+            }
+        });
+
+        // ✅ Bouton ajout groupé
+        document.getElementById('btnBulkAdd').addEventListener('click', function() {
+            if (selectedCells.length === 0) return;
+            openBulkModal();
+        });
+
+        document.getElementById('btnClearSelection').addEventListener('click', function() {
+            selectedCells = [];
+            updateSelectionUI();
+            renderTimetable(timetableData);
+        });
+
+        // ✅ Ctrl+A pour tout sélectionner
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'a' && document.getElementById('timetableContainer').style.display !== 'none') {
+                e.preventDefault();
+                selectAllEmptyCells();
             }
         });
 
@@ -247,15 +282,21 @@
             html += '<tr><td style="color:#fff;text-align:center;vertical-align:middle;font-weight:600;font-size:0.85rem;">' + slot + '</td>';
             days.forEach(function(day) {
                 const entry = data.find(function(e) { return e.day === day && e.time_slot === slot; });
+                const cellId = day + '|' + slot;
+                const isSelected = selectedCells.some(function(c) { return c.day === day && c.time_slot === slot; });
+                
                 if (entry) {
-                    html += '<td style="background:' + (entry.color || '#0d6efd') + '22; cursor:pointer; text-align:center; vertical-align:middle; padding:8px; border-left:4px solid ' + (entry.color || '#0d6efd') + ';" ' +
+                    html += '<td class="timetable-cell" data-day="' + day + '" data-slot="' + slot + '" style="background:' + (entry.color || '#0d6efd') + '22; cursor:pointer; text-align:center; vertical-align:middle; padding:8px; border-left:4px solid ' + (entry.color || '#0d6efd') + ';" ' +
                         'onclick="editEntry(\'' + day + '\', \'' + slot + '\', ' + entry.id + ', \'' + escapeJs(entry.subject) + '\', \'' + escapeJs(entry.teacher || '') + '\', \'' + escapeJs(entry.room || '') + '\', \'' + (entry.color || '#0d6efd') + '\')">' +
                         '<strong style="color:#fff;font-size:0.85rem;">' + escapeHtml(entry.subject) + '</strong>' +
                         (entry.teacher ? '<br><small style="color:#ccc;">' + escapeHtml(entry.teacher) + '</small>' : '') +
-                        (entry.room ? '<br><small style="color:#aaa;"> salle ' + escapeHtml(entry.room) + '</small>' : '') +
+                        (entry.room ? '<br><small style="color:#aaa;"> Salle ' + escapeHtml(entry.room) + '</small>' : '') +
                     '</td>';
                 } else {
-                    html += '<td style="text-align:center;vertical-align:middle;cursor:pointer;padding:8px;color:#555;" onclick="addEntry(\'' + day + '\', \'' + slot + '\')"><span style="font-size:1.5rem;">+</span></td>';
+                    html += '<td class="timetable-cell empty-cell" data-day="' + day + '" data-slot="' + slot + '" style="text-align:center;vertical-align:middle;cursor:pointer;padding:8px;color:#555;' + (isSelected ? 'background:rgba(13,202,240,0.2);border:2px dashed #0dcaf0;' : '') + '" ' +
+                        'onclick="handleCellClick(event, \'' + day + '\', \'' + slot + '\')">' +
+                        (isSelected ? '<span style="color:#0dcaf0;font-weight:bold;">✓</span>' : '<span style="font-size:1.5rem;">+</span>') +
+                    '</td>';
                 }
             });
             html += '</tr>';
@@ -263,8 +304,81 @@
         tbody.innerHTML = html;
     }
 
-    function addEntry(day, timeSlot) {
+    // ✅ Gestion du clic avec Ctrl
+    function handleCellClick(event, day, timeSlot) {
+        if (event.ctrlKey || event.metaKey) {
+            event.preventDefault();
+            toggleCellSelection(day, timeSlot);
+        } else {
+            addEntry(day, timeSlot);
+        }
+    }
+
+    function toggleCellSelection(day, timeSlot) {
+        const index = selectedCells.findIndex(function(c) { return c.day === day && c.time_slot === timeSlot; });
+        if (index >= 0) {
+            selectedCells.splice(index, 1);
+        } else {
+            selectedCells.push({ day: day, time_slot: timeSlot });
+        }
+        updateSelectionUI();
+        renderTimetable(timetableData);
+    }
+
+    function selectAllEmptyCells() {
+        selectedCells = [];
+        timeSlots.forEach(function(slot) {
+            days.forEach(function(day) {
+                const entry = timetableData.find(function(e) { return e.day === day && e.time_slot === slot; });
+                if (!entry) {
+                    selectedCells.push({ day: day, time_slot: slot });
+                }
+            });
+        });
+        updateSelectionUI();
+        renderTimetable(timetableData);
+    }
+
+    function updateSelectionUI() {
+        const info = document.getElementById('selectionInfo');
+        const count = document.getElementById('selectedCount');
+        const btnBulk = document.getElementById('btnBulkAdd');
+        const btnClear = document.getElementById('btnClearSelection');
+
+        if (selectedCells.length > 0) {
+            info.style.display = 'block';
+            count.textContent = selectedCells.length + ' case(s) sélectionnée(s)';
+            btnBulk.style.display = 'inline-block';
+            btnClear.style.display = 'inline-block';
+        } else {
+            info.style.display = 'none';
+            btnBulk.style.display = 'none';
+            btnClear.style.display = 'none';
+        }
+    }
+
+    function openBulkModal() {
         document.getElementById('entryId').value = '';
+        document.getElementById('isBulkMode').value = 'true';
+        document.getElementById('entryDay').value = '';
+        document.getElementById('entryTimeSlot').value = '';
+        document.getElementById('entrySubject').value = '';
+        document.getElementById('entryTeacher').value = '';
+        document.getElementById('entryRoom').value = '';
+        document.getElementById('entryColor').value = '#0d6efd';
+        document.getElementById('btnDeleteEntry').style.display = 'none';
+        document.getElementById('bulkModeInfo').style.display = 'block';
+        document.getElementById('bulkCount').textContent = selectedCells.length;
+        document.getElementById('modalTitle').textContent = 'Ajouter à ' + selectedCells.length + ' case(s)';
+        populateSubjects(document.getElementById('classLevel').value);
+        new bootstrap.Modal(document.getElementById('entryModal')).show();
+    }
+
+    function addEntry(day, timeSlot) {
+        selectedCells = [];
+        updateSelectionUI();
+        document.getElementById('entryId').value = '';
+        document.getElementById('isBulkMode').value = 'false';
         document.getElementById('entryDay').value = day;
         document.getElementById('entryTimeSlot').value = timeSlot;
         document.getElementById('entrySubject').value = '';
@@ -272,19 +386,24 @@
         document.getElementById('entryRoom').value = '';
         document.getElementById('entryColor').value = '#0d6efd';
         document.getElementById('btnDeleteEntry').style.display = 'none';
+        document.getElementById('bulkModeInfo').style.display = 'none';
         document.getElementById('modalTitle').textContent = 'Ajouter - ' + day + ' ' + timeSlot;
         populateSubjects(document.getElementById('classLevel').value);
         new bootstrap.Modal(document.getElementById('entryModal')).show();
     }
 
     function editEntry(day, timeSlot, id, subject, teacher, room, color) {
+        selectedCells = [];
+        updateSelectionUI();
         document.getElementById('entryId').value = id;
+        document.getElementById('isBulkMode').value = 'false';
         document.getElementById('entryDay').value = day;
         document.getElementById('entryTimeSlot').value = timeSlot;
         document.getElementById('entryTeacher').value = teacher;
         document.getElementById('entryRoom').value = room;
         document.getElementById('entryColor').value = color || '#0d6efd';
         document.getElementById('btnDeleteEntry').style.display = 'block';
+        document.getElementById('bulkModeInfo').style.display = 'none';
         document.getElementById('modalTitle').textContent = 'Modifier - ' + day + ' ' + timeSlot;
         populateSubjects(document.getElementById('classLevel').value);
         document.getElementById('entrySubject').value = subject;
@@ -294,28 +413,59 @@
     function saveEntry() {
         const subject = document.getElementById('entrySubject').value;
         if (!subject) return alert('Veuillez choisir une matière.');
-        const data = {
-            class_name: currentClass.trim(),
-            day: document.getElementById('entryDay').value,
-            time_slot: document.getElementById('entryTimeSlot').value,
-            subject: subject,
-            teacher: document.getElementById('entryTeacher').value.trim(),
-            room: document.getElementById('entryRoom').value.trim(),
-            color: document.getElementById('entryColor').value
-        };
-        fetch('/api/timetables', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        })
-        .then(function(r) { return r.json(); })
-        .then(function(result) {
-            if (result.success) {
+        const isBulk = document.getElementById('isBulkMode').value === 'true';
+
+        if (isBulk && selectedCells.length > 0) {
+            // ✅ Sauvegarde groupée
+            const promises = selectedCells.map(function(cell) {
+                return fetch('/api/timetables', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        class_name: currentClass.trim(),
+                        day: cell.day,
+                        time_slot: cell.time_slot,
+                        subject: subject,
+                        teacher: document.getElementById('entryTeacher').value.trim(),
+                        room: document.getElementById('entryRoom').value.trim(),
+                        color: document.getElementById('entryColor').value
+                    })
+                });
+            });
+
+            Promise.all(promises).then(function() {
+                selectedCells = [];
+                updateSelectionUI();
                 loadTimetable(currentClass.trim());
                 bootstrap.Modal.getInstance(document.getElementById('entryModal')).hide();
-            } else { alert('Erreur: ' + (result.error || 'Inconnue')); }
-        })
-        .catch(function(err) { alert('Erreur réseau: ' + err.message); });
+            }).catch(function(err) {
+                alert('Erreur: ' + err.message);
+            });
+        } else {
+            // Sauvegarde simple
+            const data = {
+                class_name: currentClass.trim(),
+                day: document.getElementById('entryDay').value,
+                time_slot: document.getElementById('entryTimeSlot').value,
+                subject: subject,
+                teacher: document.getElementById('entryTeacher').value.trim(),
+                room: document.getElementById('entryRoom').value.trim(),
+                color: document.getElementById('entryColor').value
+            };
+            fetch('/api/timetables', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(result) {
+                if (result.success) {
+                    loadTimetable(currentClass.trim());
+                    bootstrap.Modal.getInstance(document.getElementById('entryModal')).hide();
+                } else { alert('Erreur: ' + (result.error || 'Inconnue')); }
+            })
+            .catch(function(err) { alert('Erreur réseau: ' + err.message); });
+        }
     }
 
     function deleteEntry() {
@@ -340,6 +490,8 @@
     #timetableTable { border-collapse: collapse; width: 100%; }
     #timetableTable th, #timetableTable td { border: 1px solid rgba(255,255,255,0.08); }
     #timetableTable td:hover { background: rgba(255,255,255,0.05) !important; }
+    .timetable-cell { user-select: none; }
+    .empty-cell:hover { background: rgba(13,202,240,0.1) !important; }
 </style>
 
 <%- include('../partials/footer') %>
