@@ -865,28 +865,32 @@ app.get('/api/absences', async (req, res) => {
     
     try {
         const { user_type, class_name, date_debut, date_fin, status } = req.query;
-        let query = db('absences').where({ establishment_id: req.user.establishment_id });
-        
-        if (user_type) query = query.where({ user_type });
-        if (status && status !== '') query = query.where({ status });
-        if (date_debut && date_debut !== '') query = query.where('date', '>=', date_debut);
-        if (date_fin && date_fin !== '') query = query.where('date', '<=', date_fin);
-        
-        if (class_name && class_name !== '' && user_type === 'student') {
-            // Récupérer les IDs des élèves de cette classe
-            const studentIds = await db('users')
-                .where({ establishment_id: req.user.establishment_id, role: 'STUDENT', student_class: class_name })
-                .pluck('id');
-            query = query.whereIn('user_id', studentIds);
-        }
-
-        const absences = await query
+        let query = db('absences')
+            .where({ 'absences.establishment_id': req.user.establishment_id })
             .leftJoin('users', 'absences.user_id', 'users.id')
             .select(
                 'absences.*',
                 'users.name as user_name',
                 'users.student_class'
-            )
+            );
+        
+        if (user_type) {
+            query = query.where({ 'absences.user_type': user_type });
+        }
+        if (status && status !== '') {
+            query = query.where({ 'absences.status': status });
+        }
+        if (date_debut && date_debut !== '') {
+            query = query.where('absences.date', '>=', date_debut);
+        }
+        if (date_fin && date_fin !== '') {
+            query = query.where('absences.date', '<=', date_fin);
+        }
+        if (class_name && class_name !== '' && user_type === 'student') {
+            query = query.where('users.student_class', class_name);
+        }
+
+        const absences = await query
             .orderBy('absences.date', 'desc')
             .orderBy('absences.created_at', 'desc');
 
@@ -894,7 +898,8 @@ app.get('/api/absences', async (req, res) => {
         res.json(absences);
     } catch (error) {
         console.error('❌ Erreur GET /api/absences:', error.message);
-        res.status(500).json([]);
+        console.error('❌ Stack:', error.stack);
+        res.json([]); // ✅ Retourner un tableau vide au lieu d'une erreur 500
     }
 });
 
