@@ -5,16 +5,16 @@
     <div class="themed-container" style="max-width: 100%; padding: 0 20px;">
         
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2><i data-feather="user-x"></i> Gestion des Absences & Retards</h2>
+            <h2>Gestion des Absences & Retards</h2>
             <button class="btn btn-primary" id="btnAddAbsence">
-                <i data-feather="plus"></i> Signaler une absence/retard
+                Signaler une absence/retard
             </button>
         </div>
 
         <%- include('../partials/messages') %>
 
         <!-- Message de succès -->
-        <div id="successMessage" class="alert alert-success" style="display:none; position:fixed; top:80px; right:20px; z-index:9999; min-width:300px; border-radius:10px; box-shadow:0 8px 25px rgba(0,0,0,0.3);">
+        <div id="successMessage" class="alert alert-success" style="display:none; position:fixed; top:80px; left:20px; z-index:9999; min-width:300px; border-radius:10px; box-shadow:0 8px 25px rgba(0,0,0,0.3);">
             <span id="successText"></span>
         </div>
 
@@ -22,38 +22,36 @@
         <div class="card glass-card mb-4" style="border-radius: 16px; padding: 20px;">
             <div class="row align-items-end">
                 <div class="col-md-2">
-                    <label class="form-label" style="color:#fff;">Type</label>
-                    <select class="form-select" id="filterType" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);">
-                        <option value="student">👨‍🎓 Élèves</option>
-                        <option value="professor">👨‍🏫 Professeurs</option>
+                    <label class="form-label">Type</label>
+                    <select class="form-select" id="filterType">
+                        <option value="student">Élèves</option>
+                        <option value="professor">Professeurs</option>
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <label class="form-label" style="color:#fff;">Classe</label>
-                    <select class="form-select" id="filterClass" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);">
+                    <label class="form-label">Classe</label>
+                    <select class="form-select" id="filterClass">
                         <option value="">Toutes</option>
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <label class="form-label" style="color:#fff;">Statut</label>
-                    <select class="form-select" id="filterStatus" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);">
+                    <label class="form-label">Statut</label>
+                    <select class="form-select" id="filterStatus">
                         <option value="">Tous</option>
                         <option value="non_justifiee">Non justifiée</option>
                         <option value="justifiee">Justifiée</option>
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <label class="form-label" style="color:#fff;">Date début</label>
-                    <input type="date" class="form-control" id="filterDateDebut" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);">
+                    <label class="form-label">Date début</label>
+                    <input type="date" class="form-control" id="filterDateDebut">
                 </div>
                 <div class="col-md-2">
-                    <label class="form-label" style="color:#fff;">Date fin</label>
-                    <input type="date" class="form-control" id="filterDateFin" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);">
+                    <label class="form-label">Date fin</label>
+                    <input type="date" class="form-control" id="filterDateFin">
                 </div>
                 <div class="col-md-2">
-                    <button class="btn btn-primary w-100" id="btnFilter" style="height:42px;">
-                        <i data-feather="search"></i> Filtrer
-                    </button>
+                    <button class="btn btn-primary w-100" id="btnFilter" style="height:42px;">Filtrer</button>
                 </div>
             </div>
         </div>
@@ -63,19 +61,19 @@
             <div class="table-responsive">
                 <table class="table table-hover" id="absencesTable">
                     <thead>
-                        <tr style="background:rgba(13,110,253,0.1);">
-                            <th style="color:#fff;">Date</th>
-                            <th style="color:#fff;">Nom</th>
-                            <th style="color:#fff;">Classe</th>
-                            <th style="color:#fff;">Type</th>
-                            <th style="color:#fff;">Heure arrivée</th>
-                            <th style="color:#fff;">Justifié</th>
-                            <th style="color:#fff;">Motif</th>
-                            <th style="color:#fff;width:100px;">Actions</th>
+                        <tr>
+                            <th>Date</th>
+                            <th>Nom</th>
+                            <th>Classe</th>
+                            <th>Type</th>
+                            <th>Heure arrivée</th>
+                            <th>Justifié</th>
+                            <th>Motif</th>
+                            <th style="width:100px;">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="absencesBody">
-                        <tr><td colspan="8" class="text-center text-muted py-4">Cliquez sur Filtrer pour afficher</td></tr>
+                        <tr><td colspan="8" class="text-center py-4">Cliquez sur Filtrer pour afficher</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -87,24 +85,24 @@
 <!-- Modal Ajouter -->
 <div class="modal fade" id="absenceModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
-        <div class="modal-content" style="background:rgba(30,30,50,0.95);color:white;border-radius:16px;border:1px solid rgba(255,255,255,0.1);">
-            <div class="modal-header" style="border-bottom:1px solid rgba(255,255,255,0.1);">
+        <div class="modal-content">
+            <div class="modal-header">
                 <h5 class="modal-title">Signaler une absence/retard</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <div class="mb-3">
                     <label class="form-label">Type de personne</label>
-                    <select class="form-select" id="absenceUserType" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);">
-                        <option value="student">👨‍🎓 Élève</option>
-                        <option value="professor">👨‍🏫 Professeur</option>
+                    <select class="form-select" id="absenceUserType">
+                        <option value="student">Élève</option>
+                        <option value="professor">Professeur</option>
                     </select>
                 </div>
                 <div id="classSelectDiv">
                     <label class="form-label">Classe</label>
                     <div class="row mb-3">
                         <div class="col-5">
-                            <select class="form-select" id="modalClassLevel" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);">
+                            <select class="form-select" id="modalClassLevel">
                                 <option value="">-- Niveau --</option>
                                 <option value="Terminale">Terminale</option><option value="Première">Première</option><option value="Seconde">Seconde</option>
                                 <option value="3ème">3ème</option><option value="4ème">4ème</option><option value="5ème">5ème</option><option value="6ème">6ème</option>
@@ -113,54 +111,54 @@
                             </select>
                         </div>
                         <div class="col-2">
-                            <select class="form-select" id="modalClassLetter" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);"><option value="">-</option></select>
+                            <select class="form-select" id="modalClassLetter"><option value="">-</option></select>
                         </div>
                         <div class="col-2">
-                            <select class="form-select" id="modalClassNumber" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);"><option value="">-</option></select>
+                            <select class="form-select" id="modalClassNumber"><option value="">-</option></select>
                         </div>
                         <div class="col-3">
-                            <button class="btn btn-outline-light w-100" id="btnLoadStudents">Charger</button>
+                            <button class="btn btn-outline-secondary w-100" id="btnLoadStudents">Charger</button>
                         </div>
                     </div>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Personne *</label>
-                    <select class="form-select" id="absenceUser" required style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);">
+                    <select class="form-select" id="absenceUser" required>
                         <option value="">-- Sélectionnez --</option>
                     </select>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Type *</label>
-                    <select class="form-select" id="absenceType" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);">
-                        <option value="absence">❌ Absence</option>
-                        <option value="retard">⏰ Retard</option>
+                    <select class="form-select" id="absenceType">
+                        <option value="absence">Absence</option>
+                        <option value="retard">Retard</option>
                     </select>
                 </div>
                 <div class="mb-3" id="heureArriveeDiv" style="display:none;">
                     <label class="form-label">Heure d'arrivée</label>
-                    <input type="time" class="form-control" id="absenceHeure" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);">
+                    <input type="time" class="form-control" id="absenceHeure">
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Date *</label>
-                    <input type="date" class="form-control" id="absenceDate" required style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);">
+                    <input type="date" class="form-control" id="absenceDate" required>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Motif</label>
-                    <input type="text" class="form-control" id="absenceMotif" placeholder="Maladie, rendez-vous..." style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);">
+                    <input type="text" class="form-control" id="absenceMotif" placeholder="Maladie, rendez-vous...">
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Commentaire</label>
-                    <textarea class="form-control" id="absenceCommentaire" rows="2" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);"></textarea>
+                    <textarea class="form-control" id="absenceCommentaire" rows="2"></textarea>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Justifié</label>
-                    <select class="form-select" id="absenceJustified" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);">
-                        <option value="non_justifiee">❌ Non justifiée</option>
-                        <option value="justifiee">✅ Justifiée</option>
+                    <select class="form-select" id="absenceJustified">
+                        <option value="non_justifiee">Non justifiée</option>
+                        <option value="justifiee">Justifiée</option>
                     </select>
                 </div>
             </div>
-            <div class="modal-footer" style="border-top:1px solid rgba(255,255,255,0.1);">
+            <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
                 <button type="button" class="btn btn-primary" id="btnSaveAbsence">Enregistrer</button>
             </div>
@@ -186,31 +184,6 @@
         var opt2 = document.createElement('option');
         opt2.value = j; opt2.textContent = j; numberSel.appendChild(opt2);
     }
-
-    // Gestion des modals
-    function hideModal(id) {
-        var el = document.getElementById(id);
-        if (!el) return;
-        el.classList.remove('show'); el.style.display = 'none';
-        document.body.classList.remove('modal-open');
-        var bd = document.querySelector('.modal-backdrop'); if (bd) bd.remove();
-        document.body.style.overflow = ''; document.body.style.paddingRight = '';
-    }
-    function showModal(id) {
-        var el = document.getElementById(id);
-        if (!el) return;
-        el.classList.add('show'); el.style.display = 'block';
-        document.body.classList.add('modal-open');
-        var bd = document.createElement('div'); bd.className = 'modal-backdrop fade show'; document.body.appendChild(bd);
-    }
-    document.querySelectorAll('[data-bs-dismiss="modal"]').forEach(function(btn) {
-        btn.addEventListener('click', function() { var m = this.closest('.modal'); if (m) hideModal(m.id); });
-    });
-    document.addEventListener('click', function(e) {
-        if (e.target.classList.contains('modal-backdrop')) {
-            document.querySelectorAll('.modal.show').forEach(function(m) { hideModal(m.id); });
-        }
-    });
 
     // Message de succès
     function showSuccess(msg) {
@@ -305,27 +278,27 @@
                 var tbody = document.getElementById('absencesBody');
                 tbody.innerHTML = '';
                 if (!data || data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-muted">Aucun résultat</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4">Aucun résultat</td></tr>';
                     return;
                 }
                 for (var i = 0; i < data.length; i++) {
                     var a = data[i];
-                    var typeLabel = (a.type === 'absence') ? '❌ Absence' : '⏰ Retard';
+                    var typeLabel = (a.type === 'absence') ? 'Absence' : 'Retard';
                     var typeColor = (a.type === 'absence') ? '#dc3545' : '#fd7e14';
                     var heureArrivee = (a.type === 'retard' && a.heure_arrivee) ? a.heure_arrivee.substring(0, 5) : '-';
                     var justifiedChecked = (a.status === 'justifiee') ? 'checked' : '';
-                    var statusLabel = (a.status === 'justifiee') ? '✅ Justifiée' : '❌ Non justifiée';
+                    var statusLabel = (a.status === 'justifiee') ? 'Justifiée' : 'Non justifiée';
 
                     var tr = document.createElement('tr');
                     tr.innerHTML = 
-                        '<td style="color:#fff;">' + (a.date ? new Date(a.date).toLocaleDateString('fr-FR') : '-') + '</td>' +
-                        '<td style="color:#fff;">' + (a.user_name || '-') + '</td>' +
-                        '<td style="color:#fff;">' + (a.student_class || '-') + '</td>' +
+                        '<td>' + (a.date ? new Date(a.date).toLocaleDateString('fr-FR') : '-') + '</td>' +
+                        '<td>' + (a.user_name || '-') + '</td>' +
+                        '<td>' + (a.student_class || '-') + '</td>' +
                         '<td><span class="badge" style="background:' + typeColor + '">' + typeLabel + '</span></td>' +
-                        '<td style="color:#fff;">' + heureArrivee + '</td>' +
-                        '<td><label style="cursor:pointer;display:flex;align-items:center;gap:6px;"><input type="checkbox" ' + justifiedChecked + ' onchange="toggleJustify(' + a.id + ', this.checked)" style="accent-color:#198754;width:18px;height:18px;cursor:pointer;"><span style="font-size:0.75rem;color:#ccc;">' + statusLabel + '</span></label></td>' +
-                        '<td style="color:#ccc;">' + (a.motif || '-') + '</td>' +
-                        '<td><a href="#" onclick="event.preventDefault(); deleteAbsence(' + a.id + ')" class="btn btn-sm btn-outline-danger">🗑️</a></td>';
+                        '<td>' + heureArrivee + '</td>' +
+                        '<td><label style="cursor:pointer;display:flex;align-items:center;gap:6px;"><input type="checkbox" ' + justifiedChecked + ' onchange="toggleJustify(' + a.id + ', this.checked)" style="accent-color:#198754;width:18px;height:18px;cursor:pointer;"><span style="font-size:0.75rem;">' + statusLabel + '</span></label></td>' +
+                        '<td>' + (a.motif || '-') + '</td>' +
+                        '<td><button class="btn btn-sm btn-outline-danger" onclick="deleteAbsence(' + a.id + ')">Supprimer</button></td>';
                     tbody.appendChild(tr);
                 }
             }
@@ -342,9 +315,8 @@
             if (xhr.status === 200) {
                 var result = JSON.parse(xhr.responseText);
                 if (result.success) {
-                    var msg = checked ? '✅ Absence/retard marqué(e) comme justifié(e)' : '❌ Absence/retard marqué(e) comme non justifié(e)';
-                    showSuccess(msg);
-                    loadAbsences(); // Recharger seulement en cas de succès
+                    showSuccess(checked ? 'Absence/retard justifié(e)' : 'Absence/retard non justifié(e)');
+                    loadAbsences();
                 }
             }
         };
@@ -361,85 +333,99 @@
         document.getElementById('absenceMotif').value = '';
         document.getElementById('absenceCommentaire').value = '';
         document.getElementById('absenceJustified').value = 'non_justifiee';
-        showModal('absenceModal');
+        var modal = new bootstrap.Modal(document.getElementById('absenceModal'));
+        modal.show();
     });
 
     // Enregistrer
-document.getElementById('btnSaveAbsence').addEventListener('click', function() {
-    var uid = document.getElementById('absenceUser').value;
-    if (!uid) { alert('Sélectionnez une personne'); return; }
-    var type = document.getElementById('absenceType').value;
-    var data = {
-        user_id: parseInt(uid),
-        user_type: document.getElementById('absenceUserType').value,
-        type: type,
-        date: document.getElementById('absenceDate').value,
-        heure_arrivee: null,
-        motif: document.getElementById('absenceMotif').value.trim(),
-        commentaire: document.getElementById('absenceCommentaire').value.trim(),
-        status: document.getElementById('absenceJustified').value
-    };
-    if (type === 'retard') data.heure_arrivee = document.getElementById('absenceHeure').value;
+    document.getElementById('btnSaveAbsence').addEventListener('click', function() {
+        var uid = document.getElementById('absenceUser').value;
+        if (!uid) { alert('Sélectionnez une personne'); return; }
+        var type = document.getElementById('absenceType').value;
+        var data = {
+            user_id: parseInt(uid),
+            user_type: document.getElementById('absenceUserType').value,
+            type: type,
+            date: document.getElementById('absenceDate').value,
+            heure_arrivee: null,
+            motif: document.getElementById('absenceMotif').value.trim(),
+            commentaire: document.getElementById('absenceCommentaire').value.trim(),
+            status: document.getElementById('absenceJustified').value
+        };
+        if (type === 'retard') data.heure_arrivee = document.getElementById('absenceHeure').value;
 
-    var xhr = new XMLHttpRequest();
-    xhr.open('POST', '/api/absences');
-    xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.onload = function() {
-        // Accepter tous les codes 2xx
-        if (xhr.status >= 200 && xhr.status < 300) {
-            try {
-                var result = JSON.parse(xhr.responseText);
-                if (result.success) {
-                    hideModal('absenceModal');
-                    var msg = (type === 'absence') ? '✅ Absence enregistrée avec succès' : '⏰ Retard enregistré avec succès';
-                    showSuccess(msg);
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/api/absences');
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.onload = function() {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                try {
+                    var result = JSON.parse(xhr.responseText);
+                    if (result.success) {
+                        bootstrap.Modal.getInstance(document.getElementById('absenceModal')).hide();
+                        showSuccess(type === 'absence' ? 'Absence enregistrée' : 'Retard enregistré');
+                        loadAbsences();
+                    } else {
+                        alert('Erreur: ' + (result.error || 'Inconnue'));
+                    }
+                } catch(e) {
+                    bootstrap.Modal.getInstance(document.getElementById('absenceModal')).hide();
+                    showSuccess(type === 'absence' ? 'Absence enregistrée' : 'Retard enregistré');
                     loadAbsences();
-                } else {
-                    alert('Erreur: ' + (result.error || 'Inconnue'));
                 }
-            } catch(e) {
-                // Si la réponse n'est pas du JSON, considérer comme succès
-                hideModal('absenceModal');
-                var msg = (type === 'absence') ? '✅ Absence enregistrée avec succès' : '⏰ Retard enregistré avec succès';
-                showSuccess(msg);
-                loadAbsences();
+            } else {
+                alert('Erreur serveur (code ' + xhr.status + ')');
             }
-        } else {
-            alert('Erreur serveur (code ' + xhr.status + ')');
-        }
-    };
-    xhr.onerror = function() {
-        alert('Erreur réseau');
-    };
-    xhr.send(JSON.stringify(data));
-});
+        };
+        xhr.onerror = function() { alert('Erreur réseau'); };
+        xhr.send(JSON.stringify(data));
+    });
 
     // Supprimer
     function deleteAbsence(id) {
         if (!confirm('Supprimer cette entrée ?')) return;
         var xhr = new XMLHttpRequest();
         xhr.open('DELETE', '/api/absences/' + id);
-        xhr.onload = function() { showSuccess('🗑️ Entrée supprimée'); loadAbsences(); };
+        xhr.onload = function() { showSuccess('Entrée supprimée'); loadAbsences(); };
         xhr.send();
     }
 
-    // TEST - Afficher un message après 2 secondes
-setTimeout(function() {
-    showSuccess('Test message succès');
-}, 2000);
+    // Charger au démarrage
+    loadAbsences();
 </script>
 
 <style>
     .glass-card {
-        background: rgba(255, 255, 255, 0.05) !important;
-        backdrop-filter: blur(20px) !important;
-        -webkit-backdrop-filter: blur(20px) !important;
-        border: 1px solid rgba(255, 255, 255, 0.08) !important;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
     }
-    #absencesTable { color: #e4e4e4; }
-    #absencesTable td { border-color: rgba(255,255,255,0.06); vertical-align: middle; }
-    #absencesTable tr:hover { background: rgba(255,255,255,0.03); }
+    [data-theme="dark"] .glass-card {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+    #absencesTable { color: inherit; }
+    #absencesTable td { border-color: rgba(128,128,128,0.15); vertical-align: middle; }
+    #absencesTable tr:hover { background: rgba(128,128,128,0.05); }
+    #absencesTable th { border-color: rgba(128,128,128,0.2); font-weight: 600; }
+    .modal-content {
+        background: rgba(255, 255, 255, 0.95);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    [data-theme="dark"] .modal-content {
+        background: rgba(30, 30, 50, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #e4e4e4;
+    }
+    [data-theme="dark"] .modal-header { border-bottom-color: rgba(255,255,255,0.1); }
+    [data-theme="dark"] .modal-footer { border-top-color: rgba(255,255,255,0.1); }
+    [data-theme="dark"] .btn-close { filter: invert(1); }
+    .form-select, .form-control { background: rgba(128,128,128,0.08); border: 1px solid rgba(128,128,128,0.2); color: inherit; }
+    [data-theme="dark"] .form-select, [data-theme="dark"] .form-control { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.15); color: #e4e4e4; }
+    [data-theme="dark"] .form-select option, [data-theme="dark"] .form-control option { background: #1a1a2e; color: #e4e4e4; }
 </style>
 
 <%- include('../partials/footer') %>
