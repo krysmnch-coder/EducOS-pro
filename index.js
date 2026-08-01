@@ -1186,13 +1186,24 @@ app.get('/absences-view', async (req, res) => {
         res.redirect('/dashboard');
     }
 });
-
-app.get('/test-absences-table', async (req, res) => {
+app.get('/test-insert-absence', async (req, res) => {
     try {
-        const columns = await db('absences').columnInfo();
-        res.json(columns);
+        const [id] = await db('absences').insert({
+            establishment_id: req.user.establishment_id,
+            user_id: req.user.id,
+            user_type: 'professor',
+            type: 'absence',
+            status: 'non_justifiee',
+            date: new Date().toISOString().split('T')[0],
+            created_by: req.user.id
+        });
+        
+        // Supprimer le test
+        await db('absences').where({ id }).del();
+        
+        res.json({ success: true, message: 'Insertion OK' });
     } catch (error) {
-        res.json({ error: error.message });
+        res.json({ success: false, error: error.message });
     }
 });
 // Lancement de l'application
