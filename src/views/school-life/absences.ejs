@@ -69,11 +69,11 @@
                             <th>Heure arrivée</th>
                             <th>Justifié</th>
                             <th>Motif</th>
-                            <th style="width:100px;">Actions</th>
+                            <th style="width:110px;">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="absencesBody">
-                        <tr><td colspan="8" class="text-center py-4">Cliquez sur Filtrer pour afficher</td></tr>
+                        <tr><td colspan="8" class="text-center py-4">Chargement...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -196,18 +196,26 @@
     }
 
     // Charger classes filtre
-    var xhrC = new XMLHttpRequest();
-    xhrC.open('GET', '/api/all-classes');
-    xhrC.onload = function() {
-        if (xhrC.status === 200) {
-            var data = JSON.parse(xhrC.responseText);
-            var sel = document.getElementById('filterClass');
-            if (data) for (var i = 0; i < data.length; i++) {
-                var opt = document.createElement('option'); opt.value = data[i]; opt.textContent = data[i]; sel.appendChild(opt);
+    function loadFilterClasses() {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', '/api/all-classes');
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                try {
+                    var data = JSON.parse(xhr.responseText);
+                    var sel = document.getElementById('filterClass');
+                    if (data && Array.isArray(data)) {
+                        for (var i = 0; i < data.length; i++) {
+                            var opt = document.createElement('option');
+                            opt.value = data[i]; opt.textContent = data[i]; sel.appendChild(opt);
+                        }
+                    }
+                } catch(e) {}
             }
-        }
-    };
-    xhrC.send();
+        };
+        xhr.send();
+    }
+    loadFilterClasses();
 
     // Type personne
     document.getElementById('absenceUserType').addEventListener('change', function() {
@@ -217,12 +225,17 @@
             xhr.open('GET', '/api/professors-list');
             xhr.onload = function() {
                 if (xhr.status === 200) {
-                    var data = JSON.parse(xhr.responseText);
-                    var sel = document.getElementById('absenceUser');
-                    sel.innerHTML = '<option value="">-- Choisir --</option>';
-                    for (var i = 0; i < data.length; i++) {
-                        var opt = document.createElement('option'); opt.value = data[i].id; opt.textContent = data[i].name; sel.appendChild(opt);
-                    }
+                    try {
+                        var data = JSON.parse(xhr.responseText);
+                        var sel = document.getElementById('absenceUser');
+                        sel.innerHTML = '<option value="">-- Choisir --</option>';
+                        if (data && Array.isArray(data)) {
+                            for (var i = 0; i < data.length; i++) {
+                                var opt = document.createElement('option');
+                                opt.value = data[i].id; opt.textContent = data[i].name; sel.appendChild(opt);
+                            }
+                        }
+                    } catch(e) {}
                 }
             };
             xhr.send();
@@ -245,13 +258,19 @@
         xhr.open('GET', '/api/students-by-class/' + encodeURIComponent(cn.trim()));
         xhr.onload = function() {
             if (xhr.status === 200) {
-                var data = JSON.parse(xhr.responseText);
-                var sel = document.getElementById('absenceUser');
-                sel.innerHTML = '<option value="">-- Choisir --</option>';
-                if (data) for (var i = 0; i < data.length; i++) {
-                    var opt = document.createElement('option');
-                    opt.value = data[i].id; opt.textContent = data[i].name + ' (' + (data[i].matricule || 'N/A') + ')'; sel.appendChild(opt);
-                }
+                try {
+                    var data = JSON.parse(xhr.responseText);
+                    var sel = document.getElementById('absenceUser');
+                    sel.innerHTML = '<option value="">-- Choisir --</option>';
+                    if (data && Array.isArray(data)) {
+                        for (var i = 0; i < data.length; i++) {
+                            var opt = document.createElement('option');
+                            opt.value = data[i].id;
+                            opt.textContent = data[i].name + ' (' + (data[i].matricule || 'N/A') + ')';
+                            sel.appendChild(opt);
+                        }
+                    }
+                } catch(e) {}
             }
         };
         xhr.send();
@@ -259,50 +278,65 @@
 
     // FILTRER
     document.getElementById('btnFilter').addEventListener('click', loadAbsences);
+
     function loadAbsences() {
-        var url = '/api/absences?user_type=' + document.getElementById('filterType').value;
+        var type = document.getElementById('filterType').value;
         var cls = document.getElementById('filterClass').value;
         var st = document.getElementById('filterStatus').value;
         var d1 = document.getElementById('filterDateDebut').value;
         var d2 = document.getElementById('filterDateFin').value;
-        if (cls) url += '&class_name=' + encodeURIComponent(cls);
-        if (st) url += '&status=' + encodeURIComponent(st);
-        if (d1) url += '&date_debut=' + d1;
-        if (d2) url += '&date_fin=' + d2;
+        
+        var url = '/api/absences?user_type=' + type;
+        if (cls && cls !== '') url += '&class_name=' + encodeURIComponent(cls);
+        if (st && st !== '') url += '&status=' + encodeURIComponent(st);
+        if (d1 && d1 !== '') url += '&date_debut=' + d1;
+        if (d2 && d2 !== '') url += '&date_fin=' + d2;
+
+        console.log('🔍 Chargement:', url);
 
         var xhr = new XMLHttpRequest();
         xhr.open('GET', url);
         xhr.onload = function() {
             if (xhr.status === 200) {
-                var data = JSON.parse(xhr.responseText);
-                var tbody = document.getElementById('absencesBody');
-                tbody.innerHTML = '';
-                if (!data || data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4">Aucun résultat</td></tr>';
-                    return;
-                }
-                for (var i = 0; i < data.length; i++) {
-                    var a = data[i];
-                    var typeLabel = (a.type === 'absence') ? 'Absence' : 'Retard';
-                    var typeColor = (a.type === 'absence') ? '#dc3545' : '#fd7e14';
-                    var heureArrivee = (a.type === 'retard' && a.heure_arrivee) ? a.heure_arrivee.substring(0, 5) : '-';
-                    var justifiedChecked = (a.status === 'justifiee') ? 'checked' : '';
-                    var statusLabel = (a.status === 'justifiee') ? 'Justifiée' : 'Non justifiée';
+                try {
+                    var data = JSON.parse(xhr.responseText);
+                    console.log('📊 Résultats:', Array.isArray(data) ? data.length : 0, 'entrées');
+                    var tbody = document.getElementById('absencesBody');
+                    tbody.innerHTML = '';
+                    
+                    if (!data || !Array.isArray(data) || data.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4">Aucun résultat</td></tr>';
+                        return;
+                    }
+                    
+                    for (var i = 0; i < data.length; i++) {
+                        var a = data[i];
+                        var typeLabel = (a.type === 'absence') ? 'Absence' : 'Retard';
+                        var typeColor = (a.type === 'absence') ? '#dc3545' : '#fd7e14';
+                        var heureArrivee = (a.type === 'retard' && a.heure_arrivee) ? a.heure_arrivee.substring(0, 5) : '-';
+                        var justifiedChecked = (a.status === 'justifiee') ? 'checked' : '';
+                        var statusLabel = (a.status === 'justifiee') ? 'Justifiée' : 'Non justifiée';
+                        var displayDate = a.date ? new Date(a.date + 'T00:00:00').toLocaleDateString('fr-FR') : '-';
 
-                    var tr = document.createElement('tr');
-                    tr.innerHTML = 
-                        '<td>' + (a.date ? new Date(a.date).toLocaleDateString('fr-FR') : '-') + '</td>' +
-                        '<td>' + (a.user_name || '-') + '</td>' +
-                        '<td>' + (a.student_class || '-') + '</td>' +
-                        '<td><span class="badge" style="background:' + typeColor + '">' + typeLabel + '</span></td>' +
-                        '<td>' + heureArrivee + '</td>' +
-                        '<td><label style="cursor:pointer;display:flex;align-items:center;gap:6px;"><input type="checkbox" ' + justifiedChecked + ' onchange="toggleJustify(' + a.id + ', this.checked)" style="accent-color:#198754;width:18px;height:18px;cursor:pointer;"><span style="font-size:0.75rem;">' + statusLabel + '</span></label></td>' +
-                        '<td>' + (a.motif || '-') + '</td>' +
-                        '<td><button class="btn btn-sm btn-outline-danger" onclick="deleteAbsence(' + a.id + ')">Supprimer</button></td>';
-                    tbody.appendChild(tr);
+                        var tr = document.createElement('tr');
+                        tr.innerHTML = 
+                            '<td>' + displayDate + '</td>' +
+                            '<td>' + (a.user_name || '-') + '</td>' +
+                            '<td>' + (a.student_class || '-') + '</td>' +
+                            '<td><span class="badge" style="background:' + typeColor + '">' + typeLabel + '</span></td>' +
+                            '<td>' + heureArrivee + '</td>' +
+                            '<td><label style="cursor:pointer;display:flex;align-items:center;gap:6px;"><input type="checkbox" ' + justifiedChecked + ' onchange="toggleJustify(' + a.id + ', this.checked)"><span style="font-size:0.75rem;">' + statusLabel + '</span></label></td>' +
+                            '<td>' + (a.motif || '-') + '</td>' +
+                            '<td><button class="btn btn-sm btn-outline-danger" onclick="deleteAbsence(' + a.id + ')">Supprimer</button></td>';
+                        tbody.appendChild(tr);
+                    }
+                } catch(e) {
+                    console.error('Erreur parsing:', e);
+                    document.getElementById('absencesBody').innerHTML = '<tr><td colspan="8" class="text-center py-4 text-danger">Erreur de chargement</td></tr>';
                 }
             }
         };
+        xhr.onerror = function() { console.error('Erreur réseau'); };
         xhr.send();
     }
 
@@ -313,11 +347,13 @@
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.onload = function() {
             if (xhr.status === 200) {
-                var result = JSON.parse(xhr.responseText);
-                if (result.success) {
-                    showSuccess(checked ? 'Absence/retard justifié(e)' : 'Absence/retard non justifié(e)');
-                    loadAbsences();
-                }
+                try {
+                    var result = JSON.parse(xhr.responseText);
+                    if (result.success) {
+                        showSuccess(checked ? 'Absence/retard justifié(e)' : 'Absence/retard non justifié(e)');
+                        loadAbsences();
+                    }
+                } catch(e) {}
             }
         };
         xhr.send(JSON.stringify({ status: checked ? 'justifiee' : 'non_justifiee', motif: '', commentaire: '' }));
@@ -341,12 +377,14 @@
     document.getElementById('btnSaveAbsence').addEventListener('click', function() {
         var uid = document.getElementById('absenceUser').value;
         if (!uid) { alert('Sélectionnez une personne'); return; }
+        
         var type = document.getElementById('absenceType').value;
+        var dateVal = document.getElementById('absenceDate').value;
         var data = {
             user_id: parseInt(uid),
             user_type: document.getElementById('absenceUserType').value,
             type: type,
-            date: document.getElementById('absenceDate').value,
+            date: dateVal,
             heure_arrivee: null,
             motif: document.getElementById('absenceMotif').value.trim(),
             commentaire: document.getElementById('absenceCommentaire').value.trim(),
@@ -354,23 +392,33 @@
         };
         if (type === 'retard') data.heure_arrivee = document.getElementById('absenceHeure').value;
 
+        console.log('📤 Envoi:', JSON.stringify(data));
+
         var xhr = new XMLHttpRequest();
         xhr.open('POST', '/api/absences');
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.onload = function() {
+            console.log('📥 Réponse:', xhr.status, xhr.responseText);
             if (xhr.status >= 200 && xhr.status < 300) {
                 try {
                     var result = JSON.parse(xhr.responseText);
                     if (result.success) {
                         bootstrap.Modal.getInstance(document.getElementById('absenceModal')).hide();
                         showSuccess(type === 'absence' ? 'Absence enregistrée' : 'Retard enregistré');
+                        
+                        // Mettre à jour les filtres pour voir l'entrée
+                        document.getElementById('filterDateDebut').value = dateVal;
+                        document.getElementById('filterDateFin').value = '';
+                        document.getElementById('filterStatus').value = '';
+                        
                         loadAbsences();
                     } else {
                         alert('Erreur: ' + (result.error || 'Inconnue'));
                     }
                 } catch(e) {
                     bootstrap.Modal.getInstance(document.getElementById('absenceModal')).hide();
-                    showSuccess(type === 'absence' ? 'Absence enregistrée' : 'Retard enregistré');
+                    showSuccess('Enregistré');
+                    document.getElementById('filterDateDebut').value = dateVal;
                     loadAbsences();
                 }
             } else {
