@@ -1,50 +1,157 @@
 <%- include('../partials/head') %>
 <%- include('../partials/header') %>
 
-<div class="container-fluid page-shell py-4">
-    <div class="themed-container" style="max-width: 100%; padding: 0 20px;">
-        <h2 class="mb-4">Calendrier Scolaire</h2>
-        <%- include('../partials/messages') %>
-        
-        <div class="card glass-card p-3" style="border-radius:16px;">
-            <div class="mb-3">
-                <select class="form-select" id="typeFilter" style="width:200px;">
-                    <option value="all">Tous les types</option>
-                    <option value="Rentrée des classes">Rentrée des classes</option>
-                    <option value="Période scolaire">Période scolaire</option>
-                    <option value="Vacances scolaires">Vacances scolaires</option>
-                    <option value="Jours fériés">Jours fériés</option>
-                    <option value="Événements">Événements</option>
-                </select>
-            </div>
-            <div id="calendar"></div>
-        </div>
+<div class="container py-4">
+    <h2 class="mb-4">Calendrier Scolaire</h2>
+    <%- include('../partials/messages') %>
+    
+    <div style="margin-bottom:15px;">
+        <select id="typeFilter" style="padding:8px 15px; border-radius:8px; width:200px;">
+            <option value="all">📅 Tous les types</option>
+            <option value="Rentrée des classes">🎓 Rentrée des classes</option>
+            <option value="Période scolaire">📚 Période scolaire</option>
+            <option value="Vacances scolaires">🏖️ Vacances scolaires</option>
+            <option value="Jours fériés">🎉 Jours fériés</option>
+            <option value="Événements">⭐ Événements</option>
+        </select>
     </div>
+    
+    <div id="calendar"></div>
 </div>
 
 <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        var calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
-            initialView: 'dayGridMonth', locale: 'fr',
-            headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,listMonth' },
-            buttonText: { today: 'Aujourd\'hui', month: 'Mois', week: 'Semaine', list: 'Liste' },
+        var calendarEl = document.getElementById('calendar');
+        
+        if (!calendarEl) {
+            console.error('❌ Élément #calendar introuvable');
+            return;
+        }
+        
+        console.log('✅ Initialisation du calendrier...');
+        
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            locale: 'fr',
+            height: 'auto',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,listMonth'
+            },
+            buttonText: { 
+                today: 'Aujourd\'hui', 
+                month: 'Mois', 
+                week: 'Semaine', 
+                list: 'Liste' 
+            },
             displayEventTime: false,
-            events: function(info, success) {
+            events: function(fetchInfo, successCallback, failureCallback) {
                 var type = document.getElementById('typeFilter').value;
                 var url = '/api/calendar/events?view=' + calendar.view.type;
-                if (type !== 'all') url += '&type=' + encodeURIComponent(type);
-                fetch(url).then(r => r.json()).then(data => success(data));
+                if (type !== 'all') {
+                    url += '&type=' + encodeURIComponent(type);
+                }
+                
+                console.log('📡 Chargement événements:', url);
+                
+                fetch(url)
+                    .then(function(response) {
+                        if (!response.ok) throw new Error('HTTP ' + response.status);
+                        return response.json();
+                    })
+                    .then(function(data) {
+                        console.log('✅ Événements reçus:', data.length);
+                        successCallback(data);
+                    })
+                    .catch(function(error) {
+                        console.error('❌ Erreur chargement:', error);
+                        failureCallback(error);
+                    });
+            },
+            eventDidMount: function(info) {
+                info.el.style.fontSize = '0.8rem';
+                info.el.style.padding = '4px 8px';
+                info.el.style.borderRadius = '6px';
+                info.el.style.border = 'none';
+                info.el.style.color = '#fff';
+                info.el.style.fontWeight = '500';
+            },
+            loading: function(isLoading) {
+                console.log('⏳ Chargement:', isLoading);
             }
         });
+        
         calendar.render();
-        document.getElementById('typeFilter').addEventListener('change', function() { calendar.refetchEvents(); });
+        console.log('✅ Calendrier affiché');
+        
+        document.getElementById('typeFilter').addEventListener('change', function() {
+            calendar.refetchEvents();
+        });
     });
 </script>
+
 <style>
-    .glass-card { background: rgba(255,255,255,0.08); backdrop-filter: blur(20px); border: 1px solid rgba(0,0,0,0.08); }
-    [data-theme="dark"] .glass-card { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.08); }
-    .fc { color: inherit; } .fc .fc-toolbar-title { color: inherit; }
+    #calendar {
+        max-width: 100%;
+        margin: 0 auto;
+        padding: 20px;
+        background: rgba(255,255,255,0.05);
+        border-radius: 16px;
+        min-height: 500px;
+    }
+    
+    .fc {
+        color: inherit;
+    }
+    
+    .fc .fc-toolbar-title {
+        font-size: 1.2rem;
+    }
+    
+    .fc .fc-button {
+        text-transform: capitalize;
+    }
+    
+    .fc-theme-standard td, 
+    .fc-theme-standard th {
+        border-color: rgba(128,128,128,0.15);
+    }
+    
+    /* Mode sombre */
+    [data-theme="dark"] #calendar {
+        background: rgba(255,255,255,0.03);
+    }
+    
+    [data-theme="dark"] .fc .fc-toolbar-title {
+        color: #e4e4e4;
+    }
+    
+    [data-theme="dark"] .fc .fc-button {
+        background: rgba(255,255,255,0.1);
+        border-color: rgba(255,255,255,0.15);
+        color: #e4e4e4;
+    }
+    
+    [data-theme="dark"] .fc .fc-button:hover {
+        background: rgba(255,255,255,0.2);
+    }
+    
+    [data-theme="dark"] .fc .fc-button-active {
+        background: #0d6efd !important;
+        border-color: #0d6efd !important;
+    }
+    
+    [data-theme="dark"] .fc .fc-daygrid-day-number {
+        color: #ccc;
+    }
+    
+    [data-theme="dark"] .fc .fc-col-header-cell-cushion {
+        color: #ccc;
+    }
 </style>
+
 <%- include('../partials/footer') %>
