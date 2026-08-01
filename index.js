@@ -964,37 +964,34 @@ app.delete('/api/absences/:id', async (req, res) => {
     }
 });
 
-// API - Récupérer toutes les classes existantes (insensible à la casse)
+// API - Récupérer toutes les classes
 app.get('/api/all-classes', async (req, res) => {
     if (!req.user) return res.status(401).json([]);
+    
     try {
         const classes = await db('users')
-            .where({ establishment_id: req.user.establishment_id, approved: 1 })
-            .whereIn('role', ['STUDENT', 'student', 'eleve', 'élève'])
+            .where({ establishment_id: req.user.establishment_id, role: 'STUDENT' })
             .distinct('student_class')
             .whereNotNull('student_class')
             .orderBy('student_class')
             .pluck('student_class');
         res.json(classes);
     } catch (error) {
-        console.error('Erreur all-classes:', error);
         res.status(500).json([]);
     }
 });
 
-// API - Récupérer la liste des professeurs (insensible à la casse)
+// API - Récupérer la liste des professeurs
 app.get('/api/professors-list', async (req, res) => {
     if (!req.user) return res.status(401).json([]);
+    
     try {
         const professors = await db('users')
-            .where({ establishment_id: req.user.establishment_id, approved: 1 })
-            .whereIn('role', ['PROFESSOR', 'professor', 'professeur', 'prof'])
+            .where({ establishment_id: req.user.establishment_id, role: 'PROFESSOR' })
             .select('id', 'name')
             .orderBy('name');
-        console.log('Professeurs trouvés:', professors.length);
         res.json(professors);
     } catch (error) {
-        console.error('Erreur professors-list:', error);
         res.status(500).json([]);
     }
 });
