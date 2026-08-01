@@ -828,6 +828,36 @@ async function createTimetablesTable() {
 
 createTimetablesTable();
 
+// Créer la table absences si elle n'existe pas
+async function createAbsencesTable() {
+    try {
+        const hasTable = await db.schema.hasTable('absences');
+        if (!hasTable) {
+            await db.schema.createTable('absences', function(table) {
+                table.increments('id').primary();
+                table.integer('establishment_id').notNullable();
+                table.integer('user_id').notNullable(); // ID de l'élève ou du professeur
+                table.string('user_type', 20).notNullable(); // 'student' ou 'professor'
+                table.enum('type', ['absence', 'retard']).notNullable();
+                table.enum('status', ['non_justifiee', 'justifiee', 'en_attente']).defaultTo('non_justifiee');
+                table.date('date').notNullable();
+                table.time('heure_arrivee');
+                table.string('motif', 500);
+                table.string('justificatif_url', 500);
+                table.text('commentaire');
+                table.integer('created_by').notNullable();
+                table.timestamps(true, true);
+            });
+            console.log('✅ Table absences créée');
+        } else {
+            console.log('✅ Table absences existe déjà');
+        }
+    } catch (error) {
+        console.error('❌ Erreur création table absences:', error.message);
+    }
+}
+
+createAbsencesTable();
 // Lancement de l'application
 startServer();
 
