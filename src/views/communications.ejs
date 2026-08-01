@@ -8,9 +8,18 @@
        Page Communications - Style Glassmorphism
        ========================================================================== */
     
-    /* Conteneur principal */
+    /* Conteneur principal en flex row */
     .communication-layout {
+      display: flex;
       gap: 1.5rem;
+      align-items: stretch;
+      min-height: calc(100vh - 200px);
+    }
+    
+    /* Les deux colonnes prennent toute la hauteur */
+    .communication-layout > * {
+      flex: 1;
+      min-width: 0;
     }
     
     /* Cartes Glassmorphism */
@@ -23,6 +32,9 @@
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
       overflow: hidden;
       transition: all 0.3s ease;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
     }
     
     .glass-card-comm:hover {
@@ -44,6 +56,7 @@
       background: rgba(13, 110, 253, 0.06) !important;
       border-bottom: 1px solid rgba(13, 110, 253, 0.08) !important;
       padding: 1rem 1.25rem !important;
+      flex-shrink: 0;
     }
     
     .card-header h5 {
@@ -56,9 +69,17 @@
       border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
     }
     
+    /* Corps des cartes qui prend tout l'espace */
+    .card-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    
     /* Onglets Glassmorphism */
     .nav-tabs {
       border-bottom: 2px solid rgba(13, 110, 253, 0.1) !important;
+      flex-shrink: 0;
     }
     
     [data-theme="dark"] .nav-tabs {
@@ -93,6 +114,18 @@
       background: rgba(255, 255, 255, 0.05) !important;
       color: #ffffff !important;
       border-bottom: 3px solid #ffffff !important;
+    }
+    
+    .tab-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .tab-pane {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
     }
     
     /* Formulaires */
@@ -147,6 +180,7 @@
       font-weight: 600 !important;
       transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
       color: var(--bs-primary, #0d6efd) !important;
+      flex-shrink: 0;
     }
     
     .glass-btn-send:hover {
@@ -257,6 +291,8 @@
       border-radius: 0.75rem !important; background: rgba(255, 255, 255, 0.06) !important;
       border: 1px solid rgba(255, 255, 255, 0.12) !important; padding: 0.5rem 1rem !important;
       color: var(--text-color, #212529) !important; transition: all 0.3s ease !important;
+      width: 100%;
+      max-width: 300px;
     }
     #communication-search:focus { background: rgba(255, 255, 255, 0.1) !important; border-color: var(--bs-primary, #0d6efd) !important; box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15) !important; }
     [data-theme="dark"] #communication-search { background: rgba(255, 255, 255, 0.04) !important; border-color: rgba(255, 255, 255, 0.08) !important; color: #e4e4e4 !important; }
@@ -264,25 +300,30 @@
     
     /* Messages scroll */
     .messages-scroll-container {
-      max-height: calc(100vh - 250px); overflow-y: auto; padding-right: 5px;
+      flex: 1;
+      overflow-y: auto;
+      padding-right: 5px;
+      max-height: calc(100vh - 250px);
     }
     .messages-scroll-container::-webkit-scrollbar { width: 5px; }
     .messages-scroll-container::-webkit-scrollbar-track { background: transparent; }
     .messages-scroll-container::-webkit-scrollbar-thumb { background: rgba(13, 110, 253, 0.3); border-radius: 10px; }
     [data-theme="dark"] .messages-scroll-container::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); }
     
-    /* ✅ Colonnes côte à côte de même hauteur */
-    .equal-height-row {
-      display: flex; flex-wrap: wrap;
-    }
-    .equal-height-row > [class*="col-"] {
-      display: flex; flex-direction: column;
-    }
-    .equal-height-row .card {
-      flex: 1;
+    /* Responsive */
+    @media (max-width: 992px) {
+      .communication-layout {
+        flex-direction: column;
+        gap: 1rem;
+      }
+      .communication-layout > * {
+        flex: none;
+      }
+      #communication-search {
+        max-width: 100%;
+      }
     }
     
-    @media (max-width: 992px) { .communication-layout { gap: 1rem; } }
     @media (max-width: 768px) {
       .communication-header { flex-direction: column; align-items: flex-start; gap: 0.25rem; }
       .communication-meta { font-size: 0.7rem; flex-wrap: wrap; }
@@ -299,128 +340,127 @@
     <%- include('partials/header') %>
 
     <main class="page-main">
-      <div class="row g-4 communication-layout equal-height-row">
-        <!-- Colonne de gauche : Formulaire d'envoi -->
-        <div class="col-lg-5">
-          <div class="card glass-card-comm new-communication-card">
-            <div class="card-header">
-              <h5 class="mb-0">Envoyer un nouveau message</h5>
-            </div>
-            <div class="card-body glass-form d-flex flex-column">
-              <ul class="nav nav-tabs nav-fill mb-3" id="communicationTab" role="tablist">
-                <li class="nav-item" role="presentation">
-                  <button class="nav-link active" id="direct-message-tab" data-bs-toggle="tab" data-bs-target="#direct-message-form" type="button" role="tab">Message Direct</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                  <button class="nav-link" id="group-message-tab" data-bs-toggle="tab" data-bs-target="#group-message-form" type="button" role="tab">Communication de Groupe</button>
-                </li>
-              </ul>
-              <div class="tab-content flex-grow-1" id="communicationTabContent">
-                <div class="tab-pane fade show active h-100" id="direct-message-form" role="tabpanel">
-                  <form action="/communications/send" method="POST" class="d-flex flex-column h-100">
-                    <div class="mb-3">
-                      <label for="user-recipient-select" class="form-label">Destinataire</label>
-                      <% if (locals.allUsers && allUsers.length > 0) { %>
-                        <select id="user-recipient-select" name="recipient" required placeholder="Rechercher un utilisateur...">
-                          <% allUsers.sort((a, b) => a.name.localeCompare(b.name)).forEach(user => { %>
-                            <option value="user_<%= user.id %>" data-avatar="<%= user.avatar_url || '/img/user.png' %>" data-email="<%= user.email || '' %>"><%= user.name %></option>
-                          <% }) %>
-                        </select>
-                      <% } else { %>
-                        <input type="text" class="form-control" value="Aucun autre utilisateur disponible" disabled>
-                      <% } %>
-                    </div>
-                    <div class="mb-3">
-                      <label for="direct-subject" class="form-label">Sujet</label>
-                      <input type="text" class="form-control" id="direct-subject" name="subject" required placeholder="Entrez le sujet...">
-                    </div>
-                    <div class="mb-3 flex-grow-1 d-flex flex-column">
-                      <label for="direct-message-content" class="form-label">Message</label>
-                      <textarea class="form-control flex-grow-1" id="direct-message-content" name="message" required placeholder="Écrivez votre message..." style="min-height:150px;"></textarea>
-                    </div>
-                    <button type="submit" class="btn glass-btn-send w-100 mt-auto">Envoyer le message direct</button>
-                  </form>
-                </div>
-                <div class="tab-pane fade h-100" id="group-message-form" role="tabpanel">
-                  <form action="/communications/send" method="POST" class="d-flex flex-column h-100">
-                    <div class="mb-3">
-                      <label for="group-recipient-select" class="form-label">Destinataires</label>
-                      <select id="group-recipient-select" name="recipient" required>
-                        <option value="" disabled selected>Choisir un groupe...</option>
-                        <option value="all">Tous les utilisateurs</option>
-                        <optgroup label="Par Rôle">
-                          <option value="role_responsable vie scolaire">Vie scolaire</option>
-                          <option value="role_secretaire">Secretaire</option>
-                          <option value="role_professeur">Professeurs</option>
-                          <option value="role_parent">Parents</option>
-                          <option value="role_eleve">Élèves</option>
-                        </optgroup>
+      <!-- Layout en flex row avec les deux panneaux côte à côte -->
+      <div class="communication-layout">
+        
+        <!-- Panneau gauche : Formulaire d'envoi -->
+        <div class="glass-card-comm new-communication-card">
+          <div class="card-header">
+            <h5 class="mb-0">Envoyer un nouveau message</h5>
+          </div>
+          <div class="card-body glass-form d-flex flex-column">
+            <ul class="nav nav-tabs nav-fill mb-3" id="communicationTab" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="direct-message-tab" data-bs-toggle="tab" data-bs-target="#direct-message-form" type="button" role="tab">Message Direct</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="group-message-tab" data-bs-toggle="tab" data-bs-target="#group-message-form" type="button" role="tab">Communication de Groupe</button>
+              </li>
+            </ul>
+            <div class="tab-content flex-grow-1" id="communicationTabContent">
+              <div class="tab-pane fade show active h-100" id="direct-message-form" role="tabpanel">
+                <form action="/communications/send" method="POST" class="d-flex flex-column h-100">
+                  <div class="mb-3">
+                    <label for="user-recipient-select" class="form-label">Destinataire</label>
+                    <% if (locals.allUsers && allUsers.length > 0) { %>
+                      <select id="user-recipient-select" name="recipient" required placeholder="Rechercher un utilisateur...">
+                        <% allUsers.sort((a, b) => a.name.localeCompare(b.name)).forEach(user => { %>
+                          <option value="user_<%= user.id %>" data-avatar="<%= user.avatar_url || '/img/user.png' %>" data-email="<%= user.email || '' %>"><%= user.name %></option>
+                        <% }) %>
                       </select>
-                    </div>
-                    <div class="mb-3">
-                      <label for="group-subject" class="form-label">Sujet</label>
-                      <input type="text" class="form-control" id="group-subject" name="subject" required placeholder="Entrez le sujet...">
-                    </div>
-                    <div class="mb-3 flex-grow-1 d-flex flex-column">
-                      <label for="group-message-content" class="form-label">Message</label>
-                      <textarea class="form-control flex-grow-1" id="group-message-content" name="message" required placeholder="Écrivez votre message..." style="min-height:150px;"></textarea>
-                    </div>
-                    <button type="submit" class="btn glass-btn-send w-100 mt-auto">Envoyer la communication</button>
-                  </form>
-                </div>
+                    <% } else { %>
+                      <input type="text" class="form-control" value="Aucun autre utilisateur disponible" disabled>
+                    <% } %>
+                  </div>
+                  <div class="mb-3">
+                    <label for="direct-subject" class="form-label">Sujet</label>
+                    <input type="text" class="form-control" id="direct-subject" name="subject" required placeholder="Entrez le sujet...">
+                  </div>
+                  <div class="mb-3 flex-grow-1 d-flex flex-column">
+                    <label for="direct-message-content" class="form-label">Message</label>
+                    <textarea class="form-control flex-grow-1" id="direct-message-content" name="message" required placeholder="Écrivez votre message..." style="min-height:150px;"></textarea>
+                  </div>
+                  <button type="submit" class="btn glass-btn-send w-100 mt-auto">Envoyer le message direct</button>
+                </form>
+              </div>
+              <div class="tab-pane fade h-100" id="group-message-form" role="tabpanel">
+                <form action="/communications/send" method="POST" class="d-flex flex-column h-100">
+                  <div class="mb-3">
+                    <label for="group-recipient-select" class="form-label">Destinataires</label>
+                    <select id="group-recipient-select" name="recipient" required>
+                      <option value="" disabled selected>Choisir un groupe...</option>
+                      <option value="all">Tous les utilisateurs</option>
+                      <optgroup label="Par Rôle">
+                        <option value="role_responsable vie scolaire">Vie scolaire</option>
+                        <option value="role_secretaire">Secretaire</option>
+                        <option value="role_professeur">Professeurs</option>
+                        <option value="role_parent">Parents</option>
+                        <option value="role_eleve">Élèves</option>
+                      </optgroup>
+                    </select>
+                  </div>
+                  <div class="mb-3">
+                    <label for="group-subject" class="form-label">Sujet</label>
+                    <input type="text" class="form-control" id="group-subject" name="subject" required placeholder="Entrez le sujet...">
+                  </div>
+                  <div class="mb-3 flex-grow-1 d-flex flex-column">
+                    <label for="group-message-content" class="form-label">Message</label>
+                    <textarea class="form-control flex-grow-1" id="group-message-content" name="message" required placeholder="Écrivez votre message..." style="min-height:150px;"></textarea>
+                  </div>
+                  <button type="submit" class="btn glass-btn-send w-100 mt-auto">Envoyer la communication</button>
+                </form>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Colonne de droite : Liste des communications -->
-        <div class="col-lg-7">
-          <div class="card glass-card-comm d-flex flex-column">
-            <div class="card-header d-flex justify-content-between align-items-center">
-              <h5 class="mb-0">Messages reçus</h5>
-              <input type="text" id="communication-search" class="form-control form-control-sm w-50" placeholder="Rechercher par nom...">
-            </div>
-            <div class="card-body flex-grow-1 p-0">
-              <div class="messages-scroll-container p-3">
-                <div class="accordion communication-list" id="communicationAccordion">
-                  <% if (locals.communications && communications.length > 0) { %>
-                    <% communications.forEach((comm, index) => { %>
-                      <div class="accordion-item" data-sender-name="<%= (comm.sender_name || 'Système').toLowerCase() %>" data-delay="<%= index * 0.06 %>">
-                        <h2 class="accordion-header" id="heading-<%= comm.id %>">
-                          <button class="accordion-button <%= index > 0 ? 'collapsed' : '' %>" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-<%= comm.id %>">
-                            <div class="communication-header">
-                              <span class="communication-subject"><%= comm.subject %></span>
-                              <span class="communication-meta d-flex align-items-center">
-                                De: <img src="<%= comm.sender_avatar_url || '/img/user.png' %>" class="communication-avatar" alt="">
-                                <span class="sender-name"><%= comm.sender_name || 'Système' %></span>
-                                <span class="mx-1">|</span>
-                                <span><%= new Date(comm.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) %></span>
-                              </span>
-                            </div>
-                          </button>
-                        </h2>
-                        <div id="collapse-<%= comm.id %>" class="accordion-collapse collapse <%= index === 0 ? 'show' : '' %>" data-bs-parent="#communicationAccordion">
-                          <div class="accordion-body communication-body">
-                            <%- (comm.message || '').replace(/\n/g, '<br>') %>
-                            <div class="communication-actions">
-                              <button class="btn btn-sm btn-outline-primary reply-btn" data-sender-id="<%= comm.sender_id %>" data-subject="<%= comm.subject %>">Répondre</button>
-                              <form action="/communications/delete/<%= comm.id %>" method="POST" onsubmit="return confirm('Supprimer ?');" class="d-inline">
-                                <button type="submit" class="btn btn-sm btn-outline-danger">Supprimer</button>
-                              </form>
-                            </div>
+        <!-- Panneau droit : Liste des messages -->
+        <div class="glass-card-comm d-flex flex-column">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Messages reçus</h5>
+            <input type="text" id="communication-search" class="form-control form-control-sm" placeholder="Rechercher par nom...">
+          </div>
+          <div class="card-body flex-grow-1 p-0">
+            <div class="messages-scroll-container p-3">
+              <div class="accordion communication-list" id="communicationAccordion">
+                <% if (locals.communications && communications.length > 0) { %>
+                  <% communications.forEach((comm, index) => { %>
+                    <div class="accordion-item" data-sender-name="<%= (comm.sender_name || 'Système').toLowerCase() %>" data-delay="<%= index * 0.06 %>">
+                      <h2 class="accordion-header" id="heading-<%= comm.id %>">
+                        <button class="accordion-button <%= index > 0 ? 'collapsed' : '' %>" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-<%= comm.id %>">
+                          <div class="communication-header">
+                            <span class="communication-subject"><%= comm.subject %></span>
+                            <span class="communication-meta d-flex align-items-center">
+                              De: <img src="<%= comm.sender_avatar_url || '/img/user.png' %>" class="communication-avatar" alt="">
+                              <span class="sender-name"><%= comm.sender_name || 'Système' %></span>
+                              <span class="mx-1">|</span>
+                              <span><%= new Date(comm.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) %></span>
+                            </span>
+                          </div>
+                        </button>
+                      </h2>
+                      <div id="collapse-<%= comm.id %>" class="accordion-collapse collapse <%= index === 0 ? 'show' : '' %>" data-bs-parent="#communicationAccordion">
+                        <div class="accordion-body communication-body">
+                          <%- (comm.message || '').replace(/\n/g, '<br>') %>
+                          <div class="communication-actions">
+                            <button class="btn btn-sm btn-outline-primary reply-btn" data-sender-id="<%= comm.sender_id %>" data-subject="<%= comm.subject %>">Répondre</button>
+                            <form action="/communications/delete/<%= comm.id %>" method="POST" onsubmit="return confirm('Supprimer ?');" class="d-inline">
+                              <button type="submit" class="btn btn-sm btn-outline-danger">Supprimer</button>
+                            </form>
                           </div>
                         </div>
                       </div>
-                    <% }) %>
-                  <% } else { %>
-                    <div class="text-center text-muted py-5">Aucune communication pour le moment.</div>
-                  <% } %>
-                </div>
-                <div id="no-results-message" class="text-center text-muted py-5" style="display: none;">Aucun message trouvé.</div>
+                    </div>
+                  <% }) %>
+                <% } else { %>
+                  <div class="text-center text-muted py-5">Aucune communication pour le moment.</div>
+                <% } %>
               </div>
+              <div id="no-results-message" class="text-center text-muted py-5" style="display: none;">Aucun message trouvé.</div>
             </div>
           </div>
         </div>
+
       </div>
     </main>
   </div>
