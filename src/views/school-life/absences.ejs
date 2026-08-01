@@ -209,12 +209,10 @@
     if (typeof feather !== 'undefined') feather.replace();
 
     var today = new Date().toISOString().split('T')[0];
-    var absenceDateEl = document.getElementById('absenceDate');
-    var filterDateDebutEl = document.getElementById('filterDateDebut');
-    if (absenceDateEl) absenceDateEl.value = today;
-    if (filterDateDebutEl) filterDateDebutEl.value = today;
+    document.getElementById('absenceDate').value = today;
+    document.getElementById('filterDateDebut').value = today;
 
-    // Initialiser les lettres A-Z et N° 1-20
+    // Initialiser lettres A-Z et N° 1-20
     (function() {
         var letterSel = document.getElementById('modalClassLetter');
         var numberSel = document.getElementById('modalClassNumber');
@@ -233,21 +231,67 @@
         }
     })();
 
-    // Type de personne
+    // === FERMETURE DES MODALS (boutons Annuler et X) ===
+    function closeModal(modalEl) {
+        modalEl.classList.remove('show');
+        modalEl.style.display = 'none';
+        document.body.classList.remove('modal-open');
+        var backdrop = document.querySelector('.modal-backdrop');
+        if (backdrop) backdrop.remove();
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+    }
+
+    var closeButtons = document.querySelectorAll('[data-bs-dismiss="modal"]');
+    for (var i = 0; i < closeButtons.length; i++) {
+        closeButtons[i].addEventListener('click', function() {
+            var modalEl = this.closest('.modal');
+            if (modalEl) closeModal(modalEl);
+        });
+    }
+
+    // Fermer en cliquant sur le backdrop
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('modal-backdrop')) {
+            var modals = document.querySelectorAll('.modal.show');
+            for (var i = 0; i < modals.length; i++) {
+                closeModal(modals[i]);
+            }
+        }
+    });
+
+    // === OUVERTURE MODAL AJOUTER ===
+    document.getElementById('btnAddAbsence').addEventListener('click', function() {
+        document.getElementById('absenceUserType').value = 'student';
+        document.getElementById('classSelectDiv').style.display = 'block';
+        document.getElementById('absenceUser').innerHTML = '<option value="">-- Sélectionnez --</option>';
+        document.getElementById('absenceType').value = 'absence';
+        document.getElementById('heureArriveeDiv').style.display = 'none';
+        document.getElementById('absenceMotif').value = '';
+        document.getElementById('absenceCommentaire').value = '';
+
+        var modalEl = document.getElementById('absenceModal');
+        modalEl.classList.add('show');
+        modalEl.style.display = 'block';
+        document.body.classList.add('modal-open');
+        var backdrop = document.createElement('div');
+        backdrop.className = 'modal-backdrop fade show';
+        document.body.appendChild(backdrop);
+    });
+
+    // === TYPE DE PERSONNE ===
     document.getElementById('absenceUserType').addEventListener('change', function() {
         var isStudent = (this.value === 'student');
         document.getElementById('classSelectDiv').style.display = isStudent ? 'block' : 'none';
         if (!isStudent) loadProfessors();
     });
 
-    // Type absence/retard
+    // === TYPE ABSENCE/RETARD ===
     document.getElementById('absenceType').addEventListener('change', function() {
         document.getElementById('heureArriveeDiv').style.display = (this.value === 'retard') ? 'block' : 'none';
     });
 
-    // Charger les classes dans le filtre
-    loadFilterClasses();
-
+    // === CHARGER CLASSES FILTRE ===
     function loadFilterClasses() {
         fetch('/api/all-classes')
             .then(function(r) { return r.json(); })
@@ -263,15 +307,16 @@
                 }
             });
     }
+    loadFilterClasses();
 
-    // Charger les élèves d'une classe
+    // === CHARGER ÉLÈVES ===
     document.getElementById('btnLoadStudents').addEventListener('click', function() {
         var level = document.getElementById('modalClassLevel').value;
         if (!level) { alert('Sélectionnez un niveau'); return; }
         var letter = document.getElementById('modalClassLetter').value;
         var number = document.getElementById('modalClassNumber').value;
         var className = level + (letter ? ' ' + letter : '') + (number ? ' ' + number : '');
-        
+
         fetch('/api/students-by-class/' + encodeURIComponent(className.trim()))
             .then(function(r) { return r.json(); })
             .then(function(data) {
@@ -288,7 +333,7 @@
             });
     });
 
-    // Charger les professeurs
+    // === CHARGER PROFESSEURS ===
     function loadProfessors() {
         fetch('/api/professors-list')
             .then(function(r) { return r.json(); })
@@ -306,7 +351,7 @@
             });
     }
 
-    // Bouton Filtrer
+    // === BOUTON FILTRER ===
     document.getElementById('btnFilter').addEventListener('click', function() {
         var url = '/api/absences?user_type=' + document.getElementById('filterType').value;
         var cls = document.getElementById('filterClass').value;
@@ -324,18 +369,23 @@
                 var tbody = document.getElementById('absencesBody');
                 tbody.innerHTML = '';
                 if (!Array.isArray(data) || data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4">Aucun résultat</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">Aucun résultat</td></tr>';
                     return;
                 }
                 for (var i = 0; i < data.length; i++) {
                     var a = data[i];
+                    var typeLabel = (a.type === 'absence') ? 'Absence' : 'Retard';
+                    var typeColor = (a.type === 'absence') ? '#dc3545' : '#fd7e14';
+                    var statusLabel = (a.status === 'justifiee') ? 'Justifiée' : 'Non justifiée';
+                    var statusColor = (a.status === 'justifiee') ? '#198754' : '#dc3545';
+
                     var tr = document.createElement('tr');
-                    tr.innerHTML = 
+                    tr.innerHTML =
                         '<td style="color:#fff;">' + formatDate(a.date) + '</td>' +
                         '<td style="color:#fff;">' + (a.user_name || '-') + '</td>' +
                         '<td style="color:#fff;">' + (a.student_class || '-') + '</td>' +
-                        '<td><span class="badge" style="background:' + (a.type === 'absence' ? '#dc3545' : '#fd7e14') + '">' + (a.type === 'absence' ? 'Absence' : 'Retard') + '</span></td>' +
-                        '<td><span class="badge" style="background:' + (a.status === 'justifiee' ? '#198754' : '#dc3545') + '">' + (a.status === 'justifiee' ? 'Justifiée' : 'Non justifiée') + '</span></td>' +
+                        '<td><span class="badge" style="background:' + typeColor + '">' + typeLabel + '</span></td>' +
+                        '<td><span class="badge" style="background:' + statusColor + '">' + statusLabel + '</span></td>' +
                         '<td style="color:#ccc;">' + (a.motif || '-') + '</td>' +
                         '<td>' +
                             '<button class="btn btn-sm btn-outline-success me-1" data-id="' + a.id + '" data-action="justify">✓</button>' +
@@ -343,7 +393,6 @@
                         '</td>';
                     tbody.appendChild(tr);
                 }
-                // Attacher les événements
                 attachTableEvents();
             });
     });
@@ -357,99 +406,89 @@
     function attachTableEvents() {
         var buttons = document.querySelectorAll('#absencesBody button[data-action]');
         for (var i = 0; i < buttons.length; i++) {
-            buttons[i].addEventListener('click', function() {
+            buttons[i].onclick = function() {
                 var action = this.getAttribute('data-action');
                 var id = this.getAttribute('data-id');
                 if (action === 'justify') openJustify(id);
                 if (action === 'delete') deleteAbsence(id);
-            });
+            };
         }
     }
 
-    // Bouton Ajouter
-    document.getElementById('btnAddAbsence').addEventListener('click', function() {
-        document.getElementById('absenceUserType').value = 'student';
-        document.getElementById('classSelectDiv').style.display = 'block';
-        document.getElementById('absenceUser').innerHTML = '<option value="">-- Sélectionnez --</option>';
-        document.getElementById('absenceType').value = 'absence';
-        document.getElementById('heureArriveeDiv').style.display = 'none';
-        document.getElementById('absenceMotif').value = '';
-        document.getElementById('absenceCommentaire').value = '';
-        var modal = new bootstrap.Modal(document.getElementById('absenceModal'));
-        modal.show();
-    });
+    // === ENREGISTRER ABSENCE ===
+    document.getElementById('btnSaveAbsence').addEventListener('click', function() {
+        var uid = document.getElementById('absenceUser').value;
+        if (!uid) { alert('Sélectionnez une personne'); return; }
 
-    // Bouton Enregistrer absence
-document.getElementById('btnSaveAbsence').addEventListener('click', function() {
-    var uid = document.getElementById('absenceUser').value;
-    if (!uid) { alert('Sélectionnez une personne'); return; }
+        var data = {
+            user_id: parseInt(uid),
+            user_type: document.getElementById('absenceUserType').value,
+            type: document.getElementById('absenceType').value,
+            date: document.getElementById('absenceDate').value,
+            heure_arrivee: null,
+            motif: document.getElementById('absenceMotif').value.trim(),
+            commentaire: document.getElementById('absenceCommentaire').value.trim()
+        };
 
-    var data = {
-        user_id: parseInt(uid),
-        user_type: document.getElementById('absenceUserType').value,
-        type: document.getElementById('absenceType').value,
-        date: document.getElementById('absenceDate').value,
-        heure_arrivee: null,
-        motif: document.getElementById('absenceMotif').value.trim(),
-        commentaire: document.getElementById('absenceCommentaire').value.trim()
-    };
-
-    if (data.type === 'retard') {
-        data.heure_arrivee = document.getElementById('absenceHeure').value;
-    }
-
-    fetch('/api/absences', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-    })
-    .then(function(r) { return r.json(); })
-    .then(function(result) {
-        if (result.success) {
-            // Fermer le modal manuellement
-            var modalEl = document.getElementById('absenceModal');
-            modalEl.classList.remove('show');
-            modalEl.style.display = 'none';
-            document.body.classList.remove('modal-open');
-            var backdrop = document.querySelector('.modal-backdrop');
-            if (backdrop) backdrop.remove();
-            document.body.style.overflow = '';
-            document.body.style.paddingRight = '';
-            
-            // Recharger
-            document.getElementById('btnFilter').click();
-        } else {
-            alert('Erreur: ' + (result.error || 'Inconnue'));
+        if (data.type === 'retard') {
+            data.heure_arrivee = document.getElementById('absenceHeure').value;
         }
-    });
-});
 
-// Bouton Justifier
-document.getElementById('btnSaveJustify').addEventListener('click', function() {
-    var id = document.getElementById('justifyId').value;
-    fetch('/api/absences/' + id, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            status: document.getElementById('justifyStatus').value,
-            motif: document.getElementById('justifyMotif').value.trim(),
-            commentaire: document.getElementById('justifyCommentaire').value.trim()
+        fetch('/api/absences', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
         })
-    })
-    .then(function() {
-        // Fermer le modal manuellement
-        var modalEl = document.getElementById('justifyModal');
-        modalEl.classList.remove('show');
-        modalEl.style.display = 'none';
-        document.body.classList.remove('modal-open');
-        var backdrop = document.querySelector('.modal-backdrop');
-        if (backdrop) backdrop.remove();
-        document.body.style.overflow = '';
-        document.body.style.paddingRight = '';
-        
-        document.getElementById('btnFilter').click();
+        .then(function(r) { return r.json(); })
+        .then(function(result) {
+            if (result.success) {
+                closeModal(document.getElementById('absenceModal'));
+                document.getElementById('btnFilter').click();
+            } else {
+                alert('Erreur: ' + (result.error || 'Inconnue'));
+            }
+        });
     });
-});
+
+    // === JUSTIFIER ===
+    function openJustify(id) {
+        document.getElementById('justifyId').value = id;
+        document.getElementById('justifyMotif').value = '';
+        document.getElementById('justifyCommentaire').value = '';
+        document.getElementById('justifyStatus').value = 'justifiee';
+
+        var modalEl = document.getElementById('justifyModal');
+        modalEl.classList.add('show');
+        modalEl.style.display = 'block';
+        document.body.classList.add('modal-open');
+        var backdrop = document.createElement('div');
+        backdrop.className = 'modal-backdrop fade show';
+        document.body.appendChild(backdrop);
+    }
+
+    document.getElementById('btnSaveJustify').addEventListener('click', function() {
+        var id = document.getElementById('justifyId').value;
+        fetch('/api/absences/' + id, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                status: document.getElementById('justifyStatus').value,
+                motif: document.getElementById('justifyMotif').value.trim(),
+                commentaire: document.getElementById('justifyCommentaire').value.trim()
+            })
+        })
+        .then(function() {
+            closeModal(document.getElementById('justifyModal'));
+            document.getElementById('btnFilter').click();
+        });
+    });
+
+    // === SUPPRIMER ===
+    function deleteAbsence(id) {
+        if (!confirm('Supprimer cette entrée ?')) return;
+        fetch('/api/absences/' + id, { method: 'DELETE' })
+            .then(function() { document.getElementById('btnFilter').click(); });
+    }
 </script>
 <style>
     .glass-card {
