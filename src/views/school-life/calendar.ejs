@@ -39,6 +39,10 @@
                             <span style="display: inline-block; width: 24px; height: 24px; border-radius: 6px; background: #6f42c1; margin-right: 12px; box-shadow: 0 2px 8px rgba(111, 66, 193, 0.3);"></span>
                             <span style="color: #e4e4e4; font-size: 0.95rem;">Événements</span>
                         </div>
+                        <div class="legend-item" data-type="Examens trimestriels" style="display: flex; align-items: center; margin-bottom: 12px; cursor: pointer; padding: 8px 12px; border-radius: 8px; transition: all 0.3s ease;">
+                            <span style="display: inline-block; width: 24px; height: 24px; border-radius: 6px; background: #ffc107; margin-right: 12px; box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);"></span>
+                            <span style="color: #e4e4e4; font-size: 0.95rem;">Examens trimestriels</span>
+                        </div>
                         <hr style="border-color: rgba(255,255,255,0.1); margin: 20px 0;">
                         <div style="color: #888; font-size: 0.85rem;">
                             <p style="margin: 8px 0; display: flex; align-items: center;">
@@ -67,6 +71,7 @@
                             <option value="Vacances scolaires" style="background:#1a1a2e;">🏖️ Vacances scolaires</option>
                             <option value="Jours fériés" style="background:#1a1a2e;">🎉 Jours fériés</option>
                             <option value="Événements" style="background:#1a1a2e;">⭐ Événements</option>
+                            <option value="Examens trimestriels" style="background:#1a1a2e;">📝 Examens trimestriels</option>
                         </select>
                     </div>
                     <div id="calendar"></div>
@@ -127,6 +132,12 @@
                             <button type="button" class="btn btn-type w-100" data-type="Événements" data-color="#6f42c1" style="background: rgba(111, 66, 193, 0.2); border: 2px solid #6f42c1; color: #fff; border-radius: 10px; padding: 8px 12px; transition: all 0.3s ease;">
                                 <span style="display: inline-block; width: 12px; height: 12px; border-radius: 3px; background: #6f42c1; margin-right: 8px;"></span>
                                 Événements
+                            </button>
+                        </div>
+                        <div class="col-md-4 col-6" style="padding: 0 4px;">
+                            <button type="button" class="btn btn-type w-100" data-type="Examens trimestriels" data-color="#ffc107" style="background: rgba(255, 193, 7, 0.2); border: 2px solid #ffc107; color: #fff; border-radius: 10px; padding: 8px 12px; transition: all 0.3s ease;">
+                                <span style="display: inline-block; width: 12px; height: 12px; border-radius: 3px; background: #ffc107; margin-right: 8px;"></span>
+                                Examens
                             </button>
                         </div>
                     </div>
@@ -227,7 +238,6 @@
                 fetch(url)
                     .then(r => r.json())
                     .then(data => {
-                        // ✅ Regrouper les événements multi-jours dans la vue liste
                         if (calendar.view.type === 'listMonth') {
                             data = groupMultiDayEvents(data);
                         }
@@ -275,7 +285,8 @@
                         'Période scolaire': '#0d6efd',
                         'Vacances scolaires': '#fd7e14',
                         'Jours fériés': '#dc3545',
-                        'Événements': '#6f42c1'
+                        'Événements': '#6f42c1',
+                        'Examens trimestriels': '#ffc107'
                     };
                     info.el.style.backgroundColor = colors[type] || '#0d6efd';
                 }
@@ -307,28 +318,16 @@
         });
     });
 
-    // ✅ Regrouper les événements multi-jours en une seule ligne dans la vue liste
     function groupMultiDayEvents(events) {
         const grouped = [];
         const processed = new Set();
-
         events.forEach(event => {
             if (processed.has(event.id)) return;
-            
             const start = new Date(event.start);
             const end = new Date(event.end);
             const diffDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
-            
-            // Si c'est un événement multi-jours (> 1 jour)
             if (diffDays > 1) {
-                // Chercher tous les événements du même groupe (même titre + dates consécutives)
-                const groupEvents = events.filter(e => 
-                    e.title === event.title && 
-                    e.extendedProps.type === event.extendedProps.type &&
-                    !processed.has(e.id)
-                );
-                
-                // Trouver la date de début la plus ancienne et la date de fin la plus récente
+                const groupEvents = events.filter(e => e.title === event.title && e.extendedProps.type === event.extendedProps.type && !processed.has(e.id));
                 let minStart = start;
                 let maxEnd = end;
                 groupEvents.forEach(e => {
@@ -338,20 +337,12 @@
                     if (eStart < minStart) minStart = eStart;
                     if (eEnd > maxEnd) maxEnd = eEnd;
                 });
-
-                // Créer un événement groupé
-                grouped.push({
-                    ...event,
-                    title: event.title,
-                    start: minStart.toISOString().split('T')[0],
-                    end: maxEnd.toISOString().split('T')[0]
-                });
+                grouped.push({...event, title: event.title, start: minStart.toISOString().split('T')[0], end: maxEnd.toISOString().split('T')[0]});
             } else {
                 processed.add(event.id);
                 grouped.push(event);
             }
         });
-
         return grouped;
     }
 
@@ -366,7 +357,6 @@
         document.getElementById('eventEnd').value = '';
         document.getElementById('btnDelete').style.display = 'none';
         document.getElementById('modalTitle').innerHTML = '<i data-feather="plus-circle" style="width:20px;height:20px;margin-right:8px;"></i> Ajouter un événement';
-        
         document.querySelectorAll('.btn-type').forEach(b => {
             b.style.background = b.dataset.color + '33';
             b.style.borderColor = b.dataset.color;
@@ -390,7 +380,6 @@
         document.getElementById('eventEnd').value = event.endStr || event.startStr;
         document.getElementById('btnDelete').style.display = 'block';
         document.getElementById('modalTitle').innerHTML = '<i data-feather="edit-2" style="width:20px;height:20px;margin-right:8px;"></i> Modifier l\'événement';
-        
         const type = event.extendedProps.type || 'Période scolaire';
         document.querySelectorAll('.btn-type').forEach(b => {
             b.style.background = b.dataset.color + '33';
@@ -401,7 +390,6 @@
                 b.style.boxShadow = '0 0 20px ' + b.dataset.color + '44';
             }
         });
-        
         new bootstrap.Modal(document.getElementById('eventModal')).show();
         if (typeof feather !== 'undefined') feather.replace();
     }
@@ -411,9 +399,7 @@
         var start = document.getElementById('eventStart').value;
         var end = document.getElementById('eventEnd').value;
         var type = document.getElementById('eventType').value;
-        
         if (!title || !start || !end) return alert('Titre et dates requis.');
-
         if (type === 'Période scolaire') {
             var startDate = new Date(start + 'T00:00:00');
             var endDate = new Date(end + 'T00:00:00');
@@ -424,7 +410,6 @@
             start = startDate.toISOString().split('T')[0];
             end = endDate.toISOString().split('T')[0];
         }
-
         var data = {
             title: title,
             event_type: type,
@@ -433,76 +418,30 @@
             end_date: end,
             color: document.getElementById('eventColor').value
         };
-
         var url = '/api/calendar/events';
         var method = 'POST';
-        if (currentEventId) {
-            url += '/' + currentEventId;
-            method = 'PUT';
-        }
-
-        fetch(url, {
-            method: method,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        })
-        .then(function(r) { return r.json(); })
-        .then(function() {
-            calendar.refetchEvents();
-            bootstrap.Modal.getInstance(document.getElementById('eventModal')).hide();
-        })
-        .catch(function(err) { alert('Erreur: ' + err.message); });
+        if (currentEventId) { url += '/' + currentEventId; method = 'PUT'; }
+        fetch(url, { method: method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+            .then(function(r) { return r.json(); })
+            .then(function() { calendar.refetchEvents(); bootstrap.Modal.getInstance(document.getElementById('eventModal')).hide(); })
+            .catch(function(err) { alert('Erreur: ' + err.message); });
     }
 
     function updateEvent(event) {
         fetch('/api/calendar/events/' + event.id, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                title: event.title,
-                start_date: event.startStr,
-                end_date: event.endStr || event.startStr,
-                event_type: event.extendedProps.type || 'Période scolaire',
-                description: event.extendedProps.description || '',
-                color: event.backgroundColor
-            })
+            method: 'PUT', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title: event.title, start_date: event.startStr, end_date: event.endStr || event.startStr, event_type: event.extendedProps.type || 'Période scolaire', description: event.extendedProps.description || '', color: event.backgroundColor })
         });
     }
 </script>
 
 <style>
-    .glass-card {
-        background: rgba(255, 255, 255, 0.05) !important;
-        backdrop-filter: blur(20px) !important;
-        -webkit-backdrop-filter: blur(20px) !important;
-        border: 1px solid rgba(255, 255, 255, 0.08) !important;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
-    }
-    
-    .glass-panel {
-        background: rgba(255, 255, 255, 0.05) !important;
-        backdrop-filter: blur(15px) !important;
-        -webkit-backdrop-filter: blur(15px) !important;
-        border: 1px solid rgba(255, 255, 255, 0.08) !important;
-        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2) !important;
-    }
-    
-    .glass-modal {
-        backdrop-filter: blur(25px) !important;
-        -webkit-backdrop-filter: blur(25px) !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
-        box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5) !important;
-    }
-
+    .glass-card { background: rgba(255, 255, 255, 0.05) !important; backdrop-filter: blur(20px) !important; -webkit-backdrop-filter: blur(20px) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important; }
+    .glass-panel { background: rgba(255, 255, 255, 0.05) !important; backdrop-filter: blur(15px) !important; -webkit-backdrop-filter: blur(15px) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2) !important; }
+    .glass-modal { backdrop-filter: blur(25px) !important; -webkit-backdrop-filter: blur(25px) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5) !important; }
     .fc { color: #e4e4e4; }
     .fc .fc-toolbar-title { color: #fff; font-size: 1.3rem; font-weight: 600; }
-    .fc .fc-button { 
-        background: rgba(255,255,255,0.08); 
-        border: 1px solid rgba(255,255,255,0.12); 
-        color: #fff; text-transform: capitalize;
-        backdrop-filter: blur(10px); border-radius: 8px;
-        padding: 6px 14px; transition: all 0.3s ease;
-    }
+    .fc .fc-button { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: #fff; text-transform: capitalize; backdrop-filter: blur(10px); border-radius: 8px; padding: 6px 14px; transition: all 0.3s ease; }
     .fc .fc-button:hover { background: rgba(255,255,255,0.15); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
     .fc .fc-button-active { background: rgba(13, 110, 253, 0.3) !important; border-color: #0d6efd !important; box-shadow: 0 0 20px rgba(13, 110, 253, 0.2); }
     .fc-theme-standard td, .fc-theme-standard th { border-color: rgba(255,255,255,0.06); }
@@ -510,73 +449,20 @@
     .fc .fc-col-header-cell-cushion { color: #ccc; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px; }
     .fc .fc-day-today { background: rgba(13, 110, 253, 0.08) !important; }
     .fc .fc-highlight { background: rgba(13, 110, 253, 0.15) !important; }
-
-    .fc-daygrid-event {
-        font-size: 0.8rem !important;
-        padding: 5px 8px !important;
-        margin: 2px 0 !important;
-        border-radius: 6px !important;
-        border: none !important;
-        min-height: 24px !important;
-        display: flex !important;
-        align-items: center !important;
-    }
+    .fc-daygrid-event { font-size: 0.8rem !important; padding: 5px 8px !important; margin: 2px 0 !important; border-radius: 6px !important; border: none !important; min-height: 24px !important; display: flex !important; align-items: center !important; }
     .fc-daygrid-event .fc-event-title { color: #fff !important; font-weight: 500 !important; }
     .fc-daygrid-event-harness { margin: 1px 0 !important; }
-
-    .fc-timegrid-event {
-        border-radius: 6px !important;
-        border: none !important;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
-        min-height: 24px !important;
-    }
-    .fc-timegrid-event .fc-event-title {
-        text-align: center !important;
-        font-weight: 500 !important;
-        font-size: 0.8rem !important;
-        padding: 2px 4px !important;
-    }
+    .fc-timegrid-event { border-radius: 6px !important; border: none !important; box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important; min-height: 24px !important; }
+    .fc-timegrid-event .fc-event-title { text-align: center !important; font-weight: 500 !important; font-size: 0.8rem !important; padding: 2px 4px !important; }
     .fc-timegrid-event-harness { margin: 1px 0 !important; }
-
-    /* ✅ Vue liste - événements regroupés */
-    .fc-list-event {
-        border-radius: 6px !important;
-        margin: 2px 4px !important;
-        border: none !important;
-    }
-    .fc-list-event-graphic {
-        padding: 8px !important;
-    }
-    .fc-list-event-title {
-        font-weight: 500 !important;
-    }
-
-    .legend-item {
-        border-radius: 8px !important;
-        transition: all 0.3s ease !important;
-        cursor: pointer !important;
-        user-select: none !important;
-    }
-    .legend-item:hover {
-        background: rgba(255,255,255,0.08) !important;
-        transform: translateX(5px) !important;
-        box-shadow: 0 2px 12px rgba(0,0,0,0.2) !important;
-    }
-
-    .btn-type {
-        transition: all 0.3s ease !important;
-        font-weight: 500 !important;
-        font-size: 0.85rem !important;
-        border-radius: 10px !important;
-        padding: 10px 12px !important;
-        height: 44px !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-    }
+    .fc-list-event { border-radius: 6px !important; margin: 2px 4px !important; border: none !important; }
+    .fc-list-event-graphic { padding: 8px !important; }
+    .fc-list-event-title { font-weight: 500 !important; }
+    .legend-item { border-radius: 8px !important; transition: all 0.3s ease !important; cursor: pointer !important; user-select: none !important; }
+    .legend-item:hover { background: rgba(255,255,255,0.08) !important; transform: translateX(5px) !important; box-shadow: 0 2px 12px rgba(0,0,0,0.2) !important; }
+    .btn-type { transition: all 0.3s ease !important; font-weight: 500 !important; font-size: 0.85rem !important; border-radius: 10px !important; padding: 10px 12px !important; height: 44px !important; display: flex !important; align-items: center !important; justify-content: center !important; }
     .btn-type:hover { transform: translateY(-2px) !important; box-shadow: 0 4px 20px rgba(0,0,0,0.3) !important; }
     .btn-type:active { transform: scale(0.95) !important; }
-
     @media (max-width: 768px) {
         .col-md-3, .col-md-9 { width: 100% !important; flex: 0 0 100% !important; max-width: 100% !important; padding: 0 !important; }
         .col-md-3 { margin-bottom: 20px !important; padding-right: 0 !important; }
@@ -584,7 +470,6 @@
         .legend-container { height: auto !important; }
         .btn-type { font-size: 0.75rem !important; padding: 6px 8px !important; height: 36px !important; }
     }
-
     ::-webkit-scrollbar { width: 8px; height: 8px; }
     ::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 10px; }
     ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
