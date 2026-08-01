@@ -180,14 +180,8 @@
     }
     
     @keyframes comm-fade-in {
-      from {
-        opacity: 0;
-        transform: translateX(-10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
+      from { opacity: 0; transform: translateX(-10px); }
+      to { opacity: 1; transform: translateX(0); }
     }
     
     [data-theme="dark"] .accordion-item {
@@ -198,11 +192,7 @@
       border-bottom: none !important;
     }
     
-    /* Les délais sont appliqués via JavaScript */
-    
-    .accordion-header {
-      margin: 0 !important;
-    }
+    .accordion-header { margin: 0 !important; }
     
     .accordion-button {
       background: transparent !important;
@@ -213,213 +203,94 @@
       color: var(--text-color, #212529) !important;
     }
     
-    .accordion-button:hover {
-      background: rgba(13, 110, 253, 0.04) !important;
-    }
-    
-    [data-theme="dark"] .accordion-button:hover {
-      background: rgba(255, 255, 255, 0.04) !important;
-    }
+    .accordion-button:hover { background: rgba(13, 110, 253, 0.04) !important; }
+    [data-theme="dark"] .accordion-button:hover { background: rgba(255, 255, 255, 0.04) !important; }
     
     .accordion-button:not(.collapsed) {
       background: rgba(13, 110, 253, 0.06) !important;
       color: var(--bs-primary, #0d6efd) !important;
       box-shadow: none !important;
     }
-    
     [data-theme="dark"] .accordion-button:not(.collapsed) {
       background: rgba(255, 255, 255, 0.05) !important;
       color: #ffffff !important;
     }
+    .accordion-button::after { filter: var(--bs-accordion-btn-icon-filter, none); }
     
-    .accordion-button::after {
-      filter: var(--bs-accordion-btn-icon-filter, none);
-    }
-    
-    /* En-tête de communication */
     .communication-header {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      width: 100%;
-      gap: 0.5rem;
+      display: flex; flex-wrap: wrap; align-items: center;
+      justify-content: space-between; width: 100%; gap: 0.5rem;
     }
+    .communication-subject { font-weight: 600; font-size: 0.95rem; color: var(--text-color, #212529); }
+    .communication-meta { font-size: 0.8rem; color: var(--text-muted, #6c757d); gap: 0.5rem; flex-wrap: wrap; }
+    .communication-avatar { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(13, 110, 253, 0.15); transition: all 0.3s ease; }
+    .communication-avatar:hover { transform: scale(1.1); border-color: var(--bs-primary, #0d6efd); }
+    [data-theme="dark"] .communication-avatar { border-color: rgba(255, 255, 255, 0.15); }
+    .sender-name { font-weight: 500; }
     
-    .communication-subject {
-      font-weight: 600;
-      font-size: 0.95rem;
-      color: var(--text-color, #212529);
-    }
-    
-    .communication-meta {
-      font-size: 0.8rem;
-      color: var(--text-muted, #6c757d);
-      gap: 0.5rem;
-      flex-wrap: wrap;
-    }
-    
-    .communication-avatar {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid rgba(13, 110, 253, 0.15);
-      transition: all 0.3s ease;
-    }
-    
-    .communication-avatar:hover {
-      transform: scale(1.1);
-      border-color: var(--bs-primary, #0d6efd);
-    }
-    
-    [data-theme="dark"] .communication-avatar {
-      border-color: rgba(255, 255, 255, 0.15);
-    }
-    
-    .sender-name {
-      font-weight: 500;
-    }
-    
-    /* Corps du message */
     .accordion-body {
       background: rgba(255, 255, 255, 0.03) !important;
       border-radius: 0 0 0.5rem 0.5rem !important;
-      padding: 1.25rem !important;
-      color: var(--text-color, #212529);
-      line-height: 1.6;
+      padding: 1.25rem !important; color: var(--text-color, #212529); line-height: 1.6;
     }
+    [data-theme="dark"] .accordion-body { background: rgba(255, 255, 255, 0.02) !important; }
     
-    [data-theme="dark"] .accordion-body {
-      background: rgba(255, 255, 255, 0.02) !important;
-    }
+    .communication-actions { margin-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .communication-actions .btn { transition: all 0.3s ease !important; }
+    .communication-actions .btn:hover { transform: translateY(-2px) scale(1.02); }
     
-    /* Actions du message */
-    .communication-actions {
-      margin-top: 1rem;
-      display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-    }
-    
-    .communication-actions .btn {
-      transition: all 0.3s ease !important;
-    }
-    
-    .communication-actions .btn:hover {
-      transform: translateY(-2px) scale(1.02);
-    }
-    
-    /* Tom Select personnalisé */
+    /* Tom Select */
     .ts-wrapper .ts-control {
-      border-radius: 0.75rem !important;
-      background: rgba(255, 255, 255, 0.06) !important;
-      border: 1px solid rgba(255, 255, 255, 0.12) !important;
-      color: var(--text-color, #212529) !important;
-      padding: 0.6rem 1rem !important;
+      border-radius: 0.75rem !important; background: rgba(255, 255, 255, 0.06) !important;
+      border: 1px solid rgba(255, 255, 255, 0.12) !important; color: var(--text-color, #212529) !important; padding: 0.6rem 1rem !important;
     }
+    .ts-wrapper .ts-control:focus { border-color: var(--bs-primary, #0d6efd) !important; box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15) !important; }
+    [data-theme="dark"] .ts-wrapper .ts-control { background: rgba(255, 255, 255, 0.04) !important; border-color: rgba(255, 255, 255, 0.08) !important; color: #e4e4e4 !important; }
+    [data-theme="dark"] .ts-wrapper .ts-control:focus { border-color: #ffffff !important; box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1) !important; }
+    .ts-wrapper .ts-dropdown { border-radius: 0.75rem !important; background: var(--card-bg, #ffffff) !important; border: 1px solid rgba(0, 0, 0, 0.08) !important; }
+    [data-theme="dark"] .ts-wrapper .ts-dropdown { background: #1a1a2e !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; }
+    .ts-wrapper .ts-dropdown .option { padding: 0.5rem 1rem !important; }
+    .ts-wrapper .ts-dropdown .option:hover { background: rgba(13, 110, 253, 0.08) !important; }
+    [data-theme="dark"] .ts-wrapper .ts-dropdown .option:hover { background: rgba(255, 255, 255, 0.05) !important; }
     
-    .ts-wrapper .ts-control:focus {
-      border-color: var(--bs-primary, #0d6efd) !important;
-      box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15) !important;
-    }
-    
-    [data-theme="dark"] .ts-wrapper .ts-control {
-      background: rgba(255, 255, 255, 0.04) !important;
-      border: 1px solid rgba(255, 255, 255, 0.08) !important;
-      color: #e4e4e4 !important;
-    }
-    
-    [data-theme="dark"] .ts-wrapper .ts-control:focus {
-      border-color: #ffffff !important;
-      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1) !important;
-    }
-    
-    .ts-wrapper .ts-dropdown {
-      border-radius: 0.75rem !important;
-      background: var(--card-bg, #ffffff) !important;
-      border: 1px solid rgba(0, 0, 0, 0.08) !important;
-    }
-    
-    [data-theme="dark"] .ts-wrapper .ts-dropdown {
-      background: #1a1a2e !important;
-      border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    }
-    
-    .ts-wrapper .ts-dropdown .option {
-      padding: 0.5rem 1rem !important;
-    }
-    
-    .ts-wrapper .ts-dropdown .option:hover {
-      background: rgba(13, 110, 253, 0.08) !important;
-    }
-    
-    [data-theme="dark"] .ts-wrapper .ts-dropdown .option:hover {
-      background: rgba(255, 255, 255, 0.05) !important;
-    }
-    
-    /* Barre de recherche */
     #communication-search {
-      border-radius: 0.75rem !important;
-      background: rgba(255, 255, 255, 0.06) !important;
-      border: 1px solid rgba(255, 255, 255, 0.12) !important;
-      padding: 0.5rem 1rem !important;
-      color: var(--text-color, #212529) !important;
-      transition: all 0.3s ease !important;
+      border-radius: 0.75rem !important; background: rgba(255, 255, 255, 0.06) !important;
+      border: 1px solid rgba(255, 255, 255, 0.12) !important; padding: 0.5rem 1rem !important;
+      color: var(--text-color, #212529) !important; transition: all 0.3s ease !important;
+    }
+    #communication-search:focus { background: rgba(255, 255, 255, 0.1) !important; border-color: var(--bs-primary, #0d6efd) !important; box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15) !important; }
+    [data-theme="dark"] #communication-search { background: rgba(255, 255, 255, 0.04) !important; border-color: rgba(255, 255, 255, 0.08) !important; color: #e4e4e4 !important; }
+    [data-theme="dark"] #communication-search:focus { background: rgba(255, 255, 255, 0.08) !important; border-color: #ffffff !important; box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1) !important; }
+    
+    /* Messages scroll */
+    .messages-scroll-container {
+      max-height: calc(100vh - 250px); overflow-y: auto; padding-right: 5px;
+    }
+    .messages-scroll-container::-webkit-scrollbar { width: 5px; }
+    .messages-scroll-container::-webkit-scrollbar-track { background: transparent; }
+    .messages-scroll-container::-webkit-scrollbar-thumb { background: rgba(13, 110, 253, 0.3); border-radius: 10px; }
+    [data-theme="dark"] .messages-scroll-container::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); }
+    
+    /* ✅ Colonnes côte à côte de même hauteur */
+    .equal-height-row {
+      display: flex; flex-wrap: wrap;
+    }
+    .equal-height-row > [class*="col-"] {
+      display: flex; flex-direction: column;
+    }
+    .equal-height-row .card {
+      flex: 1;
     }
     
-    #communication-search:focus {
-      background: rgba(255, 255, 255, 0.1) !important;
-      border-color: var(--bs-primary, #0d6efd) !important;
-      box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15) !important;
-    }
-    
-    [data-theme="dark"] #communication-search {
-      background: rgba(255, 255, 255, 0.04) !important;
-      border: 1px solid rgba(255, 255, 255, 0.08) !important;
-      color: #e4e4e4 !important;
-    }
-    
-    [data-theme="dark"] #communication-search:focus {
-      background: rgba(255, 255, 255, 0.08) !important;
-      border-color: #ffffff !important;
-      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1) !important;
-    }
-    
-    /* Adaptation mobile */
-    @media (max-width: 992px) {
-      .communication-layout {
-        gap: 1rem;
-      }
-    }
-    
+    @media (max-width: 992px) { .communication-layout { gap: 1rem; } }
     @media (max-width: 768px) {
-      .communication-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.25rem;
-      }
-      
-      .communication-meta {
-        font-size: 0.7rem;
-        flex-wrap: wrap;
-      }
-      
-      .communication-subject {
-        font-size: 0.85rem;
-      }
-      
-      .accordion-button {
-        padding: 0.6rem 0.75rem !important;
-      }
-      
-      .accordion-body {
-        padding: 0.75rem !important;
-      }
-      
-      .glass-card-comm {
-        border-radius: 0.75rem !important;
-      }
+      .communication-header { flex-direction: column; align-items: flex-start; gap: 0.25rem; }
+      .communication-meta { font-size: 0.7rem; flex-wrap: wrap; }
+      .communication-subject { font-size: 0.85rem; }
+      .accordion-button { padding: 0.6rem 0.75rem !important; }
+      .accordion-body { padding: 0.75rem !important; }
+      .glass-card-comm { border-radius: 0.75rem !important; }
+      .messages-scroll-container { max-height: 400px; }
     }
   </style>
 </head>
@@ -428,70 +299,50 @@
     <%- include('partials/header') %>
 
     <main class="page-main">
-      <div class="row g-4 communication-layout">
+      <div class="row g-4 communication-layout equal-height-row">
         <!-- Colonne de gauche : Formulaire d'envoi -->
         <div class="col-lg-5">
-          <div class="card glass-card-comm new-communication-card h-100">
+          <div class="card glass-card-comm new-communication-card">
             <div class="card-header">
-              <h5 class="mb-0">
-                <i data-feather="send" class="me-2" style="width: 18px; height: 18px;"></i>
-                Envoyer un nouveau message
-              </h5>
+              <h5 class="mb-0">Envoyer un nouveau message</h5>
             </div>
-            <div class="card-body glass-form">
-              <!-- Onglets pour choisir le type d'envoi -->
+            <div class="card-body glass-form d-flex flex-column">
               <ul class="nav nav-tabs nav-fill mb-3" id="communicationTab" role="tablist">
                 <li class="nav-item" role="presentation">
-                  <button class="nav-link active" id="direct-message-tab" data-bs-toggle="tab" data-bs-target="#direct-message-form" type="button" role="tab" aria-controls="direct-message-form" aria-selected="true">
-                    <i data-feather="user" class="me-1" style="width: 14px; height: 14px;"></i>
-                    Message Direct
-                  </button>
+                  <button class="nav-link active" id="direct-message-tab" data-bs-toggle="tab" data-bs-target="#direct-message-form" type="button" role="tab">Message Direct</button>
                 </li>
                 <li class="nav-item" role="presentation">
-                  <button class="nav-link" id="group-message-tab" data-bs-toggle="tab" data-bs-target="#group-message-form" type="button" role="tab" aria-controls="group-message-form" aria-selected="false">
-                    <i data-feather="users" class="me-1" style="width: 14px; height: 14px;"></i>
-                    Communication de Groupe
-                  </button>
+                  <button class="nav-link" id="group-message-tab" data-bs-toggle="tab" data-bs-target="#group-message-form" type="button" role="tab">Communication de Groupe</button>
                 </li>
               </ul>
-
-              <div class="tab-content" id="communicationTabContent">
-                <!-- Onglet 1: Message Direct à un utilisateur -->
-                <div class="tab-pane fade show active" id="direct-message-form" role="tabpanel" aria-labelledby="direct-message-tab">
-                  <form action="/communications/send" method="POST">
+              <div class="tab-content flex-grow-1" id="communicationTabContent">
+                <div class="tab-pane fade show active h-100" id="direct-message-form" role="tabpanel">
+                  <form action="/communications/send" method="POST" class="d-flex flex-column h-100">
                     <div class="mb-3">
                       <label for="user-recipient-select" class="form-label">Destinataire</label>
                       <% if (locals.allUsers && allUsers.length > 0) { %>
                         <select id="user-recipient-select" name="recipient" required placeholder="Rechercher un utilisateur...">
                           <% allUsers.sort((a, b) => a.name.localeCompare(b.name)).forEach(user => { %>
-                            <option value="user_<%= user.id %>" data-avatar="<%= user.avatar_url || '/img/user.png' %>" data-email="<%= user.email || '' %>">
-                              <%= user.name %>
-                            </option>
+                            <option value="user_<%= user.id %>" data-avatar="<%= user.avatar_url || '/img/user.png' %>" data-email="<%= user.email || '' %>"><%= user.name %></option>
                           <% }) %>
                         </select>
                       <% } else { %>
                         <input type="text" class="form-control" value="Aucun autre utilisateur disponible" disabled>
-                        <style>#direct-message-form button[type="submit"] { pointer-events: none; opacity: 0.6; }</style>
                       <% } %>
                     </div>
                     <div class="mb-3">
                       <label for="direct-subject" class="form-label">Sujet</label>
                       <input type="text" class="form-control" id="direct-subject" name="subject" required placeholder="Entrez le sujet...">
                     </div>
-                    <div class="mb-3">
+                    <div class="mb-3 flex-grow-1 d-flex flex-column">
                       <label for="direct-message-content" class="form-label">Message</label>
-                      <textarea class="form-control" id="direct-message-content" name="message" rows="5" required placeholder="Écrivez votre message..."></textarea>
+                      <textarea class="form-control flex-grow-1" id="direct-message-content" name="message" required placeholder="Écrivez votre message..." style="min-height:150px;"></textarea>
                     </div>
-                    <button type="submit" class="btn glass-btn-send w-100">
-                      <i data-feather="send" class="me-2" style="width: 16px; height: 16px;"></i>
-                      Envoyer le message direct
-                    </button>
+                    <button type="submit" class="btn glass-btn-send w-100 mt-auto">Envoyer le message direct</button>
                   </form>
                 </div>
-
-                <!-- Onglet 2: Communication de Groupe -->
-                <div class="tab-pane fade" id="group-message-form" role="tabpanel" aria-labelledby="group-message-tab">
-                  <form action="/communications/send" method="POST">
+                <div class="tab-pane fade h-100" id="group-message-form" role="tabpanel">
+                  <form action="/communications/send" method="POST" class="d-flex flex-column h-100">
                     <div class="mb-3">
                       <label for="group-recipient-select" class="form-label">Destinataires</label>
                       <select id="group-recipient-select" name="recipient" required>
@@ -510,14 +361,11 @@
                       <label for="group-subject" class="form-label">Sujet</label>
                       <input type="text" class="form-control" id="group-subject" name="subject" required placeholder="Entrez le sujet...">
                     </div>
-                    <div class="mb-3">
+                    <div class="mb-3 flex-grow-1 d-flex flex-column">
                       <label for="group-message-content" class="form-label">Message</label>
-                      <textarea class="form-control" id="group-message-content" name="message" rows="5" required placeholder="Écrivez votre message..."></textarea>
+                      <textarea class="form-control flex-grow-1" id="group-message-content" name="message" required placeholder="Écrivez votre message..." style="min-height:150px;"></textarea>
                     </div>
-                    <button type="submit" class="btn glass-btn-send w-100">
-                      <i data-feather="send" class="me-2" style="width: 16px; height: 16px;"></i>
-                      Envoyer la communication
-                    </button>
+                    <button type="submit" class="btn glass-btn-send w-100 mt-auto">Envoyer la communication</button>
                   </form>
                 </div>
               </div>
@@ -527,65 +375,48 @@
 
         <!-- Colonne de droite : Liste des communications -->
         <div class="col-lg-7">
-          <div class="card glass-card-comm h-100">
+          <div class="card glass-card-comm d-flex flex-column">
             <div class="card-header d-flex justify-content-between align-items-center">
-              <h5 class="mb-0 w-50">
-                <i data-feather="inbox" class="me-2" style="width: 18px; height: 18px;"></i>
-                Messages reçus
-              </h5>
-              <input type="text" id="communication-search" class="form-control form-control-sm w-50" placeholder="🔍 Rechercher par nom...">
+              <h5 class="mb-0">Messages reçus</h5>
+              <input type="text" id="communication-search" class="form-control form-control-sm w-50" placeholder="Rechercher par nom...">
             </div>
-            <div class="card-body">
-              <div class="accordion communication-list" id="communicationAccordion">
-                <% if (locals.communications && communications.length > 0) { %>
-                  <% communications.forEach((comm, index) => { %>
-                    <div class="accordion-item" data-sender-name="<%= (comm.sender_name || 'Système').toLowerCase() %>" data-delay="<%= index * 0.06 %>">
-                      <h2 class="accordion-header" id="heading-<%= comm.id %>">
-                        <button class="accordion-button <%= index > 0 ? 'collapsed' : '' %>" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-<%= comm.id %>" aria-expanded="<%= index === 0 ? 'true' : 'false' %>" aria-controls="collapse-<%= comm.id %>">
-                          <div class="communication-header">
-                            <span class="communication-subject"><%= comm.subject %></span>
-                            <span class="communication-meta d-flex align-items-center">
-                              De:
-                              <img src="<%= comm.sender_avatar_url || '/img/user.png' %>" class="communication-avatar" alt="">
-                              <span class="sender-name"><%= comm.sender_name || 'Système' %></span>
-                              <span class="mx-1">|</span>
-                              <span><%= new Date(comm.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) %></span>
-                            </span>
-                          </div>
-                        </button>
-                      </h2>
-                      <div id="collapse-<%= comm.id %>" class="accordion-collapse collapse <%= index === 0 ? 'show' : '' %>" aria-labelledby="heading-<%= comm.id %>" data-bs-parent="#communicationAccordion">
-                        <div class="accordion-body communication-body">
-                          <%- (comm.message || '').replace(/\n/g, '<br>') %>
-                          <!-- Actions pour le message -->
-                          <div class="communication-actions">
-                            <button class="btn btn-sm btn-outline-primary reply-btn glass-btn-small" 
-                                    data-sender-id="<%= comm.sender_id %>" 
-                                    data-subject="<%= comm.subject %>">
-                              <i data-feather="reply" class="me-1" style="width: 14px; height: 14px;"></i>
-                              Répondre
-                            </button>
-                            <form action="/communications/delete/<%= comm.id %>" method="POST" onsubmit="return confirm('Voulez-vous vraiment supprimer ce message ?');" class="d-inline">
-                                <button type="submit" class="btn btn-sm btn-outline-danger glass-btn-small">
-                                  <i data-feather="trash-2" class="me-1" style="width: 14px; height: 14px;"></i>
-                                  Supprimer
-                                </button>
-                            </form>
+            <div class="card-body flex-grow-1 p-0">
+              <div class="messages-scroll-container p-3">
+                <div class="accordion communication-list" id="communicationAccordion">
+                  <% if (locals.communications && communications.length > 0) { %>
+                    <% communications.forEach((comm, index) => { %>
+                      <div class="accordion-item" data-sender-name="<%= (comm.sender_name || 'Système').toLowerCase() %>" data-delay="<%= index * 0.06 %>">
+                        <h2 class="accordion-header" id="heading-<%= comm.id %>">
+                          <button class="accordion-button <%= index > 0 ? 'collapsed' : '' %>" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-<%= comm.id %>">
+                            <div class="communication-header">
+                              <span class="communication-subject"><%= comm.subject %></span>
+                              <span class="communication-meta d-flex align-items-center">
+                                De: <img src="<%= comm.sender_avatar_url || '/img/user.png' %>" class="communication-avatar" alt="">
+                                <span class="sender-name"><%= comm.sender_name || 'Système' %></span>
+                                <span class="mx-1">|</span>
+                                <span><%= new Date(comm.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) %></span>
+                              </span>
+                            </div>
+                          </button>
+                        </h2>
+                        <div id="collapse-<%= comm.id %>" class="accordion-collapse collapse <%= index === 0 ? 'show' : '' %>" data-bs-parent="#communicationAccordion">
+                          <div class="accordion-body communication-body">
+                            <%- (comm.message || '').replace(/\n/g, '<br>') %>
+                            <div class="communication-actions">
+                              <button class="btn btn-sm btn-outline-primary reply-btn" data-sender-id="<%= comm.sender_id %>" data-subject="<%= comm.subject %>">Répondre</button>
+                              <form action="/communications/delete/<%= comm.id %>" method="POST" onsubmit="return confirm('Supprimer ?');" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Supprimer</button>
+                              </form>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  <% }) %>
-                <% } else { %>
-                  <div class="text-center text-muted py-5">
-                    <i data-feather="inbox" style="width: 48px; height: 48px; stroke-width: 1;"></i>
-                    <p class="mt-3">Vous n'avez aucune communication pour le moment.</p>
-                  </div>
-                <% } %>
-              </div>
-              <div id="no-results-message" class="text-center text-muted py-5" style="display: none;">
-                <i data-feather="search" style="width: 32px; height: 32px; stroke-width: 1;"></i>
-                <p class="mt-2">Aucun message ne correspond à votre recherche.</p>
+                    <% }) %>
+                  <% } else { %>
+                    <div class="text-center text-muted py-5">Aucune communication pour le moment.</div>
+                  <% } %>
+                </div>
+                <div id="no-results-message" class="text-center text-muted py-5" style="display: none;">Aucun message trouvé.</div>
               </div>
             </div>
           </div>
@@ -597,108 +428,63 @@
   <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // Appliquer les délais d'animation
       document.querySelectorAll('.accordion-item').forEach(function(el) {
         var delay = el.getAttribute('data-delay');
-        if (delay) {
-          el.style.animationDelay = delay + 's';
-        }
+        if (delay) el.style.animationDelay = delay + 's';
       });
+      if (typeof feather !== 'undefined') feather.replace();
 
-      // Remplacer les icônes Feather
-      if (typeof feather !== 'undefined') {
-        feather.replace();
-      }
-
-      // Logique pour la barre de recherche des communications
-      const searchInput = document.getElementById('communication-search');
+      var searchInput = document.getElementById('communication-search');
       if (searchInput) {
-        const communicationItems = document.querySelectorAll('#communicationAccordion .accordion-item');
-        const noResultsMessage = document.getElementById('no-results-message');
-
+        var items = document.querySelectorAll('#communicationAccordion .accordion-item');
+        var noRes = document.getElementById('no-results-message');
         searchInput.addEventListener('input', function() {
-          const searchTerm = this.value.toLowerCase().trim();
-          let visibleCount = 0;
-
-          communicationItems.forEach(item => {
-            const senderName = item.dataset.senderName;
-            const isVisible = senderName.includes(searchTerm);
-            item.style.display = isVisible ? '' : 'none';
-            if (isVisible) visibleCount++;
+          var term = this.value.toLowerCase().trim();
+          var count = 0;
+          items.forEach(function(item) {
+            var v = item.dataset.senderName.includes(term);
+            item.style.display = v ? '' : 'none';
+            if (v) count++;
           });
-
-          noResultsMessage.style.display = (visibleCount === 0 && communicationItems.length > 0) ? 'block' : 'none';
+          if (noRes) noRes.style.display = (count === 0 && items.length > 0) ? 'block' : 'none';
         });
       }
 
-      // Logique pour le bouton "Répondre"
-      document.querySelectorAll('.reply-btn').forEach(button => {
-        button.addEventListener('click', function() {
-          const senderId = this.dataset.senderId;
-          const subject = this.dataset.subject;
-
-          // 1. Activer l'onglet "Message Direct"
-          const directMessageTab = new bootstrap.Tab(document.getElementById('direct-message-tab'));
-          directMessageTab.show();
-
-          // 2. Sélectionner le bon destinataire dans la liste
-          const userSelect = document.getElementById('user-recipient-select');
-          if (userSelect && userSelect.tomselect) {
-            userSelect.tomselect.setValue(`user_${senderId}`);
-          }
-
-          // 3. Pré-remplir le sujet avec "Re: "
-          const subjectInput = document.getElementById('direct-subject');
-          if (subjectInput) {
-            subjectInput.value = subject && subject.startsWith('Re: ') ? subject : `Re: ${subject}`;
-          }
-
-          // 4. Mettre le focus sur le champ de message
-          const messageInput = document.getElementById('direct-message-content');
-          if (messageInput) {
-            setTimeout(() => messageInput.focus(), 300);
-          }
-          
-          // 5. Faire défiler jusqu'au formulaire
+      document.querySelectorAll('.reply-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var senderId = this.dataset.senderId;
+          var subject = this.dataset.subject;
+          new bootstrap.Tab(document.getElementById('direct-message-tab')).show();
+          var sel = document.getElementById('user-recipient-select');
+          if (sel && sel.tomselect) sel.tomselect.setValue('user_' + senderId);
+          var subj = document.getElementById('direct-subject');
+          if (subj) subj.value = subject && subject.startsWith('Re: ') ? subject : 'Re: ' + subject;
+          var msg = document.getElementById('direct-message-content');
+          if (msg) setTimeout(function() { msg.focus(); }, 300);
           document.querySelector('.new-communication-card').scrollIntoView({ behavior: 'smooth', block: 'center' });
         });
       });
 
-      // Initialise TomSelect pour la sélection d'utilisateur direct, s'il existe
-      const userSelect = document.getElementById('user-recipient-select');
+      var userSelect = document.getElementById('user-recipient-select');
       if (userSelect && typeof TomSelect !== 'undefined') {
         new TomSelect(userSelect, {
           create: false,
           render: {
             option: function(data, escape) {
-              const avatar = data.avatar || '/img/user.png';
-              const email = data.email || 'Email non disponible';
-              return `<div class="d-flex align-items-center p-2">
-                        <img class="list-avatar me-3" src="${escape(avatar)}" alt="">
-                        <div>
-                          <div class="text-body">${escape(data.text)}</div>
-                          <div class="text-muted small">${escape(email)}</div>
-                        </div>
-                      </div>`;
+              return '<div class="d-flex align-items-center p-2"><img class="list-avatar me-3" src="' + escape(data.avatar || '/img/user.png') + '"><div><div class="text-body">' + escape(data.text) + '</div><div class="text-muted small">' + escape(data.email || '') + '</div></div></div>';
             },
             item: function(data, escape) {
-              const avatar = data.avatar || '/img/user.png';
-              return `<div class="d-flex align-items-center">
-                        <img class="me-2" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;" src="${escape(avatar)}" alt="">
-                        <span>${escape(data.text)}</span>
-                      </div>`;
+              return '<div class="d-flex align-items-center"><img class="me-2" style="width:24px;height:24px;border-radius:50%;object-fit:cover;" src="' + escape(data.avatar || '/img/user.png') + '"><span>' + escape(data.text) + '</span></div>';
             }
           }
         });
       }
 
-      // Initialise un TomSelect plus simple pour les groupes
-      const groupSelect = document.getElementById('group-recipient-select');
+      var groupSelect = document.getElementById('group-recipient-select');
       if (groupSelect && typeof TomSelect !== 'undefined') {
-        new TomSelect(groupSelect, {
-          create: false
-        });
+        new TomSelect(groupSelect, { create: false });
       }
     });
   </script>
 </body>
+</html>
