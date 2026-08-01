@@ -859,45 +859,34 @@ app.get('/school-life/absences', async (req, res) => {
     }
 });
 
-// API - Récupérer les absences
 app.get('/api/absences', async (req, res) => {
     if (!req.user) return res.status(401).json([]);
     
     try {
-        const { user_type, class_name, date_debut, date_fin, status } = req.query;
+        const { user_type, class_name, date_debut, date_fin, status, user_id } = req.query;
+        let query = db('absences').where({ establishment_id: req.user.establishment_id });
         
-        console.log('📋 Filtres reçus:', { user_type, class_name, date_debut, date_fin, status });
+        if (user_type) query = query.where({ user_type });
+        if (status) query = query.where({ status });
+        if (date_debut) query = query.where('date', '>=', date_debut);
+        if (date_fin) query = query.where('date', '<=', date_fin);
+        if (user_id) query = query.where({ user_id: parseInt(user_id) }); // ✅ Filtre par utilisateur
         
-        let query = db('absences')
-            .where({ 'absences.establishment_id': req.user.establishment_id })
-            .leftJoin('users', 'absences.user_id', 'users.id')
-            .select('absences.*', 'users.name as user_name', 'users.student_class');
-        
-        if (user_type) {
-            query = query.where('absences.user_type', user_type);
-        }
-        if (status) {
-            query = query.where('absences.status', status);
-        }
-        if (date_debut) {
-            query = query.where('absences.date', '>=', date_debut);
-        }
-        if (date_fin) {
-            query = query.where('absences.date', '<=', date_fin);
-        }
         if (class_name && user_type === 'student') {
-            query = query.where('users.student_class', class_name);
+            query = query.whereIn('user_id', function() {
+                this.select('id').from('users').where({ student_class: class_name });
+            });
         }
 
         const absences = await query
+            .leftJoin('users', 'absences.user_id', 'users.id')
+            .select('absences.*', 'users.name as user_name', 'users.student_class')
             .orderBy('absences.date', 'desc')
             .orderBy('absences.created_at', 'desc');
 
-        console.log('✅ Absences trouvées:', absences.length);
         res.json(absences);
     } catch (error) {
-        console.error('❌ Erreur API absences:', error.message);
-        res.json([]); // ✅ Toujours retourner un tableau
+        res.status(500).json([]);
     }
 });
 
@@ -1065,6 +1054,141 @@ async function createAbsencesTable() {
 }
 
 createAbsencesTable();
+
+// API - Récupérer toutes les classes (pour les filtres)
+app.get('/api/all-classes', async (req, res) => {
+    if (!req.user) return res.status(401).json([]);
+    try {
+        const classes = await db('users')
+            .where({ establishment_id: req.user.establishment_id, role: 'STUDENT' })
+            .distinct('student_class')
+            .whereNotNull('student_class')
+            .orderBy('student_class')
+            .pluck('student_class');
+        res.json(classes);
+    } catch (error) {
+        res.status(500).json([]);
+    }
+});
+
+// API - Récupérer la liste des professeurs
+app.get('/api/professors-list', async (req, res) => {
+    if (!req.user) return res.status(401).json([]);
+    try {
+        const professors = await db('users')
+            .where({ establishment_id: req.user.establishment_id, role: 'PROFESSOR' })
+            .select('id', 'name')
+            .orderBy('name');
+        res.json(professors);
+    } catch (error) {
+        res.status(500).json([]);
+    }
+});
+
+// ==========================================================================
+// ROUTES DE CONSULTATION POUR TOUS LES RÔLES
+// ==========================================================================
+
+// Calendrier (consultation)
+app.get('/calendar-view', async (req, res) => {
+    if (!req.user) return res.redirect('/login');
+    try {
+        const events = await db('events')
+            .where({ establishment_id: req.user.establishment_id })
+            .orderBy('start_date', 'asc')
+            .select('*');
+        
+        res.render('shared/calendar-view', {
+            title: 'Calendrier Scolaire',
+            events: events,
+            user: req.user,
+            readOnly: true
+        });
+    } catch (error) {
+        req.flash('error_msg', 'Erreur lors du chargement du calendrier.');
+        res.redirect('/dashboard');
+    }
+});
+
+// Emploi du temps (consultation)
+app.get('/timetable-view', async (req, res) => {
+    if (!req.user) return res.redirect('/login');
+    
+    try {
+        // Pour un élève, afficher directement sa classe
+        let defaultClass = '';
+        if (req.user.role === 'STUDENT' || req.user.role === 'eleve') {
+            defaultClass = req.user.student_class || '';
+        }
+        // Pour un parent, afficher la classe de l'enfant sélectionné
+        if (req.user.role === 'PARENT' || req.user.role === 'parent') {
+            if (req.session.selectedChildId) {
+                const child = await db('users').where({ id: req.session.selectedChildId }).first();
+                if (child) defaultClass = child.student_class || '';
+            }
+        }
+
+        const classes = await db('users')
+            .where({ establishment_id: req.user.establishment_id, role: 'STUDENT' })
+            .distinct('student_class')
+            .whereNotNull('student_class')
+            .orderBy('student_class')
+            .pluck('student_class');
+
+        res.render('shared/timetable-view', {
+            title: 'Emploi du Temps',
+            user: req.user,
+            classes: classes,
+            defaultClass: defaultClass,
+            readOnly: true
+        });
+    } catch (error) {
+        req.flash('error_msg', 'Erreur lors du chargement.');
+        res.redirect('/dashboard');
+    }
+});
+
+// Absences (consultation)
+app.get('/absences-view', async (req, res) => {
+    if (!req.user) return res.redirect('/login');
+    
+    try {
+        let userId = null;
+        // Pour élève : voir ses propres absences
+        if (req.user.role === 'STUDENT' || req.user.role === 'eleve') {
+            userId = req.user.id;
+        }
+        // Pour parent : voir les absences de l'enfant sélectionné
+        if (req.user.role === 'PARENT' || req.user.role === 'parent') {
+            if (req.session.selectedChildId) {
+                userId = req.session.selectedChildId;
+            }
+        }
+        // Pour professeur : voir ses propres absences
+        if (req.user.role === 'PROFESSOR' || req.user.role === 'professeur') {
+            userId = req.user.id;
+        }
+
+        const classes = await db('users')
+            .where({ establishment_id: req.user.establishment_id, role: 'STUDENT' })
+            .distinct('student_class')
+            .whereNotNull('student_class')
+            .orderBy('student_class')
+            .pluck('student_class');
+
+        res.render('shared/absences-view', {
+            title: 'Consultation des Absences',
+            user: req.user,
+            classes: classes,
+            userId: userId,
+            readOnly: true
+        });
+    } catch (error) {
+        req.flash('error_msg', 'Erreur lors du chargement.');
+        res.redirect('/dashboard');
+    }
+});
+
 // Lancement de l'application
 startServer();
 

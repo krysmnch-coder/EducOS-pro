@@ -1,0 +1,55 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+
+<div class="container-fluid page-shell py-4">
+    <div class="themed-container" style="max-width: 100%; padding: 0 20px;">
+        <h2 class="mb-4">Consultation des Absences & Retards</h2>
+        <%- include('../partials/messages') %>
+        
+        <div class="card glass-card p-3" style="border-radius:16px;">
+            <div class="table-responsive">
+                <table class="table table-hover" id="absencesTable">
+                    <thead><tr><th>Date</th><th>Nom</th><th>Type</th><th>Justifié</th><th>Motif</th></tr></thead>
+                    <tbody id="absencesBody">
+                        <tr><td colspan="5" class="text-center py-4">Chargement...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var userId = '<%= userId || "" %>';
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        if (userId) loadMyAbsences();
+    });
+    
+    function loadMyAbsences() {
+        var url = '/api/absences?user_id=' + userId;
+        fetch(url).then(r => r.json()).then(data => {
+            var tbody = document.getElementById('absencesBody');
+            if (!data || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4">Aucune absence/retard</td></tr>';
+                return;
+            }
+            tbody.innerHTML = data.map(function(a) {
+                return '<tr>' +
+                    '<td>' + new Date(a.date).toLocaleDateString('fr-FR') + '</td>' +
+                    '<td>' + (a.user_name || '-') + '</td>' +
+                    '<td><span class="badge" style="background:' + (a.type === 'absence' ? '#dc3545' : '#fd7e14') + '">' + (a.type === 'absence' ? 'Absence' : 'Retard') + '</span></td>' +
+                    '<td><span class="badge" style="background:' + (a.status === 'justifiee' ? '#198754' : '#dc3545') + '">' + (a.status === 'justifiee' ? 'Justifiée' : 'Non justifiée') + '</span></td>' +
+                    '<td>' + (a.motif || '-') + '</td>' +
+                '</tr>';
+            }).join('');
+        });
+    }
+</script>
+<style>
+    .glass-card { background: rgba(255,255,255,0.08); backdrop-filter: blur(20px); border: 1px solid rgba(0,0,0,0.08); }
+    [data-theme="dark"] .glass-card { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.08); }
+    #absencesTable th, #absencesTable td { border-color: rgba(128,128,128,0.15); vertical-align: middle; }
+    #absencesTable th { background: rgba(13,110,253,0.08); }
+</style>
+<%- include('../partials/footer') %>

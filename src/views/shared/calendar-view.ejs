@@ -1,0 +1,50 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+
+<div class="container-fluid page-shell py-4">
+    <div class="themed-container" style="max-width: 100%; padding: 0 20px;">
+        <h2 class="mb-4">Calendrier Scolaire</h2>
+        <%- include('../partials/messages') %>
+        
+        <div class="card glass-card p-3" style="border-radius:16px;">
+            <div class="mb-3">
+                <select class="form-select" id="typeFilter" style="width:200px;">
+                    <option value="all">Tous les types</option>
+                    <option value="Rentrée des classes">Rentrée des classes</option>
+                    <option value="Période scolaire">Période scolaire</option>
+                    <option value="Vacances scolaires">Vacances scolaires</option>
+                    <option value="Jours fériés">Jours fériés</option>
+                    <option value="Événements">Événements</option>
+                </select>
+            </div>
+            <div id="calendar"></div>
+        </div>
+    </div>
+</div>
+
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
+            initialView: 'dayGridMonth', locale: 'fr',
+            headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,listMonth' },
+            buttonText: { today: 'Aujourd\'hui', month: 'Mois', week: 'Semaine', list: 'Liste' },
+            displayEventTime: false,
+            events: function(info, success) {
+                var type = document.getElementById('typeFilter').value;
+                var url = '/api/calendar/events?view=' + calendar.view.type;
+                if (type !== 'all') url += '&type=' + encodeURIComponent(type);
+                fetch(url).then(r => r.json()).then(data => success(data));
+            }
+        });
+        calendar.render();
+        document.getElementById('typeFilter').addEventListener('change', function() { calendar.refetchEvents(); });
+    });
+</script>
+<style>
+    .glass-card { background: rgba(255,255,255,0.08); backdrop-filter: blur(20px); border: 1px solid rgba(0,0,0,0.08); }
+    [data-theme="dark"] .glass-card { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.08); }
+    .fc { color: inherit; } .fc .fc-toolbar-title { color: inherit; }
+</style>
+<%- include('../partials/footer') %>

@@ -1,0 +1,85 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+
+<div class="container-fluid page-shell py-4">
+    <div class="themed-container" style="max-width: 100%; padding: 0 20px;">
+        <h2 class="mb-4">Emploi du Temps</h2>
+        <%- include('../partials/messages') %>
+        
+        <div class="card glass-card mb-4 p-3" style="border-radius:16px;">
+            <div class="row align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label">Classe</label>
+                    <select class="form-select" id="classSelector">
+                        <option value="">-- Choisir --</option>
+                        <% if (typeof classes !== 'undefined') { %>
+                            <% classes.forEach(function(cls) { %>
+                                <option value="<%= cls %>" <%= cls === defaultClass ? 'selected' : '' %>><%= cls %></option>
+                            <% }); %>
+                        <% } %>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-primary w-100" id="btnLoad">Afficher</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card glass-card p-3" style="border-radius:16px; display:none;" id="timetableContainer">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="timetableTable">
+                    <thead><tr><th>Heures</th><th>Lundi</th><th>Mardi</th><th>Mercredi</th><th>Jeudi</th><th>Vendredi</th></tr></thead>
+                    <tbody id="timetableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var timeSlots = ['08:00-09:00','09:00-10:00','10:00-11:00','11:00-12:00','12:00-13:00','13:00-14:00','14:00-15:00','15:00-16:00','16:00-17:00'];
+    var days = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi'];
+    var defaultClass = '<%= defaultClass || "" %>';
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        if (defaultClass) { loadTimetable(defaultClass); }
+        document.getElementById('btnLoad').addEventListener('click', function() {
+            var cls = document.getElementById('classSelector').value;
+            if (cls) loadTimetable(cls);
+        });
+    });
+    
+    function loadTimetable(className) {
+        fetch('/api/timetables/' + encodeURIComponent(className))
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('timetableContainer').style.display = 'block';
+                var tbody = document.getElementById('timetableBody');
+                var html = '';
+                timeSlots.forEach(function(slot) {
+                    html += '<tr><td style="text-align:center;font-weight:600;">' + slot + '</td>';
+                    days.forEach(function(day) {
+                        var entry = data.find(function(e) { return e.day === day && e.time_slot === slot; });
+                        if (entry) {
+                            html += '<td style="background:' + (entry.color || '#0d6efd') + '22; text-align:center; border-left:4px solid ' + (entry.color || '#0d6efd') + '; padding:8px;">' +
+                                '<strong>' + entry.subject + '</strong>' +
+                                (entry.teacher ? '<br><small>' + entry.teacher + '</small>' : '') +
+                                (entry.room ? '<br><small>🏫 ' + entry.room + '</small>' : '') +
+                            '</td>';
+                        } else {
+                            html += '<td style="text-align:center;color:#888;">-</td>';
+                        }
+                    });
+                    html += '</tr>';
+                });
+                tbody.innerHTML = html;
+            });
+    }
+</script>
+<style>
+    .glass-card { background: rgba(255,255,255,0.08); backdrop-filter: blur(20px); border: 1px solid rgba(0,0,0,0.08); }
+    [data-theme="dark"] .glass-card { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.08); }
+    #timetableTable th, #timetableTable td { border-color: rgba(128,128,128,0.15); text-align: center; }
+    #timetableTable th { background: rgba(13,110,253,0.08); }
+</style>
+<%- include('../partials/footer') %>
