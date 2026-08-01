@@ -799,6 +799,35 @@ app.delete('/api/timetables/:id', async (req, res) => {
     }
 });
 
+// Créer la table timetables si elle n'existe pas
+async function createTimetablesTable() {
+    try {
+        const hasTable = await db.schema.hasTable('timetables');
+        if (!hasTable) {
+            await db.schema.createTable('timetables', function(table) {
+                table.increments('id').primary();
+                table.integer('establishment_id').notNullable();
+                table.string('class_name', 100).notNullable();
+                table.string('day', 20).notNullable();
+                table.string('time_slot', 50).notNullable();
+                table.string('subject', 255).notNullable();
+                table.string('teacher', 255);
+                table.string('room', 100);
+                table.string('color', 7).defaultTo('#0d6efd');
+                table.integer('created_by').notNullable();
+                table.timestamps(true, true);
+            });
+            console.log('✅ Table timetables créée');
+        } else {
+            console.log('✅ Table timetables existe déjà');
+        }
+    } catch (error) {
+        console.error('❌ Erreur création table timetables:', error.message);
+    }
+}
+
+createTimetablesTable();
+
 // Lancement de l'application
 startServer();
 
