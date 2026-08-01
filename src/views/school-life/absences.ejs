@@ -365,27 +365,29 @@
     });
 
     // Enregistrer
-    document.getElementById('btnSaveAbsence').addEventListener('click', function() {
-        var uid = document.getElementById('absenceUser').value;
-        if (!uid) { alert('Sélectionnez une personne'); return; }
-        var type = document.getElementById('absenceType').value;
-        var data = {
-            user_id: parseInt(uid),
-            user_type: document.getElementById('absenceUserType').value,
-            type: type,
-            date: document.getElementById('absenceDate').value,
-            heure_arrivee: null,
-            motif: document.getElementById('absenceMotif').value.trim(),
-            commentaire: document.getElementById('absenceCommentaire').value.trim(),
-            status: document.getElementById('absenceJustified').value
-        };
-        if (type === 'retard') data.heure_arrivee = document.getElementById('absenceHeure').value;
+document.getElementById('btnSaveAbsence').addEventListener('click', function() {
+    var uid = document.getElementById('absenceUser').value;
+    if (!uid) { alert('Sélectionnez une personne'); return; }
+    var type = document.getElementById('absenceType').value;
+    var data = {
+        user_id: parseInt(uid),
+        user_type: document.getElementById('absenceUserType').value,
+        type: type,
+        date: document.getElementById('absenceDate').value,
+        heure_arrivee: null,
+        motif: document.getElementById('absenceMotif').value.trim(),
+        commentaire: document.getElementById('absenceCommentaire').value.trim(),
+        status: document.getElementById('absenceJustified').value
+    };
+    if (type === 'retard') data.heure_arrivee = document.getElementById('absenceHeure').value;
 
-        var xhr = new XMLHttpRequest();
-        xhr.open('POST', '/api/absences');
-        xhr.setRequestHeader('Content-Type', 'application/json');
-        xhr.onload = function() {
-            if (xhr.status === 201 || xhr.status === 200) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/absences');
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.onload = function() {
+        // Accepter tous les codes 2xx
+        if (xhr.status >= 200 && xhr.status < 300) {
+            try {
                 var result = JSON.parse(xhr.responseText);
                 if (result.success) {
                     hideModal('absenceModal');
@@ -395,10 +397,22 @@
                 } else {
                     alert('Erreur: ' + (result.error || 'Inconnue'));
                 }
+            } catch(e) {
+                // Si la réponse n'est pas du JSON, considérer comme succès
+                hideModal('absenceModal');
+                var msg = (type === 'absence') ? '✅ Absence enregistrée avec succès' : '⏰ Retard enregistré avec succès';
+                showSuccess(msg);
+                loadAbsences();
             }
-        };
-        xhr.send(JSON.stringify(data));
-    });
+        } else {
+            alert('Erreur serveur (code ' + xhr.status + ')');
+        }
+    };
+    xhr.onerror = function() {
+        alert('Erreur réseau');
+    };
+    xhr.send(JSON.stringify(data));
+});
 
     // Supprimer
     function deleteAbsence(id) {
@@ -408,6 +422,11 @@
         xhr.onload = function() { showSuccess('🗑️ Entrée supprimée'); loadAbsences(); };
         xhr.send();
     }
+
+    // TEST - Afficher un message après 2 secondes
+setTimeout(function() {
+    showSuccess('Test message succès');
+}, 2000);
 </script>
 
 <style>
