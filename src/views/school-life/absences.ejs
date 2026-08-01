@@ -214,56 +214,244 @@
     if (absenceDateEl) absenceDateEl.value = today;
     if (filterDateDebutEl) filterDateDebutEl.value = today;
 
-    // Charger les classes au chargement
-    fetch('/api/all-classes')
-        .then(function(r) { return r.json(); })
-        .then(function(data) {
-            var sel = document.getElementById('filterClass');
-            if (sel && Array.isArray(data)) {
-                for (var i = 0; i < data.length; i++) {
-                    var opt = document.createElement('option');
-                    opt.value = data[i];
-                    opt.textContent = data[i];
-                    sel.appendChild(opt);
+    // Initialiser les lettres A-Z et N° 1-20
+    (function() {
+        var letterSel = document.getElementById('modalClassLetter');
+        var numberSel = document.getElementById('modalClassNumber');
+        var letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        for (var i = 0; i < letters.length; i++) {
+            var opt = document.createElement('option');
+            opt.value = letters[i];
+            opt.textContent = letters[i];
+            letterSel.appendChild(opt);
+        }
+        for (var j = 1; j <= 20; j++) {
+            var opt2 = document.createElement('option');
+            opt2.value = j;
+            opt2.textContent = j;
+            numberSel.appendChild(opt2);
+        }
+    })();
+
+    // Type de personne
+    document.getElementById('absenceUserType').addEventListener('change', function() {
+        var isStudent = (this.value === 'student');
+        document.getElementById('classSelectDiv').style.display = isStudent ? 'block' : 'none';
+        if (!isStudent) loadProfessors();
+    });
+
+    // Type absence/retard
+    document.getElementById('absenceType').addEventListener('change', function() {
+        document.getElementById('heureArriveeDiv').style.display = (this.value === 'retard') ? 'block' : 'none';
+    });
+
+    // Charger les classes dans le filtre
+    loadFilterClasses();
+
+    function loadFilterClasses() {
+        fetch('/api/all-classes')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                var sel = document.getElementById('filterClass');
+                if (Array.isArray(data)) {
+                    for (var i = 0; i < data.length; i++) {
+                        var opt = document.createElement('option');
+                        opt.value = data[i];
+                        opt.textContent = data[i];
+                        sel.appendChild(opt);
+                    }
                 }
-            }
-        });
+            });
+    }
+
+    // Charger les élèves d'une classe
+    document.getElementById('btnLoadStudents').addEventListener('click', function() {
+        var level = document.getElementById('modalClassLevel').value;
+        if (!level) { alert('Sélectionnez un niveau'); return; }
+        var letter = document.getElementById('modalClassLetter').value;
+        var number = document.getElementById('modalClassNumber').value;
+        var className = level + (letter ? ' ' + letter : '') + (number ? ' ' + number : '');
+        
+        fetch('/api/students-by-class/' + encodeURIComponent(className.trim()))
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                var sel = document.getElementById('absenceUser');
+                sel.innerHTML = '<option value="">-- Choisir --</option>';
+                if (Array.isArray(data)) {
+                    for (var i = 0; i < data.length; i++) {
+                        var opt = document.createElement('option');
+                        opt.value = data[i].id;
+                        opt.textContent = data[i].name + ' (' + data[i].matricule + ')';
+                        sel.appendChild(opt);
+                    }
+                }
+            });
+    });
+
+    // Charger les professeurs
+    function loadProfessors() {
+        fetch('/api/professors-list')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                var sel = document.getElementById('absenceUser');
+                sel.innerHTML = '<option value="">-- Choisir --</option>';
+                if (Array.isArray(data)) {
+                    for (var i = 0; i < data.length; i++) {
+                        var opt = document.createElement('option');
+                        opt.value = data[i].id;
+                        opt.textContent = data[i].name;
+                        sel.appendChild(opt);
+                    }
+                }
+            });
+    }
 
     // Bouton Filtrer
     document.getElementById('btnFilter').addEventListener('click', function() {
         var url = '/api/absences?user_type=' + document.getElementById('filterType').value;
         var cls = document.getElementById('filterClass').value;
+        var st = document.getElementById('filterStatus').value;
+        var d1 = document.getElementById('filterDateDebut').value;
+        var d2 = document.getElementById('filterDateFin').value;
         if (cls) url += '&class_name=' + encodeURIComponent(cls);
-        
+        if (st) url += '&status=' + encodeURIComponent(st);
+        if (d1) url += '&date_debut=' + d1;
+        if (d2) url += '&date_fin=' + d2;
+
         fetch(url)
             .then(function(r) { return r.json(); })
             .then(function(data) {
                 var tbody = document.getElementById('absencesBody');
                 tbody.innerHTML = '';
                 if (!Array.isArray(data) || data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="7">Aucun résultat</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4">Aucun résultat</td></tr>';
                     return;
                 }
                 for (var i = 0; i < data.length; i++) {
                     var a = data[i];
                     var tr = document.createElement('tr');
-                    tr.innerHTML = '<td>' + a.date + '</td><td>' + (a.user_name || '') + '</td><td>' + (a.student_class || '') + '</td><td>' + a.type + '</td><td>' + a.status + '</td><td>' + (a.motif || '') + '</td><td></td>';
+                    tr.innerHTML = 
+                        '<td style="color:#fff;">' + formatDate(a.date) + '</td>' +
+                        '<td style="color:#fff;">' + (a.user_name || '-') + '</td>' +
+                        '<td style="color:#fff;">' + (a.student_class || '-') + '</td>' +
+                        '<td><span class="badge" style="background:' + (a.type === 'absence' ? '#dc3545' : '#fd7e14') + '">' + (a.type === 'absence' ? 'Absence' : 'Retard') + '</span></td>' +
+                        '<td><span class="badge" style="background:' + (a.status === 'justifiee' ? '#198754' : '#dc3545') + '">' + (a.status === 'justifiee' ? 'Justifiée' : 'Non justifiée') + '</span></td>' +
+                        '<td style="color:#ccc;">' + (a.motif || '-') + '</td>' +
+                        '<td>' +
+                            '<button class="btn btn-sm btn-outline-success me-1" data-id="' + a.id + '" data-action="justify">✓</button>' +
+                            '<button class="btn btn-sm btn-outline-danger" data-id="' + a.id + '" data-action="delete">🗑️</button>' +
+                        '</td>';
                     tbody.appendChild(tr);
                 }
+                // Attacher les événements
+                attachTableEvents();
             });
     });
 
-    // Bouton Ajouter - ouvre le modal
+    function formatDate(dateStr) {
+        if (!dateStr) return '-';
+        var d = new Date(dateStr);
+        return d.toLocaleDateString('fr-FR');
+    }
+
+    function attachTableEvents() {
+        var buttons = document.querySelectorAll('#absencesBody button[data-action]');
+        for (var i = 0; i < buttons.length; i++) {
+            buttons[i].addEventListener('click', function() {
+                var action = this.getAttribute('data-action');
+                var id = this.getAttribute('data-id');
+                if (action === 'justify') openJustify(id);
+                if (action === 'delete') deleteAbsence(id);
+            });
+        }
+    }
+
+    // Bouton Ajouter
     document.getElementById('btnAddAbsence').addEventListener('click', function() {
-        var modalEl = document.getElementById('absenceModal');
-        var modal = new bootstrap.Modal(modalEl);
+        document.getElementById('absenceUserType').value = 'student';
+        document.getElementById('classSelectDiv').style.display = 'block';
+        document.getElementById('absenceUser').innerHTML = '<option value="">-- Sélectionnez --</option>';
+        document.getElementById('absenceType').value = 'absence';
+        document.getElementById('heureArriveeDiv').style.display = 'none';
+        document.getElementById('absenceMotif').value = '';
+        document.getElementById('absenceCommentaire').value = '';
+        var modal = new bootstrap.Modal(document.getElementById('absenceModal'));
         modal.show();
     });
 
-    // Bouton Enregistrer
+    // Bouton Enregistrer absence
     document.getElementById('btnSaveAbsence').addEventListener('click', function() {
-        alert('Fonction saveAbsence - à implémenter');
+        var uid = document.getElementById('absenceUser').value;
+        if (!uid) { alert('Sélectionnez une personne'); return; }
+
+        var data = {
+            user_id: parseInt(uid),
+            user_type: document.getElementById('absenceUserType').value,
+            type: document.getElementById('absenceType').value,
+            date: document.getElementById('absenceDate').value,
+            heure_arrivee: null,
+            motif: document.getElementById('absenceMotif').value.trim(),
+            commentaire: document.getElementById('absenceCommentaire').value.trim()
+        };
+
+        if (data.type === 'retard') {
+            data.heure_arrivee = document.getElementById('absenceHeure').value;
+        }
+
+        fetch('/api/absences', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(result) {
+            if (result.success) {
+                // Fermer le modal
+                var modalEl = document.getElementById('absenceModal');
+                var modal = bootstrap.Modal.getInstance(modalEl);
+                if (modal) modal.hide();
+                else { modalEl.classList.remove('show'); document.body.classList.remove('modal-open'); }
+                document.getElementById('btnFilter').click();
+            } else {
+                alert('Erreur: ' + (result.error || 'Inconnue'));
+            }
+        });
     });
+
+    function openJustify(id) {
+        document.getElementById('justifyId').value = id;
+        document.getElementById('justifyMotif').value = '';
+        document.getElementById('justifyCommentaire').value = '';
+        document.getElementById('justifyStatus').value = 'justifiee';
+        var modal = new bootstrap.Modal(document.getElementById('justifyModal'));
+        modal.show();
+    }
+
+    document.getElementById('btnSaveJustify').addEventListener('click', function() {
+        var id = document.getElementById('justifyId').value;
+        fetch('/api/absences/' + id, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                status: document.getElementById('justifyStatus').value,
+                motif: document.getElementById('justifyMotif').value.trim(),
+                commentaire: document.getElementById('justifyCommentaire').value.trim()
+            })
+        })
+        .then(function() {
+            var modalEl = document.getElementById('justifyModal');
+            var modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) modal.hide();
+            else { modalEl.classList.remove('show'); document.body.classList.remove('modal-open'); }
+            document.getElementById('btnFilter').click();
+        });
+    });
+
+    function deleteAbsence(id) {
+        if (!confirm('Supprimer cette entrée ?')) return;
+        fetch('/api/absences/' + id, { method: 'DELETE' })
+            .then(function() { document.getElementById('btnFilter').click(); });
+    }
 </script>
 <style>
     .glass-card {
