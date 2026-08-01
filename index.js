@@ -859,33 +859,41 @@ app.get('/school-life/absences', async (req, res) => {
     }
 });
 
+// API - Récupérer les absences
 app.get('/api/absences', async (req, res) => {
     if (!req.user) return res.status(401).json([]);
     
     try {
-        const { user_type, class_name, date_debut, date_fin, status, user_id } = req.query;
+        const { user_type, class_name, date_debut, date_fin, status } = req.query;
         let query = db('absences').where({ establishment_id: req.user.establishment_id });
         
         if (user_type) query = query.where({ user_type });
-        if (status) query = query.where({ status });
-        if (date_debut) query = query.where('date', '>=', date_debut);
-        if (date_fin) query = query.where('date', '<=', date_fin);
-        if (user_id) query = query.where({ user_id: parseInt(user_id) }); // ✅ Filtre par utilisateur
+        if (status && status !== '') query = query.where({ status });
+        if (date_debut && date_debut !== '') query = query.where('date', '>=', date_debut);
+        if (date_fin && date_fin !== '') query = query.where('date', '<=', date_fin);
         
-        if (class_name && user_type === 'student') {
-            query = query.whereIn('user_id', function() {
-                this.select('id').from('users').where({ student_class: class_name });
-            });
+        if (class_name && class_name !== '' && user_type === 'student') {
+            // Récupérer les IDs des élèves de cette classe
+            const studentIds = await db('users')
+                .where({ establishment_id: req.user.establishment_id, role: 'STUDENT', student_class: class_name })
+                .pluck('id');
+            query = query.whereIn('user_id', studentIds);
         }
 
         const absences = await query
             .leftJoin('users', 'absences.user_id', 'users.id')
-            .select('absences.*', 'users.name as user_name', 'users.student_class')
+            .select(
+                'absences.*',
+                'users.name as user_name',
+                'users.student_class'
+            )
             .orderBy('absences.date', 'desc')
             .orderBy('absences.created_at', 'desc');
 
+        console.log('📊 Absences trouvées:', absences.length);
         res.json(absences);
     } catch (error) {
+        console.error('❌ Erreur GET /api/absences:', error.message);
         res.status(500).json([]);
     }
 });
