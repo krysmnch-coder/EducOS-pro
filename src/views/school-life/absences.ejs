@@ -161,8 +161,8 @@
                 <div class="mb-3">
                     <label class="form-label">Type</label>
                     <select class="form-select" id="absenceType" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);">
-                        <option value="absence" style="background:#1a1a2e;">❌ Absence</option>
-                        <option value="retard" style="background:#1a1a2e;">⏰ Retard</option>
+                        <option value="absence" style="background:#1a1a2e;"> Absence</option>
+                        <option value="retard" style="background:#1a1a2e;"> Retard</option>
                     </select>
                 </div>
                 <div class="mb-3" id="heureArriveeDiv" style="display:none;">
@@ -203,8 +203,8 @@
                 <div class="mb-3">
                     <label class="form-label">Statut</label>
                     <select class="form-select" id="justifyStatus" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);">
-                        <option value="justifiee" style="background:#1a1a2e;">✅ Justifiée</option>
-                        <option value="non_justifiee" style="background:#1a1a2e;">❌ Non justifiée</option>
+                        <option value="justifiee" style="background:#1a1a2e;"> Justifiée</option>
+                        <option value="non_justifiee" style="background:#1a1a2e;"> Non justifiée</option>
                     </select>
                 </div>
                 <div class="mb-3">
@@ -420,6 +420,29 @@
         if (!text) return '';
         return text.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"').replace(/\n/g, '\\n');
     }
+    app.get('/school-life/absences', async (req, res) => {
+    if (!req.user) return res.redirect('/login');
+    try {
+        const classes = await db('users')
+            .where({ establishment_id: req.user.establishment_id, approved: 1 })
+            .whereIn('role', ['STUDENT', 'student', 'eleve', 'élève'])
+            .distinct('student_class')
+            .whereNotNull('student_class')
+            .orderBy('student_class')
+            .pluck('student_class');
+
+        res.render('school-life/absences', {
+            title: 'Gestion des Absences & Retards',
+            user: req.user,
+            classes: classes,
+            professors: []
+        });
+    } catch (error) {
+        console.error('Erreur absences:', error);
+        req.flash('error_msg', 'Erreur lors du chargement.');
+        res.redirect('/dashboard');
+    }
+});
 </script>
 
 <style>

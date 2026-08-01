@@ -946,46 +946,62 @@ app.delete('/api/absences/:id', async (req, res) => {
     }
 });
 
-// API - Récupérer les élèves d'une classe
-app.get('/api/students-by-class/:className', async (req, res) => {
-    if (!req.user) return res.status(401).json([]);
-    
-    try {
-        const students = await db('users')
-            .where({ establishment_id: req.user.establishment_id, role: 'STUDENT', student_class: req.params.className })
-            .select('id', 'name', 'matricule')
-            .orderBy('name');
-        res.json(students);
-    } catch (error) {
-        res.status(500).json([]);
-    }
-});
-// API - Récupérer toutes les classes existantes
+// API - Récupérer toutes les classes existantes (insensible à la casse)
 app.get('/api/all-classes', async (req, res) => {
     if (!req.user) return res.status(401).json([]);
     try {
         const classes = await db('users')
-            .where({ establishment_id: req.user.establishment_id, role: 'STUDENT' })
+            .where({ establishment_id: req.user.establishment_id, approved: 1 })
+            .whereIn('role', ['STUDENT', 'student', 'eleve', 'élève'])
             .distinct('student_class')
             .whereNotNull('student_class')
             .orderBy('student_class')
             .pluck('student_class');
         res.json(classes);
     } catch (error) {
+        console.error('Erreur all-classes:', error);
         res.status(500).json([]);
     }
 });
 
-// API - Récupérer la liste des professeurs
+// API - Récupérer la liste des professeurs (insensible à la casse)
 app.get('/api/professors-list', async (req, res) => {
     if (!req.user) return res.status(401).json([]);
     try {
         const professors = await db('users')
-            .where({ establishment_id: req.user.establishment_id, role: 'PROFESSOR' })
+            .where({ establishment_id: req.user.establishment_id, approved: 1 })
+            .whereIn('role', ['PROFESSOR', 'professor', 'professeur', 'prof'])
             .select('id', 'name')
             .orderBy('name');
+        console.log('Professeurs trouvés:', professors.length);
         res.json(professors);
     } catch (error) {
+        console.error('Erreur professors-list:', error);
+        res.status(500).json([]);
+    }
+});
+
+// API - Récupérer les élèves d'une classe (insensible à la casse)
+app.get('/api/students-by-class/:className', async (req, res) => {
+    if (!req.user) return res.status(401).json([]);
+    try {
+        const className = decodeURIComponent(req.params.className);
+        console.log('Recherche élèves - Classe:', className);
+        
+        const students = await db('users')
+            .where({ 
+                establishment_id: req.user.establishment_id, 
+                student_class: className,
+                approved: 1
+            })
+            .whereIn('role', ['STUDENT', 'student', 'eleve', 'élève'])
+            .select('id', 'name', 'matricule', 'student_class')
+            .orderBy('name');
+        
+        console.log('Élèves trouvés:', students.length);
+        res.json(students);
+    } catch (error) {
+        console.error('Erreur students-by-class:', error);
         res.status(500).json([]);
     }
 });
