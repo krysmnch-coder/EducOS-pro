@@ -828,6 +828,139 @@ async function createTimetablesTable() {
 
 createTimetablesTable();
 
+// Page gestion des absences
+app.get('/school-life/absences', async (req, res) => {
+    if (!req.user) return res.redirect('/login');
+    
+    try {
+        // Récupérer les classes et professeurs
+        const classes = await db('users')
+            .where({ establishment_id: req.user.establishment_id, role: 'STUDENT' })
+            .distinct('student_class')
+            .whereNotNull('student_class')
+            .orderBy('student_class')
+            .pluck('student_class');
+
+        const professors = await db('users')
+            .where({ establishment_id: req.user.establishment_id, role: 'PROFESSOR' })
+            .select('id', 'name')
+            .orderBy('name');
+
+        res.render('school-life/absences', {
+            title: 'Gestion des Absences & Retards',
+            user: req.user,
+            classes: classes,
+            professors: professors
+        });
+    } catch (error) {
+        console.error('Erreur absences:', error);
+        req.flash('error_msg', 'Erreur lors du chargement.');
+        res.redirect('/dashboard');
+    }
+});
+
+// API - Récupérer les absences
+app.get('/api/absences', async (req, res) => {
+    if (!req.user) return res.status(401).json([]);
+    
+    try {
+        const { user_type, class_name, date_debut, date_fin, status } = req.query;
+        let query = db('absences').where({ establishment_id: req.user.establishment_id });
+        
+        if (user_type) query = query.where({ user_type });
+        if (status) query = query.where({ status });
+        if (date_debut) query = query.where('date', '>=', date_debut);
+        if (date_fin) query = query.where('date', '<=', date_fin);
+        
+        if (class_name && user_type === 'student') {
+            query = query.whereIn('user_id', function() {
+                this.select('id').from('users').where({ student_class: class_name });
+            });
+        }
+
+        const absences = await query
+            .leftJoin('users', 'absences.user_id', 'users.id')
+            .select('absences.*', 'users.name as user_name', 'users.student_class')
+            .orderBy('absences.date', 'desc')
+            .orderBy('absences.created_at', 'desc');
+
+        res.json(absences);
+    } catch (error) {
+        res.status(500).json([]);
+    }
+});
+
+// API - Créer une absence/retard
+app.post('/api/absences', async (req, res) => {
+    if (!req.user) return res.status(401).json({ error: 'Non authentifié' });
+    
+    try {
+        const { user_id, user_type, type, date, heure_arrivee, motif, commentaire } = req.body;
+        
+        const [id] = await db('absences').insert({
+            establishment_id: req.user.establishment_id,
+            user_id,
+            user_type,
+            type: type || 'absence',
+            status: 'non_justifiee',
+            date,
+            heure_arrivee: type === 'retard' ? heure_arrivee : null,
+            motif: motif || '',
+            commentaire: commentaire || '',
+            created_by: req.user.id
+        });
+
+        res.status(201).json({ success: true, id });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// API - Mettre à jour le statut
+app.put('/api/absences/:id', async (req, res) => {
+    if (!req.user) return res.status(401).json({ error: 'Non authentifié' });
+    
+    try {
+        const { status, motif, commentaire } = req.body;
+        await db('absences').where({ id: req.params.id }).update({
+            status: status || 'non_justifiee',
+            motif: motif || '',
+            commentaire: commentaire || '',
+            updated_at: new Date()
+        });
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// API - Supprimer
+app.delete('/api/absences/:id', async (req, res) => {
+    if (!req.user) return res.status(401).json({ error: 'Non authentifié' });
+    
+    try {
+        await db('absences').where({ id: req.params.id }).del();
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// API - Récupérer les élèves d'une classe
+app.get('/api/students-by-class/:className', async (req, res) => {
+    if (!req.user) return res.status(401).json([]);
+    
+    try {
+        const students = await db('users')
+            .where({ establishment_id: req.user.establishment_id, role: 'STUDENT', student_class: req.params.className })
+            .select('id', 'name', 'matricule')
+            .orderBy('name');
+        res.json(students);
+    } catch (error) {
+        res.status(500).json([]);
+    }
+});
+
 // Créer la table absences si elle n'existe pas
 async function createAbsencesTable() {
     try {
