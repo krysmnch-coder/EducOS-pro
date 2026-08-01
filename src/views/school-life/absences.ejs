@@ -339,11 +339,16 @@
         xhr.open('PUT', '/api/absences/' + id);
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.onload = function() {
-            var msg = checked ? '✅ Absence/retard marqué(e) comme justifié(e)' : '❌ Absence/retard marqué(e) comme non justifié(e)';
-            showSuccess(msg);
-            loadAbsences();
+            if (xhr.status === 200) {
+                var result = JSON.parse(xhr.responseText);
+                if (result.success) {
+                    var msg = checked ? '✅ Absence/retard marqué(e) comme justifié(e)' : '❌ Absence/retard marqué(e) comme non justifié(e)';
+                    showSuccess(msg);
+                    loadAbsences(); // Recharger seulement en cas de succès
+                }
+            }
         };
-        xhr.send(JSON.stringify({ status: checked ? 'justifiee' : 'non_justifiee' }));
+        xhr.send(JSON.stringify({ status: checked ? 'justifiee' : 'non_justifiee', motif: '', commentaire: '' }));
     }
 
     // Ajouter
