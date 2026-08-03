@@ -850,14 +850,21 @@ app.get('/api/timetables/:className', async (req, res) => {
 });
 
 // API - Sauvegarder une entrée d'emploi du temps (Vie Scolaire)
+// API - Sauvegarder une entrée d'emploi du temps (Vie Scolaire)
 app.post('/api/timetables', async (req, res) => {
     if (!req.user) return res.status(401).json({ error: 'Non authentifié' });
     
     try {
         const { class_name, day, time_slot, subject, teacher, room, color } = req.body;
         
-        console.log('💾 Sauvegarde emploi du temps:', { class_name, day, time_slot, subject });
+        // Normaliser le nom de classe
+        const classMap = {
+            'Sixième': '6ème', 'Cinquième': '5ème', 'Quatrième': '4ème', 'Troisième': '3ème',
+            'Seconde': '2nde', 'Première': '1ère', 'Terminale': 'Tle'
+        };
+        const normalizedClassName = classMap[class_name] || class_name;
         
+        console.log('💾 Sauvegarde emploi du temps:', { original: class_name, normalized: normalizedClassName, day, time_slot, subject });
         const dayOrder = { 'Lundi': 1, 'Mardi': 2, 'Mercredi': 3, 'Jeudi': 4, 'Vendredi': 5 };
         
         const existing = await db('timetables')
@@ -1007,7 +1014,41 @@ async function createTimetablesTable() {
     }
 }
 
+/**
+ * Normalise les noms de classes dans la table timetables pour assurer la cohérence.
+ * Par exemple, transforme 'Sixième', '6eme', etc. en '6ème'.
+ */
+async function normalizeTimetableClassNames() {
+    try {
+        console.log('🔄 Normalisation des noms de classe dans la table timetables...');
+        const classMap = {
+            '6ème': ['Sixième', 'sixieme', '6eme', '6e'],
+            '5ème': ['Cinquième', 'cinquieme', '5eme', '5e'],
+            '4ème': ['Quatrième', 'quatrieme', '4eme', '4e'],
+            '3ème': ['Troisième', 'troisieme', '3eme', '3e'],
+            '2nde': ['Seconde', 'seconde', '2nd'],
+            '1ère': ['Première', 'premiere', '1ere', '1re'],
+            'Tle': ['Terminale', 'terminale', 'tle']
+        };
+
+        let totalUpdated = 0;
+        for (const [normalizedName, variants] of Object.entries(classMap)) {
+            const updatedRows = await db('timetables')
+                .whereIn('class_name', variants)
+                .update({ class_name: normalizedName });
+            totalUpdated += updatedRows;
+        }
+
+        if (totalUpdated > 0) {
+            console.log(`✅ Normalisation des noms de classe terminée. ${totalUpdated} entrées mises à jour.`);
+        }
+    } catch (error) {
+        console.error('❌ Erreur lors de la normalisation des noms de classe:', error.message);
+    }
+}
+
 createTimetablesTable();
+normalizeTimetableClassNames(); // Appeler la fonction de normalisation au démarrage
 
 // Page gestion des absences
 app.get('/school-life/absences', async (req, res) => {
@@ -1411,4 +1452,3 @@ app.use('/', timetableRoutes);
 
 // Lancement de l'application
 startServer();
-
