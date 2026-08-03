@@ -272,8 +272,8 @@
     });
 
     function loadTimetable(className) {
-        fetch('/api/timetables/' + encodeURIComponent(className))
-            .then(function(r) { return r.json(); })
+        fetch('/api/timetables/' + encodeURIComponent(className), { credentials: 'same-origin' })
+            .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
             .then(function(data) { timetableData = data; renderTimetable(data); })
             .catch(function() { timetableData = []; renderTimetable([]); });
     }
@@ -421,6 +421,7 @@
             const promises = selectedCells.map(function(cell) {
                 return fetch('/api/timetables', {
                     method: 'POST',
+                    credentials: 'same-origin',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         class_name: currentClass.trim(),

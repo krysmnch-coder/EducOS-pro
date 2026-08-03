@@ -105,8 +105,8 @@
         var tbody = document.getElementById('timetableBody');
         tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;"><div class="spinner-border text-primary"></div></td></tr>';
         
-        fetch('/api/timetables/' + encodeURIComponent(className))
-            .then(r => r.json())
+        fetch('/api/timetables/' + encodeURIComponent(className), { credentials: 'same-origin' })
+            .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
             .then(data => {
                 var html = '';
                 timeSlots.forEach(function(slot) {
