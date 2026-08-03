@@ -15,7 +15,7 @@
         <%- include('../partials/messages') %>
         
         <%# Sélecteur d'enfant pour les parents (AFFICHÉ ICI, PAS DANS LE DASHBOARD) %>
-        <% if (user.role === 'PARENT' && typeof children !== 'undefined' && children.length > 0) { %>
+       <% if ((user.role === 'PARENT' || user.role === 'parent') && typeof children !== 'undefined' && children.length > 0) { %>
         <div class="card glass-card mb-4 p-3" style="border-radius:16px;">
             <div class="row align-items-end">
                 <div class="col-md-4">
