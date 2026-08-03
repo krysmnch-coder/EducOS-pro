@@ -1408,27 +1408,29 @@ app.get('/api/timetables/:className', async (req, res) => {
     }
 });
 
-// Absences (consultation) - CORRIGÉ
+// Absences (consultation)
 app.get('/absences-view', async (req, res) => {
     if (!req.user) return res.redirect('/login');
     
     try {
         let userId = null;
+        let children = [];
         let selectedChildId = null;
-        
-        // Pour élève : voir ses propres absences
+
+        // ÉLÈVE : voir ses propres absences
         if (req.user.role === 'STUDENT' || req.user.role === 'eleve') {
             userId = req.user.id;
         }
-        // Pour parent : voir les absences de l'enfant sélectionné
-        if (req.user.role === 'PARENT' || req.user.role === 'parent') {
+        // PARENT : récupérer les enfants
+        else if (req.user.role === 'PARENT' || req.user.role === 'parent') {
+            children = await userModel.getLinkedChildrenForParent(req.user.id);
             if (req.session.selectedChildId) {
-                userId = req.session.selectedChildId;
                 selectedChildId = req.session.selectedChildId;
+                userId = req.session.selectedChildId;
             }
         }
-        // Pour professeur : voir ses propres absences
-        if (req.user.role === 'PROFESSOR' || req.user.role === 'professeur') {
+        // PROFESSEUR : voir ses propres absences
+        else if (req.user.role === 'PROFESSOR' || req.user.role === 'professeur') {
             userId = req.user.id;
         }
 
@@ -1439,31 +1441,22 @@ app.get('/absences-view', async (req, res) => {
             .orderBy('student_class')
             .pluck('student_class');
 
+        console.log('📊 AbsencesView - User:', req.user.name, 'Children:', children.length);
+
         res.render('shared/absences-view', {
             title: 'Consultation des Absences',
             user: req.user,
             classes: classes,
             userId: userId,
-            selectedChildId: selectedChildId,  // ← AJOUTÉ pour les parents
+            children: children,           // ← AJOUTÉ
+            selectedChildId: selectedChildId, // ← AJOUTÉ
             readOnly: true
         });
     } catch (error) {
+        console.error('Erreur absences-view:', error);
         req.flash('error_msg', 'Erreur lors du chargement.');
         res.redirect('/dashboard');
     }
-    // Ajouter les enfants pour les parents
-    let children = [];
-    let selectedChildId = null;
-    if (req.user.role === 'PARENT' || req.user.role === 'parent') {
-        children = await userModel.getLinkedChildrenForParent(req.user.id);
-        selectedChildId = req.session.selectedChildId || null;
-    }
-    
-    res.render('shared/absences-view', {
-        // ... autres variables ...
-        children: children,
-        selectedChildId: selectedChildId
-    });
 });
 
 const timetableRoutes = require('./src/routes/timetableRoutes');
