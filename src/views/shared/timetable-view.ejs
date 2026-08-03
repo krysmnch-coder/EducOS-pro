@@ -6,14 +6,15 @@
         <h2 class="mb-4">Emploi du Temps</h2>
         <%- include('../partials/messages') %>
         
+        <%# Sélecteur de classe (caché pour les élèves) %>
         <% if (user.role !== 'STUDENT' && user.role !== 'eleve') { %>
         <div class="card glass-card mb-4 p-3" style="border-radius:16px;">
             <div class="row align-items-end">
                 <div class="col-md-4">
                     <label class="form-label">Classe</label>
                     <select class="form-select" id="classSelector">
-                        <option value="">-- Choisir --</option>
-                        <% if (typeof classes !== 'undefined') { %>
+                        <option value="">-- Choisir une classe --</option>
+                        <% if (typeof classes !== 'undefined' && classes.length > 0) { %>
                             <% classes.forEach(function(cls) { %>
                                 <option value="<%= cls %>" <%= cls === defaultClass ? 'selected' : '' %>><%= cls %></option>
                             <% }); %>
@@ -26,25 +27,45 @@
             </div>
         </div>
         <% } %>
-        
-        <div class="card glass-card p-3" style="border-radius:16px; display:none;" id="timetableContainer">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h4 class="mb-0" id="timetableTitle">Emploi du temps</h4>
-                <% if (user.role === 'PARENT' && typeof children !== 'undefined' && children.length > 0) { %>
-                <div>
-                    <label class="form-label me-2 mb-0">Enfant :</label>
-                    <select class="form-select d-inline-block" style="width: auto;" id="childSelector">
+
+        <%# Sélecteur d'enfant pour les parents %>
+        <% if (user.role === 'PARENT' && typeof children !== 'undefined' && children.length > 0) { %>
+        <div class="card glass-card mb-4 p-3" style="border-radius:16px;">
+            <div class="row align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label">Enfant</label>
+                    <select class="form-select" id="childSelector">
                         <% children.forEach(function(child) { %>
-                            <option value="<%= child.student_class %>" data-name="<%= child.name %>"><%= child.name %> (<%= child.student_class %>)</option>
+                            <option value="<%= child.student_class %>" <%= child.student_class === defaultClass ? 'selected' : '' %>>
+                                <%= child.name %> (<%= child.student_class || 'Sans classe' %>)
+                            </option>
                         <% }); %>
                     </select>
                 </div>
-                <% } %>
+            </div>
+        </div>
+        <% } %>
+        
+        <%# Tableau de l'emploi du temps %>
+        <div class="card glass-card p-3" style="border-radius:16px; display:none;" id="timetableContainer">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="mb-0" id="timetableTitle">Emploi du temps</h4>
             </div>
             <div class="table-responsive">
                 <table class="table table-bordered" id="timetableTable">
-                    <thead><tr><th>Heures</th><th>Lundi</th><th>Mardi</th><th>Mercredi</th><th>Jeudi</th><th>Vendredi</th></tr></thead>
-                    <tbody id="timetableBody"></tbody>
+                    <thead>
+                        <tr>
+                            <th style="width: 120px;">Heures</th>
+                            <th>Lundi</th>
+                            <th>Mardi</th>
+                            <th>Mercredi</th>
+                            <th>Jeudi</th>
+                            <th>Vendredi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="timetableBody">
+                        <!-- Rempli par JavaScript -->
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -52,8 +73,12 @@
 </div>
 
 <script>
-    var timeSlots = ['08:00-09:00','09:00-10:00','10:00-11:00','11:00-12:00','12:00-13:00','13:00-14:00','14:00-15:00','15:00-16:00','16:00-17:00'];
-    var days = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi'];
+    var timeSlots = [
+        '07:00-08:00', '08:00-09:00', '09:00-10:00', '10:00-11:00', 
+        '11:00-12:00', '12:00-13:00', '13:00-14:00', '14:00-15:00', 
+        '15:00-16:00', '16:00-17:00', '17:00-18:00'
+    ];
+    var days = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'];
     var userRole = '<%= user.role %>';
     var studentClass = '<%= user.student_class || "" %>';
     var defaultClass = '<%= defaultClass || "" %>';
@@ -64,81 +89,161 @@
         if (userRole === 'STUDENT' || userRole === 'eleve') {
             if (studentClass) {
                 loadTimetable(studentClass);
+            } else {
+                document.getElementById('timetableContainer').style.display = 'block';
+                document.getElementById('timetableBody').innerHTML = 
+                    '<tr><td colspan="6" style="text-align:center;padding:30px;color:#888;">Aucune classe assignée à votre compte.</td></tr>';
             }
             return;
         }
         
-        // PARENT : afficher l'emploi du temps du premier enfant
+        // PARENT : afficher et écouter le changement d'enfant
         if (userRole === 'PARENT') {
-            if (parentChildren.length > 0) {
-                loadTimetable(parentChildren[0].student_class);
+            if (defaultClass) {
+                loadTimetable(defaultClass);
             }
-            // Écouter le changement d'enfant
             var childSelector = document.getElementById('childSelector');
             if (childSelector) {
                 childSelector.addEventListener('change', function() {
-                    var selectedClass = this.options[this.selectedIndex].value;
-                    loadTimetable(selectedClass);
+                    loadTimetable(this.value);
                 });
             }
             return;
         }
         
-        // AUTRES : afficher la classe par défaut si elle existe
+        // AUTRES : charger la classe par défaut
         if (defaultClass) { 
             loadTimetable(defaultClass); 
         }
         
-        // Bouton pour charger
+        // Bouton pour charger une classe
         var btnLoad = document.getElementById('btnLoad');
         if (btnLoad) {
             btnLoad.addEventListener('click', function() {
                 var cls = document.getElementById('classSelector').value;
-                if (cls) loadTimetable(cls);
+                if (cls) {
+                    loadTimetable(cls);
+                } else {
+                    alert('Veuillez sélectionner une classe.');
+                }
             });
         }
     });
     
     function loadTimetable(className) {
-        document.getElementById('timetableContainer').style.display = 'block';
-        document.getElementById('timetableTitle').textContent = 'Emploi du temps - ' + className;
+        if (!className) return;
+        
+        console.log('📅 Chargement emploi du temps pour:', className);
+        
+        var container = document.getElementById('timetableContainer');
+        var title = document.getElementById('timetableTitle');
         var tbody = document.getElementById('timetableBody');
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;"><div class="spinner-border text-primary"></div></td></tr>';
+        
+        container.style.display = 'block';
+        title.textContent = 'Emploi du temps - ' + className;
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;"><div class="spinner-border text-primary"></div><p class="mt-2 text-muted">Chargement...</p></td></tr>';
         
         fetch('/api/timetables/' + encodeURIComponent(className))
-            .then(r => r.json())
-            .then(data => {
+            .then(function(response) {
+                if (!response.ok) throw new Error('Erreur réseau (' + response.status + ')');
+                return response.json();
+            })
+            .then(function(data) {
+                console.log('📅 Données reçues:', data.length, 'entrées');
+                
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:#888;">Aucun emploi du temps pour cette classe.<br><small>Contactez la vie scolaire.</small></td></tr>';
+                    return;
+                }
+                
                 var html = '';
                 timeSlots.forEach(function(slot) {
-                    html += '<tr><td style="text-align:center;font-weight:600;">' + slot + '</td>';
+                    html += '<tr>';
+                    html += '<td style="text-align:center;font-weight:600;background:rgba(13,110,253,0.05);padding:10px;">' + slot + '</td>';
+                    
                     days.forEach(function(day) {
-                        var entry = data.find(function(e) { return e.day === day && e.time_slot === slot; });
+                        var entry = data.find(function(e) { 
+                            return e.day === day && e.time_slot === slot; 
+                        });
+                        
                         if (entry) {
-                            html += '<td style="background:' + (entry.color || '#0d6efd') + '22; text-align:center; border-left:4px solid ' + (entry.color || '#0d6efd') + '; padding:8px;">' +
-                                '<strong>' + entry.subject + '</strong>' +
-                                (entry.teacher ? '<br><small>' + entry.teacher + '</small>' : '') +
-                                (entry.room ? '<br><small>🏫 ' + entry.room + '</small>' : '') +
-                            '</td>';
+                            var bgColor = (entry.color || '#0d6efd') + '18';
+                            var borderColor = entry.color || '#0d6efd';
+                            html += '<td style="background:' + bgColor + '; text-align:center; border-left:4px solid ' + borderColor + '; padding:10px; transition: all 0.2s ease; cursor:default;" onmouseover="this.style.transform=\'scale(1.02)\';this.style.boxShadow=\'0 4px 15px rgba(0,0,0,0.1)\';" onmouseout="this.style.transform=\'\';this.style.boxShadow=\'\';">';
+                            html += '<strong style="color:' + borderColor + ';font-size:0.9rem;">' + escapeHtml(entry.subject) + '</strong>';
+                            if (entry.teacher) {
+                                html += '<br><small style="color:#666;">👨‍🏫 ' + escapeHtml(entry.teacher) + '</small>';
+                            }
+                            if (entry.room) {
+                                html += '<br><small style="color:#888;">🏫 ' + escapeHtml(entry.room) + '</small>';
+                            }
+                            html += '</td>';
                         } else {
-                            html += '<td style="text-align:center;color:#888;">-</td>';
+                            html += '<td style="text-align:center;color:#ccc;padding:10px;">-</td>';
                         }
                     });
+                    
                     html += '</tr>';
                 });
+                
                 tbody.innerHTML = html;
             })
-            .catch(function() {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:#dc3545;">Erreur de chargement</td></tr>';
+            .catch(function(error) {
+                console.error('❌ Erreur:', error);
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:#dc3545;">❌ Erreur de chargement<br><small>' + escapeHtml(error.message) + '</small><br><button class="btn btn-sm btn-outline-primary mt-2" onclick="loadTimetable(\'' + className + '\')">Réessayer</button></td></tr>';
             });
+    }
+    
+    function escapeHtml(text) {
+        if (!text) return '';
+        var div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 </script>
 
 <style>
-    .glass-card { background: rgba(255,255,255,0.08); backdrop-filter: blur(20px); border: 1px solid rgba(0,0,0,0.08); }
-    [data-theme="dark"] .glass-card { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.08); }
-    #timetableTable th, #timetableTable td { border-color: rgba(128,128,128,0.15); text-align: center; }
-    #timetableTable th { background: rgba(13,110,253,0.08); }
-    #timetableTable td { vertical-align: middle; }
+    .glass-card { 
+        background: rgba(255,255,255,0.08); 
+        backdrop-filter: blur(20px); 
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(0,0,0,0.08); 
+    }
+    [data-theme="dark"] .glass-card { 
+        background: rgba(255,255,255,0.05); 
+        border-color: rgba(255,255,255,0.08); 
+    }
+    #timetableTable { 
+        border-collapse: separate; 
+        border-spacing: 0;
+        width: 100%;
+    }
+    #timetableTable th { 
+        background: rgba(13,110,253,0.08); 
+        border: 1px solid rgba(128,128,128,0.15); 
+        text-align: center; 
+        padding: 12px 8px;
+        font-weight: 600;
+        color: #0d6efd;
+        font-size: 0.9rem;
+    }
+    #timetableTable td { 
+        border: 1px solid rgba(128,128,128,0.1); 
+        vertical-align: middle;
+    }
+    [data-theme="dark"] #timetableTable th { 
+        background: rgba(255,255,255,0.05); 
+        color: #fff;
+    }
+    [data-theme="dark"] #timetableTable td { 
+        border-color: rgba(255,255,255,0.05); 
+    }
+    @media (max-width: 768px) {
+        #timetableTable th, #timetableTable td {
+            padding: 6px 4px;
+            font-size: 0.75rem;
+        }
+    }
 </style>
 
 <%- include('../partials/footer') %>
