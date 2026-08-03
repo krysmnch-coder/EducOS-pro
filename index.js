@@ -24,6 +24,7 @@ const { ROLES } = require('./constants');
 const notificationModel = require('./src/models/notificationModel');
 const userModel = require('./src/models/userModel');
 const db = require('./src/models/db');
+const timetableModel = require('./src/models/timetableModel');
 const communicationModel = require('./src/models/communicationModel');
 const { createClient } = require("redis");
 const pgSession = require('connect-pg-simple')(session);
@@ -664,7 +665,9 @@ app.delete('/api/calendar/events/:id', async (req, res) => {
     }
 });
 const schoolLifeRoutes = require('./src/routes/schoolLifeRoutes');
+const timetableRoutes = require('./src/routes/timetableRoutes');
 app.use('/', schoolLifeRoutes);
+app.use('/', timetableRoutes);
 
 // Créer la table events si elle n'existe pas (sans migration)
 async function createEventsTable() {
@@ -1053,6 +1056,54 @@ app.get('/calendar-view', async (req, res) => {
         });
     } catch (error) {
         req.flash('error_msg', 'Erreur lors du chargement du calendrier.');
+        res.redirect('/dashboard');
+    }
+});
+
+// Emploi du temps (consultation)
+app.get('/timetable-view', async (req, res) => {
+    if (!req.user) return res.redirect('/login');
+    
+    try {
+        // Pour un élève, afficher directement sa classe
+        let defaultClass = '';
+        if (req.user.role === 'STUDENT' || req.user.role === 'eleve') {
+            defaultClass = req.user.student_class || '';
+        }
+        // Pour un parent, afficher la classe de l'enfant sélectionné
+        if (req.user.role === 'PARENT' || req.user.role === 'parent') {
+            if (req.session.selectedChildId) {
+                const child = await db('users').where({ id: req.session.selectedChildId }).first();
+                if (child) defaultClass = child.student_class || '';
+            }
+        }
+
+        const timetableClasses = await timetableModel.getClassesWithTimetable(req.user.establishment_id);
+        let classes = timetableClasses || [];
+
+        if (req.user.role === 'STUDENT' || req.user.role === 'eleve') {
+            classes = [defaultClass];
+        } else if (req.user.role === 'PARENT' || req.user.role === 'parent') {
+            const childClasses = [];
+            if (req.session.selectedChildId) {
+                const child = await db('users').where({ id: req.session.selectedChildId }).first();
+                if (child && child.student_class) childClasses.push(child.student_class);
+            }
+            classes = [...new Set([...classes, ...childClasses])];
+            if (!defaultClass && classes.length > 0) {
+                defaultClass = classes[0];
+            }
+        }
+
+        res.render('shared/timetable-view', {
+            title: 'Emploi du Temps',
+            user: req.user,
+            classes: classes,
+            defaultClass: defaultClass,
+            readOnly: true
+        });
+    } catch (error) {
+        req.flash('error_msg', 'Erreur lors du chargement.');
         res.redirect('/dashboard');
     }
 });
