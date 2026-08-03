@@ -710,18 +710,24 @@ app.get('/school-life/timetables', async (req, res) => {
         res.redirect('/dashboard');
     }
 });
-// Page emplois du temps
+// ==========================================================================
+// ROUTES EMPLOI DU TEMPS
+// ==========================================================================
+
+// Page emplois du temps (Vie Scolaire - édition)
 app.get('/school-life/timetables', async (req, res) => {
     if (!req.user) return res.redirect('/login');
     
     try {
-        // Récupérer la liste des classes
+        // Récupérer la liste des classes depuis la table users
         const classes = await db('users')
             .where({ establishment_id: req.user.establishment_id, role: 'STUDENT' })
             .distinct('student_class')
             .whereNotNull('student_class')
             .orderBy('student_class')
             .pluck('student_class');
+
+        console.log('📅 Classes disponibles:', classes);
 
         res.render('school-life/timetables', {
             title: 'Emplois du Temps',
@@ -735,52 +741,165 @@ app.get('/school-life/timetables', async (req, res) => {
     }
 });
 
+// Page emploi du temps (Consultation pour tous les rôles)
+app.get('/timetable-view', async (req, res) => {
+    if (!req.user) return res.redirect('/login');
+    
+    try {
+        let defaultClass = '';
+        let children = [];
+        let classes = [];
+
+        // ÉLÈVE : afficher directement sa classe
+        if (req.user.role === 'STUDENT' || req.user.role === 'eleve') {
+            defaultClass = req.user.student_class || '';
+            classes = [defaultClass];
+        }
+        // PARENT : classes des enfants
+        else if (req.user.role === 'PARENT' || req.user.role === 'parent') {
+            children = await userModel.getLinkedChildrenForParent(req.user.id);
+            classes = children.map(c => c.student_class).filter(Boolean);
+            classes = [...new Set(classes)];
+            if (classes.length > 0) {
+                defaultClass = classes[0];
+            }
+            if (req.session.selectedChildId) {
+                const selectedChild = children.find(c => c.id == req.session.selectedChildId);
+                if (selectedChild && selectedChild.student_class) {
+                    defaultClass = selectedChild.student_class;
+                }
+            }
+        }
+        // AUTRES : toutes les classes
+        else {
+            classes = await db('users')
+                .where({ establishment_id: req.user.establishment_id, role: 'STUDENT' })
+                .distinct('student_class')
+                .whereNotNull('student_class')
+                .orderBy('student_class')
+                .pluck('student_class');
+            if (classes.length > 0) {
+                defaultClass = classes[0];
+            }
+        }
+
+        console.log('📅 TimetableView - User:', req.user.name, 'Role:', req.user.role);
+        console.log('📅 Classes:', classes, 'Default:', defaultClass);
+
+        res.render('shared/timetable-view', {
+            title: 'Emploi du Temps',
+            user: req.user,
+            classes: classes,
+            defaultClass: defaultClass,
+            children: children,
+            readOnly: true
+        });
+    } catch (error) {
+        console.error('Erreur timetable-view:', error);
+        req.flash('error_msg', 'Erreur lors du chargement.');
+        res.redirect('/dashboard');
+    }
+});
+
 // API - Récupérer l'emploi du temps d'une classe
 app.get('/api/timetables/:className', async (req, res) => {
     if (!req.user) return res.status(401).json([]);
     
     try {
-        const entries = await db('timetables')
+        const className = req.params.className;
+        console.log('📅 API - Chargement emploi du temps pour:', className);
+        
+        // Chercher d'abord avec le nom exact
+        let entries = await db('timetables')
             .where({ 
                 establishment_id: req.user.establishment_id,
-                class_name: req.params.className 
+                class_name: className 
             })
-            .orderBy('day')
+            .orderBy('day_order')
             .orderBy('time_slot')
             .select('*');
         
-        res.json(entries);
+        // Si rien trouvé, essayer sans le filtre establishment_id
+        if (entries.length === 0) {
+            console.log('⚠️ Aucune entrée avec establishment_id, recherche sans...');
+            entries = await db('timetables')
+                .where({ class_name: className })
+                .orderBy('day_order')
+                .orderBy('time_slot')
+                .select('*');
+        }
+        
+        console.log('📅 Entrées trouvées:', entries.length);
+        
+        // Formater pour le frontend
+        const formatted = entries.map(entry => ({
+            id: entry.id,
+            day: entry.day,
+            time_slot: entry.time_slot,
+            subject: entry.subject,
+            teacher: entry.teacher,
+            room: entry.room,
+            color: entry.color
+        }));
+        
+        res.json(formatted);
     } catch (error) {
+        console.error('Erreur API timetables:', error);
         res.status(500).json([]);
     }
 });
 
-// API - Sauvegarder une entrée d'emploi du temps
+// API - Sauvegarder une entrée d'emploi du temps (Vie Scolaire)
 app.post('/api/timetables', async (req, res) => {
     if (!req.user) return res.status(401).json({ error: 'Non authentifié' });
     
     try {
         const { class_name, day, time_slot, subject, teacher, room, color } = req.body;
         
-        // Vérifier si l'entrée existe déjà
+        console.log('💾 Sauvegarde emploi du temps:', { class_name, day, time_slot, subject });
+        
+        const dayOrder = { 'Lundi': 1, 'Mardi': 2, 'Mercredi': 3, 'Jeudi': 4, 'Vendredi': 5 };
+        
         const existing = await db('timetables')
-            .where({ establishment_id: req.user.establishment_id, class_name, day, time_slot })
+            .where({ 
+                establishment_id: req.user.establishment_id, 
+                class_name, 
+                day, 
+                time_slot 
+            })
             .first();
         
         if (existing) {
             await db('timetables').where({ id: existing.id }).update({
-                subject, teacher, room, color, updated_at: new Date()
+                subject, 
+                teacher: teacher || null, 
+                room: room || null, 
+                color: color || '#0d6efd',
+                day_order: dayOrder[day] || 0,
+                updated_at: new Date()
             });
+            console.log('✅ Entrée mise à jour');
         } else {
             await db('timetables').insert({
                 establishment_id: req.user.establishment_id,
-                class_name, day, time_slot, subject, teacher, room, color: color || '#0d6efd',
-                created_by: req.user.id
+                class_name, 
+                day, 
+                day_order: dayOrder[day] || 0,
+                time_slot, 
+                subject, 
+                teacher: teacher || null, 
+                room: room || null, 
+                color: color || '#0d6efd',
+                created_by: req.user.id,
+                created_at: new Date(),
+                updated_at: new Date()
             });
+            console.log('✅ Nouvelle entrée créée');
         }
          
         res.json({ success: true });
     } catch (error) {
+        console.error('❌ Erreur sauvegarde:', error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -793,8 +912,59 @@ app.delete('/api/timetables/:id', async (req, res) => {
         await db('timetables')
             .where({ id: req.params.id, establishment_id: req.user.establishment_id })
             .del();
+        console.log('🗑️ Entrée supprimée:', req.params.id);
         res.json({ success: true });
     } catch (error) {
+        console.error('❌ Erreur suppression:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// API - Sauvegarder tout l'emploi du temps d'une classe (en masse)
+app.post('/api/timetables/bulk', async (req, res) => {
+    if (!req.user) return res.status(401).json({ error: 'Non authentifié' });
+    
+    try {
+        const { class_name, entries } = req.body;
+        
+        if (!class_name || !entries || !Array.isArray(entries)) {
+            return res.status(400).json({ error: 'Données invalides' });
+        }
+        
+        console.log('💾 Sauvegarde en masse:', class_name, entries.length, 'entrées');
+        
+        // Supprimer les anciennes entrées de cette classe
+        await db('timetables')
+            .where({ 
+                establishment_id: req.user.establishment_id,
+                class_name: class_name 
+            })
+            .del();
+        
+        // Insérer les nouvelles
+        const dayOrder = { 'Lundi': 1, 'Mardi': 2, 'Mercredi': 3, 'Jeudi': 4, 'Vendredi': 5 };
+        
+        for (const entry of entries) {
+            await db('timetables').insert({
+                establishment_id: req.user.establishment_id,
+                class_name: class_name,
+                day: entry.day,
+                day_order: dayOrder[entry.day] || 0,
+                time_slot: entry.time_slot,
+                subject: entry.subject,
+                teacher: entry.teacher || null,
+                room: entry.room || null,
+                color: entry.color || '#0d6efd',
+                created_by: req.user.id,
+                created_at: new Date(),
+                updated_at: new Date()
+            });
+        }
+
+        console.log('✅ Emploi du temps sauvegardé en masse');
+        res.json({ success: true });
+    } catch (error) {
+        console.error('❌ Erreur sauvegarde en masse:', error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -806,20 +976,31 @@ async function createTimetablesTable() {
         if (!hasTable) {
             await db.schema.createTable('timetables', function(table) {
                 table.increments('id').primary();
-                table.integer('establishment_id').notNullable();
-                table.string('class_name', 100).notNullable();
+                table.integer('establishment_id').notNullable().index();
+                table.string('class_name', 100).notNullable().index('idx_class');
                 table.string('day', 20).notNullable();
+                table.integer('day_order').defaultTo(0);
                 table.string('time_slot', 50).notNullable();
-                table.string('subject', 255).notNullable();
-                table.string('teacher', 255);
-                table.string('room', 100);
-                table.string('color', 7).defaultTo('#0d6efd');
+                table.string('subject', 100).notNullable();
+                table.string('teacher', 100);
+                table.string('room', 50);
+                table.string('color', 20).defaultTo('#0d6efd');
                 table.integer('created_by').notNullable();
                 table.timestamps(true, true);
+                table.index(['day_order', 'time_slot'], 'idx_day_slot');
             });
             console.log('✅ Table timetables créée');
         } else {
             console.log('✅ Table timetables existe déjà');
+            
+            // Vérifier si la colonne day_order existe
+            const hasDayOrder = await db.schema.hasColumn('timetables', 'day_order');
+            if (!hasDayOrder) {
+                await db.schema.alterTable('timetables', function(table) {
+                    table.integer('day_order').defaultTo(0);
+                });
+                console.log('✅ Colonne day_order ajoutée');
+            }
         }
     } catch (error) {
         console.error('❌ Erreur création table timetables:', error.message);
