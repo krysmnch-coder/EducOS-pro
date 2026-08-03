@@ -3,15 +3,32 @@
 
 <div class="container-fluid page-shell py-4">
     <div class="themed-container" style="max-width: 100%; padding: 0 20px;">
-        <h2 class="mb-4">Consultation des Absences & Retards</h2>
+        <h2 class="mb-4">
+            <% if (user.role === 'STUDENT' || user.role === 'eleve') { %>
+                Mes Absences & Retards
+            <% } else if (user.role === 'PARENT') { %>
+                Absences & Retards de mon enfant
+            <% } else { %>
+                Consultation des Absences & Retards
+            <% } %>
+        </h2>
         <%- include('../partials/messages') %>
         
         <div class="card glass-card p-3" style="border-radius:16px;">
             <div class="table-responsive">
                 <table class="table table-hover" id="absencesTable">
-                    <thead><tr><th>Date</th><th>Nom</th><th>Type</th><th>Justifié</th><th>Motif</th></tr></thead>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Nom</th>
+                            <th>Classe</th>
+                            <th>Type</th>
+                            <th>Statut</th>
+                            <th>Motif</th>
+                        </tr>
+                    </thead>
                     <tbody id="absencesBody">
-                        <tr><td colspan="5" class="text-center py-4">Chargement...</td></tr>
+                        <tr><td colspan="6" class="text-center py-4"><div class="spinner-border text-primary"></div></td></tr>
                     </tbody>
                 </table>
             </div>
@@ -20,36 +37,109 @@
 </div>
 
 <script>
-    var userId = '<%= userId || "" %>';
+    var userRole = '<%= user.role %>';
+    var userId = '<%= user.id %>';
+    var selectedChildId = '<%= typeof selectedChildId !== "undefined" ? selectedChildId : "" %>';
     
     document.addEventListener('DOMContentLoaded', function() {
-        if (userId) loadMyAbsences();
+        loadAbsences();
     });
     
-    function loadMyAbsences() {
-        var url = '/api/absences?user_id=' + userId;
-        fetch(url).then(r => r.json()).then(data => {
-            var tbody = document.getElementById('absencesBody');
-            if (!data || data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4">Aucune absence/retard</td></tr>';
+    function loadAbsences() {
+        var url = '/api/absences?';
+        
+        // ÉLÈVE : voir uniquement SES absences
+        if (userRole === 'STUDENT' || userRole === 'eleve') {
+            url += 'user_id=' + userId;
+        }
+        // PARENT : voir les absences de l'enfant sélectionné
+        else if (userRole === 'PARENT' || userRole === 'parent') {
+            if (selectedChildId) {
+                url += 'user_id=' + selectedChildId;
+            } else {
+                document.getElementById('absencesBody').innerHTML = 
+                    '<tr><td colspan="6" class="text-center py-4 text-muted">Veuillez sélectionner un enfant dans le tableau de bord.</td></tr>';
                 return;
             }
-            tbody.innerHTML = data.map(function(a) {
-                return '<tr>' +
-                    '<td>' + new Date(a.date).toLocaleDateString('fr-FR') + '</td>' +
-                    '<td>' + (a.user_name || '-') + '</td>' +
-                    '<td><span class="badge" style="background:' + (a.type === 'absence' ? '#dc3545' : '#fd7e14') + '">' + (a.type === 'absence' ? 'Absence' : 'Retard') + '</span></td>' +
-                    '<td><span class="badge" style="background:' + (a.status === 'justifiee' ? '#198754' : '#dc3545') + '">' + (a.status === 'justifiee' ? 'Justifiée' : 'Non justifiée') + '</span></td>' +
-                    '<td>' + (a.motif || '-') + '</td>' +
-                '</tr>';
-            }).join('');
-        });
+        }
+        // AUTRES : voir tout (ou filtrer)
+        else {
+            url += 'user_type=student';
+        }
+        
+        console.log('📊 Chargement absences:', url);
+        
+        fetch(url)
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                var tbody = document.getElementById('absencesBody');
+                
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">Aucune absence ou retard enregistré.</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = data.map(function(a) {
+                    var dateStr = a.date ? new Date(a.date).toLocaleDateString('fr-FR', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' }) : '-';
+                    var typeBadge = a.type === 'absence' 
+                        ? '<span class="badge" style="background:#dc3545;">Absence</span>' 
+                        : '<span class="badge" style="background:#fd7e14;">Retard</span>';
+                    var statusBadge = a.status === 'justifiee' 
+                        ? '<span class="badge" style="background:#198754;">Justifiée</span>' 
+                        : '<span class="badge" style="background:#dc3545;">Non justifiée</span>';
+                    
+                    return '<tr>' +
+                        '<td>' + dateStr + '</td>' +
+                        '<td><strong>' + escapeHtml(a.user_name || '-') + '</strong></td>' +
+                        '<td>' + escapeHtml(a.student_class || '-') + '</td>' +
+                        '<td>' + typeBadge + '</td>' +
+                        '<td>' + statusBadge + '</td>' +
+                        '<td><small>' + escapeHtml(a.motif || '-') + '</small></td>' +
+                    '</tr>';
+                }).join('');
+            })
+            .catch(function(error) {
+                console.error('❌ Erreur:', error);
+                document.getElementById('absencesBody').innerHTML = 
+                    '<tr><td colspan="6" class="text-center py-4 text-danger">Erreur de chargement</td></tr>';
+            });
+    }
+    
+    function escapeHtml(text) {
+        if (!text) return '';
+        var div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 </script>
+
 <style>
-    .glass-card { background: rgba(255,255,255,0.08); backdrop-filter: blur(20px); border: 1px solid rgba(0,0,0,0.08); }
-    [data-theme="dark"] .glass-card { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.08); }
-    #absencesTable th, #absencesTable td { border-color: rgba(128,128,128,0.15); vertical-align: middle; }
-    #absencesTable th { background: rgba(13,110,253,0.08); }
+    .glass-card { 
+        background: rgba(255,255,255,0.08); 
+        backdrop-filter: blur(20px); 
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(0,0,0,0.08); 
+    }
+    [data-theme="dark"] .glass-card { 
+        background: rgba(255,255,255,0.05); 
+        border-color: rgba(255,255,255,0.08); 
+    }
+    #absencesTable th, #absencesTable td { 
+        border-color: rgba(128,128,128,0.15); 
+        vertical-align: middle; 
+    }
+    #absencesTable th { 
+        background: rgba(13,110,253,0.08); 
+        font-weight: 600;
+        color: #0d6efd;
+    }
+    [data-theme="dark"] #absencesTable th { 
+        background: rgba(255,255,255,0.05); 
+        color: #fff;
+    }
+    #absencesTable tbody tr:hover {
+        background: rgba(13,110,253,0.03);
+    }
 </style>
+
 <%- include('../partials/footer') %>
