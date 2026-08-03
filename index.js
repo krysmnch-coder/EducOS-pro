@@ -735,22 +735,39 @@ app.get('/school-life/timetables', async (req, res) => {
     }
 });
 
-// API - Récupérer l'emploi du temps d'une classe
+// API - Récupérer l'emploi du temps d'une classe (version améliorée)
 app.get('/api/timetables/:className', async (req, res) => {
     if (!req.user) return res.status(401).json([]);
     
     try {
+        const className = req.params.className;
+        console.log('📅 API - Chargement emploi du temps pour:', className);
+        
         const entries = await db('timetables')
             .where({ 
                 establishment_id: req.user.establishment_id,
-                class_name: req.params.className 
+                class_name: className 
             })
-            .orderBy('day')
+            .orderBy('day_order')
             .orderBy('time_slot')
             .select('*');
         
-        res.json(entries);
+        console.log('📅 Entrées trouvées:', entries.length);
+        
+        // Formater pour le frontend
+        const formatted = entries.map(entry => ({
+            id: entry.id,
+            day: entry.day,
+            time_slot: entry.time_slot,
+            subject: entry.subject,
+            teacher: entry.teacher,
+            room: entry.room,
+            color: entry.color
+        }));
+        
+        res.json(formatted);
     } catch (error) {
+        console.error('Erreur API timetables:', error);
         res.status(500).json([]);
     }
 });
@@ -832,7 +849,38 @@ async function createTimetablesTable() {
     }
 }
 
+// Fonction pour s'assurer que la colonne day_order est peuplée
+async function populateDayOrderForTimetables() {
+    try {
+        // Vérifier si la colonne day_order existe avant de tenter de la mettre à jour
+        const hasDayOrderColumn = await db.schema.hasColumn('timetables', 'day_order');
+        if (hasDayOrderColumn) {
+            console.log('🔄 Vérification et mise à jour des day_order pour la table timetables...');
+            const dayOrderMap = { 'Lundi': 1, 'Mardi': 2, 'Mercredi': 3, 'Jeudi': 4, 'Vendredi': 5 };
+            let updatedCount = 0;
+            for (const day in dayOrderMap) {
+                // Mettre à jour seulement si day_order est encore à 0 (sa valeur par défaut)
+                // et que le jour correspond.
+                const result = await db('timetables')
+                    .where({ day: day, day_order: 0 })
+                    .update({ day_order: dayOrderMap[day] });
+                updatedCount += result;
+            }
+            if (updatedCount > 0) {
+                console.log(`✅ ${updatedCount} entrées day_order mises à jour dans la table timetables.`);
+            } else {
+                console.log('ℹ️ Aucune entrée day_order à mettre à jour dans la table timetables.');
+            }
+        } else {
+            console.log('ℹ️ La colonne day_order n\'existe pas encore dans timetables. Ignoré la mise à jour.');
+        }
+    } catch (error) {
+        console.error('❌ Erreur lors de la mise à jour des day_order:', error.message);
+    }
+}
+
 createTimetablesTable();
+populateDayOrderForTimetables(); // Appeler cette fonction après la création/vérification de la table
 
 // Page gestion des absences
 app.get('/school-life/absences', async (req, res) => {
@@ -1121,39 +1169,62 @@ app.get('/calendar-view', async (req, res) => {
     }
 });
 
-// Emploi du temps (consultation)
+// Emploi du temps (consultation) - CORRIGÉ
 app.get('/timetable-view', async (req, res) => {
     if (!req.user) return res.redirect('/login');
     
     try {
-        // Pour un élève, afficher directement sa classe
         let defaultClass = '';
+        let children = [];
+        let classes = [];
+
+        // ÉLÈVE : afficher directement sa classe
         if (req.user.role === 'STUDENT' || req.user.role === 'eleve') {
             defaultClass = req.user.student_class || '';
+            classes = [defaultClass];
         }
-        // Pour un parent, afficher la classe de l'enfant sélectionné
-        if (req.user.role === 'PARENT' || req.user.role === 'parent') {
+        // PARENT : classes des enfants
+        else if (req.user.role === 'PARENT' || req.user.role === 'parent') {
+            children = await userModel.getLinkedChildrenForParent(req.user.id);
+            classes = children.map(c => c.student_class).filter(Boolean);
+            classes = [...new Set(classes)]; // Supprimer les doublons
+            if (classes.length > 0) {
+                defaultClass = classes[0];
+            }
+            // Si un enfant est sélectionné dans la session
             if (req.session.selectedChildId) {
-                const child = await db('users').where({ id: req.session.selectedChildId }).first();
-                if (child) defaultClass = child.student_class || '';
+                const selectedChild = children.find(c => c.id == req.session.selectedChildId);
+                if (selectedChild && selectedChild.student_class) {
+                    defaultClass = selectedChild.student_class;
+                }
+            }
+        }
+        // AUTRES : toutes les classes de l'établissement
+        else {
+            classes = await db('users')
+                .where({ establishment_id: req.user.establishment_id, role: 'STUDENT' })
+                .distinct('student_class')
+                .whereNotNull('student_class')
+                .orderBy('student_class')
+                .pluck('student_class');
+            if (classes.length > 0) {
+                defaultClass = classes[0];
             }
         }
 
-        const classes = await db('users')
-            .where({ establishment_id: req.user.establishment_id, role: 'STUDENT' })
-            .distinct('student_class')
-            .whereNotNull('student_class')
-            .orderBy('student_class')
-            .pluck('student_class');
+        console.log('📅 TimetableView - User:', req.user.name, 'Role:', req.user.role);
+        console.log('📅 Classes:', classes, 'Default:', defaultClass);
 
         res.render('shared/timetable-view', {
             title: 'Emploi du Temps',
             user: req.user,
             classes: classes,
             defaultClass: defaultClass,
+            children: children,
             readOnly: true
         });
     } catch (error) {
+        console.error('Erreur timetable-view:', error);
         req.flash('error_msg', 'Erreur lors du chargement.');
         res.redirect('/dashboard');
     }
