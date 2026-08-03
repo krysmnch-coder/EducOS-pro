@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const timetableModel = require('../models/timetableModel');
 const userModel = require('../models/userModel');
-const db = require('../models/db');
 const { ROLES } = require('../../constants');
 
 // Middleware d'authentification
@@ -69,7 +68,7 @@ router.get('/api/timetables/:className', isAuthenticated, async (req, res) => {
     try {
         const className = req.params.className;
         console.log('📅 Chargement emploi du temps pour:', className);
-        const entries = await timetableModel.getFormattedTimetable(className, req.user.establishment_id);
+        const entries = await timetableModel.getFormattedTimetable(className);
         console.log('📅 Entrées trouvées:', entries.length);
         res.json(entries);
     } catch (error) {
@@ -108,8 +107,6 @@ router.post('/api/timetables', isAuthenticated, async (req, res) => {
         }
 
         await timetableModel.saveEntry({
-            establishment_id: req.user.establishment_id,
-            created_by: req.user.id,
             class_name,
             day,
             time_slot,
@@ -138,7 +135,7 @@ router.delete('/api/timetables/:id', isAuthenticated, async (req, res) => {
             return res.status(403).json({ error: 'Accès non autorisé' });
         }
 
-        await timetableModel.deleteEntry(req.params.id, req.user.establishment_id);
+        await timetableModel.deleteEntry(req.params.id);
         console.log('🗑️ Entrée supprimée:', req.params.id);
         res.json({ success: true });
 
@@ -164,26 +161,21 @@ router.post('/api/timetables/bulk', isAuthenticated, async (req, res) => {
             return res.status(400).json({ error: 'Données invalides' });
         }
 
-        // Utiliser une transaction pour garantir l'atomicité de l'opération
-        await db.transaction(async trx => {
-            // Supprimer les anciennes entrées
-            await timetableModel.deleteByClass(class_name, req.user.establishment_id, trx);
+        // Supprimer les anciennes entrées
+        await timetableModel.deleteByClass(class_name);
 
-            // Insérer les nouvelles
-            for (const entry of entries) {
-                await timetableModel.saveEntry({
-                    establishment_id: req.user.establishment_id,
-                    created_by: req.user.id,
-                    class_name,
-                    day: entry.day,
-                    time_slot: entry.time_slot,
-                    subject: entry.subject,
-                    teacher: entry.teacher || null,
-                    room: entry.room || null,
-                    color: entry.color || '#0d6efd'
-                }, trx);
-            }
-        });
+        // Insérer les nouvelles
+        for (const entry of entries) {
+            await timetableModel.saveEntry({
+                class_name,
+                day: entry.day,
+                time_slot: entry.time_slot,
+                subject: entry.subject,
+                teacher: entry.teacher || null,
+                room: entry.room || null,
+                color: entry.color || '#0d6efd'
+            });
+        }
 
         console.log('✅ Emploi du temps sauvegardé en masse:', class_name, entries.length, 'entrées');
         res.json({ success: true });

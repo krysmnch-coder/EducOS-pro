@@ -4,7 +4,7 @@
 <div class="container-fluid page-shell py-4">
     <div class="themed-container" style="max-width: 100%; padding: 0 20px;">
         <h2 class="mb-4">Emploi du Temps</h2>
-        <%- include('../partials/messages.ejs') %>
+        <%- include('../partials/messages') %>
         
         <% if (user.role !== 'STUDENT' && user.role !== 'eleve') { %>
         <div class="card glass-card mb-4 p-3" style="border-radius:16px;">
@@ -28,29 +28,38 @@
         <% } %>
         
         <div class="card glass-card p-3" style="border-radius:16px; display:none;" id="timetableContainer">
-            <%- include('../partials/_timetable-grid.ejs', { showChildSelector: true }) %>
-        </div>
-
-        <div class="text-center py-5" id="emptyState" style="display: none;">
-            <i data-feather="clock" style="width: 64px; height: 64px; color: #666; margin-bottom: 20px;"></i>
-            <h4 style="color: #fff;">Aucun emploi du temps</h4>
-            <p style="color: #888;" id="emptyStateMessage">Sélectionnez une classe pour commencer.</p>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="mb-0" id="timetableTitle">Emploi du temps</h4>
+                <% if (user.role === 'PARENT' && typeof children !== 'undefined' && children.length > 0) { %>
+                <div>
+                    <label class="form-label me-2 mb-0">Enfant :</label>
+                    <select class="form-select d-inline-block" style="width: auto;" id="childSelector">
+                        <% children.forEach(function(child) { %>
+                            <option value="<%= child.student_class %>" data-name="<%= child.name %>"><%= child.name %> (<%= child.student_class %>)</option>
+                        <% }); %>
+                    </select>
+                </div>
+                <% } %>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered" id="timetableTable">
+                    <thead><tr><th>Heures</th><th>Lundi</th><th>Mardi</th><th>Mercredi</th><th>Jeudi</th><th>Vendredi</th></tr></thead>
+                    <tbody id="timetableBody"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-    // ✅ Horaires étendus pour correspondre à l'éditeur (7h-18h)
-    const timeSlots = ['07:00-08:00', '08:00-09:00', '09:00-10:00', '10:00-11:00', '11:00-12:00', '12:00-13:00', '13:00-14:00', '14:00-15:00', '15:00-16:00', '16:00-17:00', '17:00-18:00'];
-    const days = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'];
-    const userRole = '<%= user.role %>';
-    const studentClass = '<%= user.student_class || "" %>';
-    const defaultClass = '<%= defaultClass || "" %>';
-    const parentChildren = <%- JSON.stringify(typeof children !== 'undefined' ? children : []) %>;
+    var timeSlots = ['08:00-09:00','09:00-10:00','10:00-11:00','11:00-12:00','12:00-13:00','13:00-14:00','14:00-15:00','15:00-16:00','16:00-17:00'];
+    var days = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi'];
+    var userRole = '<%= user.role %>';
+    var studentClass = '<%= user.student_class || "" %>';
+    var defaultClass = '<%= defaultClass || "" %>';
+    var parentChildren = <%- JSON.stringify(typeof children !== 'undefined' ? children : []) %>;
     
     document.addEventListener('DOMContentLoaded', function() {
-        if (typeof feather !== 'undefined') feather.replace();
-
         // ÉLÈVE : afficher directement son emploi du temps
         if (userRole === 'STUDENT' || userRole === 'eleve') {
             if (studentClass) {
@@ -61,31 +70,21 @@
         
         // PARENT : afficher l'emploi du temps du premier enfant
         if (userRole === 'PARENT') {
-            const childSelector = document.getElementById('childSelector');
             if (parentChildren.length > 0) {
-                parentChildren.forEach(child => {
-                    const option = document.createElement('option');
-                    option.value = child.student_class;
-                    option.textContent = `${child.name} (${child.student_class})`;
-                    childSelector.appendChild(option);
-                });
-                loadTimetable(childSelector.value);
+                loadTimetable(parentChildren[0].student_class);
             }
             // Écouter le changement d'enfant
+            var childSelector = document.getElementById('childSelector');
             if (childSelector) {
                 childSelector.addEventListener('change', function() {
-                    const selectedClass = this.value;
+                    var selectedClass = this.options[this.selectedIndex].value;
                     loadTimetable(selectedClass);
                 });
             }
             return;
         }
         
-        // AUTRES RÔLES (Prof, Admin, etc.)
-        const classSelector = document.getElementById('classSelector');
-        if (classSelector && classSelector.options.length <= 1) {
-            showEmptyState('Aucune classe avec un emploi du temps n\'a été trouvée.');
-        }
+        // AUTRES : afficher la classe par défaut si elle existe
         if (defaultClass) { 
             loadTimetable(defaultClass); 
         }
@@ -94,73 +93,43 @@
         var btnLoad = document.getElementById('btnLoad');
         if (btnLoad) {
             btnLoad.addEventListener('click', function() {
-                const cls = classSelector.value;
+                var cls = document.getElementById('classSelector').value;
                 if (cls) loadTimetable(cls);
             });
         }
     });
     
     function loadTimetable(className) {
-        if (!className) {
-            showEmptyState('Veuillez sélectionner une classe pour afficher son emploi du temps.');
-            return;
-        }
-
-        document.getElementById('emptyState').style.display = 'none';
         document.getElementById('timetableContainer').style.display = 'block';
         document.getElementById('timetableTitle').textContent = 'Emploi du temps - ' + className;
-        const tbody = document.getElementById('timetableBody');
+        var tbody = document.getElementById('timetableBody');
         tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;"><div class="spinner-border text-primary"></div></td></tr>';
         
-        fetch('/api/timetables/' + encodeURIComponent(className), { credentials: 'same-origin' })
-            .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+        fetch('/api/timetables/' + encodeURIComponent(className))
+            .then(r => r.json())
             .then(data => {
-                if (data.length === 0) {
-                    showEmptyState(`L'emploi du temps pour la classe <strong>${className}</strong> n'a pas encore été configuré.`);
-                    return;
-                }
-
-                let html = '<thead><tr><th style="width:100px;">Heures</th>';
-                days.forEach(day => html += `<th>${day}</th>`);
-                html += '</tr></thead>';
-
+                var html = '';
                 timeSlots.forEach(function(slot) {
-                    html += `<tr><td style="font-weight:600;font-size:0.85rem;">${slot}</td>`;
+                    html += '<tr><td style="text-align:center;font-weight:600;">' + slot + '</td>';
                     days.forEach(function(day) {
-                        const entry = data.find(e => e.day === day && e.time_slot === slot);
+                        var entry = data.find(function(e) { return e.day === day && e.time_slot === slot; });
                         if (entry) {
-                            const teacher = entry.teacher ? `<br><small>${escapeHtml(entry.teacher)}</small>` : '';
-                            const room = entry.room ? `<br><small style="opacity: 0.7;">Salle ${escapeHtml(entry.room)}</small>` : '';
-                            html += `<td style="background:${entry.color || '#0d6efd'}22; border-left:4px solid ${entry.color || '#0d6efd'}; padding:8px;">
-                                        <strong style="font-size:0.9rem;">${escapeHtml(entry.subject)}</strong>
-                                        ${teacher}
-                                        ${room}
-                                     </td>`;
+                            html += '<td style="background:' + (entry.color || '#0d6efd') + '22; text-align:center; border-left:4px solid ' + (entry.color || '#0d6efd') + '; padding:8px;">' +
+                                '<strong>' + entry.subject + '</strong>' +
+                                (entry.teacher ? '<br><small>' + entry.teacher + '</small>' : '') +
+                                (entry.room ? '<br><small>🏫 ' + entry.room + '</small>' : '') +
+                            '</td>';
                         } else {
-                            html += '<td style="color:#888;">-</td>';
+                            html += '<td style="text-align:center;color:#888;">-</td>';
                         }
                     });
                     html += '</tr>';
                 });
-                document.getElementById('timetableTable').innerHTML = html;
+                tbody.innerHTML = html;
             })
-            .catch(function(err) {
-                console.error(err);
-                showEmptyState('Une erreur est survenue lors du chargement de l\'emploi du temps.');
+            .catch(function() {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:#dc3545;">Erreur de chargement</td></tr>';
             });
-    }
-
-    function showEmptyState(message) {
-        document.getElementById('timetableContainer').style.display = 'none';
-        document.getElementById('emptyState').style.display = 'block';
-        document.getElementById('emptyStateMessage').innerHTML = message;
-    }
-
-    function escapeHtml(text) {
-        if (!text) return '';
-        const d = document.createElement('div');
-        d.textContent = text;
-        return d.innerHTML;
     }
 </script>
 
