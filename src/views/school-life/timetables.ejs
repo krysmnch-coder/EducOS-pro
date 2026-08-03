@@ -22,10 +22,10 @@
                             <option value="Seconde" style="background:#1a1a2e;">Seconde</option>
                         </optgroup>
                         <optgroup label="Collège">
-                            <option value="Troisième" style="background:#1a1a2e;">3ème</option>
-                            <option value="Quatrième" style="background:#1a1a2e;">quatrième</option>
-                            <option value="Cinquième" style="background:#1a1a2e;">5ème</option>
-                            <option value="Sixième" style="background:#1a1a2e;">6ème</option>
+                            <option value="Troisième" style="background:#1a1a2e;">Troisième</option>
+                            <option value="Quatrième" style="background:#1a1a2e;">Quatrième</option>
+                            <option value="Cinquième" style="background:#1a1a2e;">Cinquième</option>
+                            <option value="Sixième" style="background:#1a1a2e;">Sixième</option>
                         </optgroup>
                         <optgroup label="Primaire">
                             <option value="CM2" style="background:#1a1a2e;">CM2</option>
@@ -272,8 +272,8 @@
     });
 
     function loadTimetable(className) {
-        fetch('/api/timetables/' + encodeURIComponent(className), { credentials: 'same-origin' })
-            .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+        fetch('/api/timetables/' + encodeURIComponent(className))
+            .then(function(r) { return r.json(); })
             .then(function(data) { timetableData = data; renderTimetable(data); })
             .catch(function() { timetableData = []; renderTimetable([]); });
     }
@@ -421,7 +421,6 @@
             const promises = selectedCells.map(function(cell) {
                 return fetch('/api/timetables', {
                     method: 'POST',
-                    credentials: 'same-origin',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         class_name: currentClass.trim(),
