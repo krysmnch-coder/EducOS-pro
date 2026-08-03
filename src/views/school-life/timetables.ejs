@@ -415,43 +415,46 @@
         new bootstrap.Modal(document.getElementById('entryModal')).show();
     }
 
-    function normalizeClassName(className) {
-    // Table de correspondance : noms longs → noms courts (comme dans users.student_class)
-    const classMap = {
+   // Ajoutez cette fonction AVANT saveEntry
+function normalizeClassName(className) {
+    if (!className) return '';
+    
+    // Table de correspondance : noms longs → noms courts
+    var classMap = {
         'Sixième': '6ème', 'Cinquième': '5ème', 'Quatrième': '4ème', 'Troisième': '3ème',
         'Seconde': '2nde', 'Première': '1ère', 'Terminale': 'Tle',
-        'Grande Section': 'GS', 'Moyenne Section': 'MS', 'Petite Section': 'PS', 'Toute Petite Section': 'TPS',
-        'CM2': 'CM2', 'CM1': 'CM1', 'CE2': 'CE2', 'CE1': 'CE1', 'CP': 'CP'
+        'Grande Section': 'GS', 'Moyenne Section': 'MS', 'Petite Section': 'PS', 'Toute Petite Section': 'TPS'
     };
     
-    // Extraire le niveau de base (ex: "Quatrième A 1" → "Quatrième")
-    var parts = className.split(' ');
+    // Extraire le premier mot (le niveau)
+    var parts = className.trim().split(' ');
     var level = parts[0];
-    var rest = parts.slice(1).join(' ');
+    var rest = parts.slice(1).join(' '); // lettre + numéro
     
     // Normaliser le niveau
     var normalizedLevel = classMap[level] || level;
     
-    // Reconstruire avec le reste (lettre + numéro)
+    // Reconstruire
     return normalizedLevel + (rest ? ' ' + rest : '');
 }
 
+// MODIFIEZ saveEntry pour utiliser la normalisation
 function saveEntry() {
-    const subject = document.getElementById('entrySubject').value;
+    var subject = document.getElementById('entrySubject').value;
     if (!subject) return alert('Veuillez choisir une matière.');
-    const isBulk = document.getElementById('isBulkMode').value === 'true';
+    var isBulk = document.getElementById('isBulkMode').value === 'true';
 
-    // Normaliser le nom de classe
-    var normalizedClass = normalizeClassName(currentClass.trim());
-    console.log('💾 Sauvegarde - Original:', currentClass.trim(), '→ Normalisé:', normalizedClass);
+    // NORMALISER LE NOM DE CLASSE
+    var className = normalizeClassName(currentClass.trim());
+    console.log('💾 Sauvegarde:', currentClass.trim(), '→', className);
 
     if (isBulk && selectedCells.length > 0) {
-        const promises = selectedCells.map(function(cell) {
+        var promises = selectedCells.map(function(cell) {
             return fetch('/api/timetables', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    class_name: normalizedClass,
+                    class_name: className,
                     day: cell.day,
                     time_slot: cell.time_slot,
                     subject: subject,
@@ -461,18 +464,15 @@ function saveEntry() {
                 })
             });
         });
-
         Promise.all(promises).then(function() {
             selectedCells = [];
             updateSelectionUI();
             loadTimetable(currentClass.trim());
             bootstrap.Modal.getInstance(document.getElementById('entryModal')).hide();
-        }).catch(function(err) {
-            alert('Erreur: ' + err.message);
-        });
+        }).catch(function(err) { alert('Erreur: ' + err.message); });
     } else {
-        const data = {
-            class_name: normalizedClass,
+        var data = {
+            class_name: className,
             day: document.getElementById('entryDay').value,
             time_slot: document.getElementById('entryTimeSlot').value,
             subject: subject,
@@ -494,6 +494,17 @@ function saveEntry() {
         })
         .catch(function(err) { alert('Erreur réseau: ' + err.message); });
     }
+}
+
+// MODIFIEZ AUSSI loadTimetable
+function loadTimetable(className) {
+    var normalizedClass = normalizeClassName(className);
+    console.log('Chargement:', className, '→', normalizedClass);
+    
+    fetch('/api/timetables/' + encodeURIComponent(normalizedClass))
+        .then(function(r) { return r.json(); })
+        .then(function(data) { timetableData = data; renderTimetable(data); })
+        .catch(function() { timetableData = []; renderTimetable([]); });
 }
     function deleteEntry() {
         const id = document.getElementById('entryId').value;
