@@ -12,12 +12,6 @@
                 Consultation des Absences & Retards
             <% } %>
         </h2>
-        <div style="background:yellow; color:black; padding:10px; margin:10px;">
-    DEBUG - User Role: <b><%= user.role %></b><br>
-    Children count: <b><%= typeof children !== 'undefined' ? children.length : 'NON DÉFINI' %></b><br>
-    SelectedChildId: <b><%= typeof selectedChildId !== 'undefined' ? selectedChildId : 'NON DÉFINI' %></b><br>
-    UserId: <b><%= userId || 'NON DÉFINI' %></b>
-</div>
         <%- include('../partials/messages') %>
         
         <%# Sélecteur d'enfant pour les parents (AFFICHÉ ICI, PAS DANS LE DASHBOARD) %>

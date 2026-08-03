@@ -1408,7 +1408,7 @@ app.get('/api/timetables/:className', async (req, res) => {
     }
 });
 
-// Absences (consultation)
+// Absences (consultation) - CORRIGÉ
 app.get('/absences-view', async (req, res) => {
     if (!req.user) return res.redirect('/login');
     
@@ -1417,20 +1417,15 @@ app.get('/absences-view', async (req, res) => {
         let children = [];
         let selectedChildId = null;
 
-        // ÉLÈVE : voir ses propres absences
         if (req.user.role === 'STUDENT' || req.user.role === 'eleve') {
             userId = req.user.id;
-        }
-        // PARENT : récupérer les enfants
-        else if (req.user.role === 'PARENT' || req.user.role === 'parent') {
+        } else if (req.user.role === 'PARENT' || req.user.role === 'parent') {
             children = await userModel.getLinkedChildrenForParent(req.user.id);
             if (req.session.selectedChildId) {
                 selectedChildId = req.session.selectedChildId;
                 userId = req.session.selectedChildId;
             }
-        }
-        // PROFESSEUR : voir ses propres absences
-        else if (req.user.role === 'PROFESSOR' || req.user.role === 'professeur') {
+        } else if (req.user.role === 'PROFESSOR' || req.user.role === 'professeur') {
             userId = req.user.id;
         }
 
@@ -1441,15 +1436,13 @@ app.get('/absences-view', async (req, res) => {
             .orderBy('student_class')
             .pluck('student_class');
 
-        console.log('📊 AbsencesView - User:', req.user.name, 'Children:', children.length);
-
         res.render('shared/absences-view', {
             title: 'Consultation des Absences',
             user: req.user,
             classes: classes,
             userId: userId,
-            children: children,           // ← AJOUTÉ
-            selectedChildId: selectedChildId, // ← AJOUTÉ
+            children: children,
+            selectedChildId: selectedChildId,
             readOnly: true
         });
     } catch (error) {
