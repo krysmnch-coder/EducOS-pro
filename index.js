@@ -1057,44 +1057,6 @@ app.get('/calendar-view', async (req, res) => {
     }
 });
 
-// Emploi du temps (consultation)
-app.get('/timetable-view', async (req, res) => {
-    if (!req.user) return res.redirect('/login');
-    
-    try {
-        // Pour un élève, afficher directement sa classe
-        let defaultClass = '';
-        if (req.user.role === 'STUDENT' || req.user.role === 'eleve') {
-            defaultClass = req.user.student_class || '';
-        }
-        // Pour un parent, afficher la classe de l'enfant sélectionné
-        if (req.user.role === 'PARENT' || req.user.role === 'parent') {
-            if (req.session.selectedChildId) {
-                const child = await db('users').where({ id: req.session.selectedChildId }).first();
-                if (child) defaultClass = child.student_class || '';
-            }
-        }
-
-        const classes = await db('users')
-            .where({ establishment_id: req.user.establishment_id, role: 'STUDENT' })
-            .distinct('student_class')
-            .whereNotNull('student_class')
-            .orderBy('student_class')
-            .pluck('student_class');
-
-        res.render('shared/timetable-view', {
-            title: 'Emploi du Temps',
-            user: req.user,
-            classes: classes,
-            defaultClass: defaultClass,
-            readOnly: true
-        });
-    } catch (error) {
-        req.flash('error_msg', 'Erreur lors du chargement.');
-        res.redirect('/dashboard');
-    }
-});
-
 // Absences (consultation)
 app.get('/absences-view', async (req, res) => {
     if (!req.user) return res.redirect('/login');
