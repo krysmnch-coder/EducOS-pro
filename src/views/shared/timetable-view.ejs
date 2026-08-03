@@ -52,10 +52,10 @@
                 <h4 class="mb-0" id="timetableTitle">Emploi du temps</h4>
             </div>
             <div class="table-responsive">
-                <table class="table table-bordered" id="timetableTable">
+                <table class="table table-bordered timetable-grid" id="timetableTable">
                     <thead>
                         <tr>
-                            <th style="width: 120px;">Heures</th>
+                            <th style="width: 100px;">Heures</th>
                             <th>Lundi</th>
                             <th>Mardi</th>
                             <th>Mercredi</th>
@@ -73,9 +73,10 @@
 </div>
 
 <script>
+    // Mêmes créneaux que timetables.ejs
     var timeSlots = [
-        '07:00-08:00', '08:00-09:00', '09:00-10:00', '10:00-11:00', 
-        '11:00-12:00', '12:00-13:00', '13:00-14:00', '14:00-15:00', 
+        '07:00-08:00', '08:00-09:00', '09:00-10:00', '10:00-11:00',
+        '11:00-12:00', '12:00-13:00', '13:00-14:00', '14:00-15:00',
         '15:00-16:00', '16:00-17:00', '17:00-18:00'
     ];
     var days = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'];
@@ -84,24 +85,38 @@
     var defaultClass = '<%= defaultClass || "" %>';
     var parentChildren = <%- JSON.stringify(typeof children !== 'undefined' ? children : []) %>;
     
+    // Table de correspondance noms longs → noms courts
+    var classNameMap = {
+        'Sixième': '6ème', 'Cinquième': '5ème', 'Quatrième': '4ème', 'Troisième': '3ème',
+        'Seconde': '2nde', 'Première': '1ère', 'Terminale': 'Tle'
+    };
+    
+    function normalizeClassName(name) {
+        if (!name) return '';
+        if (/^\d/.test(name)) return name;
+        var normalized = classNameMap[name];
+        if (normalized) return normalized;
+        var lower = name.toLowerCase().trim();
+        for (var key in classNameMap) {
+            if (key.toLowerCase() === lower) return classNameMap[key];
+        }
+        return name;
+    }
+    
     document.addEventListener('DOMContentLoaded', function() {
-        // ÉLÈVE : afficher directement son emploi du temps
         if (userRole === 'STUDENT' || userRole === 'eleve') {
             if (studentClass) {
                 loadTimetable(studentClass);
             } else {
                 document.getElementById('timetableContainer').style.display = 'block';
                 document.getElementById('timetableBody').innerHTML = 
-                    '<tr><td colspan="6" style="text-align:center;padding:30px;color:#888;">Aucune classe assignée à votre compte.</td></tr>';
+                    '<tr><td colspan="6" class="empty-cell">Aucune classe assignée à votre compte.</td></tr>';
             }
             return;
         }
         
-        // PARENT : afficher et écouter le changement d'enfant
         if (userRole === 'PARENT') {
-            if (defaultClass) {
-                loadTimetable(defaultClass);
-            }
+            if (defaultClass) loadTimetable(defaultClass);
             var childSelector = document.getElementById('childSelector');
             if (childSelector) {
                 childSelector.addEventListener('change', function() {
@@ -111,21 +126,14 @@
             return;
         }
         
-        // AUTRES : charger la classe par défaut
-        if (defaultClass) { 
-            loadTimetable(defaultClass); 
-        }
+        if (defaultClass) loadTimetable(defaultClass);
         
-        // Bouton pour charger une classe
         var btnLoad = document.getElementById('btnLoad');
         if (btnLoad) {
             btnLoad.addEventListener('click', function() {
                 var cls = document.getElementById('classSelector').value;
-                if (cls) {
-                    loadTimetable(cls);
-                } else {
-                    alert('Veuillez sélectionner une classe.');
-                }
+                if (cls) loadTimetable(cls);
+                else alert('Veuillez sélectionner une classe.');
             });
         }
     });
@@ -133,7 +141,8 @@
     function loadTimetable(className) {
         if (!className) return;
         
-        console.log('📅 Chargement emploi du temps pour:', className);
+        var normalized = normalizeClassName(className);
+        console.log('📅 Chargement:', className, '→', normalized);
         
         var container = document.getElementById('timetableContainer');
         var title = document.getElementById('timetableTitle');
@@ -141,45 +150,46 @@
         
         container.style.display = 'block';
         title.textContent = 'Emploi du temps - ' + className;
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;"><div class="spinner-border text-primary"></div><p class="mt-2 text-muted">Chargement...</p></td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="loading-cell"><div class="spinner-border text-primary"></div><p class="mt-2">Chargement...</p></td></tr>';
         
-        fetch('/api/timetables/' + encodeURIComponent(className))
-            .then(function(response) {
-                if (!response.ok) throw new Error('Erreur réseau (' + response.status + ')');
-                return response.json();
+        // Essayer avec le nom normalisé
+        fetch('/api/timetables/' + encodeURIComponent(normalized))
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.length === 0 && normalized !== className) {
+                    return fetch('/api/timetables/' + encodeURIComponent(className)).then(function(r) { return r.json(); });
+                }
+                return data;
             })
             .then(function(data) {
-                console.log('📅 Données reçues:', data.length, 'entrées');
+                console.log('📅 Entrées:', data.length);
                 
                 if (data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:#888;">Aucun emploi du temps pour cette classe.<br><small>Contactez la vie scolaire.</small></td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="6" class="empty-cell">Aucun emploi du temps pour cette classe.<br><small>Contactez la vie scolaire.</small></td></tr>';
                     return;
                 }
                 
                 var html = '';
                 timeSlots.forEach(function(slot) {
                     html += '<tr>';
-                    html += '<td style="text-align:center;font-weight:600;background:rgba(13,110,253,0.05);padding:10px;">' + slot + '</td>';
+                    html += '<td class="time-slot-cell">' + slot + '</td>';
                     
                     days.forEach(function(day) {
-                        var entry = data.find(function(e) { 
-                            return e.day === day && e.time_slot === slot; 
-                        });
+                        var entry = data.find(function(e) { return e.day === day && e.time_slot === slot; });
                         
                         if (entry) {
-                            var bgColor = (entry.color || '#0d6efd') + '18';
-                            var borderColor = entry.color || '#0d6efd';
-                            html += '<td style="background:' + bgColor + '; text-align:center; border-left:4px solid ' + borderColor + '; padding:10px; transition: all 0.2s ease; cursor:default;" onmouseover="this.style.transform=\'scale(1.02)\';this.style.boxShadow=\'0 4px 15px rgba(0,0,0,0.1)\';" onmouseout="this.style.transform=\'\';this.style.boxShadow=\'\';">';
-                            html += '<strong style="color:' + borderColor + ';font-size:0.9rem;">' + escapeHtml(entry.subject) + '</strong>';
+                            var color = entry.color || '#0d6efd';
+                            html += '<td class="subject-cell" style="background:' + color + '15; border-left:4px solid ' + color + ';" data-color="' + color + '">';
+                            html += '<div class="subject-name">' + escapeHtml(entry.subject) + '</div>';
                             if (entry.teacher) {
-                                html += '<br><small style="color:#666;">👨‍🏫 ' + escapeHtml(entry.teacher) + '</small>';
+                                html += '<div class="subject-teacher">👨‍🏫 ' + escapeHtml(entry.teacher) + '</div>';
                             }
                             if (entry.room) {
-                                html += '<br><small style="color:#888;">🏫 ' + escapeHtml(entry.room) + '</small>';
+                                html += '<div class="subject-room">🏫 ' + escapeHtml(entry.room) + '</div>';
                             }
                             html += '</td>';
                         } else {
-                            html += '<td style="text-align:center;color:#ccc;padding:10px;">-</td>';
+                            html += '<td class="empty-slot">-</td>';
                         }
                     });
                     
@@ -190,7 +200,7 @@
             })
             .catch(function(error) {
                 console.error('❌ Erreur:', error);
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:#dc3545;">❌ Erreur de chargement<br><small>' + escapeHtml(error.message) + '</small><br><button class="btn btn-sm btn-outline-primary mt-2" onclick="loadTimetable(\'' + className + '\')">Réessayer</button></td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="error-cell">❌ Erreur de chargement<br><small>' + escapeHtml(error.message) + '</small><br><button class="btn btn-sm btn-outline-primary mt-2" onclick="loadTimetable(\'' + className + '\')">Réessayer</button></td></tr>';
             });
     }
     
@@ -203,6 +213,7 @@
 </script>
 
 <style>
+    /* Style identique à timetables.ejs */
     .glass-card { 
         background: rgba(255,255,255,0.08); 
         backdrop-filter: blur(20px); 
@@ -213,36 +224,112 @@
         background: rgba(255,255,255,0.05); 
         border-color: rgba(255,255,255,0.08); 
     }
-    #timetableTable { 
-        border-collapse: separate; 
-        border-spacing: 0;
+    
+    .timetable-grid {
+        border-collapse: collapse;
         width: 100%;
+        background: transparent;
     }
-    #timetableTable th { 
-        background: rgba(13,110,253,0.08); 
-        border: 1px solid rgba(128,128,128,0.15); 
-        text-align: center; 
-        padding: 12px 8px;
-        font-weight: 600;
+    .timetable-grid th {
+        background: rgba(13,110,253,0.1);
         color: #0d6efd;
-        font-size: 0.9rem;
+        font-weight: 700;
+        text-align: center;
+        padding: 12px 8px;
+        border: 1px solid rgba(13,110,253,0.15);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
-    #timetableTable td { 
-        border: 1px solid rgba(128,128,128,0.1); 
+    .timetable-grid td {
+        border: 1px solid rgba(128,128,128,0.1);
+        padding: 10px 8px;
         vertical-align: middle;
+        transition: all 0.2s ease;
     }
-    [data-theme="dark"] #timetableTable th { 
-        background: rgba(255,255,255,0.05); 
+    .time-slot-cell {
+        text-align: center;
+        font-weight: 600;
+        background: rgba(13,110,253,0.03);
+        color: #495057;
+        font-size: 0.8rem;
+        min-width: 100px;
+    }
+    .subject-cell {
+        text-align: center;
+        padding: 8px !important;
+        cursor: default;
+        transition: all 0.2s ease;
+    }
+    .subject-cell:hover {
+        transform: scale(1.03);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        z-index: 1;
+        position: relative;
+    }
+    .subject-name {
+        font-weight: 700;
+        font-size: 0.85rem;
+        margin-bottom: 2px;
+    }
+    .subject-teacher {
+        font-size: 0.7rem;
+        color: #666;
+        margin-top: 2px;
+    }
+    .subject-room {
+        font-size: 0.7rem;
+        color: #888;
+        margin-top: 1px;
+    }
+    .empty-slot {
+        text-align: center;
+        color: #ccc;
+        font-size: 0.8rem;
+    }
+    .empty-cell {
+        text-align: center;
+        padding: 30px !important;
+        color: #888;
+    }
+    .loading-cell {
+        text-align: center;
+        padding: 30px !important;
+    }
+    .error-cell {
+        text-align: center;
+        padding: 30px !important;
+        color: #dc3545;
+    }
+    
+    [data-theme="dark"] .timetable-grid th {
+        background: rgba(255,255,255,0.05);
         color: #fff;
+        border-color: rgba(255,255,255,0.1);
     }
-    [data-theme="dark"] #timetableTable td { 
-        border-color: rgba(255,255,255,0.05); 
+    [data-theme="dark"] .timetable-grid td {
+        border-color: rgba(255,255,255,0.05);
     }
+    [data-theme="dark"] .time-slot-cell {
+        background: rgba(255,255,255,0.02);
+        color: rgba(255,255,255,0.7);
+    }
+    [data-theme="dark"] .subject-teacher { color: rgba(255,255,255,0.6); }
+    [data-theme="dark"] .subject-room { color: rgba(255,255,255,0.4); }
+    [data-theme="dark"] .empty-slot { color: rgba(255,255,255,0.2); }
+    
     @media (max-width: 768px) {
-        #timetableTable th, #timetableTable td {
+        .timetable-grid th,
+        .timetable-grid td {
             padding: 6px 4px;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
         }
+        .time-slot-cell {
+            font-size: 0.65rem;
+            min-width: 70px;
+        }
+        .subject-name { font-size: 0.7rem; }
+        .subject-teacher, .subject-room { font-size: 0.6rem; }
     }
 </style>
 

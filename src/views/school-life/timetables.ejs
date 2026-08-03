@@ -3,297 +3,495 @@
 
 <div class="container-fluid page-shell py-4">
     <div class="themed-container" style="max-width: 100%; padding: 0 20px;">
-        <h2 class="mb-4">Emploi du Temps</h2>
-        <%- include('../partials/messages') %>
         
-        <%# Sélecteur de classe (caché pour les élèves) %>
-        <% if (user.role !== 'STUDENT' && user.role !== 'eleve') { %>
-        <div class="card glass-card mb-4 p-3" style="border-radius:16px;">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i data-feather="clock"></i> Emplois du Temps</h2>
+        </div>
+
+        <%- include('../partials/messages') %>
+
+        <div class="card glass-card mb-4" style="border-radius: 16px; padding: 20px;">
             <div class="row align-items-end">
-                <div class="col-md-4">
-                    <label class="form-label">Classe</label>
-                    <select class="form-select" id="classSelector">
-                        <option value="">-- Choisir une classe --</option>
-                        <% if (typeof classes !== 'undefined' && classes.length > 0) { %>
-                            <% classes.forEach(function(cls) { %>
-                                <option value="<%= cls %>" <%= cls === defaultClass ? 'selected' : '' %>><%= cls %></option>
-                            <% }); %>
-                        <% } %>
+                <div class="col-md-5">
+                    <label class="form-label" style="color: #fff; font-weight: 500;">Niveau</label>
+                    <select class="form-select" id="classLevel" style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.15);">
+                        <option value="" disabled selected style="background:#1a1a2e;">-- Choisir un niveau --</option>
+                        <optgroup label="Lycée">
+                            <option value="Terminale" style="background:#1a1a2e;">Terminale</option>
+                            <option value="Première" style="background:#1a1a2e;">Première</option>
+                            <option value="Seconde" style="background:#1a1a2e;">Seconde</option>
+                        </optgroup>
+                        <optgroup label="Collège">
+                            <option value="Troisième" style="background:#1a1a2e;">Troisième</option>
+                            <option value="Quatrième" style="background:#1a1a2e;">Quatrième</option>
+                            <option value="Cinquième" style="background:#1a1a2e;">Cinquième</option>
+                            <option value="Sixième" style="background:#1a1a2e;">Sixième</option>
+                        </optgroup>
+                        <optgroup label="Primaire">
+                            <option value="CM2" style="background:#1a1a2e;">CM2</option>
+                            <option value="CM1" style="background:#1a1a2e;">CM1</option>
+                            <option value="CE2" style="background:#1a1a2e;">CE2</option>
+                            <option value="CE1" style="background:#1a1a2e;">CE1</option>
+                            <option value="CP" style="background:#1a1a2e;">CP</option>
+                        </optgroup>
+                        <optgroup label="Maternelle">
+                            <option value="Grande Section" style="background:#1a1a2e;">Grande Section</option>
+                            <option value="Moyenne Section" style="background:#1a1a2e;">Moyenne Section</option>
+                            <option value="Petite Section" style="background:#1a1a2e;">Petite Section</option>
+                            <option value="Toute Petite Section" style="background:#1a1a2e;">Toute Petite Section</option>
+                        </optgroup>
                     </select>
                 </div>
-                <div class="col-md-2">
-                    <button class="btn btn-primary w-100" id="btnLoad">Afficher</button>
-                </div>
-            </div>
-        </div>
-        <% } %>
-
-        <%# Sélecteur d'enfant pour les parents %>
-        <% if (user.role === 'PARENT' && typeof children !== 'undefined' && children.length > 0) { %>
-        <div class="card glass-card mb-4 p-3" style="border-radius:16px;">
-            <div class="row align-items-end">
-                <div class="col-md-4">
-                    <label class="form-label">Enfant</label>
-                    <select class="form-select" id="childSelector">
-                        <% children.forEach(function(child) { %>
-                            <option value="<%= child.student_class %>" <%= child.student_class === defaultClass ? 'selected' : '' %>>
-                                <%= child.name %> (<%= child.student_class || 'Sans classe' %>)
-                            </option>
+                <div class="col-md-1">
+                    <label class="form-label" style="color: #fff; font-weight: 500;">Lettre</label>
+                    <select class="form-select" id="classLetter" style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.15); padding: 6px;">
+                        <option value="" selected style="background:#1a1a2e;">-</option>
+                        <% 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(function(l) { %>
+                            <option value="<%= l %>" style="background:#1a1a2e;"><%= l %></option>
                         <% }); %>
                     </select>
                 </div>
+                <div class="col-md-1">
+                    <label class="form-label" style="color: #fff; font-weight: 500;">N°</label>
+                    <select class="form-select" id="classNumber" style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.15); padding: 6px;">
+                        <option value="" selected style="background:#1a1a2e;">-</option>
+                        <% for (var i = 1; i <= 20; i++) { %>
+                            <option value="<%= i %>" style="background:#1a1a2e;"><%= i %></option>
+                        <% } %>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button class="btn btn-primary w-100" id="btnLoadTimetable" style="height: 42px;">
+                        <i data-feather="search"></i> Afficher
+                    </button>
+                </div>
+                <div class="col-md-2">
+                    <span id="classNameDisplay" style="color: #0d6efd; font-weight: 600; font-size: 1.1rem;"></span>
+                </div>
+            </div>
+            <div class="row mt-2" id="selectionInfo" style="display:none;">
+                <div class="col-12">
+                    <small style="color: #0dcaf0;">
+                        <i data-feather="info" style="width: 14px; height: 14px;"></i>
+                        <strong>Ctrl+clic</strong> pour sélectionner plusieurs cases. <strong>Ctrl+A</strong> pour tout sélectionner. 
+                        <span id="selectedCount" style="color: #ffc107;"></span>
+                        <button class="btn btn-sm btn-success ms-2" id="btnBulkAdd" style="display:none;">Ajouter aux cases sélectionnées</button>
+                        <button class="btn btn-sm btn-outline-light ms-1" id="btnClearSelection" style="display:none;">Annuler</button>
+                    </small>
+                </div>
             </div>
         </div>
-        <% } %>
-        
-        <%# Tableau de l'emploi du temps %>
-        <div class="card glass-card p-3" style="border-radius:16px; display:none;" id="timetableContainer">
+
+        <div class="card glass-card" style="border-radius: 16px; padding: 20px; display: none;" id="timetableContainer">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h4 class="mb-0" id="timetableTitle">Emploi du temps</h4>
+                <h4 style="color: #fff;" id="timetableTitle">Emploi du temps</h4>
             </div>
             <div class="table-responsive">
                 <table class="table table-bordered" id="timetableTable">
                     <thead>
-                        <tr>
-                            <th style="width: 120px;">Heures</th>
-                            <th>Lundi</th>
-                            <th>Mardi</th>
-                            <th>Mercredi</th>
-                            <th>Jeudi</th>
-                            <th>Vendredi</th>
+                        <tr style="background: rgba(13,110,253,0.1);">
+                            <th style="color:#fff; text-align:center; width:100px;">Heures</th>
+                            <th style="color:#fff; text-align:center;">Lundi</th>
+                            <th style="color:#fff; text-align:center;">Mardi</th>
+                            <th style="color:#fff; text-align:center;">Mercredi</th>
+                            <th style="color:#fff; text-align:center;">Jeudi</th>
+                            <th style="color:#fff; text-align:center;">Vendredi</th>
                         </tr>
                     </thead>
                     <tbody id="timetableBody"></tbody>
                 </table>
             </div>
         </div>
+
+        <div class="text-center py-5" id="emptyState">
+            <i data-feather="clock" style="width: 64px; height: 64px; color: #666; margin-bottom: 20px;"></i>
+            <h4 style="color: #fff;">Sélectionnez une classe</h4>
+            <p style="color: #888;">Choisissez un niveau, une lettre et un numéro pour afficher l'emploi du temps.</p>
+        </div>
+
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="entryModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="background: rgba(30,30,50,0.95); color: white; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1);">
+            <div class="modal-header" style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                <h5 class="modal-title" id="modalTitle">Ajouter un cours</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="entryId">
+                <div id="bulkModeInfo" style="display:none; background: rgba(13,202,240,0.1); padding: 8px 12px; border-radius: 8px; margin-bottom: 15px; color: #0dcaf0; font-size: 0.85rem;">
+                    📌 <span id="bulkCount"></span> cases sélectionnées
+                </div>
+                <input type="hidden" id="entryDay">
+                <input type="hidden" id="entryTimeSlot">
+                <input type="hidden" id="isBulkMode" value="false">
+                <div id="bulkSlotsContainer"></div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Matière *</label>
+                    <select class="form-select" id="entrySubject" required style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);">
+                        <option value="" disabled selected style="background:#1a1a2e;">-- Choisir une matière --</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Professeur</label>
+                    <input type="text" class="form-control" id="entryTeacher" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Salle</label>
+                    <input type="text" class="form-control" id="entryRoom" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Couleur</label>
+                    <select class="form-select" id="entryColor" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);">
+                        <option value="#0d6efd" style="background:#1a1a2e;">🔵 Bleu</option>
+                        <option value="#198754" style="background:#1a1a2e;">🟢 Vert</option>
+                        <option value="#fd7e14" style="background:#1a1a2e;">🟠 Orange</option>
+                        <option value="#dc3545" style="background:#1a1a2e;">🔴 Rouge</option>
+                        <option value="#6f42c1" style="background:#1a1a2e;">🟣 Violet</option>
+                        <option value="#0dcaf0" style="background:#1a1a2e;">🩵 Cyan</option>
+                        <option value="#d63384" style="background:#1a1a2e;">🩷 Rose</option>
+                        <option value="#20c997" style="background:#1a1a2e;">🩶 Teal</option>
+                        <option value="#ffc107" style="background:#1a1a2e;">🟡 Jaune</option>
+                        <option value="#7952b3" style="background:#1a1a2e;">🟤 Indigo</option>
+                        <option value="#e83e8c" style="background:#1a1a2e;">🌸 Magenta</option>
+                        <option value="#00bcd4" style="background:#1a1a2e;">🌊 Turquoise</option>
+                        <option value="#ff6f00" style="background:#1a1a2e;">🍊 Ambre</option>
+                        <option value="#4caf50" style="background:#1a1a2e;">🌿 Lime</option>
+                        <option value="#9c27b0" style="background:#1a1a2e;">🍇 Mauve</option>
+                        <option value="#607d8b" style="background:#1a1a2e;">🪨 Gris bleu</option>
+                        <option value="#e91e63" style="background:#1a1a2e;">🌹 Rose foncé</option>
+                        <option value="#3f51b5" style="background:#1a1a2e;">💙 Bleu indigo</option>
+                        <option value="#009688" style="background:#1a1a2e;">🌲 Vert sarcelle</option>
+                        <option value="#cddc39" style="background:#1a1a2e;">🍋 Citron</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer" style="border-top: 1px solid rgba(255,255,255,0.1);">
+                <button type="button" class="btn btn-danger me-auto" id="btnDeleteEntry" style="display:none;">Supprimer</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" id="btnSaveEntry">Enregistrer</button>
+            </div>
+        </div>
     </div>
 </div>
 
 <script>
-    var timeSlots = [
+    // ✅ Horaires de 7h00 à 18h00 (11 créneaux)
+    const timeSlots = [
         '07:00-08:00', '08:00-09:00', '09:00-10:00', '10:00-11:00', 
         '11:00-12:00', '12:00-13:00', '13:00-14:00', '14:00-15:00', 
         '15:00-16:00', '16:00-17:00', '17:00-18:00'
     ];
-    var days = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'];
-    var userRole = '<%= user.role %>';
-    var studentClass = '<%= user.student_class || "" %>';
-    var defaultClass = '<%= defaultClass || "" %>';
-    var parentChildren = <%- JSON.stringify(typeof children !== 'undefined' ? children : []) %>;
-    
-    // Table de correspondance : noms longs -> noms courts (utilisés dans users.student_class)
-    var classNameMap = {
-        'Sixième': '6ème', 'sixieme': '6ème', '6eme': '6ème', '6e': '6ème',
-        'Cinquième': '5ème', 'cinquieme': '5ème', '5eme': '5ème', '5e': '5ème',
-        'Quatrième': '4ème', 'quatrieme': '4ème', '4eme': '4ème', '4e': '4ème',
-        'Troisième': '3ème', 'troisieme': '3ème', '3eme': '3ème', '3e': '3ème',
-        'Seconde': '2nde', 'seconde': '2nde', '2nd': '2nde',
-        'Première': '1ère', 'premiere': '1ère', '1ere': '1ère', '1re': '1ère',
-        'Terminale': 'Tle', 'terminale': 'Tle', 'tle': 'Tle'
+    const days = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'];
+    let currentClass = '';
+    let timetableData = [];
+    let selectedCells = [];
+
+    const subjectsByLevel = {
+        'Maternelle': ['Accueil', 'Motricité', 'Chant', 'Dessin', 'Sieste', 'Jeux libres', 'Langage', 'Découverte'],
+        'Primaire': ['Français', 'Mathématiques', 'Sciences', 'Histoire-Géo', 'EPS', 'Anglais', 'Arts plastiques', 'Musique', 'Informatique', 'Éducation civique'],
+        'Collège': ['Français', 'Mathématiques', 'SVT', 'Physique-Chimie', 'Histoire-Géo', 'Anglais', 'EPS', 'Arts plastiques', 'Musique', 'Technologie', 'Espagnol', 'Allemand', 'Latin'],
+        'Lycée': ['Français', 'Mathématiques', 'SVT', 'Physique-Chimie', 'Histoire-Géo', 'Anglais', 'EPS', 'Philosophie', 'SES', 'Espagnol', 'Allemand', 'Informatique', 'SNT', 'NSI', 'LLCE', 'HLP', 'HGGSP', 'SI', 'PC', 'Maths Expertes', 'Maths Complémentaires', 'Droit', 'Économie', 'Management', 'STMG', 'STI2D', 'STL', 'ST2S', 'STD2A', 'Arts', 'Cinéma', 'Théâtre']
     };
-    
-    // Normaliser le nom de classe
-    function normalizeClassName(name) {
-        if (!name) return '';
-        // Si c'est déjà un nom court (ex: '4ème'), le retourner tel quel
-        if (/^\d/.test(name)) return name;
-        // Chercher dans la table de correspondance
-        var normalized = classNameMap[name];
-        if (normalized) return normalized;
-        // Chercher insensiblement
-        var lowerName = name.toLowerCase().trim();
-        for (var key in classNameMap) {
-            if (key.toLowerCase() === lowerName) return classNameMap[key];
-        }
-        // Retourner le nom original si pas de correspondance
-        return name;
+
+    function getLevelCategory(level) {
+        if (!level) return 'Collège';
+        if (['Terminale', 'Première', 'Seconde'].includes(level)) return 'Lycée';
+        if (['Troisième', 'Quatrième', 'Cinquième', 'Sixième'].includes(level)) return 'Collège';
+        if (['CM2', 'CM1', 'CE2', 'CE1', 'CP'].includes(level)) return 'Primaire';
+        return 'Maternelle';
     }
-    
+
+    function populateSubjects(level) {
+        const category = getLevelCategory(level);
+        const subjects = subjectsByLevel[category] || subjectsByLevel['Collège'];
+        const select = document.getElementById('entrySubject');
+        select.innerHTML = '<option value="" disabled selected style="background:#1a1a2e;">-- Choisir une matière --</option>';
+        subjects.forEach(function(s) {
+            select.innerHTML += '<option value="' + s + '" style="background:#1a1a2e;">' + s + '</option>';
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
-        // ÉLÈVE : afficher directement son emploi du temps
-        if (userRole === 'STUDENT' || userRole === 'eleve') {
-            if (studentClass) {
-                loadTimetable(studentClass);
-            } else {
+        if (typeof feather !== 'undefined') feather.replace();
+
+        function updateClassNameDisplay() {
+            const level = document.getElementById('classLevel').value || '';
+            const letter = document.getElementById('classLetter').value || '';
+            const number = document.getElementById('classNumber').value || '';
+            currentClass = level + (letter ? ' ' + letter : '') + (number ? ' ' + number : '');
+            document.getElementById('classNameDisplay').textContent = currentClass.trim();
+        }
+
+        document.getElementById('classLevel').addEventListener('change', function() {
+            updateClassNameDisplay();
+            populateSubjects(this.value);
+        });
+        document.getElementById('classLetter').addEventListener('change', updateClassNameDisplay);
+        document.getElementById('classNumber').addEventListener('change', updateClassNameDisplay);
+
+        document.getElementById('btnLoadTimetable').addEventListener('click', function() {
+            const level = document.getElementById('classLevel').value;
+            if (!level) return alert('Veuillez sélectionner un niveau.');
+            updateClassNameDisplay();
+            populateSubjects(level);
+            if (currentClass.trim()) {
+                selectedCells = [];
+                updateSelectionUI();
+                loadTimetable(currentClass.trim());
                 document.getElementById('timetableContainer').style.display = 'block';
-                document.getElementById('timetableBody').innerHTML = 
-                    '<tr><td colspan="6" style="text-align:center;padding:30px;color:#888;">Aucune classe assignée à votre compte.</td></tr>';
+                document.getElementById('emptyState').style.display = 'none';
+                document.getElementById('timetableTitle').textContent = 'Emploi du temps - ' + currentClass.trim();
             }
-            return;
-        }
-        
-        // PARENT : afficher et écouter le changement d'enfant
-        if (userRole === 'PARENT') {
-            if (defaultClass) {
-                loadTimetable(defaultClass);
+        });
+
+        document.getElementById('btnBulkAdd').addEventListener('click', function() {
+            if (selectedCells.length === 0) return;
+            openBulkModal();
+        });
+
+        document.getElementById('btnClearSelection').addEventListener('click', function() {
+            selectedCells = [];
+            updateSelectionUI();
+            renderTimetable(timetableData);
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'a' && document.getElementById('timetableContainer').style.display !== 'none') {
+                e.preventDefault();
+                selectAllEmptyCells();
             }
-            var childSelector = document.getElementById('childSelector');
-            if (childSelector) {
-                childSelector.addEventListener('change', function() {
-                    loadTimetable(this.value);
-                });
-            }
-            return;
-        }
-        
-        // AUTRES : charger la classe par défaut
-        if (defaultClass) { 
-            loadTimetable(defaultClass); 
-        }
-        
-        // Bouton pour charger une classe
-        var btnLoad = document.getElementById('btnLoad');
-        if (btnLoad) {
-            btnLoad.addEventListener('click', function() {
-                var cls = document.getElementById('classSelector').value;
-                if (cls) {
-                    loadTimetable(cls);
-                } else {
-                    alert('Veuillez sélectionner une classe.');
-                }
-            });
-        }
+        });
+
+        document.getElementById('btnSaveEntry').addEventListener('click', saveEntry);
+        document.getElementById('btnDeleteEntry').addEventListener('click', deleteEntry);
     });
-    
+
     function loadTimetable(className) {
-        if (!className) return;
-        
-        // Normaliser le nom de classe pour correspondre à la DB
-        var normalizedName = normalizeClassName(className);
-        
-        console.log('📅 Chargement emploi du temps pour:', className, '→ Normalisé:', normalizedName);
-        
-        var container = document.getElementById('timetableContainer');
-        var title = document.getElementById('timetableTitle');
-        var tbody = document.getElementById('timetableBody');
-        
-        container.style.display = 'block';
-        title.textContent = 'Emploi du temps - ' + className;
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;"><div class="spinner-border text-primary"></div><p class="mt-2 text-muted">Chargement...</p></td></tr>';
-        
-        // Essayer avec le nom normalisé d'abord, puis avec le nom original
-        fetchTimetable(normalizedName, className);
+        fetch('/api/timetables/' + encodeURIComponent(className))
+            .then(function(r) { return r.json(); })
+            .then(function(data) { timetableData = data; renderTimetable(data); })
+            .catch(function() { timetableData = []; renderTimetable([]); });
     }
-    
-    function fetchTimetable(normalizedName, originalName) {
-        fetch('/api/timetables/' + encodeURIComponent(normalizedName))
-            .then(function(response) {
-                if (!response.ok) throw new Error('Erreur réseau (' + response.status + ')');
-                return response.json();
-            })
-            .then(function(data) {
-                // Si aucune donnée avec le nom normalisé, essayer avec le nom original
-                if (data.length === 0 && normalizedName !== originalName) {
-                    console.log('⚠️ Aucune donnée avec nom normalisé, essai avec nom original:', originalName);
-                    return fetch('/api/timetables/' + encodeURIComponent(originalName))
-                        .then(function(r) { return r.json(); });
-                }
-                return data;
-            })
-            .then(function(data) {
-                renderTimetable(data, originalName);
-            })
-            .catch(function(error) {
-                console.error('❌ Erreur:', error);
-                var tbody = document.getElementById('timetableBody');
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:#dc3545;">❌ Erreur de chargement<br><small>' + escapeHtml(error.message) + '</small><br><button class="btn btn-sm btn-outline-primary mt-2" onclick="loadTimetable(\'' + originalName + '\')">Réessayer</button></td></tr>';
-            });
-    }
-    
-    function renderTimetable(data, className) {
-        var tbody = document.getElementById('timetableBody');
-        
-        console.log('📅 Données reçues:', data.length, 'entrées');
-        
-        if (data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:#888;">Aucun emploi du temps pour cette classe.<br><small>Contactez la vie scolaire.</small></td></tr>';
-            return;
-        }
-        
-        var html = '';
+
+    function renderTimetable(data) {
+        const tbody = document.getElementById('timetableBody');
+        let html = '';
         timeSlots.forEach(function(slot) {
-            html += '<tr>';
-            html += '<td style="text-align:center;font-weight:600;background:rgba(13,110,253,0.05);padding:10px;">' + slot + '</td>';
-            
+            html += '<tr><td style="color:#fff;text-align:center;vertical-align:middle;font-weight:600;font-size:0.85rem;">' + slot + '</td>';
             days.forEach(function(day) {
-                var entry = data.find(function(e) { 
-                    return e.day === day && e.time_slot === slot; 
-                });
+                const entry = data.find(function(e) { return e.day === day && e.time_slot === slot; });
+                const cellId = day + '|' + slot;
+                const isSelected = selectedCells.some(function(c) { return c.day === day && c.time_slot === slot; });
                 
                 if (entry) {
-                    var bgColor = (entry.color || '#0d6efd') + '18';
-                    var borderColor = entry.color || '#0d6efd';
-                    html += '<td style="background:' + bgColor + '; text-align:center; border-left:4px solid ' + borderColor + '; padding:10px; transition: all 0.2s ease; cursor:default;" onmouseover="this.style.transform=\'scale(1.02)\';this.style.boxShadow=\'0 4px 15px rgba(0,0,0,0.1)\';" onmouseout="this.style.transform=\'\';this.style.boxShadow=\'\';">';
-                    html += '<strong style="color:' + borderColor + ';font-size:0.9rem;">' + escapeHtml(entry.subject) + '</strong>';
-                    if (entry.teacher) {
-                        html += '<br><small style="color:#666;">👨‍🏫 ' + escapeHtml(entry.teacher) + '</small>';
-                    }
-                    if (entry.room) {
-                        html += '<br><small style="color:#888;">🏫 ' + escapeHtml(entry.room) + '</small>';
-                    }
-                    html += '</td>';
+                    html += '<td class="timetable-cell" data-day="' + day + '" data-slot="' + slot + '" style="background:' + (entry.color || '#0d6efd') + '22; cursor:pointer; text-align:center; vertical-align:middle; padding:8px; border-left:4px solid ' + (entry.color || '#0d6efd') + ';" ' +
+                        'onclick="editEntry(\'' + day + '\', \'' + slot + '\', ' + entry.id + ', \'' + escapeJs(entry.subject) + '\', \'' + escapeJs(entry.teacher || '') + '\', \'' + escapeJs(entry.room || '') + '\', \'' + (entry.color || '#0d6efd') + '\')">' +
+                        '<strong style="color:#fff;font-size:0.85rem;">' + escapeHtml(entry.subject) + '</strong>' +
+                        (entry.teacher ? '<br><small style="color:#ccc;">' + escapeHtml(entry.teacher) + '</small>' : '') +
+                        (entry.room ? '<br><small style="color:#aaa;"> Salle ' + escapeHtml(entry.room) + '</small>' : '') +
+                    '</td>';
                 } else {
-                    html += '<td style="text-align:center;color:#ccc;padding:10px;">-</td>';
+                    html += '<td class="timetable-cell empty-cell" data-day="' + day + '" data-slot="' + slot + '" style="text-align:center;vertical-align:middle;cursor:pointer;padding:8px;color:#555;' + (isSelected ? 'background:rgba(13,202,240,0.2);border:2px dashed #0dcaf0;' : '') + '" ' +
+                        'onclick="handleCellClick(event, \'' + day + '\', \'' + slot + '\')">' +
+                        (isSelected ? '<span style="color:#0dcaf0;font-weight:bold;">✓</span>' : '<span style="font-size:1.5rem;">+</span>') +
+                    '</td>';
                 }
             });
-            
             html += '</tr>';
         });
-        
         tbody.innerHTML = html;
     }
-    
-    function escapeHtml(text) {
-        if (!text) return '';
-        var div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
+
+    function handleCellClick(event, day, timeSlot) {
+        if (event.ctrlKey || event.metaKey) {
+            event.preventDefault();
+            toggleCellSelection(day, timeSlot);
+        } else {
+            addEntry(day, timeSlot);
+        }
     }
+
+    function toggleCellSelection(day, timeSlot) {
+        const index = selectedCells.findIndex(function(c) { return c.day === day && c.time_slot === timeSlot; });
+        if (index >= 0) {
+            selectedCells.splice(index, 1);
+        } else {
+            selectedCells.push({ day: day, time_slot: timeSlot });
+        }
+        updateSelectionUI();
+        renderTimetable(timetableData);
+    }
+
+    function selectAllEmptyCells() {
+        selectedCells = [];
+        timeSlots.forEach(function(slot) {
+            days.forEach(function(day) {
+                const entry = timetableData.find(function(e) { return e.day === day && e.time_slot === slot; });
+                if (!entry) {
+                    selectedCells.push({ day: day, time_slot: slot });
+                }
+            });
+        });
+        updateSelectionUI();
+        renderTimetable(timetableData);
+    }
+
+    function updateSelectionUI() {
+        const info = document.getElementById('selectionInfo');
+        const count = document.getElementById('selectedCount');
+        const btnBulk = document.getElementById('btnBulkAdd');
+        const btnClear = document.getElementById('btnClearSelection');
+
+        if (selectedCells.length > 0) {
+            info.style.display = 'block';
+            count.textContent = selectedCells.length + ' case(s) sélectionnée(s)';
+            btnBulk.style.display = 'inline-block';
+            btnClear.style.display = 'inline-block';
+        } else {
+            info.style.display = 'none';
+            btnBulk.style.display = 'none';
+            btnClear.style.display = 'none';
+        }
+    }
+
+    function openBulkModal() {
+        document.getElementById('entryId').value = '';
+        document.getElementById('isBulkMode').value = 'true';
+        document.getElementById('entryDay').value = '';
+        document.getElementById('entryTimeSlot').value = '';
+        document.getElementById('entrySubject').value = '';
+        document.getElementById('entryTeacher').value = '';
+        document.getElementById('entryRoom').value = '';
+        document.getElementById('entryColor').value = '#0d6efd';
+        document.getElementById('btnDeleteEntry').style.display = 'none';
+        document.getElementById('bulkModeInfo').style.display = 'block';
+        document.getElementById('bulkCount').textContent = selectedCells.length;
+        document.getElementById('modalTitle').textContent = 'Ajouter à ' + selectedCells.length + ' case(s)';
+        populateSubjects(document.getElementById('classLevel').value);
+        new bootstrap.Modal(document.getElementById('entryModal')).show();
+    }
+
+    function addEntry(day, timeSlot) {
+        selectedCells = [];
+        updateSelectionUI();
+        document.getElementById('entryId').value = '';
+        document.getElementById('isBulkMode').value = 'false';
+        document.getElementById('entryDay').value = day;
+        document.getElementById('entryTimeSlot').value = timeSlot;
+        document.getElementById('entrySubject').value = '';
+        document.getElementById('entryTeacher').value = '';
+        document.getElementById('entryRoom').value = '';
+        document.getElementById('entryColor').value = '#0d6efd';
+        document.getElementById('btnDeleteEntry').style.display = 'none';
+        document.getElementById('bulkModeInfo').style.display = 'none';
+        document.getElementById('modalTitle').textContent = 'Ajouter - ' + day + ' ' + timeSlot;
+        populateSubjects(document.getElementById('classLevel').value);
+        new bootstrap.Modal(document.getElementById('entryModal')).show();
+    }
+
+    function editEntry(day, timeSlot, id, subject, teacher, room, color) {
+        selectedCells = [];
+        updateSelectionUI();
+        document.getElementById('entryId').value = id;
+        document.getElementById('isBulkMode').value = 'false';
+        document.getElementById('entryDay').value = day;
+        document.getElementById('entryTimeSlot').value = timeSlot;
+        document.getElementById('entryTeacher').value = teacher;
+        document.getElementById('entryRoom').value = room;
+        document.getElementById('entryColor').value = color || '#0d6efd';
+        document.getElementById('btnDeleteEntry').style.display = 'block';
+        document.getElementById('bulkModeInfo').style.display = 'none';
+        document.getElementById('modalTitle').textContent = 'Modifier - ' + day + ' ' + timeSlot;
+        populateSubjects(document.getElementById('classLevel').value);
+        document.getElementById('entrySubject').value = subject;
+        new bootstrap.Modal(document.getElementById('entryModal')).show();
+    }
+
+    function saveEntry() {
+        const subject = document.getElementById('entrySubject').value;
+        if (!subject) return alert('Veuillez choisir une matière.');
+        const isBulk = document.getElementById('isBulkMode').value === 'true';
+
+        if (isBulk && selectedCells.length > 0) {
+            const promises = selectedCells.map(function(cell) {
+                return fetch('/api/timetables', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        class_name: currentClass.trim(),
+                        day: cell.day,
+                        time_slot: cell.time_slot,
+                        subject: subject,
+                        teacher: document.getElementById('entryTeacher').value.trim(),
+                        room: document.getElementById('entryRoom').value.trim(),
+                        color: document.getElementById('entryColor').value
+                    })
+                });
+            });
+
+            Promise.all(promises).then(function() {
+                selectedCells = [];
+                updateSelectionUI();
+                loadTimetable(currentClass.trim());
+                bootstrap.Modal.getInstance(document.getElementById('entryModal')).hide();
+            }).catch(function(err) {
+                alert('Erreur: ' + err.message);
+            });
+        } else {
+            const data = {
+                class_name: currentClass.trim(),
+                day: document.getElementById('entryDay').value,
+                time_slot: document.getElementById('entryTimeSlot').value,
+                subject: subject,
+                teacher: document.getElementById('entryTeacher').value.trim(),
+                room: document.getElementById('entryRoom').value.trim(),
+                color: document.getElementById('entryColor').value
+            };
+            fetch('/api/timetables', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(result) {
+                if (result.success) {
+                    loadTimetable(currentClass.trim());
+                    bootstrap.Modal.getInstance(document.getElementById('entryModal')).hide();
+                } else { alert('Erreur: ' + (result.error || 'Inconnue')); }
+            })
+            .catch(function(err) { alert('Erreur réseau: ' + err.message); });
+        }
+    }
+
+    function deleteEntry() {
+        const id = document.getElementById('entryId').value;
+        if (!id || !confirm('Supprimer ce cours ?')) return;
+        fetch('/api/timetables/' + id, { method: 'DELETE' })
+            .then(function() { loadTimetable(currentClass.trim()); bootstrap.Modal.getInstance(document.getElementById('entryModal')).hide(); });
+    }
+
+    function escapeHtml(text) { if (!text) return ''; const d = document.createElement('div'); d.textContent = text; return d.innerHTML; }
+    function escapeJs(text) { if (!text) return ''; return text.replace(/'/g, "\\'").replace(/"/g, '\\"').replace(/\n/g, '\\n'); }
 </script>
 
 <style>
-    .glass-card { 
-        background: rgba(255,255,255,0.08); 
-        backdrop-filter: blur(20px); 
-        -webkit-backdrop-filter: blur(20px);
-        border: 1px solid rgba(0,0,0,0.08); 
+    .glass-card {
+        background: rgba(255, 255, 255, 0.05) !important;
+        backdrop-filter: blur(20px) !important;
+        -webkit-backdrop-filter: blur(20px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
     }
-    [data-theme="dark"] .glass-card { 
-        background: rgba(255,255,255,0.05); 
-        border-color: rgba(255,255,255,0.08); 
-    }
-    #timetableTable { 
-        border-collapse: separate; 
-        border-spacing: 0;
-        width: 100%;
-    }
-    #timetableTable th { 
-        background: rgba(13,110,253,0.08); 
-        border: 1px solid rgba(128,128,128,0.15); 
-        text-align: center; 
-        padding: 12px 8px;
-        font-weight: 600;
-        color: #0d6efd;
-        font-size: 0.9rem;
-    }
-    #timetableTable td { 
-        border: 1px solid rgba(128,128,128,0.1); 
-        vertical-align: middle;
-    }
-    [data-theme="dark"] #timetableTable th { 
-        background: rgba(255,255,255,0.05); 
-        color: #fff;
-    }
-    [data-theme="dark"] #timetableTable td { 
-        border-color: rgba(255,255,255,0.05); 
-    }
-    @media (max-width: 768px) {
-        #timetableTable th, #timetableTable td {
-            padding: 6px 4px;
-            font-size: 0.75rem;
-        }
-    }
+    #timetableTable { border-collapse: collapse; width: 100%; }
+    #timetableTable th, #timetableTable td { border: 1px solid rgba(255,255,255,0.08); }
+    #timetableTable td:hover { background: rgba(255,255,255,0.05) !important; }
+    .timetable-cell { user-select: none; }
+    .empty-cell:hover { background: rgba(13,202,240,0.1) !important; }
 </style>
 
 <%- include('../partials/footer') %>
