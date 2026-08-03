@@ -14,37 +14,22 @@
         </h2>
         <%- include('../partials/messages') %>
         
-        <%# Sélecteur d'enfant pour les parents %>
+        <%# Sélecteur d'enfant pour les parents (AFFICHÉ ICI, PAS DANS LE DASHBOARD) %>
         <% if (user.role === 'PARENT' && typeof children !== 'undefined' && children.length > 0) { %>
         <div class="card glass-card mb-4 p-3" style="border-radius:16px;">
             <div class="row align-items-end">
                 <div class="col-md-4">
                     <label class="form-label">Sélectionner un enfant</label>
-                    <select class="form-select" id="childSelector">
+                    <select class="form-select" id="childSelector" onchange="loadAbsencesForChild(this.value)">
                         <option value="">-- Choisir un enfant --</option>
                         <% children.forEach(function(child) { %>
-                            <option value="<%= child.id %>" <%= (selectedChildId && selectedChildId == child.id) ? 'selected' : '' %>>
+                            <option value="<%= child.id %>" <%= (typeof selectedChildId !== 'undefined' && selectedChildId == child.id) ? 'selected' : '' %>>
                                 <%= child.name %> (<%= child.student_class || 'Sans classe' %>)
                             </option>
                         <% }); %>
                     </select>
                 </div>
-                <div class="col-md-2">
-                    <button class="btn btn-primary w-100" id="btnLoadChild">Afficher</button>
-                </div>
             </div>
-        </div>
-        <% } %>
-        
-        <%# Message si parent sans enfant sélectionné %>
-        <% if (user.role === 'PARENT' && (!selectedChildId || typeof children === 'undefined' || children.length === 0)) { %>
-        <div class="alert alert-info" style="border-radius:12px;">
-            <i data-feather="info" style="width: 16px; height: 16px;"></i>
-            <% if (typeof children === 'undefined' || children.length === 0) { %>
-                Aucun enfant n'est lié à votre compte.
-            <% } else { %>
-                Veuillez sélectionner un enfant ci-dessus pour voir ses absences.
-            <% } %>
         </div>
         <% } %>
         
@@ -79,52 +64,53 @@
     document.addEventListener('DOMContentLoaded', function() {
         // ÉLÈVE : charger directement
         if (userRole === 'STUDENT' || userRole === 'eleve') {
-            loadAbsences(userId);
-            return;
+            loadAbsences();
         }
-        
         // PARENT : charger si un enfant est déjà sélectionné
-        if (userRole === 'PARENT' || userRole === 'parent') {
+        else if (userRole === 'PARENT' || userRole === 'parent') {
             if (selectedChildId) {
-                loadAbsences(selectedChildId);
+                loadAbsences();
+            } else {
+                document.getElementById('absencesBody').innerHTML = 
+                    '<tr><td colspan="6" class="text-center py-4 text-muted">Veuillez sélectionner un enfant ci-dessus pour voir ses absences.</td></tr>';
             }
-            
-            // Écouter le bouton
-            var btnLoadChild = document.getElementById('btnLoadChild');
-            if (btnLoadChild) {
-                btnLoadChild.addEventListener('click', function() {
-                    var childId = document.getElementById('childSelector').value;
-                    if (childId) {
-                        loadAbsences(childId);
-                    } else {
-                        alert('Veuillez sélectionner un enfant.');
-                    }
-                });
-            }
-            
-            // Écouter le changement de sélection
-            var childSelector = document.getElementById('childSelector');
-            if (childSelector) {
-                childSelector.addEventListener('change', function() {
-                    var childId = this.value;
-                    if (childId) {
-                        loadAbsences(childId);
-                    }
-                });
-            }
-            return;
         }
-        
-        // AUTRES : charger toutes les absences
-        loadAbsences(null);
+        // AUTRES : charger tout
+        else {
+            loadAbsences();
+        }
     });
     
-    function loadAbsences(filterUserId) {
+    // Fonction appelée quand le parent change d'enfant
+    function loadAbsencesForChild(childId) {
+        if (!childId) {
+            document.getElementById('absencesBody').innerHTML = 
+                '<tr><td colspan="6" class="text-center py-4 text-muted">Veuillez sélectionner un enfant.</td></tr>';
+            return;
+        }
+        selectedChildId = childId;
+        loadAbsences();
+    }
+    
+    function loadAbsences() {
         var url = '/api/absences?';
         
-        if (filterUserId) {
-            url += 'user_id=' + filterUserId;
-        } else if (userRole !== 'STUDENT' && userRole !== 'eleve' && userRole !== 'PARENT' && userRole !== 'parent') {
+        // ÉLÈVE : voir uniquement SES absences
+        if (userRole === 'STUDENT' || userRole === 'eleve') {
+            url += 'user_id=' + userId;
+        }
+        // PARENT : voir les absences de l'enfant sélectionné
+        else if (userRole === 'PARENT' || userRole === 'parent') {
+            if (selectedChildId) {
+                url += 'user_id=' + selectedChildId;
+            } else {
+                document.getElementById('absencesBody').innerHTML = 
+                    '<tr><td colspan="6" class="text-center py-4 text-muted">Veuillez sélectionner un enfant ci-dessus.</td></tr>';
+                return;
+            }
+        }
+        // AUTRES : voir tout
+        else {
             url += 'user_type=student';
         }
         
@@ -136,7 +122,7 @@
                 var tbody = document.getElementById('absencesBody');
                 
                 if (!data || data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">✅ Aucune absence ou retard enregistré.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">Aucune absence ou retard enregistré.</td></tr>';
                     return;
                 }
                 
@@ -162,7 +148,7 @@
             .catch(function(error) {
                 console.error('❌ Erreur:', error);
                 document.getElementById('absencesBody').innerHTML = 
-                    '<tr><td colspan="6" class="text-center py-4 text-danger">❌ Erreur de chargement</td></tr>';
+                    '<tr><td colspan="6" class="text-center py-4 text-danger">Erreur de chargement</td></tr>';
             });
     }
     
