@@ -1296,41 +1296,72 @@ app.get('/calendar-view', async (req, res) => {
     }
 });
 
-// Emploi du temps (consultation)
-app.get('/timetable-view', async (req, res) => {
-    if (!req.user) return res.redirect('/login');
+// API - Récupérer l'emploi du temps d'une classe (avec correspondance des noms)
+app.get('/api/timetables/:className', async (req, res) => {
+    if (!req.user) return res.status(401).json([]);
     
     try {
-        // Pour un élève, afficher directement sa classe
-        let defaultClass = '';
-        if (req.user.role === 'STUDENT' || req.user.role === 'eleve') {
-            defaultClass = req.user.student_class || '';
-        }
-        // Pour un parent, afficher la classe de l'enfant sélectionné
-        if (req.user.role === 'PARENT' || req.user.role === 'parent') {
-            if (req.session.selectedChildId) {
-                const child = await db('users').where({ id: req.session.selectedChildId }).first();
-                if (child) defaultClass = child.student_class || '';
+        const className = req.params.className;
+        console.log('📅 API - Chargement emploi du temps pour:', className);
+        
+        // Table de correspondance : noms courts → noms longs
+        const classMap = {
+            '6ème': ['6ème', 'Sixième', 'sixieme', '6eme', '6e'],
+            '5ème': ['5ème', 'Cinquième', 'cinquieme', '5eme', '5e'],
+            '4ème': ['4ème', 'Quatrième', 'quatrieme', '4eme', '4e'],
+            '3ème': ['3ème', 'Troisième', 'troisieme', '3eme', '3e'],
+            '2nde': ['2nde', 'Seconde', 'seconde', '2nd'],
+            '1ère': ['1ère', 'Première', 'premiere', '1ere', '1re'],
+            'Tle': ['Tle', 'Terminale', 'terminale', 'tle']
+        };
+        
+        // Trouver toutes les variantes possibles pour cette classe
+        let searchTerms = [className];
+        for (var key in classMap) {
+            if (classMap[key].indexOf(className) !== -1) {
+                searchTerms = classMap[key];
+                break;
             }
         }
-
-        const classes = await db('users')
-            .where({ establishment_id: req.user.establishment_id, role: 'STUDENT' })
-            .distinct('student_class')
-            .whereNotNull('student_class')
-            .orderBy('student_class')
-            .pluck('student_class');
-
-        res.render('shared/timetable-view', {
-            title: 'Emploi du Temps',
-            user: req.user,
-            classes: classes,
-            defaultClass: defaultClass,
-            readOnly: true
+        
+        console.log('📅 Recherche avec les termes:', searchTerms);
+        
+        // Chercher avec toutes les variantes
+        let entries = await db('timetables')
+            .where({ establishment_id: req.user.establishishment_id })
+            .whereIn('class_name', searchTerms)
+            .orderBy('day_order')
+            .orderBy('time_slot')
+            .select('*');
+        
+        // Si rien trouvé avec establishment_id, essayer sans
+        if (entries.length === 0) {
+            console.log(' Aucune entrée avec establishment_id, recherche sans...');
+            entries = await db('timetables')
+                .whereIn('class_name', searchTerms)
+                .orderBy('day_order')
+                .orderBy('time_slot')
+                .select('*');
+        }
+        
+        console.log(' Entrées trouvées:', entries.length);
+        
+        const formatted = entries.map(function(entry) {
+            return {
+                id: entry.id,
+                day: entry.day,
+                time_slot: entry.time_slot,
+                subject: entry.subject,
+                teacher: entry.teacher,
+                room: entry.room,
+                color: entry.color
+            };
         });
+        
+        res.json(formatted);
     } catch (error) {
-        req.flash('error_msg', 'Erreur lors du chargement.');
-        res.redirect('/dashboard');
+        console.error('Erreur API timetables:', error);
+        res.status(500).json([]);
     }
 });
 
