@@ -806,20 +806,26 @@ async function createTimetablesTable() {
         if (!hasTable) {
             await db.schema.createTable('timetables', function(table) {
                 table.increments('id').primary();
-                table.integer('establishment_id').notNullable();
-                table.string('class_name', 100).notNullable();
+                table.integer('establishment_id').notNullable().index();
+                table.string('class_name', 100).notNullable().index('idx_class');
                 table.string('day', 20).notNullable();
+                table.integer('day_order').defaultTo(0);
                 table.string('time_slot', 50).notNullable();
-                table.string('subject', 255).notNullable();
-                table.string('teacher', 255);
-                table.string('room', 100);
-                table.string('color', 7).defaultTo('#0d6efd');
+                table.string('subject', 100).notNullable();
+                table.string('teacher', 100);
+                table.string('room', 50);
+                table.string('color', 20).defaultTo('#0d6efd');
                 table.integer('created_by').notNullable();
                 table.timestamps(true, true);
+
+                // Index composite pour les recherches fréquentes
+                table.index(['day_order', 'time_slot'], 'idx_day_slot');
             });
             console.log('✅ Table timetables créée');
         } else {
             console.log('✅ Table timetables existe déjà');
+            // Vous pouvez ajouter ici une logique pour mettre à jour la table si elle existe déjà
+            // par exemple en ajoutant les colonnes manquantes.
         }
     } catch (error) {
         console.error('❌ Erreur création table timetables:', error.message);
@@ -1196,4 +1202,3 @@ app.get('/absences-view', async (req, res) => {
 
 // Lancement de l'application
 startServer();
-
