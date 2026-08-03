@@ -1080,12 +1080,12 @@ app.get('/school-life/absences', async (req, res) => {
     }
 });
 
-// API - Récupérer les absences
+// API - Récupérer les absences (CORRIGÉ avec filtre user_id)
 app.get('/api/absences', async (req, res) => {
     if (!req.user) return res.status(401).json([]);
     
     try {
-        const { user_type, class_name, date_debut, date_fin, status } = req.query;
+        const { user_id, user_type, class_name, date_debut, date_fin, status } = req.query;
         let query = db('absences')
             .where({ 'absences.establishment_id': req.user.establishment_id })
             .leftJoin('users', 'absences.user_id', 'users.id')
@@ -1094,6 +1094,11 @@ app.get('/api/absences', async (req, res) => {
                 'users.name as user_name',
                 'users.student_class'
             );
+        
+        // === FILTRE PAR USER_ID (prioritaire) ===
+        if (user_id && user_id !== '') {
+            query = query.where({ 'absences.user_id': parseInt(user_id) });
+        }
         
         if (user_type) {
             query = query.where({ 'absences.user_type': user_type });
@@ -1115,15 +1120,13 @@ app.get('/api/absences', async (req, res) => {
             .orderBy('absences.date', 'desc')
             .orderBy('absences.created_at', 'desc');
 
-        console.log('📊 Absences trouvées:', absences.length);
+        console.log('📊 Absences trouvées:', absences.length, '| user_id:', user_id || 'tous');
         res.json(absences);
     } catch (error) {
         console.error('❌ Erreur GET /api/absences:', error.message);
-        console.error('❌ Stack:', error.stack);
-        res.json([]); // ✅ Retourner un tableau vide au lieu d'une erreur 500
+        res.json([]);
     }
 });
-
 // API - Créer une absence/retard
 app.post('/api/absences', async (req, res) => {
     if (!req.user) return res.status(401).json({ error: 'Non authentifié' });
