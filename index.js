@@ -850,7 +850,6 @@ app.get('/api/timetables/:className', async (req, res) => {
 });
 
 // API - Sauvegarder une entrée d'emploi du temps (Vie Scolaire)
-// API - Sauvegarder une entrée d'emploi du temps (Vie Scolaire)
 app.post('/api/timetables', async (req, res) => {
     if (!req.user) return res.status(401).json({ error: 'Non authentifié' });
     
@@ -1406,12 +1405,14 @@ app.get('/api/timetables/:className', async (req, res) => {
     }
 });
 
-// Absences (consultation)
+// Absences (consultation) - CORRIGÉ
 app.get('/absences-view', async (req, res) => {
     if (!req.user) return res.redirect('/login');
     
     try {
         let userId = null;
+        let selectedChildId = null;
+        
         // Pour élève : voir ses propres absences
         if (req.user.role === 'STUDENT' || req.user.role === 'eleve') {
             userId = req.user.id;
@@ -1420,6 +1421,7 @@ app.get('/absences-view', async (req, res) => {
         if (req.user.role === 'PARENT' || req.user.role === 'parent') {
             if (req.session.selectedChildId) {
                 userId = req.session.selectedChildId;
+                selectedChildId = req.session.selectedChildId;
             }
         }
         // Pour professeur : voir ses propres absences
@@ -1439,6 +1441,7 @@ app.get('/absences-view', async (req, res) => {
             user: req.user,
             classes: classes,
             userId: userId,
+            selectedChildId: selectedChildId,  // ← AJOUTÉ pour les parents
             readOnly: true
         });
     } catch (error) {

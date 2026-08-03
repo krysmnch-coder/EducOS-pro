@@ -37,9 +37,9 @@
 </div>
 
 <script>
-    var userRole = '<%= user.role %>';
-    var userId = '<%= user.id %>';
-    var selectedChildId = '<%= typeof selectedChildId !== "undefined" ? selectedChildId : "" %>';
+   var userRole = '<%= user.role %>';
+var userId = '<%= userId || "" %>';
+var selectedChildId = '<%= selectedChildId || "" %>';
     
     document.addEventListener('DOMContentLoaded', function() {
         loadAbsences();
