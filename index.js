@@ -1451,6 +1451,19 @@ app.get('/absences-view', async (req, res) => {
         req.flash('error_msg', 'Erreur lors du chargement.');
         res.redirect('/dashboard');
     }
+    // Ajouter les enfants pour les parents
+    let children = [];
+    let selectedChildId = null;
+    if (req.user.role === 'PARENT' || req.user.role === 'parent') {
+        children = await userModel.getLinkedChildrenForParent(req.user.id);
+        selectedChildId = req.session.selectedChildId || null;
+    }
+    
+    res.render('shared/absences-view', {
+        // ... autres variables ...
+        children: children,
+        selectedChildId: selectedChildId
+    });
 });
 
 const timetableRoutes = require('./src/routes/timetableRoutes');
