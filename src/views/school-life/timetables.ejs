@@ -23,7 +23,7 @@
                         </optgroup>
                         <optgroup label="Collège">
                             <option value="Troisième" style="background:#1a1a2e;">3ème</option>
-                            <option value="Quatrième" style="background:#1a1a2e;">4ème</option>
+                            <option value="Quatrième" style="background:#1a1a2e;">quatrième</option>
                             <option value="Cinquième" style="background:#1a1a2e;">5ème</option>
                             <option value="Sixième" style="background:#1a1a2e;">6ème</option>
                         </optgroup>
@@ -432,7 +432,7 @@
                         room: document.getElementById('entryRoom').value.trim(),
                         color: document.getElementById('entryColor').value
                     })
-                }).then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); });
+                });
             });
 
             Promise.all(promises).then(function() {
@@ -455,11 +455,10 @@
             };
             fetch('/api/timetables', {
                 method: 'POST',
-                credentials: 'same-origin',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             })
-            .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+            .then(function(r) { return r.json(); })
             .then(function(result) {
                 if (result.success) {
                     loadTimetable(currentClass.trim());
@@ -473,8 +472,7 @@
     function deleteEntry() {
         const id = document.getElementById('entryId').value;
         if (!id || !confirm('Supprimer ce cours ?')) return;
-        fetch('/api/timetables/' + id, { method: 'DELETE', credentials: 'same-origin' })
-            .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+        fetch('/api/timetables/' + id, { method: 'DELETE' })
             .then(function() { loadTimetable(currentClass.trim()); bootstrap.Modal.getInstance(document.getElementById('entryModal')).hide(); });
     }
 
