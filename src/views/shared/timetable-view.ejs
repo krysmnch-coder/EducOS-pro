@@ -142,7 +142,7 @@
         if (!className) return;
         
         var normalized = normalizeClassName(className);
-        console.log('📅 Chargement:', className, '→', normalized);
+        console.log(' Chargement:', className, '→', normalized);
         
         var container = document.getElementById('timetableContainer');
         var title = document.getElementById('timetableTitle');
@@ -162,7 +162,7 @@
                 return data;
             })
             .then(function(data) {
-                console.log('📅 Entrées:', data.length);
+                console.log(' Entrées:', data.length);
                 
                 if (data.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="6" class="empty-cell">Aucun emploi du temps pour cette classe.<br><small>Contactez la vie scolaire.</small></td></tr>';
@@ -182,10 +182,10 @@
                             html += '<td class="subject-cell" style="background:' + color + '15; border-left:4px solid ' + color + ';" data-color="' + color + '">';
                             html += '<div class="subject-name">' + escapeHtml(entry.subject) + '</div>';
                             if (entry.teacher) {
-                                html += '<div class="subject-teacher">👨‍🏫 ' + escapeHtml(entry.teacher) + '</div>';
+                                html += '<div class="subject-teacher"> ' + escapeHtml(entry.teacher) + '</div>';
                             }
                             if (entry.room) {
-                                html += '<div class="subject-room">🏫 ' + escapeHtml(entry.room) + '</div>';
+                                html += '<div class="subject-room"> ' + escapeHtml(entry.room) + '</div>';
                             }
                             html += '</td>';
                         } else {
