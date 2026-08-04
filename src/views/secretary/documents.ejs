@@ -1,0 +1,355 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+
+<div class="container-fluid page-shell py-4">
+    <div class="themed-container" style="max-width: 100%; padding: 0 20px;">
+        <h2 class="mb-4">Documents Scolaires</h2>
+        <%- include('../partials/messages') %>
+
+        <div class="row g-4">
+            <!-- Certificat de Scolarité -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card glass-card p-4 text-center" style="border-radius:16px; min-height:250px;">
+                    <div style="font-size:50px; margin-bottom:15px;">📜</div>
+                    <h5>Certificat de Scolarité</h5>
+                    <p style="color:#888; font-size:0.9rem;">Générer un certificat de scolarité pour un élève.</p>
+                    <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#certificateModal">
+                        <i data-feather="file-text"></i> Générer
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bulletin de Notes -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card glass-card p-4 text-center" style="border-radius:16px; min-height:250px;">
+                    <div style="font-size:50px; margin-bottom:15px;">📊</div>
+                    <h5>Bulletin de Notes</h5>
+                    <p style="color:#888; font-size:0.9rem;">Générer les bulletins de notes par classe ou par élève.</p>
+                    <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#bulletinModal">
+                        <i data-feather="bar-chart-2"></i> Générer
+                    </button>
+                </div>
+            </div>
+
+            <!-- Attestation de Réussite -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card glass-card p-4 text-center" style="border-radius:16px; min-height:250px;">
+                    <div style="font-size:50px; margin-bottom:15px;">🏆</div>
+                    <h5>Attestation de Réussite</h5>
+                    <p style="color:#888; font-size:0.9rem;">Délivrer une attestation de réussite ou de passage.</p>
+                    <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#attestationModal">
+                        <i data-feather="award"></i> Générer
+                    </button>
+                </div>
+            </div>
+
+            <!-- Relevé de Notes -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card glass-card p-4 text-center" style="border-radius:16px; min-height:250px;">
+                    <div style="font-size:50px; margin-bottom:15px;">📋</div>
+                    <h5>Relevé de Notes</h5>
+                    <p style="color:#888; font-size:0.9rem;">Relevé détaillé des notes par période.</p>
+                    <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#releveModal">
+                        <i data-feather="list"></i> Générer
+                    </button>
+                </div>
+            </div>
+
+            <!-- Convocation -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card glass-card p-4 text-center" style="border-radius:16px; min-height:250px;">
+                    <div style="font-size:50px; margin-bottom:15px;">📨</div>
+                    <h5>Convocation</h5>
+                    <p style="color:#888; font-size:0.9rem;">Générer des convocations pour les parents.</p>
+                    <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#convocationModal">
+                        <i data-feather="send"></i> Générer
+                    </button>
+                </div>
+            </div>
+
+            <!-- Archives -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card glass-card p-4 text-center" style="border-radius:16px; min-height:250px;">
+                    <div style="font-size:50px; margin-bottom:15px;">🗄️</div>
+                    <h5>Archives</h5>
+                    <p style="color:#888; font-size:0.9rem;">Consulter les documents déjà générés.</p>
+                    <button class="btn btn-primary mt-3" onclick="loadArchives()">
+                        <i data-feather="archive"></i> Consulter
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Archives -->
+        <div class="card glass-card mt-4 p-4" style="border-radius:16px; display:none;" id="archivesSection">
+            <h4 class="mb-3">📁 Documents Archivés</h4>
+            <div class="table-responsive">
+                <table class="table table-hover" id="archivesTable">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Élève</th>
+                            <th>Classe</th>
+                            <th>Généré par</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="archivesBody">
+                        <tr><td colspan="6" class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary"></div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Certificat de Scolarité -->
+<div class="modal fade" id="certificateModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="background:rgba(30,30,50,0.95); color:white; border-radius:16px; border:1px solid rgba(255,255,255,0.1);">
+            <div class="modal-header" style="border-bottom:1px solid rgba(255,255,255,0.1);">
+                <h5 class="modal-title">📜 Certificat de Scolarité</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Élève</label>
+                    <select class="form-select" id="certStudent" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
+                        <option value="">-- Rechercher un élève --</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Année Scolaire</label>
+                    <input type="text" class="form-control" id="certYear" value="2024-2025" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Établissement</label>
+                    <input type="text" class="form-control" id="certSchool" placeholder="Nom de l'établissement" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
+                </div>
+            </div>
+            <div class="modal-footer" style="border-top:1px solid rgba(255,255,255,0.1);">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" onclick="generateCertificate()">
+                    <i data-feather="printer"></i> Imprimer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Bulletin -->
+<div class="modal fade" id="bulletinModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="background:rgba(30,30,50,0.95); color:white; border-radius:16px; border:1px solid rgba(255,255,255,0.1);">
+            <div class="modal-header" style="border-bottom:1px solid rgba(255,255,255,0.1);">
+                <h5 class="modal-title">📊 Bulletin de Notes</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Classe</label>
+                    <select class="form-select" id="bulletinClass" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
+                        <option value="">-- Choisir une classe --</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Période</label>
+                    <select class="form-select" id="bulletinPeriod" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
+                        <option value="1">1er Trimestre</option>
+                        <option value="2">2ème Trimestre</option>
+                        <option value="3">3ème Trimestre</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer" style="border-top:1px solid rgba(255,255,255,0.1);">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" onclick="generateBulletin()">
+                    <i data-feather="printer"></i> Imprimer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Attestation -->
+<div class="modal fade" id="attestationModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="background:rgba(30,30,50,0.95); color:white; border-radius:16px; border:1px solid rgba(255,255,255,0.1);">
+            <div class="modal-header" style="border-bottom:1px solid rgba(255,255,255,0.1);">
+                <h5 class="modal-title">🏆 Attestation de Réussite</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Élève</label>
+                    <select class="form-select" id="attestStudent" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
+                        <option value="">-- Rechercher un élève --</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Type</label>
+                    <select class="form-select" id="attestType" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
+                        <option value="passage">Attestation de Passage</option>
+                        <option value="reussite">Attestation de Réussite</option>
+                        <option value="fin_cycle">Attestation de Fin de Cycle</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer" style="border-top:1px solid rgba(255,255,255,0.1);">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" onclick="generateAttestation()">
+                    <i data-feather="printer"></i> Imprimer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Relevé -->
+<div class="modal fade" id="releveModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="background:rgba(30,30,50,0.95); color:white; border-radius:16px; border:1px solid rgba(255,255,255,0.1);">
+            <div class="modal-header" style="border-bottom:1px solid rgba(255,255,255,0.1);">
+                <h5 class="modal-title">📋 Relevé de Notes</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p style="color:#888;">Fonctionnalité en cours de développement.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Convocation -->
+<div class="modal fade" id="convocationModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="background:rgba(30,30,50,0.95); color:white; border-radius:16px; border:1px solid rgba(255,255,255,0.1);">
+            <div class="modal-header" style="border-bottom:1px solid rgba(255,255,255,0.1);">
+                <h5 class="modal-title">📨 Convocation</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p style="color:#888;">Fonctionnalité en cours de développement.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof feather !== 'undefined') feather.replace();
+        loadStudents();
+        loadClasses();
+    });
+
+    function loadStudents() {
+        fetch('/api/all-students')
+            .then(function(r) { return r.json(); })
+            .then(function(students) {
+                var options = '';
+                students.forEach(function(s) {
+                    options += '<option value="' + s.id + '" style="background:#1a1a2e;">' + s.name + ' (' + (s.student_class || 'N/A') + ')</option>';
+                });
+                var certSelect = document.getElementById('certStudent');
+                var attestSelect = document.getElementById('attestStudent');
+                if (certSelect) certSelect.innerHTML += options;
+                if (attestSelect) attestSelect.innerHTML += options;
+            })
+            .catch(function() {});
+    }
+
+    function loadClasses() {
+        fetch('/api/all-classes')
+            .then(function(r) { return r.json(); })
+            .then(function(classes) {
+                var options = '';
+                classes.forEach(function(c) {
+                    options += '<option value="' + c + '" style="background:#1a1a2e;">' + c + '</option>';
+                });
+                var bulletinSelect = document.getElementById('bulletinClass');
+                if (bulletinSelect) bulletinSelect.innerHTML += options;
+            })
+            .catch(function() {});
+    }
+
+    function loadArchives() {
+        var section = document.getElementById('archivesSection');
+        section.style.display = 'block';
+        
+        fetch('/api/documents/archives')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                var tbody = document.getElementById('archivesBody');
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-3 text-muted">Aucun document archivé.</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = data.map(function(d) {
+                    return '<tr>' +
+                        '<td>' + new Date(d.created_at).toLocaleDateString('fr-FR') + '</td>' +
+                        '<td>' + d.type + '</td>' +
+                        '<td>' + d.student_name + '</td>' +
+                        '<td>' + d.student_class + '</td>' +
+                        '<td>' + d.created_by_name + '</td>' +
+                        '<td><button class="btn btn-sm btn-outline-primary" onclick="window.open(\'/uploads/documents/' + d.file_url + '\')">📥</button></td>' +
+                    '</tr>';
+                }).join('');
+            })
+            .catch(function() {
+                document.getElementById('archivesBody').innerHTML = '<tr><td colspan="6" class="text-center py-3 text-muted">Erreur de chargement.</td></tr>';
+            });
+    }
+
+    function generateCertificate() {
+        var studentId = document.getElementById('certStudent').value;
+        if (!studentId) return alert('Veuillez sélectionner un élève.');
+        alert('📜 Certificat de scolarité généré avec succès !\n(Fonction d\'impression à implémenter)');
+        bootstrap.Modal.getInstance(document.getElementById('certificateModal')).hide();
+    }
+
+    function generateBulletin() {
+        var className = document.getElementById('bulletinClass').value;
+        if (!className) return alert('Veuillez sélectionner une classe.');
+        alert('📊 Bulletin généré pour la classe ' + className + ' !\n(Fonction d\'impression à implémenter)');
+        bootstrap.Modal.getInstance(document.getElementById('bulletinModal')).hide();
+    }
+
+    function generateAttestation() {
+        var studentId = document.getElementById('attestStudent').value;
+        if (!studentId) return alert('Veuillez sélectionner un élève.');
+        alert('🏆 Attestation générée avec succès !\n(Fonction d\'impression à implémenter)');
+        bootstrap.Modal.getInstance(document.getElementById('attestationModal')).hide();
+    }
+</script>
+
+<style>
+    .glass-card {
+        background: rgba(255,255,255,0.05) !important;
+        backdrop-filter: blur(20px) !important;
+        -webkit-backdrop-filter: blur(20px) !important;
+        border: 1px solid rgba(255,255,255,0.08) !important;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3) !important;
+        transition: all 0.3s ease;
+    }
+    .glass-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.4) !important;
+        border-color: rgba(13,110,253,0.3) !important;
+    }
+    #archivesTable th, #archivesTable td {
+        border-color: rgba(128,128,128,0.15);
+        vertical-align: middle;
+    }
+    #archivesTable th {
+        background: rgba(13,110,253,0.08);
+        font-weight: 600;
+        color: #0d6efd;
+    }
+    [data-theme="dark"] #archivesTable th {
+        background: rgba(255,255,255,0.05);
+        color: #fff;
+    }
+</style>
+
+<%- include('../partials/footer') %>

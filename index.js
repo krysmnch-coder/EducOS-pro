@@ -1452,6 +1452,29 @@ app.get('/absences-view', async (req, res) => {
     }
 });
 
+// Page documents secrétaire
+app.get('/secretary/documents', async (req, res) => {
+    if (!req.user) return res.redirect('/login');
+    
+    // Vérifier que l'utilisateur est secrétaire ou admin
+    if (req.user.role !== 'SECRETARY' && req.user.role !== 'secretaire' && 
+        req.user.role !== 'ADMINISTRATOR' && req.user.role !== 'administrateur') {
+        req.flash('error_msg', 'Accès non autorisé.');
+        return res.redirect('/dashboard');
+    }
+    
+    try {
+        res.render('secretary/documents', {
+            title: 'Documents Scolaires',
+            user: req.user
+        });
+    } catch (error) {
+        console.error('Erreur documents:', error);
+        req.flash('error_msg', 'Erreur lors du chargement.');
+        res.redirect('/dashboard');
+    }
+});
+
 const timetableRoutes = require('./src/routes/timetableRoutes');
 app.use('/', timetableRoutes);
 
