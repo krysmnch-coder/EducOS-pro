@@ -218,25 +218,35 @@
     });
 
     function loadClassesAndStudents() {
-        fetch('/api/all-classes')
-            .then(function(r) { return r.json(); })
-            .then(function(classes) {
-                allClasses = classes;
-                var classSelect = document.getElementById('filterClass');
-                classes.forEach(function(c) {
-                    classSelect.innerHTML += '<option value="' + c + '" style="background:#1a1a2e;">' + c + '</option>';
-                });
-            })
-            .catch(function() {});
-
-        fetch('/api/all-students')
-            .then(function(r) { return r.json(); })
-            .then(function(students) {
-                allStudents = students;
-                populateStudentSelect(students);
-            })
-            .catch(function() {});
-    }
+    // Charger les élèves (API qui fonctionne)
+    fetch('/api/all-students')
+        .then(function(r) { return r.json(); })
+        .then(function(students) {
+            allStudents = students;
+            populateStudentSelect(students);
+            
+            // Extraire les classes des élèves (puisque l'API all-classes ne marche pas)
+            var classSet = {};
+            students.forEach(function(s) {
+                if (s.student_class && s.student_class.trim() !== '') {
+                    classSet[s.student_class] = true;
+                }
+            });
+            allClasses = Object.keys(classSet).sort();
+            
+            // Remplir le sélecteur de classes
+            var classSelect = document.getElementById('filterClass');
+            classSelect.innerHTML = '<option value="">-- Toutes les classes --</option>';
+            allClasses.forEach(function(c) {
+                classSelect.innerHTML += '<option value="' + c + '" style="background:#1a1a2e;">' + c + '</option>';
+            });
+            
+            console.log('📋 Classes extraites:', allClasses);
+        })
+        .catch(function(error) {
+            console.error('Erreur chargement élèves:', error);
+        });
+}
 
     function populateStudentSelect(students) {
         var studentSelect = document.getElementById('filterStudent');
