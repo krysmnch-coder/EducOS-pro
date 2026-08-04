@@ -1601,24 +1601,31 @@ app.get('/api/student-details/:id', async (req, res) => {
     if (!req.user) return res.status(401).json({ error: 'Non authentifié' });
     
     try {
-        // Chercher sans filtre de rôle
+        console.log('🔍 Recherche étudiant ID:', req.params.id);
+        
+        // Chercher l'étudiant sans filtre de rôle
         const student = await db('users')
             .where({ id: req.params.id })
-            .select('id', 'name', 'matricule', 'student_class', 'date_of_birth', 
-                    'place_of_birth', 'address', 'email', 'phone_number', 'manual_parents')
             .first();
+        
+        console.log('👤 Étudiant trouvé:', student ? student.name : 'NON');
+        console.log('📋 Matricule:', student ? student.matricule : 'N/A');
+        console.log('📋 date_of_birth:', student ? student.date_of_birth : 'N/A');
+        console.log('📋 place_of_birth:', student ? student.place_of_birth : 'N/A');
+        console.log('📋 address:', student ? student.address : 'N/A');
         
         if (!student) {
             return res.status(404).json({ error: 'Élève non trouvé' });
         }
         
-        // Récupérer les parents liés (seulement si matricule existe)
+        // Récupérer les parents liés (si matricule existe)
         let linkedParents = [];
         if (student.matricule) {
             linkedParents = await db('parent_student_links as psl')
                 .join('users as u', 'psl.parent_id', 'u.id')
                 .where('psl.student_matricule', student.matricule)
                 .select('u.id', 'u.name', 'u.phone_number');
+            console.log('👥 Parents liés:', linkedParents.length);
         }
         
         // Parser les parents manuels
@@ -1628,19 +1635,29 @@ app.get('/api/student-details/:id', async (req, res) => {
                 manualParents = typeof student.manual_parents === 'string' 
                     ? JSON.parse(student.manual_parents) 
                     : student.manual_parents;
+                console.log('👥 Parents manuels:', manualParents.length);
             } catch (e) {
                 manualParents = [];
             }
         }
         
+        // Retourner TOUTES les colonnes
         res.json({
-            ...student,
+            id: student.id,
+            name: student.name,
+            matricule: student.matricule,
+            student_class: student.student_class,
+            date_of_birth: student.date_of_birth,
+            place_of_birth: student.place_of_birth,
+            address: student.address,
+            email: student.email,
+            phone_number: student.phone_number,
             linkedParents: linkedParents,
             manualParents: manualParents
         });
         
     } catch (error) {
-        console.error('Erreur student-details:', error);
+        console.error('❌ Erreur student-details:', error);
         res.status(500).json({ error: error.message });
     }
 });
