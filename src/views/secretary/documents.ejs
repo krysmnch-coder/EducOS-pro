@@ -376,112 +376,145 @@
     // ========================================================================
     
     function generateDocument(type) {
-        if (!selectedStudentId && !selectedClassName) {
-            alert('Veuillez sélectionner une classe ou un élève.');
-            return;
-        }
-        
-        var docNames = {
-            'certificate': 'Certificat de scolarité',
-            'bulletin': 'Bulletin de notes',
-            'attestation': 'Attestation de réussite',
-            'inscription': 'Fiche d\'inscription',
-            'sortie': 'Certificat de sortie',
-            'livret': 'Livret scolaire'
-        };
-        
-        if (selectedStudentId) {
-            fetch('/api/student-details/' + selectedStudentId)
-                .then(function(r) { return r.json(); })
-                .then(function(student) {
-                    console.log('📋 Détails élève:', student);
-                    
-                    var docData = {
-                        student_name: student.name,
-                        student_class: student.student_class,
-                        matricule: student.matricule,
-                        date_of_birth: student.date_of_birth,
-                        place_of_birth: student.place_of_birth,
-                        address: student.address,
-                        parents: student.linkedParents || [],
-                        manual_parents: student.manualParents || []
-                    };
-                    
-                    return fetch('/api/documents/generate', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            type: type,
-                            student_id: selectedStudentId,
-                            class_name: selectedClassName,
-                            data: docData
-                        })
-                    });
-                })
-                .then(function(r) { return r.json(); })
-                .then(function(result) {
-                    if (result.success) {
-                        openPrintWindow(type, selectedStudentId);
-                    }
-                })
-                .catch(function(error) {
-                    console.error('❌ Erreur:', error);
-                    alert('✅ ' + (docNames[type] || 'Document') + ' généré avec succès !');
-                });
-        } else {
-            alert('✅ ' + (docNames[type] || 'Document') + ' généré pour la classe ' + selectedClassName + ' !');
-        }
-        
-        var modal = bootstrap.Modal.getInstance(document.getElementById('docModal'));
-        if (modal) modal.hide();
+    if (!selectedStudentId && !selectedClassName) {
+        alert('Veuillez sélectionner une classe ou un élève.');
+        return;
     }
-
-    function openPrintWindow(type, studentId) {
-    fetch('/api/student-details/' + studentId)
-        .then(function(r) { return r.json(); })
-        .then(function(student) {
-            var docBody = '';
-            
-            switch(type) {
-                case 'certificate': docBody = generateCertificateHTML(student); break;
-                case 'inscription': docBody = generateInscriptionHTML(student); break;
-                case 'sortie': docBody = generateSortieHTML(student); break;
-                case 'livret': docBody = generateLivretHTML(student); break;
-                case 'attestation': docBody = generateAttestationHTML(student); break;
-                default: docBody = generateGenericHTML(student);
-            }
-            
-            // Afficher dans une modale avec bouton imprimer
-            var printModal = document.createElement('div');
-            printModal.innerHTML = '<div class="modal fade" id="printModal" tabindex="-1"><div class="modal-dialog modal-lg"><div class="modal-content" style="background:white; color:#333; border-radius:16px;"><div class="modal-header"><h5 class="modal-title">Aperçu avant impression</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body" style="max-height:70vh; overflow-y:auto;">' + docBody + '</div><div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button><button class="btn btn-primary" onclick="window.print()"><i data-feather="printer"></i> Imprimer</button></div></div></div></div>';
-            
-            document.body.appendChild(printModal);
-            var modal = new bootstrap.Modal(document.getElementById('printModal'));
-            modal.show();
-            
-            document.getElementById('printModal').addEventListener('hidden.bs.modal', function() {
-                this.remove();
+    
+    var docNames = {
+        'certificate': 'Certificat de scolarité',
+        'bulletin': 'Bulletin de notes',
+        'attestation': 'Attestation de réussite',
+        'inscription': 'Fiche d\'inscription',
+        'sortie': 'Certificat de sortie',
+        'livret': 'Livret scolaire'
+    };
+    
+    // Fermer le modal docModal
+    var docModal = bootstrap.Modal.getInstance(document.getElementById('docModal'));
+    if (docModal) docModal.hide();
+    
+    if (selectedStudentId) {
+        var student = allStudents.find(function(s) { return s.id == selectedStudentId; });
+        
+        fetch('/api/student-details/' + selectedStudentId)
+            .then(function(r) { return r.json(); })
+            .then(function(details) {
+                // Fusionner les infos de base avec les détails
+                var studentData = details;
+                if (!studentData.name && student) studentData.name = student.name;
+                if (!studentData.student_class && student) studentData.student_class = student.student_class;
+                
+                // Archiver le document avec le nom de l'élève
+                return fetch('/api/documents/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        type: type,
+                        student_id: selectedStudentId,
+                        class_name: studentData.student_class || selectedClassName,
+                        data: {
+                            student_name: studentData.name,
+                            student_class: studentData.student_class
+                        }
+                    })
+                }).then(function() { return studentData; });
+            })
+            .then(function(studentData) {
+                // Afficher dans une MODALE (pas de popup bloqué)
+                showPrintModal(type, studentData);
+            })
+            .catch(function(error) {
+                console.error('❌ Erreur:', error);
+                alert('✅ ' + (docNames[type] || 'Document') + ' généré avec succès !');
             });
-        });
+    } else {
+        alert('✅ ' + (docNames[type] || 'Document') + ' généré pour la classe ' + selectedClassName + ' !');
+    }
 }
 
-    function generateCertificateHTML(student) {
-        var date = new Date().toLocaleDateString('fr-FR');
-        var year = document.getElementById('certYear') ? document.getElementById('certYear').value : '2024-2025';
-        var school = document.getElementById('certSchool') ? document.getElementById('certSchool').value : 'Établissement';
-        
-        return '<div class="header"><h1>CERTIFICAT DE SCOLARITÉ</h1><h2>Année Scolaire ' + year + '</h2></div>' +
-            '<div class="section"><p>Je soussigné, Directeur de l\'établissement <strong>' + school + '</strong>, certifie que :</p></div>' +
-            '<table><tr><td>Nom et Prénom</td><td><strong>' + student.name + '</strong></td></tr>' +
-            '<tr><td>Né(e) le</td><td>' + (student.date_of_birth ? new Date(student.date_of_birth).toLocaleDateString('fr-FR') : 'Non renseigné') + '</td></tr>' +
-            '<tr><td>À</td><td>' + (student.place_of_birth || 'Non renseigné') + '</td></tr>' +
-            '<tr><td>Matricule</td><td>' + (student.matricule || 'N/A') + '</td></tr>' +
-            '<tr><td>Classe</td><td>' + (student.student_class || 'N/A') + '</td></tr>' +
-            '<tr><td>Adresse</td><td>' + (student.address || 'Non renseignée') + '</td></tr></table>' +
-            '<div class="section"><p>Est régulièrement inscrit(e) dans notre établissement pour l\'année scolaire en cours.</p></div>' +
-            '<div class="footer"><p>Fait à _______________, le ' + date + '</p><p>Le Directeur</p></div>';
+function showPrintModal(type, student) {
+    var docTitle = '';
+    var docBody = '';
+    
+    switch(type) {
+        case 'certificate':
+            docTitle = 'CERTIFICAT DE SCOLARITÉ';
+            docBody = generateCertificateHTML(student);
+            break;
+        case 'inscription':
+            docTitle = "FICHE D'INSCRIPTION";
+            docBody = generateInscriptionHTML(student);
+            break;
+        case 'sortie':
+            docTitle = 'CERTIFICAT DE SORTIE';
+            docBody = generateSortieHTML(student);
+            break;
+        case 'livret':
+            docTitle = 'LIVRET SCOLAIRE';
+            docBody = generateLivretHTML(student);
+            break;
+        case 'attestation':
+            docTitle = 'ATTESTATION';
+            docBody = generateAttestationHTML(student);
+            break;
+        default:
+            docTitle = 'DOCUMENT';
+            docBody = generateGenericHTML(student);
     }
+    
+    // Supprimer l'ancienne modale si elle existe
+    var oldModal = document.getElementById('printModal');
+    if (oldModal) oldModal.remove();
+    
+    // Créer la modale d'impression
+    var modalHTML = '<div class="modal fade" id="printModal" tabindex="-1">' +
+        '<div class="modal-dialog modal-lg">' +
+        '<div class="modal-content" style="background:white; color:#333; border-radius:16px;">' +
+        '<div class="modal-header">' +
+        '<h5 class="modal-title" style="color:#333;">' + docTitle + '</h5>' +
+        '<button type="button" class="btn-close" data-bs-dismiss="modal"></button>' +
+        '</div>' +
+        '<div class="modal-body" style="max-height:70vh; overflow-y:auto; padding:30px;">' +
+        docBody +
+        '</div>' +
+        '<div class="modal-footer">' +
+        '<button class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>' +
+        '<button class="btn btn-primary" onclick="window.print()">🖨️ Imprimer</button>' +
+        '</div>' +
+        '</div></div></div>';
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    var printModal = new bootstrap.Modal(document.getElementById('printModal'));
+    printModal.show();
+    
+    // Nettoyer après fermeture
+    document.getElementById('printModal').addEventListener('hidden.bs.modal', function() {
+        this.remove();
+    });
+}
 
+   function generateCertificateHTML(student) {
+    var date = new Date().toLocaleDateString('fr-FR');
+    var year = document.getElementById('certYear') ? document.getElementById('certYear').value : '2024-2025';
+    var school = document.getElementById('certSchool') ? document.getElementById('certSchool').value : 'Établissement';
+    
+    return '<div style="text-align:center;margin-bottom:30px;">' +
+        '<h1 style="font-size:20px;">CERTIFICAT DE SCOLARITÉ</h1>' +
+        '<h2 style="font-size:16px;color:#666;">Année Scolaire ' + year + '</h2></div>' +
+        '<p>Je soussigné, Directeur de l\'établissement <strong>' + school + '</strong>, certifie que :</p>' +
+        '<table style="width:100%;border-collapse:collapse;margin:10px 0;">' +
+        '<tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;width:200px;">Nom et Prénom</td><td style="padding:8px;border:1px solid #ddd;"><strong>' + (student.name || '') + '</strong></td></tr>' +
+        '<tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">Né(e) le</td><td style="padding:8px;border:1px solid #ddd;">' + (student.date_of_birth ? new Date(student.date_of_birth).toLocaleDateString('fr-FR') : 'Non renseigné') + '</td></tr>' +
+        '<tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">À</td><td style="padding:8px;border:1px solid #ddd;">' + (student.place_of_birth || 'Non renseigné') + '</td></tr>' +
+        '<tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">Matricule</td><td style="padding:8px;border:1px solid #ddd;">' + (student.matricule || 'N/A') + '</td></tr>' +
+        '<tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">Classe</td><td style="padding:8px;border:1px solid #ddd;">' + (student.student_class || 'N/A') + '</td></tr>' +
+        '<tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">Adresse</td><td style="padding:8px;border:1px solid #ddd;">' + (student.address || 'Non renseignée') + '</td></tr>' +
+        '</table>' +
+        '<p>Est régulièrement inscrit(e) dans notre établissement pour l\'année scolaire en cours.</p>' +
+        '<div style="margin-top:40px;text-align:right;">Fait à _______________, le ' + date + '<br>Le Directeur</div>';
+}
     function generateInscriptionHTML(student) {
         var date = new Date().toLocaleDateString('fr-FR');
         var year = document.getElementById('inscYear') ? document.getElementById('inscYear').value : '2024-2025';
