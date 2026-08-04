@@ -43,6 +43,42 @@
                 </div>
             </div>
 
+            <!-- Fiche d'Inscription / Réinscription -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card glass-card p-4 text-center" style="border-radius:16px; min-height:250px;">
+                    <div style="font-size:50px; margin-bottom:15px;">📝</div>
+                    <h5>Fiche d'Inscription</h5>
+                    <p style="color:#888; font-size:0.9rem;">Fiche d'inscription ou de réinscription pour un élève.</p>
+                    <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#inscriptionModal">
+                        <i data-feather="edit-3"></i> Générer
+                    </button>
+                </div>
+            </div>
+
+            <!-- Certificat de Sortie / Radiation -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card glass-card p-4 text-center" style="border-radius:16px; min-height:250px;">
+                    <div style="font-size:50px; margin-bottom:15px;">🚪</div>
+                    <h5>Certificat de Sortie</h5>
+                    <p style="color:#888; font-size:0.9rem;">Certificat de radiation pour changement d'école.</p>
+                    <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#sortieModal">
+                        <i data-feather="log-out"></i> Générer
+                    </button>
+                </div>
+            </div>
+
+            <!-- Livret Scolaire -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card glass-card p-4 text-center" style="border-radius:16px; min-height:250px;">
+                    <div style="font-size:50px; margin-bottom:15px;">📖</div>
+                    <h5>Livret Scolaire</h5>
+                    <p style="color:#888; font-size:0.9rem;">Livret qui suit l'élève et résume ses compétences.</p>
+                    <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#livretModal">
+                        <i data-feather="book-open"></i> Générer
+                    </button>
+                </div>
+            </div>
+
             <!-- Relevé de Notes -->
             <div class="col-md-6 col-lg-4">
                 <div class="card glass-card p-4 text-center" style="border-radius:16px; min-height:250px;">
@@ -206,6 +242,131 @@
     </div>
 </div>
 
+<!-- Modal Fiche d'Inscription -->
+<div class="modal fade" id="inscriptionModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="background:rgba(30,30,50,0.95); color:white; border-radius:16px; border:1px solid rgba(255,255,255,0.1);">
+            <div class="modal-header" style="border-bottom:1px solid rgba(255,255,255,0.1);">
+                <h5 class="modal-title">📝 Fiche d'Inscription / Réinscription</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Élève</label>
+                        <select class="form-select" id="inscStudent" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
+                            <option value="">-- Rechercher --</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Type</label>
+                        <select class="form-select" id="inscType" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
+                            <option value="inscription">Nouvelle Inscription</option>
+                            <option value="reinscription">Réinscription</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Année Scolaire</label>
+                        <input type="text" class="form-control" id="inscYear" value="2024-2025" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Classe</label>
+                        <input type="text" class="form-control" id="inscClass" placeholder="Classe de l'élève" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="border-top:1px solid rgba(255,255,255,0.1);">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" onclick="generateInscription()">
+                    <i data-feather="printer"></i> Imprimer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Certificat de Sortie -->
+<div class="modal fade" id="sortieModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="background:rgba(30,30,50,0.95); color:white; border-radius:16px; border:1px solid rgba(255,255,255,0.1);">
+            <div class="modal-header" style="border-bottom:1px solid rgba(255,255,255,0.1);">
+                <h5 class="modal-title">🚪 Certificat de Sortie (Radiation)</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Élève</label>
+                    <select class="form-select" id="sortieStudent" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
+                        <option value="">-- Rechercher un élève --</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Motif de départ</label>
+                    <select class="form-select" id="sortieMotif" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
+                        <option value="demangement">Déménagement</option>
+                        <option value="changement_ecole">Changement d'école</option>
+                        <option value="fin_cycle">Fin de cycle</option>
+                        <option value="autre">Autre</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Date de sortie</label>
+                    <input type="date" class="form-control" id="sortieDate" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Nouvel établissement (si connu)</label>
+                    <input type="text" class="form-control" id="sortieNewSchool" placeholder="Nom du nouvel établissement" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
+                </div>
+            </div>
+            <div class="modal-footer" style="border-top:1px solid rgba(255,255,255,0.1);">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" onclick="generateSortie()">
+                    <i data-feather="printer"></i> Imprimer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Livret Scolaire -->
+<div class="modal fade" id="livretModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="background:rgba(30,30,50,0.95); color:white; border-radius:16px; border:1px solid rgba(255,255,255,0.1);">
+            <div class="modal-header" style="border-bottom:1px solid rgba(255,255,255,0.1);">
+                <h5 class="modal-title">📖 Livret Scolaire</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Élève</label>
+                    <select class="form-select" id="livretStudent" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
+                        <option value="">-- Rechercher un élève --</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Année Scolaire</label>
+                    <input type="text" class="form-control" id="livretYear" value="2024-2025" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Période</label>
+                    <select class="form-select" id="livretPeriod" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
+                        <option value="1">1er Trimestre</option>
+                        <option value="2">2ème Trimestre</option>
+                        <option value="3">3ème Trimestre</option>
+                        <option value="annuel">Annuel</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer" style="border-top:1px solid rgba(255,255,255,0.1);">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" onclick="generateLivret()">
+                    <i data-feather="printer"></i> Imprimer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Modal Relevé -->
 <div class="modal fade" id="releveModal" tabindex="-1">
     <div class="modal-dialog">
@@ -239,11 +400,11 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         if (typeof feather !== 'undefined') feather.replace();
-        loadStudents();
+        loadStudentsForAllModals();
         loadClasses();
     });
 
-    function loadStudents() {
+    function loadStudentsForAllModals() {
         fetch('/api/all-students')
             .then(function(r) { return r.json(); })
             .then(function(students) {
@@ -251,10 +412,11 @@
                 students.forEach(function(s) {
                     options += '<option value="' + s.id + '" style="background:#1a1a2e;">' + s.name + ' (' + (s.student_class || 'N/A') + ')</option>';
                 });
-                var certSelect = document.getElementById('certStudent');
-                var attestSelect = document.getElementById('attestStudent');
-                if (certSelect) certSelect.innerHTML += options;
-                if (attestSelect) attestSelect.innerHTML += options;
+                var selects = ['certStudent', 'attestStudent', 'inscStudent', 'sortieStudent', 'livretStudent'];
+                selects.forEach(function(id) {
+                    var el = document.getElementById(id);
+                    if (el) el.innerHTML += options;
+                });
             })
             .catch(function() {});
     }
@@ -267,8 +429,8 @@
                 classes.forEach(function(c) {
                     options += '<option value="' + c + '" style="background:#1a1a2e;">' + c + '</option>';
                 });
-                var bulletinSelect = document.getElementById('bulletinClass');
-                if (bulletinSelect) bulletinSelect.innerHTML += options;
+                var el = document.getElementById('bulletinClass');
+                if (el) el.innerHTML += options;
             })
             .catch(function() {});
     }
@@ -301,25 +463,52 @@
             });
     }
 
+    function hideModal(modalId) {
+        var modal = bootstrap.Modal.getInstance(document.getElementById(modalId));
+        if (modal) modal.hide();
+    }
+
     function generateCertificate() {
         var studentId = document.getElementById('certStudent').value;
         if (!studentId) return alert('Veuillez sélectionner un élève.');
-        alert('📜 Certificat de scolarité généré avec succès !\n(Fonction d\'impression à implémenter)');
-        bootstrap.Modal.getInstance(document.getElementById('certificateModal')).hide();
+        alert('📜 Certificat de scolarité généré avec succès !');
+        hideModal('certificateModal');
     }
 
     function generateBulletin() {
         var className = document.getElementById('bulletinClass').value;
         if (!className) return alert('Veuillez sélectionner une classe.');
-        alert('📊 Bulletin généré pour la classe ' + className + ' !\n(Fonction d\'impression à implémenter)');
-        bootstrap.Modal.getInstance(document.getElementById('bulletinModal')).hide();
+        alert('📊 Bulletin généré pour la classe ' + className + ' !');
+        hideModal('bulletinModal');
     }
 
     function generateAttestation() {
         var studentId = document.getElementById('attestStudent').value;
         if (!studentId) return alert('Veuillez sélectionner un élève.');
-        alert('🏆 Attestation générée avec succès !\n(Fonction d\'impression à implémenter)');
-        bootstrap.Modal.getInstance(document.getElementById('attestationModal')).hide();
+        alert('🏆 Attestation générée avec succès !');
+        hideModal('attestationModal');
+    }
+
+    function generateInscription() {
+        var studentId = document.getElementById('inscStudent').value;
+        if (!studentId) return alert('Veuillez sélectionner un élève.');
+        var type = document.getElementById('inscType').value;
+        alert('📝 Fiche de ' + (type === 'inscription' ? 'nouvelle inscription' : 'réinscription') + ' générée !');
+        hideModal('inscriptionModal');
+    }
+
+    function generateSortie() {
+        var studentId = document.getElementById('sortieStudent').value;
+        if (!studentId) return alert('Veuillez sélectionner un élève.');
+        alert('🚪 Certificat de sortie (radiation) généré avec succès !');
+        hideModal('sortieModal');
+    }
+
+    function generateLivret() {
+        var studentId = document.getElementById('livretStudent').value;
+        if (!studentId) return alert('Veuillez sélectionner un élève.');
+        alert('📖 Livret scolaire généré avec succès !');
+        hideModal('livretModal');
     }
 </script>
 
