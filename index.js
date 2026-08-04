@@ -1501,7 +1501,6 @@ app.get('/secretary/documents', async (req, res) => {
     }
 });
 
-// API - Récupérer toutes les classes - CORRIGÉ
 app.get('/api/all-classes', async (req, res) => {
     if (!req.user) return res.status(401).json([]);
     try {
@@ -1511,12 +1510,13 @@ app.get('/api/all-classes', async (req, res) => {
                 approved: 1 
             })
             .whereIn('role', ['STUDENT', 'student', 'eleve', 'élève', 'Eleve', 'Élève'])
-            .distinct('student_class')
             .whereNotNull('student_class')
+            .where('student_class', '!=', '')
+            .distinct('student_class')
             .orderBy('student_class')
             .pluck('student_class');
         
-        console.log('📋 Classes trouvées:', classes);
+        console.log('📋 Classes trouvées:', classes.length, classes);
         res.json(classes);
     } catch (error) {
         console.error('Erreur all-classes:', error);

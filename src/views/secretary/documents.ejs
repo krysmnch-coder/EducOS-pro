@@ -427,45 +427,33 @@
     }
 
     function openPrintWindow(type, studentId) {
-        fetch('/api/student-details/' + studentId)
-            .then(function(r) { return r.json(); })
-            .then(function(student) {
-                var printWindow = window.open('', '_blank', 'width=800,height=600');
-                
-                var docTitle = '';
-                var docBody = '';
-                
-                switch(type) {
-                    case 'certificate':
-                        docTitle = 'CERTIFICAT DE SCOLARITÉ';
-                        docBody = generateCertificateHTML(student);
-                        break;
-                    case 'inscription':
-                        docTitle = "FICHE D'INSCRIPTION";
-                        docBody = generateInscriptionHTML(student);
-                        break;
-                    case 'sortie':
-                        docTitle = 'CERTIFICAT DE SORTIE (RADIATION)';
-                        docBody = generateSortieHTML(student);
-                        break;
-                    case 'livret':
-                        docTitle = 'LIVRET SCOLAIRE';
-                        docBody = generateLivretHTML(student);
-                        break;
-                    case 'attestation':
-                        docTitle = 'ATTESTATION DE RÉUSSITE';
-                        docBody = generateAttestationHTML(student);
-                        break;
-                    default:
-                        docTitle = 'DOCUMENT SCOLAIRE';
-                        docBody = generateGenericHTML(student);
-                }
-                
-                printWindow.document.write('<!DOCTYPE html><html><head><title>' + docTitle + '</title><style>body{font-family:Arial,sans-serif;padding:40px;color:#333;}.header{text-align:center;margin-bottom:30px;}.header h1{font-size:20px;margin-bottom:5px;}.header h2{font-size:16px;color:#666;}.section{margin-bottom:20px;}.section h3{border-bottom:2px solid #0d6efd;padding-bottom:5px;font-size:14px;color:#0d6efd;}table{width:100%;border-collapse:collapse;margin:10px 0;}table td{padding:8px;border:1px solid #ddd;}table td:first-child{font-weight:bold;width:200px;background:#f8f9fa;}.footer{margin-top:40px;text-align:right;font-style:italic;}@media print{body{padding:20px;}}</style></head><body>' + docBody + '</body></html>');
-                printWindow.document.close();
-                setTimeout(function() { printWindow.print(); }, 500);
+    fetch('/api/student-details/' + studentId)
+        .then(function(r) { return r.json(); })
+        .then(function(student) {
+            var docBody = '';
+            
+            switch(type) {
+                case 'certificate': docBody = generateCertificateHTML(student); break;
+                case 'inscription': docBody = generateInscriptionHTML(student); break;
+                case 'sortie': docBody = generateSortieHTML(student); break;
+                case 'livret': docBody = generateLivretHTML(student); break;
+                case 'attestation': docBody = generateAttestationHTML(student); break;
+                default: docBody = generateGenericHTML(student);
+            }
+            
+            // Afficher dans une modale avec bouton imprimer
+            var printModal = document.createElement('div');
+            printModal.innerHTML = '<div class="modal fade" id="printModal" tabindex="-1"><div class="modal-dialog modal-lg"><div class="modal-content" style="background:white; color:#333; border-radius:16px;"><div class="modal-header"><h5 class="modal-title">Aperçu avant impression</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body" style="max-height:70vh; overflow-y:auto;">' + docBody + '</div><div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button><button class="btn btn-primary" onclick="window.print()"><i data-feather="printer"></i> Imprimer</button></div></div></div></div>';
+            
+            document.body.appendChild(printModal);
+            var modal = new bootstrap.Modal(document.getElementById('printModal'));
+            modal.show();
+            
+            document.getElementById('printModal').addEventListener('hidden.bs.modal', function() {
+                this.remove();
             });
-    }
+        });
+}
 
     function generateCertificateHTML(student) {
         var date = new Date().toLocaleDateString('fr-FR');
