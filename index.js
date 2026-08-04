@@ -1476,6 +1476,7 @@ app.get('/secretary/documents', async (req, res) => {
 });
 
 // ==========================================================================
+//// ==========================================================================
 // ROUTES DOCUMENTS SECRÉTAIRE
 // ==========================================================================
 
@@ -1501,6 +1502,7 @@ app.get('/secretary/documents', async (req, res) => {
     }
 });
 
+// API - Récupérer toutes les classes
 app.get('/api/all-classes', async (req, res) => {
     if (!req.user) return res.status(401).json([]);
     try {
@@ -1524,12 +1526,11 @@ app.get('/api/all-classes', async (req, res) => {
     }
 });
 
-// API - Récupérer tous les élèves (pour les sélecteurs) - CORRIGÉ
+// API - Récupérer tous les élèves
 app.get('/api/all-students', async (req, res) => {
     if (!req.user) return res.status(401).json([]);
     
     try {
-        // Chercher avec tous les rôles possibles pour les élèves
         const students = await db('users')
             .where({ 
                 establishment_id: req.user.establishment_id, 
@@ -1572,7 +1573,6 @@ app.post('/api/documents/generate', async (req, res) => {
     try {
         const { type, student_id, class_name, data } = req.body;
         
-        // Enregistrer dans les archives
         const [id] = await db('document_archives').insert({
             establishment_id: req.user.establishment_id,
             type: type,
@@ -1594,7 +1594,50 @@ app.post('/api/documents/generate', async (req, res) => {
     }
 });
 
-// Créer la table document_archives si elle n'existe pas
+// API - Récupérer les détails complets d'un élève
+app.get('/api/student-details/:id', async (req, res) => {
+    if (!req.user) return res.status(401).json({ error: 'Non authentifié' });
+    
+    try {
+        const student = await db('users')
+            .where({ id: req.params.id })
+            .select('id', 'name', 'matricule', 'student_class', 'date_of_birth', 
+                    'place_of_birth', 'address', 'email', 'phone_number', 'manual_parents')
+            .first();
+        
+        if (!student) {
+            return res.status(404).json({ error: 'Élève non trouvé' });
+        }
+        
+        const linkedParents = await db('parent_student_links as psl')
+            .join('users as u', 'psl.parent_id', 'u.id')
+            .where('psl.student_matricule', student.matricule)
+            .select('u.id', 'u.name', 'u.phone_number');
+        
+        let manualParents = [];
+        if (student.manual_parents) {
+            try {
+                manualParents = typeof student.manual_parents === 'string' 
+                    ? JSON.parse(student.manual_parents) 
+                    : student.manual_parents;
+            } catch (e) {
+                manualParents = [];
+            }
+        }
+        
+        res.json({
+            ...student,
+            linkedParents: linkedParents,
+            manualParents: manualParents
+        });
+        
+    } catch (error) {
+        console.error('Erreur student-details:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Créer la table document_archives
 async function createDocumentArchivesTable() {
     try {
         const hasTable = await db.schema.hasTable('document_archives');
@@ -1621,51 +1664,6 @@ async function createDocumentArchivesTable() {
 }
 
 createDocumentArchivesTable();
-
-// API - Récupérer les détails complets d'un élève
-app.get('/api/student-details/:id', async (req, res) => {
-    if (!req.user) return res.status(401).json({ error: 'Non authentifié' });
-    
-    try {
-        const student = await db('users')
-            .where({ id: req.params.id })
-            .select('id', 'name', 'matricule', 'student_class', 'date_of_birth', 
-                    'place_of_birth', 'address', 'email', 'phone_number', 'manual_parents')
-            .first();
-        
-        if (!student) {
-            return res.status(404).json({ error: 'Élève non trouvé' });
-        }
-        
-        // Récupérer les parents liés
-        const linkedParents = await db('parent_student_links as psl')
-            .join('users as u', 'psl.parent_id', 'u.id')
-            .where('psl.student_matricule', student.matricule)
-            .select('u.id', 'u.name', 'u.phone_number');
-        
-        // Parser les parents manuels
-        let manualParents = [];
-        if (student.manual_parents) {
-            try {
-                manualParents = typeof student.manual_parents === 'string' 
-                    ? JSON.parse(student.manual_parents) 
-                    : student.manual_parents;
-            } catch (e) {
-                manualParents = [];
-            }
-        }
-        
-        res.json({
-            ...student,
-            linkedParents: linkedParents,
-            manualParents: manualParents
-        });
-        
-    } catch (error) {
-        console.error('Erreur student-details:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
 
 const timetableRoutes = require('./src/routes/timetableRoutes');
 app.use('/', timetableRoutes);
