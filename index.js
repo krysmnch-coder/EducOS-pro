@@ -1622,6 +1622,51 @@ async function createDocumentArchivesTable() {
 
 createDocumentArchivesTable();
 
+// API - Récupérer les détails complets d'un élève
+app.get('/api/student-details/:id', async (req, res) => {
+    if (!req.user) return res.status(401).json({ error: 'Non authentifié' });
+    
+    try {
+        const student = await db('users')
+            .where({ id: req.params.id })
+            .select('id', 'name', 'matricule', 'student_class', 'date_of_birth', 
+                    'place_of_birth', 'address', 'email', 'phone_number', 'manual_parents')
+            .first();
+        
+        if (!student) {
+            return res.status(404).json({ error: 'Élève non trouvé' });
+        }
+        
+        // Récupérer les parents liés
+        const linkedParents = await db('parent_student_links as psl')
+            .join('users as u', 'psl.parent_id', 'u.id')
+            .where('psl.student_matricule', student.matricule)
+            .select('u.id', 'u.name', 'u.phone_number');
+        
+        // Parser les parents manuels
+        let manualParents = [];
+        if (student.manual_parents) {
+            try {
+                manualParents = typeof student.manual_parents === 'string' 
+                    ? JSON.parse(student.manual_parents) 
+                    : student.manual_parents;
+            } catch (e) {
+                manualParents = [];
+            }
+        }
+        
+        res.json({
+            ...student,
+            linkedParents: linkedParents,
+            manualParents: manualParents
+        });
+        
+    } catch (error) {
+        console.error('Erreur student-details:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 const timetableRoutes = require('./src/routes/timetableRoutes');
 app.use('/', timetableRoutes);
 
