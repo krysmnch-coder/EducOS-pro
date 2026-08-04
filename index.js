@@ -1601,6 +1601,7 @@ app.get('/api/student-details/:id', async (req, res) => {
     if (!req.user) return res.status(401).json({ error: 'Non authentifié' });
     
     try {
+        // Chercher sans filtre de rôle
         const student = await db('users')
             .where({ id: req.params.id })
             .select('id', 'name', 'matricule', 'student_class', 'date_of_birth', 
@@ -1611,11 +1612,16 @@ app.get('/api/student-details/:id', async (req, res) => {
             return res.status(404).json({ error: 'Élève non trouvé' });
         }
         
-        const linkedParents = await db('parent_student_links as psl')
-            .join('users as u', 'psl.parent_id', 'u.id')
-            .where('psl.student_matricule', student.matricule)
-            .select('u.id', 'u.name', 'u.phone_number');
+        // Récupérer les parents liés (seulement si matricule existe)
+        let linkedParents = [];
+        if (student.matricule) {
+            linkedParents = await db('parent_student_links as psl')
+                .join('users as u', 'psl.parent_id', 'u.id')
+                .where('psl.student_matricule', student.matricule)
+                .select('u.id', 'u.name', 'u.phone_number');
+        }
         
+        // Parser les parents manuels
         let manualParents = [];
         if (student.manual_parents) {
             try {

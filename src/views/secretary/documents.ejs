@@ -500,6 +500,20 @@ function showPrintModal(type, student) {
     var year = document.getElementById('certYear') ? document.getElementById('certYear').value : '2024-2025';
     var school = document.getElementById('certSchool') ? document.getElementById('certSchool').value : 'Établissement';
     
+    // Fusionner tous les parents
+    var allParents = [];
+    if (student.linkedParents) allParents = allParents.concat(student.linkedParents);
+    if (student.manualParents) allParents = allParents.concat(student.manualParents);
+    
+    var parentsHTML = '';
+    if (allParents.length > 0) {
+        parentsHTML = '<tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">Parent(s)</td><td style="padding:8px;border:1px solid #ddd;">';
+        allParents.forEach(function(p, i) {
+            parentsHTML += (i > 0 ? '<br>' : '') + (p.name || 'N/A') + ' - Tél: ' + (p.phone || p.phone_number || 'Non renseigné');
+        });
+        parentsHTML += '</td></tr>';
+    }
+    
     return '<div style="text-align:center;margin-bottom:30px;">' +
         '<h1 style="font-size:20px;">CERTIFICAT DE SCOLARITÉ</h1>' +
         '<h2 style="font-size:16px;color:#666;">Année Scolaire ' + year + '</h2></div>' +
@@ -511,40 +525,47 @@ function showPrintModal(type, student) {
         '<tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">Matricule</td><td style="padding:8px;border:1px solid #ddd;">' + (student.matricule || 'N/A') + '</td></tr>' +
         '<tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">Classe</td><td style="padding:8px;border:1px solid #ddd;">' + (student.student_class || 'N/A') + '</td></tr>' +
         '<tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">Adresse</td><td style="padding:8px;border:1px solid #ddd;">' + (student.address || 'Non renseignée') + '</td></tr>' +
+        parentsHTML +
         '</table>' +
         '<p>Est régulièrement inscrit(e) dans notre établissement pour l\'année scolaire en cours.</p>' +
         '<div style="margin-top:40px;text-align:right;">Fait à _______________, le ' + date + '<br>Le Directeur</div>';
 }
-    function generateInscriptionHTML(student) {
-        var date = new Date().toLocaleDateString('fr-FR');
-        var year = document.getElementById('inscYear') ? document.getElementById('inscYear').value : '2024-2025';
-        var parents = student.linkedParents || [];
-        var manualParents = student.manualParents || [];
-        var allParents = parents.concat(manualParents);
-        
-        var parentsHTML = '';
-        if (allParents.length > 0) {
-            parentsHTML = '<table>';
-            allParents.forEach(function(p) {
-                parentsHTML += '<tr><td>' + p.name + '</td><td>' + (p.phone || p.phone_number || 'Non renseigné') + '</td></tr>';
-            });
-            parentsHTML += '</table>';
-        } else {
-            parentsHTML = '<p>Aucun parent enregistré.</p>';
-        }
-        
-        return '<div class="header"><h1>FICHE D\'INSCRIPTION / RÉINSCRIPTION</h1><h2>Année Scolaire ' + year + '</h2></div>' +
-            '<div class="section"><h3>Informations de l\'élève</h3></div>' +
-            '<table><tr><td>Nom et Prénom</td><td><strong>' + student.name + '</strong></td></tr>' +
-            '<tr><td>Date de naissance</td><td>' + (student.date_of_birth ? new Date(student.date_of_birth).toLocaleDateString('fr-FR') : 'Non renseigné') + '</td></tr>' +
-            '<tr><td>Lieu de naissance</td><td>' + (student.place_of_birth || 'Non renseigné') + '</td></tr>' +
-            '<tr><td>Matricule</td><td>' + (student.matricule || 'N/A') + '</td></tr>' +
-            '<tr><td>Classe</td><td>' + (student.student_class || 'N/A') + '</td></tr>' +
-            '<tr><td>Adresse</td><td>' + (student.address || 'Non renseignée') + '</td></tr></table>' +
-            '<div class="section"><h3>Parents / Tuteurs</h3></div>' + parentsHTML +
-            '<div class="footer"><p>Fait à _______________, le ' + date + '</p><p>Signature du parent/tuteur : _________________</p></div>';
-    }
 
+function generateInscriptionHTML(student) {
+    var date = new Date().toLocaleDateString('fr-FR');
+    var year = document.getElementById('inscYear') ? document.getElementById('inscYear').value : '2024-2025';
+    
+    // Fusionner tous les parents
+    var allParents = [];
+    if (student.linkedParents) allParents = allParents.concat(student.linkedParents);
+    if (student.manualParents) allParents = allParents.concat(student.manualParents);
+    
+    var parentsHTML = '';
+    if (allParents.length > 0) {
+        parentsHTML = '<table style="width:100%;border-collapse:collapse;margin:10px 0;">';
+        allParents.forEach(function(p) {
+            parentsHTML += '<tr><td style="padding:8px;border:1px solid #ddd;">' + (p.name || 'N/A') + '</td><td style="padding:8px;border:1px solid #ddd;">' + (p.phone || p.phone_number || 'Non renseigné') + '</td></tr>';
+        });
+        parentsHTML += '</table>';
+    } else {
+        parentsHTML = '<p>Aucun parent enregistré.</p>';
+    }
+    
+    return '<div style="text-align:center;margin-bottom:30px;">' +
+        '<h1 style="font-size:20px;">FICHE D\'INSCRIPTION / RÉINSCRIPTION</h1>' +
+        '<h2 style="font-size:16px;color:#666;">Année Scolaire ' + year + '</h2></div>' +
+        '<h3 style="border-bottom:2px solid #0d6efd;padding-bottom:5px;">Informations de l\'élève</h3>' +
+        '<table style="width:100%;border-collapse:collapse;margin:10px 0;">' +
+        '<tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;width:200px;">Nom et Prénom</td><td style="padding:8px;border:1px solid #ddd;"><strong>' + (student.name || '') + '</strong></td></tr>' +
+        '<tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">Date de naissance</td><td style="padding:8px;border:1px solid #ddd;">' + (student.date_of_birth ? new Date(student.date_of_birth).toLocaleDateString('fr-FR') : 'Non renseigné') + '</td></tr>' +
+        '<tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">Lieu de naissance</td><td style="padding:8px;border:1px solid #ddd;">' + (student.place_of_birth || 'Non renseigné') + '</td></tr>' +
+        '<tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">Matricule</td><td style="padding:8px;border:1px solid #ddd;">' + (student.matricule || 'N/A') + '</td></tr>' +
+        '<tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">Classe</td><td style="padding:8px;border:1px solid #ddd;">' + (student.student_class || 'N/A') + '</td></tr>' +
+        '<tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">Adresse</td><td style="padding:8px;border:1px solid #ddd;">' + (student.address || 'Non renseignée') + '</td></tr>' +
+        '</table>' +
+        '<h3 style="border-bottom:2px solid #0d6efd;padding-bottom:5px;">Parents / Tuteurs</h3>' + parentsHTML +
+        '<div style="margin-top:40px;text-align:right;">Fait à _______________, le ' + date + '<br>Signature du parent/tuteur : _________________</div>';
+}
     function generateSortieHTML(student) {
         var date = new Date().toLocaleDateString('fr-FR');
         var sortieDateEl = document.getElementById('sortieDate');
