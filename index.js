@@ -1475,6 +1475,128 @@ app.get('/secretary/documents', async (req, res) => {
     }
 });
 
+// ==========================================================================
+// ROUTES DOCUMENTS SECRÉTAIRE
+// ==========================================================================
+
+// Page documents
+app.get('/secretary/documents', async (req, res) => {
+    if (!req.user) return res.redirect('/login');
+    
+    if (req.user.role !== 'SECRETARY' && req.user.role !== 'secretaire' && 
+        req.user.role !== 'ADMINISTRATOR' && req.user.role !== 'administrateur') {
+        req.flash('error_msg', 'Accès non autorisé.');
+        return res.redirect('/dashboard');
+    }
+    
+    try {
+        res.render('secretary/documents', {
+            title: 'Documents Scolaires',
+            user: req.user
+        });
+    } catch (error) {
+        console.error('Erreur documents:', error);
+        req.flash('error_msg', 'Erreur lors du chargement.');
+        res.redirect('/dashboard');
+    }
+});
+
+// API - Récupérer tous les élèves (pour les sélecteurs)
+app.get('/api/all-students', async (req, res) => {
+    if (!req.user) return res.status(401).json([]);
+    
+    try {
+        const students = await db('users')
+            .where({ 
+                establishment_id: req.user.establishment_id, 
+                role: 'STUDENT',
+                approved: 1 
+            })
+            .select('id', 'name', 'student_class', 'matricule')
+            .orderBy('name');
+        
+        res.json(students);
+    } catch (error) {
+        console.error('Erreur all-students:', error);
+        res.status(500).json([]);
+    }
+});
+
+// API - Récupérer les archives de documents
+app.get('/api/documents/archives', async (req, res) => {
+    if (!req.user) return res.status(401).json([]);
+    
+    try {
+        const archives = await db('document_archives')
+            .where({ establishment_id: req.user.establishment_id })
+            .orderBy('created_at', 'desc')
+            .limit(50)
+            .select('*');
+        
+        res.json(archives || []);
+    } catch (error) {
+        console.error('Erreur archives:', error);
+        res.status(500).json([]);
+    }
+});
+
+// API - Générer un document
+app.post('/api/documents/generate', async (req, res) => {
+    if (!req.user) return res.status(401).json({ error: 'Non authentifié' });
+    
+    try {
+        const { type, student_id, class_name, data } = req.body;
+        
+        // Enregistrer dans les archives
+        const [id] = await db('document_archives').insert({
+            establishment_id: req.user.establishment_id,
+            type: type,
+            student_id: student_id || null,
+            student_name: data?.student_name || '',
+            student_class: class_name || data?.student_class || '',
+            created_by: req.user.id,
+            created_by_name: req.user.name,
+            file_url: '',
+            created_at: new Date()
+        });
+        
+        console.log('📄 Document archivé:', type, 'ID:', id);
+        
+        res.json({ success: true, id: id });
+    } catch (error) {
+        console.error('Erreur génération document:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Créer la table document_archives si elle n'existe pas
+async function createDocumentArchivesTable() {
+    try {
+        const hasTable = await db.schema.hasTable('document_archives');
+        if (!hasTable) {
+            await db.schema.createTable('document_archives', function(table) {
+                table.increments('id').primary();
+                table.integer('establishment_id').notNullable().index();
+                table.string('type', 100).notNullable();
+                table.integer('student_id').nullable();
+                table.string('student_name', 255).nullable();
+                table.string('student_class', 100).nullable();
+                table.string('file_url', 500).nullable();
+                table.integer('created_by').notNullable();
+                table.string('created_by_name', 255).nullable();
+                table.timestamp('created_at').defaultTo(db.fn.now());
+            });
+            console.log('✅ Table document_archives créée');
+        } else {
+            console.log('✅ Table document_archives existe déjà');
+        }
+    } catch (error) {
+        console.error('❌ Erreur création table document_archives:', error.message);
+    }
+}
+
+createDocumentArchivesTable();
+
 const timetableRoutes = require('./src/routes/timetableRoutes');
 app.use('/', timetableRoutes);
 
