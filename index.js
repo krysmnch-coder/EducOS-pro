@@ -1501,20 +1501,45 @@ app.get('/secretary/documents', async (req, res) => {
     }
 });
 
-// API - Récupérer tous les élèves (pour les sélecteurs)
+// API - Récupérer toutes les classes - CORRIGÉ
+app.get('/api/all-classes', async (req, res) => {
+    if (!req.user) return res.status(401).json([]);
+    try {
+        const classes = await db('users')
+            .where({ 
+                establishment_id: req.user.establishment_id, 
+                approved: 1 
+            })
+            .whereIn('role', ['STUDENT', 'student', 'eleve', 'élève', 'Eleve', 'Élève'])
+            .distinct('student_class')
+            .whereNotNull('student_class')
+            .orderBy('student_class')
+            .pluck('student_class');
+        
+        console.log('📋 Classes trouvées:', classes);
+        res.json(classes);
+    } catch (error) {
+        console.error('Erreur all-classes:', error);
+        res.status(500).json([]);
+    }
+});
+
+// API - Récupérer tous les élèves (pour les sélecteurs) - CORRIGÉ
 app.get('/api/all-students', async (req, res) => {
     if (!req.user) return res.status(401).json([]);
     
     try {
+        // Chercher avec tous les rôles possibles pour les élèves
         const students = await db('users')
             .where({ 
                 establishment_id: req.user.establishment_id, 
-                role: 'STUDENT',
                 approved: 1 
             })
+            .whereIn('role', ['STUDENT', 'student', 'eleve', 'élève', 'Eleve', 'Élève'])
             .select('id', 'name', 'student_class', 'matricule')
             .orderBy('name');
         
+        console.log('📋 Élèves trouvés:', students.length);
         res.json(students);
     } catch (error) {
         console.error('Erreur all-students:', error);
