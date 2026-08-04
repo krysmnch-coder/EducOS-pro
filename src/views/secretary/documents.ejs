@@ -449,54 +449,6 @@
     }
 
     function generateDocument(type) {
-        if (!selectedStudentId && !selectedClassName) {
-            alert('Veuillez sélectionner une classe ou un élève.');
-            return;
-        }
-        
-        var docNames = {
-            'certificate': 'Certificat de scolarité',
-            'bulletin': 'Bulletin de notes',
-            'attestation': 'Attestation de réussite',
-            'inscription': 'Fiche d\'inscription',
-            'sortie': 'Certificat de sortie',
-            'livret': 'Livret scolaire'
-        };
-        
-        alert('✅ ' + (docNames[type] || 'Document') + ' généré avec succès !\nPour : ' + (selectedStudentId ? '1 élève' : 'Classe ' + selectedClassName));
-        
-        var modal = bootstrap.Modal.getInstance(document.getElementById('docModal'));
-        if (modal) modal.hide();
-    }
-
-    function loadArchives() {
-        var section = document.getElementById('archivesSection');
-        section.style.display = 'block';
-        
-        fetch('/api/documents/archives')
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
-                var tbody = document.getElementById('archivesBody');
-                if (!data || data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-3 text-muted">Aucun document archivé.</td></tr>';
-                    return;
-                }
-                tbody.innerHTML = data.map(function(d) {
-                    return '<tr>' +
-                        '<td>' + new Date(d.created_at).toLocaleDateString('fr-FR') + '</td>' +
-                        '<td>' + d.type + '</td>' +
-                        '<td>' + d.student_name + '</td>' +
-                        '<td>' + d.student_class + '</td>' +
-                        '<td>' + d.created_by_name + '</td>' +
-                        '<td><button class="btn btn-sm btn-outline-primary" onclick="window.open(\'/uploads/documents/' + d.file_url + '\')">📥</button></td>' +
-                    '</tr>';
-                }).join('');
-            })
-            .catch(function() {
-                document.getElementById('archivesBody').innerHTML = '<tr><td colspan="6" class="text-center py-3 text-muted">Erreur de chargement.</td></tr>';
-            });
-    }
-    function generateDocument(type) {
     if (!selectedStudentId && !selectedClassName) {
         alert('Veuillez sélectionner une classe ou un élève.');
         return;
@@ -791,6 +743,34 @@ function generateGenericHTML(student) {
         <div class="footer"><p>Fait le ${date}</p></div>
     `;
 }
+
+    function loadArchives() {
+        var section = document.getElementById('archivesSection');
+        section.style.display = 'block';
+        
+        fetch('/api/documents/archives')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                var tbody = document.getElementById('archivesBody');
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-3 text-muted">Aucun document archivé.</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = data.map(function(d) {
+                    return '<tr>' +
+                        '<td>' + new Date(d.created_at).toLocaleDateString('fr-FR') + '</td>' +
+                        '<td>' + d.type + '</td>' +
+                        '<td>' + d.student_name + '</td>' +
+                        '<td>' + d.student_class + '</td>' +
+                        '<td>' + d.created_by_name + '</td>' +
+                        '<td><button class="btn btn-sm btn-outline-primary" onclick="window.open(\'/uploads/documents/' + d.file_url + '\')">📥</button></td>' +
+                    '</tr>';
+                }).join('');
+            })
+            .catch(function() {
+                document.getElementById('archivesBody').innerHTML = '<tr><td colspan="6" class="text-center py-3 text-muted">Erreur de chargement.</td></tr>';
+            });
+    }
 </script>
 
 <style>
