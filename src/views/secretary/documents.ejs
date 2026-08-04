@@ -198,7 +198,6 @@
         if (typeof feather !== 'undefined') feather.replace();
         loadClassesAndStudents();
         
-        // Événements
         document.getElementById('filterClass').addEventListener('change', function() {
             selectedClassName = this.value;
             filterStudentsByClass(this.value);
@@ -219,7 +218,6 @@
     });
 
     function loadClassesAndStudents() {
-        // Charger les classes
         fetch('/api/all-classes')
             .then(function(r) { return r.json(); })
             .then(function(classes) {
@@ -231,7 +229,6 @@
             })
             .catch(function() {});
 
-        // Charger tous les élèves
         fetch('/api/all-students')
             .then(function(r) { return r.json(); })
             .then(function(students) {
@@ -332,418 +329,269 @@
     }
 
     function getCertificateBody() {
-        return `
-            <div class="mb-3">
-                <label class="form-label">Année Scolaire</label>
-                <input type="text" class="form-control" id="certYear" value="2024-2025" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Établissement</label>
-                <input type="text" class="form-control" id="certSchool" placeholder="Nom de l'établissement" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
-            </div>
-            <div style="background:rgba(13,202,240,0.1); padding:10px; border-radius:8px; color:#0dcaf0;">
-                📌 Document pour : <strong>${selectedStudentId ? '1 élève sélectionné' : 'Classe ' + selectedClassName}</strong>
-            </div>
-        `;
+        return '<div class="mb-3"><label class="form-label">Année Scolaire</label><input type="text" class="form-control" id="certYear" value="2024-2025" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);"></div>' +
+            '<div class="mb-3"><label class="form-label">Établissement</label><input type="text" class="form-control" id="certSchool" placeholder="Nom de l\'établissement" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);"></div>' +
+            '<div style="background:rgba(13,202,240,0.1); padding:10px; border-radius:8px; color:#0dcaf0;">📌 Document pour : <strong>' + (selectedStudentId ? '1 élève sélectionné' : 'Classe ' + selectedClassName) + '</strong></div>';
     }
 
     function getBulletinBody() {
-        return `
-            <div class="mb-3">
-                <label class="form-label">Période</label>
-                <select class="form-select" id="bulletinPeriod" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
-                    <option value="1">1er Trimestre</option>
-                    <option value="2">2ème Trimestre</option>
-                    <option value="3">3ème Trimestre</option>
-                </select>
-            </div>
-            <div style="background:rgba(13,202,240,0.1); padding:10px; border-radius:8px; color:#0dcaf0;">
-                📌 Document pour : <strong>${selectedStudentId ? '1 élève sélectionné' : 'Classe ' + selectedClassName}</strong>
-            </div>
-        `;
+        return '<div class="mb-3"><label class="form-label">Période</label><select class="form-select" id="bulletinPeriod" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);"><option value="1">1er Trimestre</option><option value="2">2ème Trimestre</option><option value="3">3ème Trimestre</option></select></div>' +
+            '<div style="background:rgba(13,202,240,0.1); padding:10px; border-radius:8px; color:#0dcaf0;">📌 Document pour : <strong>' + (selectedStudentId ? '1 élève sélectionné' : 'Classe ' + selectedClassName) + '</strong></div>';
     }
 
     function getAttestationBody() {
-        return `
-            <div class="mb-3">
-                <label class="form-label">Type</label>
-                <select class="form-select" id="attestType" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
-                    <option value="passage">Attestation de Passage</option>
-                    <option value="reussite">Attestation de Réussite</option>
-                    <option value="fin_cycle">Attestation de Fin de Cycle</option>
-                </select>
-            </div>
-            <div style="background:rgba(13,202,240,0.1); padding:10px; border-radius:8px; color:#0dcaf0;">
-                📌 Document pour : <strong>${selectedStudentId ? '1 élève sélectionné' : 'Classe ' + selectedClassName}</strong>
-            </div>
-        `;
+        return '<div class="mb-3"><label class="form-label">Type</label><select class="form-select" id="attestType" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);"><option value="passage">Attestation de Passage</option><option value="reussite">Attestation de Réussite</option><option value="fin_cycle">Attestation de Fin de Cycle</option></select></div>' +
+            '<div style="background:rgba(13,202,240,0.1); padding:10px; border-radius:8px; color:#0dcaf0;">📌 Document pour : <strong>' + (selectedStudentId ? '1 élève sélectionné' : 'Classe ' + selectedClassName) + '</strong></div>';
     }
 
     function getInscriptionBody() {
-        return `
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Type</label>
-                    <select class="form-select" id="inscType" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
-                        <option value="inscription">Nouvelle Inscription</option>
-                        <option value="reinscription">Réinscription</option>
-                    </select>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Année Scolaire</label>
-                    <input type="text" class="form-control" id="inscYear" value="2024-2025" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
-                </div>
-            </div>
-            <div style="background:rgba(13,202,240,0.1); padding:10px; border-radius:8px; color:#0dcaf0;">
-                📌 Document pour : <strong>${selectedStudentId ? '1 élève sélectionné' : 'Classe ' + selectedClassName}</strong>
-            </div>
-        `;
+        return '<div class="row"><div class="col-md-6 mb-3"><label class="form-label">Type</label><select class="form-select" id="inscType" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);"><option value="inscription">Nouvelle Inscription</option><option value="reinscription">Réinscription</option></select></div><div class="col-md-6 mb-3"><label class="form-label">Année Scolaire</label><input type="text" class="form-control" id="inscYear" value="2024-2025" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);"></div></div>' +
+            '<div style="background:rgba(13,202,240,0.1); padding:10px; border-radius:8px; color:#0dcaf0;">📌 Document pour : <strong>' + (selectedStudentId ? '1 élève sélectionné' : 'Classe ' + selectedClassName) + '</strong></div>';
     }
 
     function getSortieBody() {
-        return `
-            <div class="mb-3">
-                <label class="form-label">Motif de départ</label>
-                <select class="form-select" id="sortieMotif" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
-                    <option value="demangement">Déménagement</option>
-                    <option value="changement_ecole">Changement d'école</option>
-                    <option value="fin_cycle">Fin de cycle</option>
-                    <option value="autre">Autre</option>
-                </select>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Date de sortie</label>
-                <input type="date" class="form-control" id="sortieDate" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Nouvel établissement</label>
-                <input type="text" class="form-control" id="sortieNewSchool" placeholder="Nom du nouvel établissement" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
-            </div>
-            <div style="background:rgba(13,202,240,0.1); padding:10px; border-radius:8px; color:#0dcaf0;">
-                📌 Document pour : <strong>${selectedStudentId ? '1 élève sélectionné' : 'Classe ' + selectedClassName}</strong>
-            </div>
-        `;
+        return '<div class="mb-3"><label class="form-label">Motif de départ</label><select class="form-select" id="sortieMotif" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);"><option value="demangement">Déménagement</option><option value="changement_ecole">Changement d\'école</option><option value="fin_cycle">Fin de cycle</option><option value="autre">Autre</option></select></div>' +
+            '<div class="mb-3"><label class="form-label">Date de sortie</label><input type="date" class="form-control" id="sortieDate" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);"></div>' +
+            '<div class="mb-3"><label class="form-label">Nouvel établissement</label><input type="text" class="form-control" id="sortieNewSchool" placeholder="Nom du nouvel établissement" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);"></div>' +
+            '<div style="background:rgba(13,202,240,0.1); padding:10px; border-radius:8px; color:#0dcaf0;">📌 Document pour : <strong>' + (selectedStudentId ? '1 élève sélectionné' : 'Classe ' + selectedClassName) + '</strong></div>';
     }
 
     function getLivretBody() {
-        return `
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Année Scolaire</label>
-                    <input type="text" class="form-control" id="livretYear" value="2024-2025" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Période</label>
-                    <select class="form-select" id="livretPeriod" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
-                        <option value="1">1er Trimestre</option>
-                        <option value="2">2ème Trimestre</option>
-                        <option value="3">3ème Trimestre</option>
-                        <option value="annuel">Annuel</option>
-                    </select>
-                </div>
-            </div>
-            <div style="background:rgba(13,202,240,0.1); padding:10px; border-radius:8px; color:#0dcaf0;">
-                📌 Document pour : <strong>${selectedStudentId ? '1 élève sélectionné' : 'Classe ' + selectedClassName}</strong>
-            </div>
-        `;
+        return '<div class="row"><div class="col-md-6 mb-3"><label class="form-label">Année Scolaire</label><input type="text" class="form-control" id="livretYear" value="2024-2025" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);"></div><div class="col-md-6 mb-3"><label class="form-label">Période</label><select class="form-select" id="livretPeriod" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);"><option value="1">1er Trimestre</option><option value="2">2ème Trimestre</option><option value="3">3ème Trimestre</option><option value="annuel">Annuel</option></select></div></div>' +
+            '<div style="background:rgba(13,202,240,0.1); padding:10px; border-radius:8px; color:#0dcaf0;">📌 Document pour : <strong>' + (selectedStudentId ? '1 élève sélectionné' : 'Classe ' + selectedClassName) + '</strong></div>';
     }
 
+    // ========================================================================
+    // GÉNÉRATION DE DOCUMENTS AVEC DÉTAILS ÉLÈVE
+    // ========================================================================
+    
     function generateDocument(type) {
-    if (!selectedStudentId && !selectedClassName) {
-        alert('Veuillez sélectionner une classe ou un élève.');
-        return;
+        if (!selectedStudentId && !selectedClassName) {
+            alert('Veuillez sélectionner une classe ou un élève.');
+            return;
+        }
+        
+        var docNames = {
+            'certificate': 'Certificat de scolarité',
+            'bulletin': 'Bulletin de notes',
+            'attestation': 'Attestation de réussite',
+            'inscription': 'Fiche d\'inscription',
+            'sortie': 'Certificat de sortie',
+            'livret': 'Livret scolaire'
+        };
+        
+        if (selectedStudentId) {
+            fetch('/api/student-details/' + selectedStudentId)
+                .then(function(r) { return r.json(); })
+                .then(function(student) {
+                    console.log('📋 Détails élève:', student);
+                    
+                    var docData = {
+                        student_name: student.name,
+                        student_class: student.student_class,
+                        matricule: student.matricule,
+                        date_of_birth: student.date_of_birth,
+                        place_of_birth: student.place_of_birth,
+                        address: student.address,
+                        parents: student.linkedParents || [],
+                        manual_parents: student.manualParents || []
+                    };
+                    
+                    return fetch('/api/documents/generate', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            type: type,
+                            student_id: selectedStudentId,
+                            class_name: selectedClassName,
+                            data: docData
+                        })
+                    });
+                })
+                .then(function(r) { return r.json(); })
+                .then(function(result) {
+                    if (result.success) {
+                        openPrintWindow(type, selectedStudentId);
+                    }
+                })
+                .catch(function(error) {
+                    console.error('❌ Erreur:', error);
+                    alert('✅ ' + (docNames[type] || 'Document') + ' généré avec succès !');
+                });
+        } else {
+            alert('✅ ' + (docNames[type] || 'Document') + ' généré pour la classe ' + selectedClassName + ' !');
+        }
+        
+        var modal = bootstrap.Modal.getInstance(document.getElementById('docModal'));
+        if (modal) modal.hide();
     }
-    
-    var docNames = {
-        'certificate': 'Certificat de scolarité',
-        'bulletin': 'Bulletin de notes',
-        'attestation': 'Attestation de réussite',
-        'inscription': 'Fiche d\'inscription',
-        'sortie': 'Certificat de sortie',
-        'livret': 'Livret scolaire'
-    };
-    
-    // Si un élève est sélectionné, récupérer ses détails complets
-    if (selectedStudentId) {
-        fetch('/api/student-details/' + selectedStudentId)
+
+    function openPrintWindow(type, studentId) {
+        fetch('/api/student-details/' + studentId)
             .then(function(r) { return r.json(); })
             .then(function(student) {
-                console.log('📋 Détails élève:', student);
+                var printWindow = window.open('', '_blank', 'width=800,height=600');
                 
-                // Préparer les données pour le document
-                var docData = {
-                    student_name: student.name,
-                    student_class: student.student_class,
-                    matricule: student.matricule,
-                    date_of_birth: student.date_of_birth,
-                    place_of_birth: student.place_of_birth,
-                    address: student.address,
-                    parents: student.linkedParents || [],
-                    manual_parents: student.manualParents || []
-                };
+                var docTitle = '';
+                var docBody = '';
                 
-                // Envoyer au serveur pour archivage
-                return fetch('/api/documents/generate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        type: type,
-                        student_id: selectedStudentId,
-                        class_name: selectedClassName,
-                        data: docData
-                    })
-                });
-            })
-            .then(function(r) { return r.json(); })
-            .then(function(result) {
-                if (result.success) {
-                    // Ouvrir une nouvelle fenêtre pour l'impression
-                    openPrintWindow(type, selectedStudentId);
+                switch(type) {
+                    case 'certificate':
+                        docTitle = 'CERTIFICAT DE SCOLARITÉ';
+                        docBody = generateCertificateHTML(student);
+                        break;
+                    case 'inscription':
+                        docTitle = "FICHE D'INSCRIPTION";
+                        docBody = generateInscriptionHTML(student);
+                        break;
+                    case 'sortie':
+                        docTitle = 'CERTIFICAT DE SORTIE (RADIATION)';
+                        docBody = generateSortieHTML(student);
+                        break;
+                    case 'livret':
+                        docTitle = 'LIVRET SCOLAIRE';
+                        docBody = generateLivretHTML(student);
+                        break;
+                    case 'attestation':
+                        docTitle = 'ATTESTATION DE RÉUSSITE';
+                        docBody = generateAttestationHTML(student);
+                        break;
+                    default:
+                        docTitle = 'DOCUMENT SCOLAIRE';
+                        docBody = generateGenericHTML(student);
                 }
-            })
-            .catch(function(error) {
-                console.error('❌ Erreur:', error);
-                alert('✅ ' + (docNames[type] || 'Document') + ' généré avec succès !');
+                
+                printWindow.document.write('<!DOCTYPE html><html><head><title>' + docTitle + '</title><style>body{font-family:Arial,sans-serif;padding:40px;color:#333;}.header{text-align:center;margin-bottom:30px;}.header h1{font-size:20px;margin-bottom:5px;}.header h2{font-size:16px;color:#666;}.section{margin-bottom:20px;}.section h3{border-bottom:2px solid #0d6efd;padding-bottom:5px;font-size:14px;color:#0d6efd;}table{width:100%;border-collapse:collapse;margin:10px 0;}table td{padding:8px;border:1px solid #ddd;}table td:first-child{font-weight:bold;width:200px;background:#f8f9fa;}.footer{margin-top:40px;text-align:right;font-style:italic;}@media print{body{padding:20px;}}</style></head><body>' + docBody + '</body></html>');
+                printWindow.document.close();
+                setTimeout(function() { printWindow.print(); }, 500);
             });
-    } else {
-        // Pour une classe entière
-        alert('✅ ' + (docNames[type] || 'Document') + ' généré pour la classe ' + selectedClassName + ' !');
     }
+
+    function generateCertificateHTML(student) {
+        var date = new Date().toLocaleDateString('fr-FR');
+        var year = document.getElementById('certYear') ? document.getElementById('certYear').value : '2024-2025';
+        var school = document.getElementById('certSchool') ? document.getElementById('certSchool').value : 'Établissement';
+        
+        return '<div class="header"><h1>CERTIFICAT DE SCOLARITÉ</h1><h2>Année Scolaire ' + year + '</h2></div>' +
+            '<div class="section"><p>Je soussigné, Directeur de l\'établissement <strong>' + school + '</strong>, certifie que :</p></div>' +
+            '<table><tr><td>Nom et Prénom</td><td><strong>' + student.name + '</strong></td></tr>' +
+            '<tr><td>Né(e) le</td><td>' + (student.date_of_birth ? new Date(student.date_of_birth).toLocaleDateString('fr-FR') : 'Non renseigné') + '</td></tr>' +
+            '<tr><td>À</td><td>' + (student.place_of_birth || 'Non renseigné') + '</td></tr>' +
+            '<tr><td>Matricule</td><td>' + (student.matricule || 'N/A') + '</td></tr>' +
+            '<tr><td>Classe</td><td>' + (student.student_class || 'N/A') + '</td></tr>' +
+            '<tr><td>Adresse</td><td>' + (student.address || 'Non renseignée') + '</td></tr></table>' +
+            '<div class="section"><p>Est régulièrement inscrit(e) dans notre établissement pour l\'année scolaire en cours.</p></div>' +
+            '<div class="footer"><p>Fait à _______________, le ' + date + '</p><p>Le Directeur</p></div>';
+    }
+
+    function generateInscriptionHTML(student) {
+        var date = new Date().toLocaleDateString('fr-FR');
+        var year = document.getElementById('inscYear') ? document.getElementById('inscYear').value : '2024-2025';
+        var parents = student.linkedParents || [];
+        var manualParents = student.manualParents || [];
+        var allParents = parents.concat(manualParents);
+        
+        var parentsHTML = '';
+        if (allParents.length > 0) {
+            parentsHTML = '<table>';
+            allParents.forEach(function(p) {
+                parentsHTML += '<tr><td>' + p.name + '</td><td>' + (p.phone || p.phone_number || 'Non renseigné') + '</td></tr>';
+            });
+            parentsHTML += '</table>';
+        } else {
+            parentsHTML = '<p>Aucun parent enregistré.</p>';
+        }
+        
+        return '<div class="header"><h1>FICHE D\'INSCRIPTION / RÉINSCRIPTION</h1><h2>Année Scolaire ' + year + '</h2></div>' +
+            '<div class="section"><h3>Informations de l\'élève</h3></div>' +
+            '<table><tr><td>Nom et Prénom</td><td><strong>' + student.name + '</strong></td></tr>' +
+            '<tr><td>Date de naissance</td><td>' + (student.date_of_birth ? new Date(student.date_of_birth).toLocaleDateString('fr-FR') : 'Non renseigné') + '</td></tr>' +
+            '<tr><td>Lieu de naissance</td><td>' + (student.place_of_birth || 'Non renseigné') + '</td></tr>' +
+            '<tr><td>Matricule</td><td>' + (student.matricule || 'N/A') + '</td></tr>' +
+            '<tr><td>Classe</td><td>' + (student.student_class || 'N/A') + '</td></tr>' +
+            '<tr><td>Adresse</td><td>' + (student.address || 'Non renseignée') + '</td></tr></table>' +
+            '<div class="section"><h3>Parents / Tuteurs</h3></div>' + parentsHTML +
+            '<div class="footer"><p>Fait à _______________, le ' + date + '</p><p>Signature du parent/tuteur : _________________</p></div>';
+    }
+
+    function generateSortieHTML(student) {
+        var date = new Date().toLocaleDateString('fr-FR');
+        var sortieDateEl = document.getElementById('sortieDate');
+        var sortieDate = sortieDateEl && sortieDateEl.value ? new Date(sortieDateEl.value).toLocaleDateString('fr-FR') : date;
+        var motifEl = document.getElementById('sortieMotif');
+        var motif = motifEl ? motifEl.value : 'autre';
+        var motifs = { 'demangement': 'Déménagement', 'changement_ecole': "Changement d'école", 'fin_cycle': 'Fin de cycle', 'autre': 'Autre' };
+        var newSchoolEl = document.getElementById('sortieNewSchool');
+        var newSchool = newSchoolEl ? newSchoolEl.value : 'Non précisé';
+        
+        return '<div class="header"><h1>CERTIFICAT DE SORTIE (RADIATION)</h1></div>' +
+            '<div class="section"><p>Je soussigné, Directeur de l\'établissement, certifie que :</p></div>' +
+            '<table><tr><td>Nom et Prénom</td><td><strong>' + student.name + '</strong></td></tr>' +
+            '<tr><td>Né(e) le</td><td>' + (student.date_of_birth ? new Date(student.date_of_birth).toLocaleDateString('fr-FR') : 'Non renseigné') + '</td></tr>' +
+            '<tr><td>Matricule</td><td>' + (student.matricule || 'N/A') + '</td></tr>' +
+            '<tr><td>Dernière classe fréquentée</td><td>' + (student.student_class || 'N/A') + '</td></tr>' +
+            '<tr><td>Date de sortie</td><td>' + sortieDate + '</td></tr>' +
+            '<tr><td>Motif</td><td>' + (motifs[motif] || motif) + '</td></tr>' +
+            '<tr><td>Nouvel établissement</td><td>' + newSchool + '</td></tr></table>' +
+            '<div class="section"><p>Est libéré(e) de toute obligation envers notre établissement à compter de la date indiquée.</p></div>' +
+            '<div class="footer"><p>Fait à _______________, le ' + date + '</p><p>Le Directeur</p></div>';
+    }
+
+    function generateLivretHTML(student) {
+        var date = new Date().toLocaleDateString('fr-FR');
+        var yearEl = document.getElementById('livretYear');
+        var year = yearEl ? yearEl.value : '2024-2025';
+        var periodEl = document.getElementById('livretPeriod');
+        var periodVal = periodEl ? periodEl.value : '1';
+        var period = periodVal === 'annuel' ? 'Annuel' : periodVal + 'er Trimestre';
+        
+        return '<div class="header"><h1>LIVRET SCOLAIRE</h1><h2>Année Scolaire ' + year + '</h2></div>' +
+            '<div class="section"><h3>Informations de l\'élève</h3></div>' +
+            '<table><tr><td>Nom et Prénom</td><td><strong>' + student.name + '</strong></td></tr>' +
+            '<tr><td>Date de naissance</td><td>' + (student.date_of_birth ? new Date(student.date_of_birth).toLocaleDateString('fr-FR') : 'Non renseigné') + '</td></tr>' +
+            '<tr><td>Lieu de naissance</td><td>' + (student.place_of_birth || 'Non renseigné') + '</td></tr>' +
+            '<tr><td>Matricule</td><td>' + (student.matricule || 'N/A') + '</td></tr>' +
+            '<tr><td>Classe</td><td>' + (student.student_class || 'N/A') + '</td></tr>' +
+            '<tr><td>Année Scolaire</td><td>' + year + '</td></tr>' +
+            '<tr><td>Période</td><td>' + period + '</td></tr></table>' +
+            '<div class="section"><h3>Compétences et Appréciations</h3></div>' +
+            '<table><tr><td>Français</td><td>_______________________________</td></tr>' +
+            '<tr><td>Mathématiques</td><td>_______________________________</td></tr>' +
+            '<tr><td>Sciences</td><td>_______________________________</td></tr>' +
+            '<tr><td>Histoire-Géographie</td><td>_______________________________</td></tr>' +
+            '<tr><td>Langues</td><td>_______________________________</td></tr>' +
+            '<tr><td>EPS</td><td>_______________________________</td></tr></table>' +
+            '<div class="footer"><p>Fait à _______________, le ' + date + '</p><p>Le Directeur / Professeur Principal</p></div>';
+    }
+
+    function generateAttestationHTML(student) {
+        var date = new Date().toLocaleDateString('fr-FR');
+        var typeEl = document.getElementById('attestType');
+        var type = typeEl ? typeEl.value : 'passage';
+        var types = { 'passage': 'PASSAGE EN CLASSE SUPÉRIEURE', 'reussite': 'RÉUSSITE', 'fin_cycle': 'FIN DE CYCLE' };
+        
+        return '<div class="header"><h1>ATTESTATION DE ' + (types[type] || 'RÉUSSITE') + '</h1></div>' +
+            '<table><tr><td>Nom et Prénom</td><td><strong>' + student.name + '</strong></td></tr>' +
+            '<tr><td>Matricule</td><td>' + (student.matricule || 'N/A') + '</td></tr>' +
+            '<tr><td>Classe</td><td>' + (student.student_class || 'N/A') + '</td></tr>' +
+            '<tr><td>Année Scolaire</td><td>2024-2025</td></tr></table>' +
+            '<div class="section"><p>Est admis(e) en classe supérieure pour l\'année scolaire suivante.</p></div>' +
+            '<div class="footer"><p>Fait à _______________, le ' + date + '</p><p>Le Directeur</p></div>';
+    }
+
+    function generateGenericHTML(student) {
+        var date = new Date().toLocaleDateString('fr-FR');
+        return '<div class="header"><h1>DOCUMENT SCOLAIRE</h1></div>' +
+            '<table><tr><td>Nom</td><td><strong>' + student.name + '</strong></td></tr>' +
+            '<tr><td>Classe</td><td>' + (student.student_class || 'N/A') + '</td></tr>' +
+            '<tr><td>Matricule</td><td>' + (student.matricule || 'N/A') + '</td></tr></table>' +
+            '<div class="footer"><p>Fait le ' + date + '</p></div>';
+    }
+
+    // ========================================================================
+    // ARCHIVES
+    // ========================================================================
     
-    var modal = bootstrap.Modal.getInstance(document.getElementById('docModal'));
-    if (modal) modal.hide();
-}
-
-// Fonction pour ouvrir la fenêtre d'impression avec les détails de l'élève
-function openPrintWindow(type, studentId) {
-    fetch('/api/student-details/' + studentId)
-        .then(function(r) { return r.json(); })
-        .then(function(student) {
-            var printWindow = window.open('', '_blank', 'width=800,height=600');
-            
-            var docTitle = '';
-            var docBody = '';
-            
-            switch(type) {
-                case 'certificate':
-                    docTitle = 'CERTIFICAT DE SCOLARITÉ';
-                    docBody = generateCertificateHTML(student);
-                    break;
-                case 'inscription':
-                    docTitle = 'FICHE D\'INSCRIPTION';
-                    docBody = generateInscriptionHTML(student);
-                    break;
-                case 'sortie':
-                    docTitle = 'CERTIFICAT DE SORTIE (RADIATION)';
-                    docBody = generateSortieHTML(student);
-                    break;
-                case 'livret':
-                    docTitle = 'LIVRET SCOLAIRE';
-                    docBody = generateLivretHTML(student);
-                    break;
-                case 'attestation':
-                    docTitle = 'ATTESTATION DE RÉUSSITE';
-                    docBody = generateAttestationHTML(student);
-                    break;
-                default:
-                    docTitle = 'DOCUMENT SCOLAIRE';
-                    docBody = generateGenericHTML(student);
-            }
-            
-            printWindow.document.write(`
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <title>${docTitle}</title>
-                    <style>
-                        body { font-family: Arial, sans-serif; padding: 40px; color: #333; }
-                        .header { text-align: center; margin-bottom: 30px; }
-                        .header h1 { font-size: 20px; margin-bottom: 5px; }
-                        .header h2 { font-size: 16px; color: #666; }
-                        .section { margin-bottom: 20px; }
-                        .section h3 { border-bottom: 2px solid #0d6efd; padding-bottom: 5px; font-size: 14px; color: #0d6efd; }
-                        table { width: 100%; border-collapse: collapse; margin: 10px 0; }
-                        table td { padding: 8px; border: 1px solid #ddd; }
-                        table td:first-child { font-weight: bold; width: 200px; background: #f8f9fa; }
-                        .footer { margin-top: 40px; text-align: right; font-style: italic; }
-                        @media print { body { padding: 20px; } }
-                    </style>
-                </head>
-                <body>
-                    ${docBody}
-                </body>
-                </html>
-            `);
-            printWindow.document.close();
-            setTimeout(function() { printWindow.print(); }, 500);
-        });
-}
-
-function generateCertificateHTML(student) {
-    var date = new Date().toLocaleDateString('fr-FR');
-    return `
-        <div class="header">
-            <h1>CERTIFICAT DE SCOLARITÉ</h1>
-            <h2>Année Scolaire ${document.getElementById('certYear')?.value || '2024-2025'}</h2>
-        </div>
-        <div class="section">
-            <p>Je soussigné, Directeur de l'établissement <strong>${document.getElementById('certSchool')?.value || 'Établissement'}</strong>, certifie que :</p>
-        </div>
-        <table>
-            <tr><td>Nom et Prénom</td><td><strong>${student.name}</strong></td></tr>
-            <tr><td>Né(e) le</td><td>${student.date_of_birth ? new Date(student.date_of_birth).toLocaleDateString('fr-FR') : 'Non renseigné'}</td></tr>
-            <tr><td>À</td><td>${student.place_of_birth || 'Non renseigné'}</td></tr>
-            <tr><td>Matricule</td><td>${student.matricule || 'N/A'}</td></tr>
-            <tr><td>Classe</td><td>${student.student_class || 'N/A'}</td></tr>
-            <tr><td>Adresse</td><td>${student.address || 'Non renseignée'}</td></tr>
-        </table>
-        <div class="section">
-            <p>Est régulièrement inscrit(e) dans notre établissement pour l'année scolaire en cours.</p>
-        </div>
-        <div class="footer">
-            <p>Fait à _______________, le ${date}</p>
-            <p>Le Directeur</p>
-        </div>
-    `;
-}
-
-function generateInscriptionHTML(student) {
-    var date = new Date().toLocaleDateString('fr-FR');
-    var parents = student.linkedParents || [];
-    var manualParents = student.manualParents || [];
-    var allParents = [...parents, ...manualParents];
-    
-    return `
-        <div class="header">
-            <h1>FICHE D'INSCRIPTION / RÉINSCRIPTION</h1>
-            <h2>Année Scolaire ${document.getElementById('inscYear')?.value || '2024-2025'}</h2>
-        </div>
-        <div class="section"><h3>Informations de l'élève</h3></div>
-        <table>
-            <tr><td>Nom et Prénom</td><td><strong>${student.name}</strong></td></tr>
-            <tr><td>Date de naissance</td><td>${student.date_of_birth ? new Date(student.date_of_birth).toLocaleDateString('fr-FR') : 'Non renseigné'}</td></tr>
-            <tr><td>Lieu de naissance</td><td>${student.place_of_birth || 'Non renseigné'}</td></tr>
-            <tr><td>Matricule</td><td>${student.matricule || 'N/A'}</td></tr>
-            <tr><td>Classe</td><td>${student.student_class || 'N/A'}</td></tr>
-            <tr><td>Adresse</td><td>${student.address || 'Non renseignée'}</td></tr>
-        </table>
-        <div class="section"><h3>Parents / Tuteurs</h3></div>
-        ${allParents.length > 0 ? `
-        <table>
-            ${allParents.map(function(p) {
-                return '<tr><td>' + p.name + '</td><td>' + (p.phone || p.phone_number || 'Non renseigné') + '</td></tr>';
-            }).join('')}
-        </table>` : '<p>Aucun parent enregistré.</p>'}
-        <div class="footer">
-            <p>Fait à _______________, le ${date}</p>
-            <p>Signature du parent/tuteur : _________________</p>
-        </div>
-    `;
-}
-
-function generateSortieHTML(student) {
-    var date = new Date().toLocaleDateString('fr-FR');
-    var sortieDate = document.getElementById('sortieDate')?.value || date;
-    var motif = document.getElementById('sortieMotif')?.value || 'autre';
-    var motifs = { 'demangement': 'Déménagement', 'changement_ecole': "Changement d'école", 'fin_cycle': 'Fin de cycle', 'autre': 'Autre' };
-    
-    return `
-        <div class="header">
-            <h1>CERTIFICAT DE SORTIE (RADIATION)</h1>
-        </div>
-        <div class="section">
-            <p>Je soussigné, Directeur de l'établissement, certifie que :</p>
-        </div>
-        <table>
-            <tr><td>Nom et Prénom</td><td><strong>${student.name}</strong></td></tr>
-            <tr><td>Né(e) le</td><td>${student.date_of_birth ? new Date(student.date_of_birth).toLocaleDateString('fr-FR') : 'Non renseigné'}</td></tr>
-            <tr><td>Matricule</td><td>${student.matricule || 'N/A'}</td></tr>
-            <tr><td>Dernière classe fréquentée</td><td>${student.student_class || 'N/A'}</td></tr>
-            <tr><td>Date de sortie</td><td>${new Date(sortieDate).toLocaleDateString('fr-FR')}</td></tr>
-            <tr><td>Motif</td><td>${motifs[motif] || motif}</td></tr>
-            <tr><td>Nouvel établissement</td><td>${document.getElementById('sortieNewSchool')?.value || 'Non précisé'}</td></tr>
-        </table>
-        <div class="section">
-            <p>Est libéré(e) de toute obligation envers notre établissement à compter de la date indiquée.</p>
-        </div>
-        <div class="footer">
-            <p>Fait à _______________, le ${date}</p>
-            <p>Le Directeur</p>
-        </div>
-    `;
-}
-
-function generateLivretHTML(student) {
-    var date = new Date().toLocaleDateString('fr-FR');
-    return `
-        <div class="header">
-            <h1>LIVRET SCOLAIRE</h1>
-            <h2>Année Scolaire ${document.getElementById('livretYear')?.value || '2024-2025'}</h2>
-        </div>
-        <div class="section"><h3>Informations de l'élève</h3></div>
-        <table>
-            <tr><td>Nom et Prénom</td><td><strong>${student.name}</strong></td></tr>
-            <tr><td>Date de naissance</td><td>${student.date_of_birth ? new Date(student.date_of_birth).toLocaleDateString('fr-FR') : 'Non renseigné'}</td></tr>
-            <tr><td>Lieu de naissance</td><td>${student.place_of_birth || 'Non renseigné'}</td></tr>
-            <tr><td>Matricule</td><td>${student.matricule || 'N/A'}</td></tr>
-            <tr><td>Classe</td><td>${student.student_class || 'N/A'}</td></tr>
-            <tr><td>Année Scolaire</td><td>${document.getElementById('livretYear')?.value || '2024-2025'}</td></tr>
-            <tr><td>Période</td><td>${document.getElementById('livretPeriod')?.value === 'annuel' ? 'Annuel' : document.getElementById('livretPeriod')?.value + 'er Trimestre' || '1er Trimestre'}</td></tr>
-        </table>
-        <div class="section"><h3>Compétences et Appréciations</h3></div>
-        <table>
-            <tr><td>Français</td><td>_______________________________</td></tr>
-            <tr><td>Mathématiques</td><td>_______________________________</td></tr>
-            <tr><td>Sciences</td><td>_______________________________</td></tr>
-            <tr><td>Histoire-Géographie</td><td>_______________________________</td></tr>
-            <tr><td>Langues</td><td>_______________________________</td></tr>
-            <tr><td>EPS</td><td>_______________________________</td></tr>
-        </table>
-        <div class="footer">
-            <p>Fait à _______________, le ${date}</p>
-            <p>Le Directeur / Professeur Principal</p>
-        </div>
-    `;
-}
-
-function generateAttestationHTML(student) {
-    var date = new Date().toLocaleDateString('fr-FR');
-    var type = document.getElementById('attestType')?.value || 'passage';
-    var types = { 'passage': 'PASSAGE EN CLASSE SUPÉRIEURE', 'reussite': 'RÉUSSITE', 'fin_cycle': 'FIN DE CYCLE' };
-    
-    return `
-        <div class="header">
-            <h1>ATTESTATION DE ${types[type] || 'RÉUSSITE'}</h1>
-        </div>
-        <table>
-            <tr><td>Nom et Prénom</td><td><strong>${student.name}</strong></td></tr>
-            <tr><td>Matricule</td><td>${student.matricule || 'N/A'}</td></tr>
-            <tr><td>Classe</td><td>${student.student_class || 'N/A'}</td></tr>
-            <tr><td>Année Scolaire</td><td>2024-2025</td></tr>
-        </table>
-        <div class="section">
-            <p>Est admis(e) en classe supérieure pour l'année scolaire suivante.</p>
-        </div>
-        <div class="footer">
-            <p>Fait à _______________, le ${date}</p>
-            <p>Le Directeur</p>
-        </div>
-    `;
-}
-
-function generateGenericHTML(student) {
-    var date = new Date().toLocaleDateString('fr-FR');
-    return `
-        <div class="header"><h1>DOCUMENT SCOLAIRE</h1></div>
-        <table>
-            <tr><td>Nom</td><td><strong>${student.name}</strong></td></tr>
-            <tr><td>Classe</td><td>${student.student_class || 'N/A'}</td></tr>
-            <tr><td>Matricule</td><td>${student.matricule || 'N/A'}</td></tr>
-        </table>
-        <div class="footer"><p>Fait le ${date}</p></div>
-    `;
-}
-
     function loadArchives() {
         var section = document.getElementById('archivesSection');
         section.style.display = 'block';
@@ -760,10 +608,10 @@ function generateGenericHTML(student) {
                     return '<tr>' +
                         '<td>' + new Date(d.created_at).toLocaleDateString('fr-FR') + '</td>' +
                         '<td>' + d.type + '</td>' +
-                        '<td>' + d.student_name + '</td>' +
-                        '<td>' + d.student_class + '</td>' +
-                        '<td>' + d.created_by_name + '</td>' +
-                        '<td><button class="btn btn-sm btn-outline-primary" onclick="window.open(\'/uploads/documents/' + d.file_url + '\')">📥</button></td>' +
+                        '<td>' + (d.student_name || '-') + '</td>' +
+                        '<td>' + (d.student_class || '-') + '</td>' +
+                        '<td>' + (d.created_by_name || '-') + '</td>' +
+                        '<td><button class="btn btn-sm btn-outline-primary" onclick="window.open(\'/uploads/documents/' + (d.file_url || '') + '\')">📥</button></td>' +
                     '</tr>';
                 }).join('');
             })
