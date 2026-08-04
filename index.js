@@ -1513,13 +1513,15 @@ app.get('/api/all-classes', async (req, res) => {
             })
             .whereIn('role', ['STUDENT', 'student', 'eleve', 'élève', 'Eleve', 'Élève'])
             .whereNotNull('student_class')
-            .where('student_class', '!=', '')
             .distinct('student_class')
             .orderBy('student_class')
             .pluck('student_class');
         
-        console.log('📋 Classes trouvées:', classes.length, classes);
-        res.json(classes);
+        // Filtrer les valeurs vides après coup
+        const filteredClasses = classes.filter(c => c && c.trim() !== '');
+        
+        console.log('📋 Classes trouvées:', filteredClasses.length, filteredClasses);
+        res.json(filteredClasses);
     } catch (error) {
         console.error('Erreur all-classes:', error);
         res.status(500).json([]);
