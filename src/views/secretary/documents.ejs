@@ -325,9 +325,9 @@
     doc.setFont('helvetica', 'normal');
     doc.text('Fait à ' + city + ', le ' + date, pageWidth - leftMargin, sigY, { align: 'right' });
     doc.setFont('helvetica', 'bold');
-    doc.text(directorTitle, pageWidth - leftMargin, sigY + 12, { align: 'right' });
+    doc.text(directorTitle, pageWidth - leftMargin, sigY + 9, { align: 'right' });
     doc.setFont('helvetica', 'normal');
-    doc.text(directorName, pageWidth - leftMargin, sigY + 16, { align: 'right' });
+    doc.text(directorName, pageWidth - leftMargin, sigY + 12, { align: 'right' });
 
     doc.save('Certificat_Scolarite_' + (student.name || 'eleve').replace(/ /g, '_') + '.pdf');
 }
@@ -398,9 +398,9 @@ function generateSortiePDF(student) {
     doc.setFont('helvetica', 'normal');
     doc.text('Fait à ' + city + ', le ' + date, pageWidth - leftMargin, sigY, { align: 'right' });
     doc.setFont('helvetica', 'bold');
-    doc.text(directorTitle, pageWidth - leftMargin, sigY + 12, { align: 'right' });
+    doc.text(directorTitle, pageWidth - leftMargin, sigY + 9, { align: 'right' });
     doc.setFont('helvetica', 'normal');
-    doc.text(directorName, pageWidth - leftMargin, sigY + 16, { align: 'right' });
+    doc.text(directorName, pageWidth - leftMargin, sigY + 12, { align: 'right' });
 
     doc.save('Certificat_Sortie_' + (student.name || 'eleve').replace(/ /g, '_') + '.pdf');
 }
