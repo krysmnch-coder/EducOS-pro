@@ -39,7 +39,22 @@
                         <p style="color:#888; font-size:0.9rem;">Générer un certificat de scolarité pour un élève.</p>
                         <div class="mb-3">
                             <label class="form-label">Année Scolaire</label>
-                            <input type="text" class="form-control" id="certYear" value="2025-2026" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
+                            <select class="form-select" id="certYear" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
+    <option value="2026-2027">2026-2027</option>
+    <option value="2027-2028">2027-2028</option>
+    <option value="2028-2029">2028-2029</option>
+    <option value="2029-2030">2029-2030</option>
+    <option value="2030-2031">2030-2031</option>
+    <option value="2031-2032">2031-2032</option>
+    <option value="2032-2033">2032-2033</option>
+    <option value="2033-2034">2033-2034</option>
+    <option value="2034-2035">2034-2035</option>
+    <option value="2035-2036">2035-2036</option>
+    <option value="2036-2037">2036-2037</option>
+    <option value="2037-2038">2037-2038</option>
+    <option value="2038-2039">2038-2039</option>
+    <option value="2039-2040">2039-2040</option>
+</select>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Ville / Région</label>
@@ -250,10 +265,9 @@
 
     var pageWidth = 210;
     var centerX = pageWidth / 2;
-    var leftMargin = 20;
-    var col1X = leftMargin;
-    var col2X = centerX + 5;
-    var labelWidth = 35;
+    var leftMargin = 25;
+    var labelX = leftMargin;
+    var valueX = leftMargin + 45;
 
     // === EN-TÊTE ===
     doc.setFontSize(14);
@@ -272,64 +286,48 @@
     doc.setFontSize(10);
     doc.text('Je soussigné, ' + directorTitle + ' ' + directorName + ' de ' + school + ', certifie que :', leftMargin, 45);
 
-    var y = 56;
-    var lineHeight = 9;
+    var y = 55;                  // début légèrement remonté
+    var lineHeight = 7;          // interligne réduit (au lieu de 8)
+    
+    var lines = [
+        { label: 'Nom et Prénom :', value: student.name || '' },
+        { label: 'Né(e) le :', value: student.date_of_birth ? new Date(student.date_of_birth).toLocaleDateString('fr-FR') : 'Non renseigné' },
+        { label: 'Lieu de naissance :', value: student.place_of_birth || 'Non renseigné' },
+        { label: 'Matricule :', value: student.matricule || 'N/A' },
+        { label: 'Classe :', value: student.student_class || 'N/A' },
+        { label: 'Adresse :', value: student.address || 'Non renseignée' }
+    ];
 
-    // Colonne 1 (gauche)
-    doc.setFont('helvetica', 'bold');
-    doc.text('Nom et Prénom :', col1X, y);
-    doc.setFont('helvetica', 'normal');
-    doc.text(student.name || '', col1X + labelWidth, y);
-
-    doc.setFont('helvetica', 'bold');
-    doc.text('Né(e) le :', col1X, y + lineHeight);
-    doc.setFont('helvetica', 'normal');
-    doc.text(student.date_of_birth ? new Date(student.date_of_birth).toLocaleDateString('fr-FR') : 'Non renseigné', col1X + labelWidth, y + lineHeight);
-
-    doc.setFont('helvetica', 'bold');
-    doc.text('À :', col1X, y + lineHeight * 2);
-    doc.setFont('helvetica', 'normal');
-    doc.text(student.place_of_birth || 'Non renseigné', col1X + labelWidth, y + lineHeight * 2);
-
-    // Colonne 2 (droite)
-    doc.setFont('helvetica', 'bold');
-    doc.text('Matricule :', col2X, y);
-    doc.setFont('helvetica', 'normal');
-    doc.text(student.matricule || 'N/A', col2X + labelWidth, y);
-
-    doc.setFont('helvetica', 'bold');
-    doc.text('Classe :', col2X, y + lineHeight);
-    doc.setFont('helvetica', 'normal');
-    doc.text(student.student_class || 'N/A', col2X + labelWidth, y + lineHeight);
-
-    doc.setFont('helvetica', 'bold');
-    doc.text('Adresse :', col2X, y + lineHeight * 2);
-    doc.setFont('helvetica', 'normal');
-    doc.text(student.address || 'Non renseignée', col2X + labelWidth, y + lineHeight * 2, { maxWidth: 65 });
+    lines.forEach(function(line) {
+        doc.setFont('helvetica', 'bold');
+        doc.text(line.label, labelX, y);
+        doc.setFont('helvetica', 'normal');
+        doc.text(line.value, valueX, y);
+        y += lineHeight;
+    });
 
     // Parents
-    y += lineHeight * 3 + 4;
     if (allParents.length > 0) {
         doc.setFont('helvetica', 'bold');
-        doc.text('Parent(s) :', col1X, y);
+        doc.text('Parent(s) :', labelX, y + 1);
         doc.setFont('helvetica', 'normal');
-        doc.text(allParents.map(function(p) { return p.name; }).join(' | '), col1X + labelWidth, y, { maxWidth: pageWidth - col1X - labelWidth - leftMargin });
-        y += lineHeight;
+        doc.text(allParents.map(function(p) { return p.name; }).join(' | '), valueX, y + 1, { maxWidth: pageWidth - valueX - leftMargin });
+        y += 10;   // un peu moins d'espace
     }
 
     // Texte de certification
-    y += 4;
+    y += 2;   // réduit
     doc.setFont('helvetica', 'normal');
     doc.text('Est régulièrement inscrit(e) dans notre établissement pour l\'année scolaire ' + year + '.', leftMargin, y);
 
     // === SIGNATURE ===
-    var sigY = 120;
+    var sigY = 105;   // remonté (au lieu de 115)
     doc.setFont('helvetica', 'normal');
     doc.text('Fait à ' + city + ', le ' + date, pageWidth - leftMargin, sigY, { align: 'right' });
     doc.setFont('helvetica', 'bold');
-    doc.text(directorTitle, pageWidth - leftMargin, sigY + 8, { align: 'right' });
+    doc.text(directorTitle, pageWidth - leftMargin, sigY + 7, { align: 'right' });
     doc.setFont('helvetica', 'normal');
-    doc.text(directorName, pageWidth - leftMargin, sigY + 15, { align: 'right' });
+    doc.text(directorName, pageWidth - leftMargin, sigY + 13, { align: 'right' });
 
     doc.save('Certificat_Scolarite_' + (student.name || 'eleve').replace(/ /g, '_') + '.pdf');
 }
@@ -349,10 +347,9 @@ function generateSortiePDF(student) {
 
     var pageWidth = 210;
     var centerX = pageWidth / 2;
-    var leftMargin = 20;
-    var col1X = leftMargin;
-    var col2X = centerX + 5;
-    var labelWidth = 35;
+    var leftMargin = 25;
+    var labelX = leftMargin;
+    var valueX = leftMargin + 45;
 
     // === EN-TÊTE ===
     doc.setFontSize(14);
@@ -371,55 +368,39 @@ function generateSortiePDF(student) {
     doc.setFontSize(10);
     doc.text('Je soussigné, ' + directorTitle + ' ' + directorName + ' de ' + school + ', certifie que :', leftMargin, 45);
 
-    var y = 56;
-    var lineHeight = 9;
+    var y = 55;
+    var lineHeight = 7;   // réduit
+    
+    var lines = [
+        { label: 'Nom et Prénom :', value: student.name || '' },
+        { label: 'Né(e) le :', value: student.date_of_birth ? new Date(student.date_of_birth).toLocaleDateString('fr-FR') : 'Non renseigné' },
+        { label: 'Matricule :', value: student.matricule || 'N/A' },
+        { label: 'Dernière classe :', value: student.student_class || 'N/A' },
+        { label: 'Date de sortie :', value: sortieDate },
+        { label: 'Motif :', value: motifs[motif] || motif }
+    ];
 
-    // Colonne 1
-    doc.setFont('helvetica', 'bold');
-    doc.text('Nom et Prénom :', col1X, y);
-    doc.setFont('helvetica', 'normal');
-    doc.text(student.name || '', col1X + labelWidth, y);
-
-    doc.setFont('helvetica', 'bold');
-    doc.text('Né(e) le :', col1X, y + lineHeight);
-    doc.setFont('helvetica', 'normal');
-    doc.text(student.date_of_birth ? new Date(student.date_of_birth).toLocaleDateString('fr-FR') : 'Non renseigné', col1X + labelWidth, y + lineHeight);
-
-    // Colonne 2
-    doc.setFont('helvetica', 'bold');
-    doc.text('Matricule :', col2X, y);
-    doc.setFont('helvetica', 'normal');
-    doc.text(student.matricule || 'N/A', col2X + labelWidth, y);
-
-    doc.setFont('helvetica', 'bold');
-    doc.text('Classe :', col2X, y + lineHeight);
-    doc.setFont('helvetica', 'normal');
-    doc.text(student.student_class || 'N/A', col2X + labelWidth, y + lineHeight);
-
-    y += lineHeight * 2 + 2;
-    doc.setFont('helvetica', 'bold');
-    doc.text('Date de sortie :', col1X, y);
-    doc.setFont('helvetica', 'normal');
-    doc.text(sortieDate, col1X + labelWidth, y);
-
-    doc.setFont('helvetica', 'bold');
-    doc.text('Motif :', col1X, y + lineHeight);
-    doc.setFont('helvetica', 'normal');
-    doc.text(motifs[motif] || motif, col1X + labelWidth, y + lineHeight);
+    lines.forEach(function(line) {
+        doc.setFont('helvetica', 'bold');
+        doc.text(line.label, labelX, y);
+        doc.setFont('helvetica', 'normal');
+        doc.text(line.value, valueX, y);
+        y += lineHeight;
+    });
 
     // Texte
-    y += lineHeight * 2 + 4;
+    y += 2;
     doc.setFont('helvetica', 'normal');
-    doc.text('Est libéré(e) de toute obligation envers notre établissement.', leftMargin, y);
+    doc.text('Est libéré(e) de toute obligation envers notre établissement à compter de la date indiquée.', leftMargin, y);
 
     // === SIGNATURE ===
-    var sigY = 120;
+    var sigY = 105;   // remonté
     doc.setFont('helvetica', 'normal');
     doc.text('Fait à ' + city + ', le ' + date, pageWidth - leftMargin, sigY, { align: 'right' });
     doc.setFont('helvetica', 'bold');
-    doc.text(directorTitle, pageWidth - leftMargin, sigY + 8, { align: 'right' });
+    doc.text(directorTitle, pageWidth - leftMargin, sigY + 7, { align: 'right' });
     doc.setFont('helvetica', 'normal');
-    doc.text(directorName, pageWidth - leftMargin, sigY + 15, { align: 'right' });
+    doc.text(directorName, pageWidth - leftMargin, sigY + 13, { align: 'right' });
 
     doc.save('Certificat_Sortie_' + (student.name || 'eleve').replace(/ /g, '_') + '.pdf');
 }
