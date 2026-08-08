@@ -22,9 +22,7 @@
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <button class="btn btn-primary w-100" id="btnFilter">
-                        Filtrer
-                    </button>
+                    <button class="btn btn-primary w-100" id="btnFilter">Filtrer</button>
                 </div>
                 <div class="col-md-3">
                     <span id="selectedStudentInfo" style="color: #0dcaf0; font-size: 0.9rem;"></span>
@@ -35,23 +33,53 @@
         <div class="row g-4">
             <!-- Certificat de Scolarité -->
             <div class="col-md-6 col-lg-4">
-                <div class="card glass-card p-4" style="border-radius:16px; min-height:200px;">
-                    <h5>Certificat de Scolarité</h5>
+                <div class="card glass-card p-4" style="border-radius:16px; min-height:250px;">
+                    <h5>📜 Certificat de Scolarité</h5>
                     <p style="color:#888; font-size:0.9rem;">Générer un certificat de scolarité pour un élève.</p>
                     <div class="mb-3">
                         <label class="form-label">Année Scolaire</label>
                         <input type="text" class="form-control" id="certYear" value="2025-2026" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label">Ville / Région</label>
+                        <select class="form-select" id="certCity" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
+                            <option value="">-- Choisir --</option>
+                            <option value="Antananarivo">Antananarivo (Analamanga)</option>
+                            <option value="Antsirabe">Antsirabe (Vakinankaratra)</option>
+                            <option value="Fianarantsoa">Fianarantsoa (Haute Matsiatra)</option>
+                            <option value="Toamasina">Toamasina (Atsinanana)</option>
+                            <option value="Mahajanga">Mahajanga (Boeny)</option>
+                            <option value="Toliara">Toliara (Atsimo-Andrefana)</option>
+                            <option value="Antsiranana">Antsiranana (Diana)</option>
+                            <option value="Ambositra">Ambositra (Amoron'i Mania)</option>
+                            <option value="Morondava">Morondava (Menabe)</option>
+                            <option value="Antalaha">Antalaha (Sava)</option>
+                            <option value="Maroantsetra">Maroantsetra (Analanjirofo)</option>
+                            <option value="Fort Dauphin">Fort Dauphin (Anosy)</option>
+                            <option value="Moramanga">Moramanga (Alaotra-Mangoro)</option>
+                            <option value="Maevatanana">Maevatanana (Betsiboka)</option>
+                            <option value="Maintirano">Maintirano (Melaky)</option>
+                            <option value="Ihosy">Ihosy (Ihorombe)</option>
+                            <option value="Ambatondrazaka">Ambatondrazaka (Alaotra-Mangoro)</option>
+                            <option value="Manakara">Manakara (Vatovavy)</option>
+                            <option value="Farafangana">Farafangana (Atsimo-Atsinanana)</option>
+                            <option value="Antsohihy">Antsohihy (Sofia)</option>
+                            <option value="Sambava">Sambava (Sava)</option>
+                            <option value="Nosy Be">Nosy Be (Diana)</option>
+                            <option value="Sainte-Marie">Sainte-Marie (Analanjirofo)</option>
+                            <option value="Tsiroanomandidy">Tsiroanomandidy (Bongolava)</option>
+                        </select>
+                    </div>
                     <button class="btn btn-primary w-100" onclick="generateDocument('certificate')">
-                        Générer et Télécharger PDF
+                        🖨️ Générer et Télécharger PDF
                     </button>
                 </div>
             </div>
 
             <!-- Certificat de Sortie / Radiation -->
             <div class="col-md-6 col-lg-4">
-                <div class="card glass-card p-4" style="border-radius:16px; min-height:200px;">
-                    <h5>Certificat de Sortie (Radiation)</h5>
+                <div class="card glass-card p-4" style="border-radius:16px; min-height:250px;">
+                    <h5>🚪 Certificat de Sortie (Radiation)</h5>
                     <p style="color:#888; font-size:0.9rem;">Certificat de radiation pour changement d'école.</p>
                     <div class="mb-3">
                         <label class="form-label">Motif de départ</label>
@@ -66,19 +94,49 @@
                         <label class="form-label">Date de sortie</label>
                         <input type="date" class="form-control" id="sortieDate" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label">Ville / Région</label>
+                        <select class="form-select" id="sortieCity" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
+                            <option value="">-- Choisir --</option>
+                            <option value="Antananarivo">Antananarivo (Analamanga)</option>
+                            <option value="Antsirabe">Antsirabe (Vakinankaratra)</option>
+                            <option value="Fianarantsoa">Fianarantsoa (Haute Matsiatra)</option>
+                            <option value="Toamasina">Toamasina (Atsinanana)</option>
+                            <option value="Mahajanga">Mahajanga (Boeny)</option>
+                            <option value="Toliara">Toliara (Atsimo-Andrefana)</option>
+                            <option value="Antsiranana">Antsiranana (Diana)</option>
+                            <option value="Ambositra">Ambositra (Amoron'i Mania)</option>
+                            <option value="Morondava">Morondava (Menabe)</option>
+                            <option value="Antalaha">Antalaha (Sava)</option>
+                            <option value="Maroantsetra">Maroantsetra (Analanjirofo)</option>
+                            <option value="Fort Dauphin">Fort Dauphin (Anosy)</option>
+                            <option value="Moramanga">Moramanga (Alaotra-Mangoro)</option>
+                            <option value="Maevatanana">Maevatanana (Betsiboka)</option>
+                            <option value="Maintirano">Maintirano (Melaky)</option>
+                            <option value="Ihosy">Ihosy (Ihorombe)</option>
+                            <option value="Ambatondrazaka">Ambatondrazaka (Alaotra-Mangoro)</option>
+                            <option value="Manakara">Manakara (Vatovavy)</option>
+                            <option value="Farafangana">Farafangana (Atsimo-Atsinanana)</option>
+                            <option value="Antsohihy">Antsohihy (Sofia)</option>
+                            <option value="Sambava">Sambava (Sava)</option>
+                            <option value="Nosy Be">Nosy Be (Diana)</option>
+                            <option value="Sainte-Marie">Sainte-Marie (Analanjirofo)</option>
+                            <option value="Tsiroanomandidy">Tsiroanomandidy (Bongolava)</option>
+                        </select>
+                    </div>
                     <button class="btn btn-primary w-100" onclick="generateDocument('sortie')">
-                        Générer et Télécharger PDF
+                        🖨️ Générer et Télécharger PDF
                     </button>
                 </div>
             </div>
 
             <!-- Archives -->
             <div class="col-md-6 col-lg-4">
-                <div class="card glass-card p-4" style="border-radius:16px; min-height:200px;">
-                    <h5>Archives</h5>
+                <div class="card glass-card p-4" style="border-radius:16px; min-height:250px;">
+                    <h5>🗄️ Archives</h5>
                     <p style="color:#888; font-size:0.9rem;">Consulter les documents déjà générés.</p>
                     <button class="btn btn-primary w-100 mt-3" onclick="loadArchives()">
-                        Consulter les archives
+                        📁 Consulter les archives
                     </button>
                 </div>
             </div>
@@ -86,7 +144,7 @@
 
         <!-- Section Archives -->
         <div class="card glass-card mt-4 p-4" style="border-radius:16px; display:none;" id="archivesSection">
-            <h4 class="mb-3">Documents Archivés</h4>
+            <h4 class="mb-3">📁 Documents Archivés</h4>
             <div class="table-responsive">
                 <table class="table table-hover" id="archivesTable">
                     <thead>
@@ -109,14 +167,18 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <script>
     var allStudents = [];
     var allClasses = [];
     var selectedStudentId = null;
     var selectedClassName = null;
-    var currentUser = { name: '<%= user.name %>', establishment: '<%= user.establishment_name || "Établissement" %>' };
+    var currentUser = { 
+        name: '<%= user.name %>', 
+        role: '<%= user.role %>',
+        establishmentName: '<%= typeof establishmentName !== "undefined" ? establishmentName : "Établissement" %>',
+        adminName: '<%= typeof adminName !== "undefined" ? adminName : user.name %>'
+    };
 
     document.addEventListener('DOMContentLoaded', function() {
         loadClassesAndStudents();
@@ -229,7 +291,6 @@
                     })
                 });
                 
-                // Générer PDF
                 if (type === 'certificate') {
                     generateCertificatePDF(studentData);
                 } else if (type === 'sortie') {
@@ -243,74 +304,134 @@
     }
 
     function generateCertificatePDF(student) {
-    var year = document.getElementById('certYear').value || '2025-2026';
-    var date = new Date().toLocaleDateString('fr-FR');
-    var school = currentUser.establishment;
-    var adminName = currentUser.name;
+        var year = document.getElementById('certYear').value || '2025-2026';
+        var city = document.getElementById('certCity').value || '_______________';
+        var date = new Date().toLocaleDateString('fr-FR');
+        var school = currentUser.establishmentName;
+        var directorName = currentUser.adminName;
 
-    // Récupérer seulement les noms des parents (max 2)
-    var allParents = [];
-    if (student.linkedParents) allParents = allParents.concat(student.linkedParents);
-    if (student.manualParents) allParents = allParents.concat(student.manualParents);
+        // Parents
+        var allParents = [];
+        if (student.linkedParents) allParents = allParents.concat(student.linkedParents);
+        if (student.manualParents) allParents = allParents.concat(student.manualParents);
 
-    var parentsText = '';
-    if (allParents.length > 0) {
-        var names = allParents.slice(0, 2).map(function(p) { return p.name || ''; }).filter(Boolean);
-        if (names.length > 0) {
-            parentsText = 'Parents : ' + names.join(' et ');
+        var { jsPDF } = window.jspdf;
+        var doc = new jsPDF({ format: 'a5' }); // Format demi A4 (A5)
+        
+        // En-tête
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('CERTIFICAT DE SCOLARITE', 74, 15, { align: 'center' });
+        
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.text('Année Scolaire : ' + year, 74, 23, { align: 'center' });
+        doc.text('Établissement : ' + school, 74, 30, { align: 'center' });
+        
+        doc.setDrawColor(13, 110, 253);
+        doc.line(15, 35, 133, 35);
+        
+        // Corps
+        doc.setFontSize(9);
+        doc.text('Je soussigné, ' + directorName + ', Directeur de ' + school + ', certifie que :', 15, 43);
+        
+        // Infos élève (tableau simple)
+        var y = 52;
+        var lines = [
+            ['Nom et Prénom :', student.name || ''],
+            ['Né(e) le :', student.date_of_birth ? new Date(student.date_of_birth).toLocaleDateString('fr-FR') : 'Non renseigné'],
+            ['Lieu de naissance :', student.place_of_birth || 'Non renseigné'],
+            ['Matricule :', student.matricule || 'N/A'],
+            ['Classe :', student.student_class || 'N/A'],
+            ['Adresse :', student.address || 'Non renseignée']
+        ];
+        
+        lines.forEach(function(line) {
+            doc.setFont('helvetica', 'bold');
+            doc.text(line[0], 18, y);
+            doc.setFont('helvetica', 'normal');
+            doc.text(line[1], 65, y);
+            y += 7;
+        });
+        
+        // Parents sous l'année scolaire
+        if (allParents.length > 0) {
+            doc.setFont('helvetica', 'bold');
+            doc.text('Parents / Tuteurs :', 18, y + 2);
+            doc.setFont('helvetica', 'normal');
+            var parentText = allParents.map(function(p) { 
+                return p.name; 
+            }).join(' | ');
+            doc.text(parentText, 65, y + 2, { maxWidth: 75 });
+            y += 10;
         }
+        
+        // Texte de certification
+        y += 5;
+        doc.text('Est régulièrement inscrit(e) dans notre établissement pour l\'année scolaire ' + year + '.', 15, y);
+        
+        // Signature
+        doc.text('Fait à ' + city + ', le ' + date, 100, y + 20, { align: 'right' });
+        doc.text(directorName, 100, y + 28, { align: 'right' });
+        doc.setFont('helvetica', 'italic');
+        doc.text('Directeur', 100, y + 36, { align: 'right' });
+        
+        doc.save('Certificat_Scolarite_' + (student.name || 'eleve').replace(/ /g, '_') + '.pdf');
     }
 
-    var { jsPDF } = window.jspdf;
-    var doc = new jsPDF();
-    doc.setFontSize(16);
-    doc.text('CERTIFICAT DE SCOLARITE', 105, 20, { align: 'center' });
-    doc.setFontSize(11);
-    doc.text('Année Scolaire : ' + year, 105, 28, { align: 'center' });
-    doc.text('Etablissement : ' + school, 105, 36, { align: 'center' });
-    doc.text('_'.repeat(60), 25, 44);
-    doc.setFontSize(10);
-    doc.text('Je soussigné, ' + adminName + ', Directeur de ' + school + ', certifie que :', 25, 54);
-    doc.text('Nom et Prénom : ' + (student.name || ''), 30, 64);
-    doc.text('Né(e) le : ' + (student.date_of_birth ? new Date(student.date_of_birth).toLocaleDateString('fr-FR') : 'Non renseigné'), 30, 72);
-    doc.text('Lieu de naissance : ' + (student.place_of_birth || 'Non renseigné'), 30, 80);
-    doc.text('Matricule : ' + (student.matricule || 'N/A'), 30, 88);
-    doc.text('Classe : ' + (student.student_class || 'N/A'), 30, 96);
-    doc.text('Adresse : ' + (student.address || 'Non renseignée'), 30, 104);
-    if (parentsText) doc.text(parentsText, 30, 112);
-    doc.text('Est régulièrement inscrit(e) dans notre établissement pour l\'année scolaire en cours.', 25, 124);
-    doc.text('Fait à ' + school + ', le ' + date, 140, 140, { align: 'right' });
-    doc.text(adminName, 140, 148, { align: 'right' });
-    doc.text('Directeur', 140, 156, { align: 'right' });
-    doc.save('Certificat_Scolarite_' + (student.name || 'eleve').replace(/ /g, '_') + '.pdf');
-}
     function generateSortiePDF(student) {
         var date = new Date().toLocaleDateString('fr-FR');
         var sortieDate = document.getElementById('sortieDate').value || date;
         var motif = document.getElementById('sortieMotif').value || 'autre';
+        var city = document.getElementById('sortieCity').value || '_______________';
         var motifs = { 'demangement': 'Déménagement', 'changement_ecole': "Changement d'école", 'fin_cycle': 'Fin de cycle', 'autre': 'Autre' };
-        var school = currentUser.establishment;
-        var adminName = currentUser.name;
+        var school = currentUser.establishmentName;
+        var directorName = currentUser.adminName;
 
         var { jsPDF } = window.jspdf;
-        var doc = new jsPDF();
-        doc.setFontSize(16);
-        doc.text('CERTIFICAT DE SORTIE (RADIATION)', 105, 20, { align: 'center' });
-        doc.setFontSize(11);
-        doc.text('Etablissement : ' + school, 105, 30, { align: 'center' });
-        doc.text('_'.repeat(60), 25, 38);
-        doc.setFontSize(10);
-        doc.text('Je soussigné, ' + adminName + ', Directeur de ' + school + ', certifie que :', 25, 48);
-        doc.text('Nom et Prénom : ' + (student.name || ''), 30, 58);
-        doc.text('Né(e) le : ' + (student.date_of_birth ? new Date(student.date_of_birth).toLocaleDateString('fr-FR') : 'Non renseigné'), 30, 66);
-        doc.text('Matricule : ' + (student.matricule || 'N/A'), 30, 74);
-        doc.text('Dernière classe fréquentée : ' + (student.student_class || 'N/A'), 30, 82);
-        doc.text('Date de sortie : ' + new Date(sortieDate).toLocaleDateString('fr-FR'), 30, 90);
-        doc.text('Motif : ' + (motifs[motif] || motif), 30, 98);
-        doc.text('Est libéré(e) de toute obligation envers notre établissement.', 25, 110);
-        doc.text('Fait à ' + school + ', le ' + date, 140, 130, { align: 'right' });
-        doc.text(adminName, 140, 138, { align: 'right' });
-        doc.text('Directeur', 140, 146, { align: 'right' });
+        var doc = new jsPDF({ format: 'a5' });
+        
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('CERTIFICAT DE SORTIE', 74, 15, { align: 'center' });
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.text('(RADIATION)', 74, 21, { align: 'center' });
+        
+        doc.setFontSize(9);
+        doc.text('Établissement : ' + school, 74, 28, { align: 'center' });
+        
+        doc.setDrawColor(220, 53, 69);
+        doc.line(15, 33, 133, 33);
+        
+        doc.text('Je soussigné, ' + directorName + ', Directeur de ' + school + ', certifie que :', 15, 41);
+        
+        var y = 50;
+        var lines = [
+            ['Nom et Prénom :', student.name || ''],
+            ['Né(e) le :', student.date_of_birth ? new Date(student.date_of_birth).toLocaleDateString('fr-FR') : 'Non renseigné'],
+            ['Matricule :', student.matricule || 'N/A'],
+            ['Dernière classe :', student.student_class || 'N/A'],
+            ['Date de sortie :', new Date(sortieDate).toLocaleDateString('fr-FR')],
+            ['Motif :', motifs[motif] || motif]
+        ];
+        
+        lines.forEach(function(line) {
+            doc.setFont('helvetica', 'bold');
+            doc.text(line[0], 18, y);
+            doc.setFont('helvetica', 'normal');
+            doc.text(line[1], 65, y);
+            y += 7;
+        });
+        
+        y += 5;
+        doc.text('Est libéré(e) de toute obligation envers notre établissement à compter de la date indiquée.', 15, y);
+        
+        doc.text('Fait à ' + city + ', le ' + date, 100, y + 20, { align: 'right' });
+        doc.text(directorName, 100, y + 28, { align: 'right' });
+        doc.setFont('helvetica', 'italic');
+        doc.text('Directeur', 100, y + 36, { align: 'right' });
+        
         doc.save('Certificat_Sortie_' + (student.name || 'eleve').replace(/ /g, '_') + '.pdf');
     }
 

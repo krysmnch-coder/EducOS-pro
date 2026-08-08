@@ -1500,6 +1500,13 @@ app.get('/secretary/documents', async (req, res) => {
         req.flash('error_msg', 'Erreur lors du chargement.');
         res.redirect('/dashboard');
     }
+
+    res.render('secretary/documents', {
+    title: 'Documents Scolaires',
+    user: req.user,
+    establishmentName: req.user.establishment_name || 'Établissement',
+    adminName: req.user.name
+});
 });
 
 // API - Récupérer toutes les classes
