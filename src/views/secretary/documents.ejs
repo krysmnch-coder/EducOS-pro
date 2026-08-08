@@ -321,13 +321,13 @@
     doc.text('Est régulièrement inscrit(e) dans notre établissement pour l\'année scolaire ' + year + '.', leftMargin, y);
 
     // === SIGNATURE ===
-    var sigY = 105;   // remonté (au lieu de 115)
+    var sigY = 115;   // remonté (au lieu de 115)
     doc.setFont('helvetica', 'normal');
     doc.text('Fait à ' + city + ', le ' + date, pageWidth - leftMargin, sigY, { align: 'right' });
     doc.setFont('helvetica', 'bold');
-    doc.text(directorTitle, pageWidth - leftMargin, sigY + 10, { align: 'right' });
+    doc.text(directorTitle, pageWidth - leftMargin, sigY + 13, { align: 'right' });
     doc.setFont('helvetica', 'normal');
-    doc.text(directorName, pageWidth - leftMargin, sigY + 16, { align: 'right' });
+    doc.text(directorName, pageWidth - leftMargin, sigY + 19, { align: 'right' });
 
     doc.save('Certificat_Scolarite_' + (student.name || 'eleve').replace(/ /g, '_') + '.pdf');
 }
@@ -394,13 +394,13 @@ function generateSortiePDF(student) {
     doc.text('Est libéré(e) de toute obligation envers notre établissement à compter de la date indiquée.', leftMargin, y);
 
     // === SIGNATURE ===
-    var sigY = 105;   // remonté
+    var sigY = 115;   // remonté
     doc.setFont('helvetica', 'normal');
     doc.text('Fait à ' + city + ', le ' + date, pageWidth - leftMargin, sigY, { align: 'right' });
     doc.setFont('helvetica', 'bold');
-    doc.text(directorTitle, pageWidth - leftMargin, sigY + 10, { align: 'right' });
+    doc.text(directorTitle, pageWidth - leftMargin, sigY + 13, { align: 'right' });
     doc.setFont('helvetica', 'normal');
-    doc.text(directorName, pageWidth - leftMargin, sigY + 16, { align: 'right' });
+    doc.text(directorName, pageWidth - leftMargin, sigY + 119, { align: 'right' });
 
     doc.save('Certificat_Sortie_' + (student.name || 'eleve').replace(/ /g, '_') + '.pdf');
 }
