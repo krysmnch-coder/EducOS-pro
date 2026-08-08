@@ -35,7 +35,7 @@
             <div class="col-md-6 col-lg-4 d-flex">
                 <div class="card glass-card p-4 w-100" style="border-radius:16px; min-height:280px; display:flex; flex-direction:column; justify-content:space-between;">
                     <div>
-                        <h5>📜 Certificat de Scolarité</h5>
+                        <h5>Certificat de Scolarité</h5>
                         <p style="color:#888; font-size:0.9rem;">Générer un certificat de scolarité pour un élève.</p>
                         <div class="mb-3">
                             <label class="form-label">Année Scolaire</label>
@@ -56,7 +56,7 @@
                         </div>
                     </div>
                     <button class="btn btn-primary w-100 mt-2" onclick="generateDocument('certificate')">
-                        🖨️ Générer PDF (A5)
+                         Générer PDF (A5)
                     </button>
                 </div>
             </div>
@@ -65,7 +65,7 @@
             <div class="col-md-6 col-lg-4 d-flex">
                 <div class="card glass-card p-4 w-100" style="border-radius:16px; min-height:280px; display:flex; flex-direction:column; justify-content:space-between;">
                     <div>
-                        <h5>🚪 Certificat de Sortie</h5>
+                        <h5>Certificat de Sortie</h5>
                         <p style="color:#888; font-size:0.9rem;">Certificat de radiation pour changement d'école.</p>
                         <div class="mb-3">
                             <label class="form-label">Motif de départ</label>
@@ -91,7 +91,7 @@
                         </div>
                     </div>
                     <button class="btn btn-primary w-100 mt-2" onclick="generateDocument('sortie')">
-                        🖨️ Générer PDF (A5)
+                         Générer PDF (A5)
                     </button>
                 </div>
             </div>
@@ -100,11 +100,11 @@
             <div class="col-md-6 col-lg-4 d-flex">
                 <div class="card glass-card p-4 w-100" style="border-radius:16px; min-height:280px; display:flex; flex-direction:column; justify-content:space-between;">
                     <div>
-                        <h5>🗄️ Archives</h5>
+                        <h5>Archives</h5>
                         <p style="color:#888; font-size:0.9rem;">Consulter les documents déjà générés.</p>
                     </div>
                     <button class="btn btn-primary w-100 mt-2" onclick="loadArchives()">
-                        📁 Consulter les archives
+                         Consulter les archives
                     </button>
                 </div>
             </div>
@@ -112,7 +112,7 @@
 
         <!-- Section Archives -->
         <div class="card glass-card mt-4 p-4" style="border-radius:16px; display:none;" id="archivesSection">
-            <h4 class="mb-3">📁 Documents Archivés</h4>
+            <h4 class="mb-3">Documents Archivés</h4>
             <div class="table-responsive">
                 <table class="table table-hover" id="archivesTable">
                     <thead>
@@ -246,7 +246,7 @@
         if (student.manualParents) allParents = allParents.concat(student.manualParents);
 
         var { jsPDF } = window.jspdf;
-        var doc = new jsPDF({ format: 'a5' });
+        var doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [210, 148] });
 
         // En-tête
         doc.setFontSize(13);
@@ -307,7 +307,7 @@
         var directorName = currentUser.adminName;
 
         var { jsPDF } = window.jspdf;
-        var doc = new jsPDF({ format: 'a5' });
+        var doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [210, 148] });
 
         doc.setFontSize(13);
         doc.setFont('helvetica', 'bold');
