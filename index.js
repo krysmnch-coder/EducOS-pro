@@ -917,6 +917,116 @@ async function createDocumentArchivesTable() {
 }
 createDocumentArchivesTable();
 
+// ==========================================================================
+// ROUTES PAIEMENTS SECRÉTAIRE
+// ==========================================================================
+
+// Page paiements
+app.get('/secretary/payments', async (req, res) => {
+    if (!req.user) return res.redirect('/login');
+    if (req.user.role !== 'SECRETARY' && req.user.role !== 'secretaire' && 
+        req.user.role !== 'ADMINISTRATOR' && req.user.role !== 'administrateur') {
+        req.flash('error_msg', 'Accès non autorisé.');
+        return res.redirect('/dashboard');
+    }
+    try {
+        res.render('secretary/payments', {
+            title: 'Suivi des Paiements',
+            user: req.user
+        });
+    } catch (error) {
+        console.error('Erreur payments:', error);
+        req.flash('error_msg', 'Erreur lors du chargement.');
+        res.redirect('/dashboard');
+    }
+});
+
+// API - Récupérer les paiements
+app.get('/api/payments', async (req, res) => {
+    if (!req.user) return res.status(401).json([]);
+    try {
+        const payments = await db('payments')
+            .where({ establishment_id: req.user.establishment_id })
+            .orderBy('created_at', 'desc')
+            .limit(50)
+            .select('*');
+        res.json(payments);
+    } catch (error) {
+        res.status(500).json([]);
+    }
+});
+
+// API - Créer un paiement
+app.post('/api/payments', async (req, res) => {
+    if (!req.user) return res.status(401).json({ error: 'Non authentifié' });
+    try {
+        const { student_id, amount, method, reference, description } = req.body;
+        if (!student_id || !amount) {
+            return res.status(400).json({ error: 'Élève et montant requis.' });
+        }
+        const [id] = await db('payments').insert({
+            establishment_id: req.user.establishment_id,
+            student_id,
+            amount,
+            method: method || 'espèces',
+            reference: reference || '',
+            description: description || '',
+            created_by: req.user.id,
+            created_at: new Date()
+        });
+        res.status(201).json({ success: true, id });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// API - Détails d'un paiement (pour reçu)
+app.get('/api/payments/:id', async (req, res) => {
+    if (!req.user) return res.status(401).json({});
+    try {
+        const payment = await db('payments')
+            .where({ id: req.params.id })
+            .first();
+        if (!payment) return res.status(404).json({ error: 'Non trouvé' });
+        const student = await db('users').where({ id: payment.student_id }).first();
+        res.json({
+            ...payment,
+            student_name: student ? student.name : 'Inconnu',
+            student_class: student ? student.student_class : ''
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Créer la table payments si elle n'existe pas
+async function createPaymentsTable() {
+    try {
+        const hasTable = await db.schema.hasTable('payments');
+        if (!hasTable) {
+            await db.schema.createTable('payments', function(table) {
+                table.increments('id').primary();
+                table.integer('establishment_id').notNullable().index();
+                table.integer('student_id').notNullable();
+                table.decimal('amount', 10, 2).notNullable();
+                table.string('method', 50).defaultTo('espèces');
+                table.string('reference', 100);
+                table.text('description');
+                table.integer('created_by').notNullable();
+                table.timestamp('created_at').defaultTo(db.fn.now());
+                table.foreign('student_id').references('users.id').onDelete('CASCADE');
+            });
+            console.log('✅ Table payments créée');
+        } else {
+            console.log('✅ Table payments existe déjà');
+        }
+    } catch (error) {
+        console.error('❌ Erreur création table payments:', error.message);
+    }
+}
+
+createPaymentsTable();
+
 const timetableRoutes = require('./src/routes/timetableRoutes');
 app.use('/', timetableRoutes);
 

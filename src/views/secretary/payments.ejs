@@ -1,0 +1,249 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+
+<div class="container-fluid page-shell py-4">
+    <div class="themed-container" style="max-width: 100%; padding: 0 20px;">
+        <h2 class="mb-4">💰 Suivi des Paiements</h2>
+        <%- include('../partials/messages') %>
+
+        <!-- Formulaire nouveau paiement -->
+        <div class="card glass-card mb-4 p-4" style="border-radius:16px;">
+            <h5 class="mb-3">➕ Enregistrer un paiement</h5>
+            <div class="row align-items-end">
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Élève</label>
+                    <select class="form-select" id="paymentStudent" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
+                        <option value="">-- Sélectionner --</option>
+                    </select>
+                </div>
+                <div class="col-md-2 mb-3">
+                    <label class="form-label">Montant (Ar)</label>
+                    <input type="number" class="form-control" id="paymentAmount" placeholder="0" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
+                </div>
+                <div class="col-md-2 mb-3">
+                    <label class="form-label">Méthode</label>
+                    <select class="form-select" id="paymentMethod" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
+                        <option value="espèces">💵 Espèces</option>
+                        <option value="mobile_money">📱 Mobile Money</option>
+                        <option value="virement">🏦 Virement bancaire</option>
+                        <option value="en_ligne">💳 En ligne</option>
+                    </select>
+                </div>
+                <div class="col-md-2 mb-3">
+                    <label class="form-label">Référence</label>
+                    <input type="text" class="form-control" id="paymentRef" placeholder="N° transaction" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
+                </div>
+                <div class="col-md-2 mb-3">
+                    <label class="form-label">Description</label>
+                    <input type="text" class="form-control" id="paymentDesc" placeholder="Ex: frais scolarité" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
+                </div>
+                <div class="col-md-1 mb-3">
+                    <button class="btn btn-success w-100" onclick="savePayment()">💾</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Liste des paiements -->
+        <div class="card glass-card p-4" style="border-radius:16px;">
+            <h5 class="mb-3">📋 Derniers paiements</h5>
+            <div class="table-responsive">
+                <table class="table table-hover" id="paymentsTable">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Élève</th>
+                            <th>Classe</th>
+                            <th>Montant</th>
+                            <th>Méthode</th>
+                            <th>Référence</th>
+                            <th>Reçu</th>
+                        </tr>
+                    </thead>
+                    <tbody id="paymentsBody">
+                        <tr><td colspan="7" class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary"></div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script>
+    var allStudents = [];
+    var currentUser = { 
+        name: '<%= user.name %>', 
+        establishmentName: '<%= typeof establishmentName !== "undefined" ? establishmentName : "Établissement" %>'
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+        loadStudents();
+        loadPayments();
+    });
+
+    function loadStudents() {
+        fetch('/api/all-students')
+            .then(function(r) { return r.json(); })
+            .then(function(students) {
+                allStudents = students;
+                var select = document.getElementById('paymentStudent');
+                students.forEach(function(s) {
+                    select.innerHTML += '<option value="' + s.id + '">' + s.name + ' (' + (s.student_class || 'N/A') + ')</option>';
+                });
+            });
+    }
+
+    function loadPayments() {
+        fetch('/api/payments')
+            .then(function(r) { return r.json(); })
+            .then(function(payments) {
+                var tbody = document.getElementById('paymentsBody');
+                if (!payments || payments.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="text-center py-3 text-muted">Aucun paiement enregistré.</td></tr>';
+                    return;
+                }
+                // Récupérer les noms des élèves manquants
+                var studentMap = {};
+                allStudents.forEach(function(s) { studentMap[s.id] = s; });
+
+                tbody.innerHTML = payments.map(function(p) {
+                    var student = studentMap[p.student_id];
+                    var methodIcons = { 'espèces': '💵', 'mobile_money': '📱', 'virement': '🏦', 'en_ligne': '💳' };
+                    return '<tr>' +
+                        '<td>' + new Date(p.created_at).toLocaleDateString('fr-FR') + '</td>' +
+                        '<td>' + (student ? student.name : 'ID:' + p.student_id) + '</td>' +
+                        '<td>' + (student ? (student.student_class || '-') : '-') + '</td>' +
+                        '<td><strong>' + Number(p.amount).toLocaleString('fr-FR') + ' Ar</strong></td>' +
+                        '<td>' + (methodIcons[p.method] || '') + ' ' + p.method + '</td>' +
+                        '<td><small>' + (p.reference || '-') + '</small></td>' +
+                        '<td><button class="btn btn-sm btn-outline-primary" onclick="printReceipt(' + p.id + ')">🧾</button></td>' +
+                    '</tr>';
+                }).join('');
+            })
+            .catch(function() {
+                document.getElementById('paymentsBody').innerHTML = '<tr><td colspan="7" class="text-center py-3 text-danger">Erreur de chargement.</td></tr>';
+            });
+    }
+
+    function savePayment() {
+        var studentId = document.getElementById('paymentStudent').value;
+        var amount = document.getElementById('paymentAmount').value;
+        var method = document.getElementById('paymentMethod').value;
+        var reference = document.getElementById('paymentRef').value;
+        var description = document.getElementById('paymentDesc').value;
+
+        if (!studentId || !amount) {
+            return alert('Veuillez sélectionner un élève et entrer un montant.');
+        }
+
+        fetch('/api/payments', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                student_id: studentId,
+                amount: amount,
+                method: method,
+                reference: reference,
+                description: description
+            })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(result) {
+            if (result.success) {
+                alert('✅ Paiement enregistré !');
+                document.getElementById('paymentAmount').value = '';
+                document.getElementById('paymentRef').value = '';
+                document.getElementById('paymentDesc').value = '';
+                loadPayments();
+            } else {
+                alert('Erreur : ' + (result.error || 'inconnue'));
+            }
+        })
+        .catch(function(err) {
+            alert('Erreur réseau : ' + err.message);
+        });
+    }
+
+    function printReceipt(paymentId) {
+        fetch('/api/payments/' + paymentId)
+            .then(function(r) { return r.json(); })
+            .then(function(payment) {
+                var { jsPDF } = window.jspdf;
+                var doc = new jsPDF({ format: [80, 120] }); // Format ticket
+
+                var date = new Date(payment.created_at).toLocaleDateString('fr-FR');
+                var time = new Date(payment.created_at).toLocaleTimeString('fr-FR');
+                var methodIcons = { 'espèces': 'Espèces', 'mobile_money': 'Mobile Money', 'virement': 'Virement', 'en_ligne': 'En ligne' };
+
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'bold');
+                doc.text('REÇU DE PAIEMENT', 40, 10, { align: 'center' });
+                doc.setFontSize(8);
+                doc.setFont('helvetica', 'normal');
+                doc.text(currentUser.establishmentName, 40, 17, { align: 'center' });
+                doc.line(5, 21, 75, 21);
+
+                var y = 27;
+                var lines = [
+                    ['Date :', date + ' ' + time],
+                    ['Élève :', payment.student_name || ''],
+                    ['Classe :', payment.student_class || ''],
+                    ['Montant :', Number(payment.amount).toLocaleString('fr-FR') + ' Ar'],
+                    ['Méthode :', methodIcons[payment.method] || payment.method],
+                    ['Référence :', payment.reference || '-'],
+                    ['Motif :', payment.description || 'Frais de scolarité']
+                ];
+
+                lines.forEach(function(line) {
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(line[0], 8, y);
+                    doc.setFont('helvetica', 'normal');
+                    doc.text(line[1], 35, y);
+                    y += 6;
+                });
+
+                doc.line(5, y + 2, 75, y + 2);
+                doc.setFontSize(7);
+                doc.text('Merci de votre confiance !', 40, y + 8, { align: 'center' });
+                doc.text(currentUser.establishmentName + ' - ' + currentUser.name, 40, y + 13, { align: 'center' });
+
+                doc.save('Recu_Paiement_' + paymentId + '.pdf');
+            });
+    }
+</script>
+
+<style>
+    .glass-card {
+        background: rgba(255,255,255,0.05) !important;
+        backdrop-filter: blur(20px) !important;
+        -webkit-backdrop-filter: blur(20px) !important;
+        border: 1px solid rgba(255,255,255,0.08) !important;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3) !important;
+        transition: all 0.3s ease;
+    }
+    .glass-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.4) !important;
+        border-color: rgba(13,110,253,0.3) !important;
+    }
+    #paymentsTable th, #paymentsTable td {
+        border-color: rgba(128,128,128,0.15);
+        vertical-align: middle;
+    }
+    #paymentsTable th {
+        background: rgba(13,110,253,0.08);
+        font-weight: 600;
+        color: #0d6efd;
+    }
+    [data-theme="dark"] #paymentsTable th {
+        background: rgba(255,255,255,0.05);
+        color: #fff;
+    }
+    .form-label {
+        color: rgba(255,255,255,0.8);
+        font-weight: 500;
+    }
+</style>
+
+<%- include('../partials/footer') %>
