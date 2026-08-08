@@ -32,110 +32,78 @@
 
         <div class="row g-4">
             <!-- Certificat de Scolarité -->
-            <div class="col-md-6 col-lg-4">
-                <div class="card glass-card p-4" style="border-radius:16px; min-height:250px;">
-                    <h5>📜 Certificat de Scolarité</h5>
-                    <p style="color:#888; font-size:0.9rem;">Générer un certificat de scolarité pour un élève.</p>
-                    <div class="mb-3">
-                        <label class="form-label">Année Scolaire</label>
-                        <input type="text" class="form-control" id="certYear" value="2025-2026" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
+            <div class="col-md-6 col-lg-4 d-flex">
+                <div class="card glass-card p-4 w-100" style="border-radius:16px; min-height:280px; display:flex; flex-direction:column; justify-content:space-between;">
+                    <div>
+                        <h5>📜 Certificat de Scolarité</h5>
+                        <p style="color:#888; font-size:0.9rem;">Générer un certificat de scolarité pour un élève.</p>
+                        <div class="mb-3">
+                            <label class="form-label">Année Scolaire</label>
+                            <input type="text" class="form-control" id="certYear" value="2025-2026" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Ville / Région</label>
+                            <select class="form-select" id="certCity" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
+                                <option value="">-- Choisir --</option>
+                                <option value="Antananarivo">Antananarivo</option>
+                                <option value="Antsirabe">Antsirabe</option>
+                                <option value="Fianarantsoa">Fianarantsoa</option>
+                                <option value="Toamasina">Toamasina</option>
+                                <option value="Mahajanga">Mahajanga</option>
+                                <option value="Toliara">Toliara</option>
+                                <option value="Antsiranana">Antsiranana</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Ville / Région</label>
-                        <select class="form-select" id="certCity" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
-                            <option value="">-- Choisir --</option>
-                            <option value="Antananarivo">Antananarivo (Analamanga)</option>
-                            <option value="Antsirabe">Antsirabe (Vakinankaratra)</option>
-                            <option value="Fianarantsoa">Fianarantsoa (Haute Matsiatra)</option>
-                            <option value="Toamasina">Toamasina (Atsinanana)</option>
-                            <option value="Mahajanga">Mahajanga (Boeny)</option>
-                            <option value="Toliara">Toliara (Atsimo-Andrefana)</option>
-                            <option value="Antsiranana">Antsiranana (Diana)</option>
-                            <option value="Ambositra">Ambositra (Amoron'i Mania)</option>
-                            <option value="Morondava">Morondava (Menabe)</option>
-                            <option value="Antalaha">Antalaha (Sava)</option>
-                            <option value="Maroantsetra">Maroantsetra (Analanjirofo)</option>
-                            <option value="Fort Dauphin">Fort Dauphin (Anosy)</option>
-                            <option value="Moramanga">Moramanga (Alaotra-Mangoro)</option>
-                            <option value="Maevatanana">Maevatanana (Betsiboka)</option>
-                            <option value="Maintirano">Maintirano (Melaky)</option>
-                            <option value="Ihosy">Ihosy (Ihorombe)</option>
-                            <option value="Ambatondrazaka">Ambatondrazaka (Alaotra-Mangoro)</option>
-                            <option value="Manakara">Manakara (Vatovavy)</option>
-                            <option value="Farafangana">Farafangana (Atsimo-Atsinanana)</option>
-                            <option value="Antsohihy">Antsohihy (Sofia)</option>
-                            <option value="Sambava">Sambava (Sava)</option>
-                            <option value="Nosy Be">Nosy Be (Diana)</option>
-                            <option value="Sainte-Marie">Sainte-Marie (Analanjirofo)</option>
-                            <option value="Tsiroanomandidy">Tsiroanomandidy (Bongolava)</option>
-                        </select>
-                    </div>
-                    <button class="btn btn-primary w-100" onclick="generateDocument('certificate')">
-                        🖨️ Générer et Télécharger PDF
+                    <button class="btn btn-primary w-100 mt-2" onclick="generateDocument('certificate')">
+                        🖨️ Générer PDF (A5)
                     </button>
                 </div>
             </div>
 
             <!-- Certificat de Sortie / Radiation -->
-            <div class="col-md-6 col-lg-4">
-                <div class="card glass-card p-4" style="border-radius:16px; min-height:250px;">
-                    <h5>🚪 Certificat de Sortie (Radiation)</h5>
-                    <p style="color:#888; font-size:0.9rem;">Certificat de radiation pour changement d'école.</p>
-                    <div class="mb-3">
-                        <label class="form-label">Motif de départ</label>
-                        <select class="form-select" id="sortieMotif" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
-                            <option value="demangement">Déménagement</option>
-                            <option value="changement_ecole">Changement d'école</option>
-                            <option value="fin_cycle">Fin de cycle</option>
-                            <option value="autre">Autre</option>
-                        </select>
+            <div class="col-md-6 col-lg-4 d-flex">
+                <div class="card glass-card p-4 w-100" style="border-radius:16px; min-height:280px; display:flex; flex-direction:column; justify-content:space-between;">
+                    <div>
+                        <h5>🚪 Certificat de Sortie</h5>
+                        <p style="color:#888; font-size:0.9rem;">Certificat de radiation pour changement d'école.</p>
+                        <div class="mb-3">
+                            <label class="form-label">Motif de départ</label>
+                            <select class="form-select" id="sortieMotif" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
+                                <option value="demangement">Déménagement</option>
+                                <option value="changement_ecole">Changement d'école</option>
+                                <option value="fin_cycle">Fin de cycle</option>
+                                <option value="autre">Autre</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Ville / Région</label>
+                            <select class="form-select" id="sortieCity" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
+                                <option value="">-- Choisir --</option>
+                                <option value="Antananarivo">Antananarivo</option>
+                                <option value="Antsirabe">Antsirabe</option>
+                                <option value="Fianarantsoa">Fianarantsoa</option>
+                                <option value="Toamasina">Toamasina</option>
+                                <option value="Mahajanga">Mahajanga</option>
+                                <option value="Toliara">Toliara</option>
+                                <option value="Antsiranana">Antsiranana</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Date de sortie</label>
-                        <input type="date" class="form-control" id="sortieDate" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Ville / Région</label>
-                        <select class="form-select" id="sortieCity" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
-                            <option value="">-- Choisir --</option>
-                            <option value="Antananarivo">Antananarivo (Analamanga)</option>
-                            <option value="Antsirabe">Antsirabe (Vakinankaratra)</option>
-                            <option value="Fianarantsoa">Fianarantsoa (Haute Matsiatra)</option>
-                            <option value="Toamasina">Toamasina (Atsinanana)</option>
-                            <option value="Mahajanga">Mahajanga (Boeny)</option>
-                            <option value="Toliara">Toliara (Atsimo-Andrefana)</option>
-                            <option value="Antsiranana">Antsiranana (Diana)</option>
-                            <option value="Ambositra">Ambositra (Amoron'i Mania)</option>
-                            <option value="Morondava">Morondava (Menabe)</option>
-                            <option value="Antalaha">Antalaha (Sava)</option>
-                            <option value="Maroantsetra">Maroantsetra (Analanjirofo)</option>
-                            <option value="Fort Dauphin">Fort Dauphin (Anosy)</option>
-                            <option value="Moramanga">Moramanga (Alaotra-Mangoro)</option>
-                            <option value="Maevatanana">Maevatanana (Betsiboka)</option>
-                            <option value="Maintirano">Maintirano (Melaky)</option>
-                            <option value="Ihosy">Ihosy (Ihorombe)</option>
-                            <option value="Ambatondrazaka">Ambatondrazaka (Alaotra-Mangoro)</option>
-                            <option value="Manakara">Manakara (Vatovavy)</option>
-                            <option value="Farafangana">Farafangana (Atsimo-Atsinanana)</option>
-                            <option value="Antsohihy">Antsohihy (Sofia)</option>
-                            <option value="Sambava">Sambava (Sava)</option>
-                            <option value="Nosy Be">Nosy Be (Diana)</option>
-                            <option value="Sainte-Marie">Sainte-Marie (Analanjirofo)</option>
-                            <option value="Tsiroanomandidy">Tsiroanomandidy (Bongolava)</option>
-                        </select>
-                    </div>
-                    <button class="btn btn-primary w-100" onclick="generateDocument('sortie')">
-                        🖨️ Générer et Télécharger PDF
+                    <button class="btn btn-primary w-100 mt-2" onclick="generateDocument('sortie')">
+                        🖨️ Générer PDF (A5)
                     </button>
                 </div>
             </div>
 
             <!-- Archives -->
-            <div class="col-md-6 col-lg-4">
-                <div class="card glass-card p-4" style="border-radius:16px; min-height:250px;">
-                    <h5>🗄️ Archives</h5>
-                    <p style="color:#888; font-size:0.9rem;">Consulter les documents déjà générés.</p>
-                    <button class="btn btn-primary w-100 mt-3" onclick="loadArchives()">
+            <div class="col-md-6 col-lg-4 d-flex">
+                <div class="card glass-card p-4 w-100" style="border-radius:16px; min-height:280px; display:flex; flex-direction:column; justify-content:space-between;">
+                    <div>
+                        <h5>🗄️ Archives</h5>
+                        <p style="color:#888; font-size:0.9rem;">Consulter les documents déjà générés.</p>
+                    </div>
+                    <button class="btn btn-primary w-100 mt-2" onclick="loadArchives()">
                         📁 Consulter les archives
                     </button>
                 </div>
@@ -154,11 +122,10 @@
                             <th>Élève</th>
                             <th>Classe</th>
                             <th>Généré par</th>
-                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody id="archivesBody">
-                        <tr><td colspan="6" class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary"></div></td></tr>
+                        <tr><td colspan="5" class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary"></div></td></tr>
                     </tbody>
                 </table>
             </div>
@@ -182,20 +149,15 @@
 
     document.addEventListener('DOMContentLoaded', function() {
         loadClassesAndStudents();
-        
         document.getElementById('filterClass').addEventListener('change', function() {
             selectedClassName = this.value;
             filterStudentsByClass(this.value);
         });
-        
         document.getElementById('filterStudent').addEventListener('change', function() {
             selectedStudentId = this.value;
             updateSelectedInfo();
         });
-        
-        document.getElementById('btnFilter').addEventListener('click', function() {
-            updateSelectedInfo();
-        });
+        document.getElementById('btnFilter').addEventListener('click', function() { updateSelectedInfo(); });
     });
 
     function loadClassesAndStudents() {
@@ -204,24 +166,18 @@
             .then(function(students) {
                 allStudents = students;
                 populateStudentSelect(students);
-                
                 var classSet = {};
                 students.forEach(function(s) {
-                    if (s.student_class && s.student_class.trim() !== '') {
-                        classSet[s.student_class] = true;
-                    }
+                    if (s.student_class && s.student_class.trim() !== '') classSet[s.student_class] = true;
                 });
                 allClasses = Object.keys(classSet).sort();
-                
                 var classSelect = document.getElementById('filterClass');
                 classSelect.innerHTML = '<option value="">-- Toutes les classes --</option>';
                 allClasses.forEach(function(c) {
                     classSelect.innerHTML += '<option value="' + c + '">' + c + '</option>';
                 });
             })
-            .catch(function(error) {
-                console.error('Erreur chargement élèves:', error);
-            });
+            .catch(function(error) { console.error('Erreur:', error); });
     }
 
     function populateStudentSelect(students) {
@@ -234,15 +190,10 @@
 
     function filterStudentsByClass(className) {
         var studentSelect = document.getElementById('filterStudent');
-        if (!className) {
-            populateStudentSelect(allStudents);
-            return;
-        }
+        if (!className) { populateStudentSelect(allStudents); return; }
         var filtered = allStudents.filter(function(s) { return s.student_class === className; });
         studentSelect.innerHTML = '<option value="">-- Tous les élèves de ' + className + ' --</option>';
-        filtered.forEach(function(s) {
-            studentSelect.innerHTML += '<option value="' + s.id + '">' + s.name + '</option>';
-        });
+        filtered.forEach(function(s) { studentSelect.innerHTML += '<option value="' + s.id + '">' + s.name + '</option>'; });
         selectedStudentId = null;
         updateSelectedInfo();
     }
@@ -253,22 +204,14 @@
         selectedClassName = document.getElementById('filterClass').value;
         if (selectedStudentId) {
             var student = allStudents.find(function(s) { return s.id == selectedStudentId; });
-            if (student) {
-                info.textContent = '✓ ' + student.name + ' (' + (student.student_class || 'N/A') + ')';
-            }
+            if (student) info.textContent = '✓ ' + student.name + ' (' + (student.student_class || 'N/A') + ')';
         } else if (selectedClassName) {
             info.textContent = '✓ Classe : ' + selectedClassName;
-        } else {
-            info.textContent = '';
-        }
+        } else { info.textContent = ''; }
     }
 
     function generateDocument(type) {
-        if (!selectedStudentId) {
-            alert('Veuillez sélectionner un élève.');
-            return;
-        }
-
+        if (!selectedStudentId) { alert('Veuillez sélectionner un élève.'); return; }
         var student = allStudents.find(function(s) { return s.id == selectedStudentId; });
         if (!student) return;
 
@@ -278,65 +221,48 @@
                 var studentData = details;
                 if (!studentData.name) studentData.name = student.name;
                 if (!studentData.student_class) studentData.student_class = student.student_class;
-                
-                // Archiver
+
                 fetch('/api/documents/generate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        type: type,
-                        student_id: selectedStudentId,
-                        class_name: studentData.student_class || selectedClassName,
-                        data: { student_name: studentData.name, student_class: studentData.student_class }
-                    })
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: type, student_id: selectedStudentId, class_name: studentData.student_class || selectedClassName, data: { student_name: studentData.name, student_class: studentData.student_class } })
                 });
-                
-                if (type === 'certificate') {
-                    generateCertificatePDF(studentData);
-                } else if (type === 'sortie') {
-                    generateSortiePDF(studentData);
-                }
+
+                if (type === 'certificate') generateCertificatePDF(studentData);
+                else if (type === 'sortie') generateSortiePDF(studentData);
             })
-            .catch(function(error) {
-                console.error('Erreur:', error);
-                alert('Erreur lors de la génération.');
-            });
+            .catch(function(error) { console.error('Erreur:', error); alert('Erreur lors de la génération.'); });
     }
 
     function generateCertificatePDF(student) {
-        var year = document.getElementById('certYear').value || '2025-2026';
+        var year = document.getElementById('certYear').value || '_______________';
         var city = document.getElementById('certCity').value || '_______________';
         var date = new Date().toLocaleDateString('fr-FR');
         var school = currentUser.establishmentName;
+        var directorTitle = 'Le/La Directeur(rice)';
         var directorName = currentUser.adminName;
 
-        // Parents
         var allParents = [];
         if (student.linkedParents) allParents = allParents.concat(student.linkedParents);
         if (student.manualParents) allParents = allParents.concat(student.manualParents);
 
         var { jsPDF } = window.jspdf;
-        var doc = new jsPDF({ format: 'a5' }); // Format demi A4 (A5)
-        
+        var doc = new jsPDF({ format: 'a5' });
+
         // En-tête
-        doc.setFontSize(14);
+        doc.setFontSize(13);
         doc.setFont('helvetica', 'bold');
-        doc.text('CERTIFICAT DE SCOLARITE', 74, 15, { align: 'center' });
-        
+        doc.text('CERTIFICAT DE SCOLARITÉ', 74, 15, { align: 'center' });
         doc.setFontSize(9);
         doc.setFont('helvetica', 'normal');
         doc.text('Année Scolaire : ' + year, 74, 23, { align: 'center' });
         doc.text('Établissement : ' + school, 74, 30, { align: 'center' });
-        
         doc.setDrawColor(13, 110, 253);
         doc.line(15, 35, 133, 35);
-        
-        // Corps
+
         doc.setFontSize(9);
-        doc.text('Je soussigné, ' + directorName + ', Directeur de ' + school + ', certifie que :', 15, 43);
-        
-        // Infos élève (tableau simple)
-        var y = 52;
+        doc.text('Je soussigné, ' + directorTitle + ' ' + directorName + ' de/du ' + school + ', certifie que :', 15, 43);
+
+        var y = 54;
         var lines = [
             ['Nom et Prénom :', student.name || ''],
             ['Né(e) le :', student.date_of_birth ? new Date(student.date_of_birth).toLocaleDateString('fr-FR') : 'Non renseigné'],
@@ -345,7 +271,7 @@
             ['Classe :', student.student_class || 'N/A'],
             ['Adresse :', student.address || 'Non renseignée']
         ];
-        
+
         lines.forEach(function(line) {
             doc.setFont('helvetica', 'bold');
             doc.text(line[0], 18, y);
@@ -353,69 +279,59 @@
             doc.text(line[1], 65, y);
             y += 7;
         });
-        
-        // Parents sous l'année scolaire
+
         if (allParents.length > 0) {
             doc.setFont('helvetica', 'bold');
-            doc.text('Parents / Tuteurs :', 18, y + 2);
+            doc.text('Parent(s) :', 18, y + 2);
             doc.setFont('helvetica', 'normal');
-            var parentText = allParents.map(function(p) { 
-                return p.name; 
-            }).join(' | ');
-            doc.text(parentText, 65, y + 2, { maxWidth: 75 });
+            doc.text(allParents.map(function(p) { return p.name; }).join(' | '), 65, y + 2, { maxWidth: 70 });
             y += 10;
         }
-        
-        // Texte de certification
+
         y += 5;
         doc.text('Est régulièrement inscrit(e) dans notre établissement pour l\'année scolaire ' + year + '.', 15, y);
-        
-        // Signature
         doc.text('Fait à ' + city + ', le ' + date, 100, y + 20, { align: 'right' });
-        doc.text(directorName, 100, y + 28, { align: 'right' });
-        doc.setFont('helvetica', 'italic');
-        doc.text('Directeur', 100, y + 36, { align: 'right' });
-        
+        doc.text(directorTitle + ' ' + directorName, 100, y + 28, { align: 'right' });
+
         doc.save('Certificat_Scolarite_' + (student.name || 'eleve').replace(/ /g, '_') + '.pdf');
     }
 
     function generateSortiePDF(student) {
         var date = new Date().toLocaleDateString('fr-FR');
-        var sortieDate = document.getElementById('sortieDate').value || date;
+        var sortieDate = new Date().toLocaleDateString('fr-FR');
         var motif = document.getElementById('sortieMotif').value || 'autre';
         var city = document.getElementById('sortieCity').value || '_______________';
         var motifs = { 'demangement': 'Déménagement', 'changement_ecole': "Changement d'école", 'fin_cycle': 'Fin de cycle', 'autre': 'Autre' };
         var school = currentUser.establishmentName;
+        var directorTitle = 'Le/La Directeur(rice)';
         var directorName = currentUser.adminName;
 
         var { jsPDF } = window.jspdf;
         var doc = new jsPDF({ format: 'a5' });
-        
-        doc.setFontSize(14);
+
+        doc.setFontSize(13);
         doc.setFont('helvetica', 'bold');
         doc.text('CERTIFICAT DE SORTIE', 74, 15, { align: 'center' });
         doc.setFontSize(8);
         doc.setFont('helvetica', 'normal');
         doc.text('(RADIATION)', 74, 21, { align: 'center' });
-        
         doc.setFontSize(9);
         doc.text('Établissement : ' + school, 74, 28, { align: 'center' });
-        
         doc.setDrawColor(220, 53, 69);
         doc.line(15, 33, 133, 33);
-        
-        doc.text('Je soussigné, ' + directorName + ', Directeur de ' + school + ', certifie que :', 15, 41);
-        
-        var y = 50;
+
+        doc.text('Je soussigné, ' + directorTitle + ' ' + directorName + ' de/du ' + school + ', certifie que :', 15, 41);
+
+        var y = 52;
         var lines = [
             ['Nom et Prénom :', student.name || ''],
             ['Né(e) le :', student.date_of_birth ? new Date(student.date_of_birth).toLocaleDateString('fr-FR') : 'Non renseigné'],
             ['Matricule :', student.matricule || 'N/A'],
             ['Dernière classe :', student.student_class || 'N/A'],
-            ['Date de sortie :', new Date(sortieDate).toLocaleDateString('fr-FR')],
+            ['Date de sortie :', sortieDate],
             ['Motif :', motifs[motif] || motif]
         ];
-        
+
         lines.forEach(function(line) {
             doc.setFont('helvetica', 'bold');
             doc.text(line[0], 18, y);
@@ -423,15 +339,12 @@
             doc.text(line[1], 65, y);
             y += 7;
         });
-        
+
         y += 5;
-        doc.text('Est libéré(e) de toute obligation envers notre établissement à compter de la date indiquée.', 15, y);
-        
-        doc.text('Fait à ' + city + ', le ' + date, 100, y + 20, { align: 'right' });
-        doc.text(directorName, 100, y + 28, { align: 'right' });
-        doc.setFont('helvetica', 'italic');
-        doc.text('Directeur', 100, y + 36, { align: 'right' });
-        
+        doc.text('Est libéré(e) de toute obligation envers notre établissement.', 15, y);
+        doc.text('Fait à ' + city + ', le ' + date, 100, y + 18, { align: 'right' });
+        doc.text(directorTitle + ' ' + directorName, 100, y + 26, { align: 'right' });
+
         doc.save('Certificat_Sortie_' + (student.name || 'eleve').replace(/ /g, '_') + '.pdf');
     }
 
@@ -443,22 +356,17 @@
             .then(function(data) {
                 var tbody = document.getElementById('archivesBody');
                 if (!data || data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-3 text-muted">Aucun document archivé.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-3 text-muted">Aucun document archivé.</td></tr>';
                     return;
                 }
                 tbody.innerHTML = data.map(function(d) {
-                    return '<tr>' +
-                        '<td>' + new Date(d.created_at).toLocaleDateString('fr-FR') + '</td>' +
-                        '<td>' + d.type + '</td>' +
-                        '<td>' + (d.student_name || '-') + '</td>' +
-                        '<td>' + (d.student_class || '-') + '</td>' +
-                        '<td>' + (d.created_by_name || '-') + '</td>' +
-                        '<td><button class="btn btn-sm btn-outline-primary">📥</button></td>' +
-                    '</tr>';
+                    return '<tr><td>' + new Date(d.created_at).toLocaleDateString('fr-FR') + '</td>' +
+                        '<td>' + d.type + '</td><td>' + (d.student_name || '-') + '</td>' +
+                        '<td>' + (d.student_class || '-') + '</td><td>' + (d.created_by_name || '-') + '</td></tr>';
                 }).join('');
             })
             .catch(function() {
-                document.getElementById('archivesBody').innerHTML = '<tr><td colspan="6" class="text-center py-3 text-muted">Erreur de chargement.</td></tr>';
+                document.getElementById('archivesBody').innerHTML = '<tr><td colspan="5" class="text-center py-3 text-muted">Erreur.</td></tr>';
             });
     }
 </script>
@@ -477,23 +385,10 @@
         box-shadow: 0 15px 40px rgba(0,0,0,0.4) !important;
         border-color: rgba(13,110,253,0.3) !important;
     }
-    #archivesTable th, #archivesTable td {
-        border-color: rgba(128,128,128,0.15);
-        vertical-align: middle;
-    }
-    #archivesTable th {
-        background: rgba(13,110,253,0.08);
-        font-weight: 600;
-        color: #0d6efd;
-    }
-    [data-theme="dark"] #archivesTable th {
-        background: rgba(255,255,255,0.05);
-        color: #fff;
-    }
-    .form-label {
-        color: rgba(255,255,255,0.8);
-        font-weight: 500;
-    }
+    #archivesTable th, #archivesTable td { border-color: rgba(128,128,128,0.15); vertical-align: middle; }
+    #archivesTable th { background: rgba(13,110,253,0.08); font-weight: 600; color: #0d6efd; }
+    [data-theme="dark"] #archivesTable th { background: rgba(255,255,255,0.05); color: #fff; }
+    .form-label { color: rgba(255,255,255,0.8); font-weight: 500; }
 </style>
 
 <%- include('../partials/footer') %>
