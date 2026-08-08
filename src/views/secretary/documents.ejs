@@ -23,7 +23,7 @@
                 </div>
                 <div class="col-md-2">
                     <button class="btn btn-primary w-100" id="btnFilter">
-                        <i data-feather="filter"></i> Filtrer
+                        Filtrer
                     </button>
                 </div>
                 <div class="col-md-3">
@@ -35,108 +35,50 @@
         <div class="row g-4">
             <!-- Certificat de Scolarité -->
             <div class="col-md-6 col-lg-4">
-                <div class="card glass-card p-4 text-center" style="border-radius:16px; min-height:250px;">
-                    <div style="font-size:50px; margin-bottom:15px;">📜</div>
+                <div class="card glass-card p-4" style="border-radius:16px; min-height:200px;">
                     <h5>Certificat de Scolarité</h5>
                     <p style="color:#888; font-size:0.9rem;">Générer un certificat de scolarité pour un élève.</p>
-                    <button class="btn btn-primary mt-3" onclick="openDocModal('certificate')">
-                        <i data-feather="file-text"></i> Générer
-                    </button>
-                </div>
-            </div>
-
-            <!-- Bulletin de Notes -->
-            <div class="col-md-6 col-lg-4">
-                <div class="card glass-card p-4 text-center" style="border-radius:16px; min-height:250px;">
-                    <div style="font-size:50px; margin-bottom:15px;">📊</div>
-                    <h5>Bulletin de Notes</h5>
-                    <p style="color:#888; font-size:0.9rem;">Générer les bulletins de notes par classe ou par élève.</p>
-                    <button class="btn btn-primary mt-3" onclick="openDocModal('bulletin')">
-                        <i data-feather="bar-chart-2"></i> Générer
-                    </button>
-                </div>
-            </div>
-
-            <!-- Attestation de Réussite -->
-            <div class="col-md-6 col-lg-4">
-                <div class="card glass-card p-4 text-center" style="border-radius:16px; min-height:250px;">
-                    <div style="font-size:50px; margin-bottom:15px;">🏆</div>
-                    <h5>Attestation de Réussite</h5>
-                    <p style="color:#888; font-size:0.9rem;">Délivrer une attestation de réussite ou de passage.</p>
-                    <button class="btn btn-primary mt-3" onclick="openDocModal('attestation')">
-                        <i data-feather="award"></i> Générer
-                    </button>
-                </div>
-            </div>
-
-            <!-- Fiche d'Inscription / Réinscription -->
-            <div class="col-md-6 col-lg-4">
-                <div class="card glass-card p-4 text-center" style="border-radius:16px; min-height:250px;">
-                    <div style="font-size:50px; margin-bottom:15px;">📝</div>
-                    <h5>Fiche d'Inscription</h5>
-                    <p style="color:#888; font-size:0.9rem;">Fiche d'inscription ou de réinscription pour un élève.</p>
-                    <button class="btn btn-primary mt-3" onclick="openDocModal('inscription')">
-                        <i data-feather="edit-3"></i> Générer
+                    <div class="mb-3">
+                        <label class="form-label">Année Scolaire</label>
+                        <input type="text" class="form-control" id="certYear" value="2025-2026" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
+                    </div>
+                    <button class="btn btn-primary w-100" onclick="generateDocument('certificate')">
+                        Générer et Télécharger PDF
                     </button>
                 </div>
             </div>
 
             <!-- Certificat de Sortie / Radiation -->
             <div class="col-md-6 col-lg-4">
-                <div class="card glass-card p-4 text-center" style="border-radius:16px; min-height:250px;">
-                    <div style="font-size:50px; margin-bottom:15px;">🚪</div>
-                    <h5>Certificat de Sortie</h5>
+                <div class="card glass-card p-4" style="border-radius:16px; min-height:200px;">
+                    <h5>Certificat de Sortie (Radiation)</h5>
                     <p style="color:#888; font-size:0.9rem;">Certificat de radiation pour changement d'école.</p>
-                    <button class="btn btn-primary mt-3" onclick="openDocModal('sortie')">
-                        <i data-feather="log-out"></i> Générer
-                    </button>
-                </div>
-            </div>
-
-            <!-- Livret Scolaire -->
-            <div class="col-md-6 col-lg-4">
-                <div class="card glass-card p-4 text-center" style="border-radius:16px; min-height:250px;">
-                    <div style="font-size:50px; margin-bottom:15px;">📖</div>
-                    <h5>Livret Scolaire</h5>
-                    <p style="color:#888; font-size:0.9rem;">Livret qui suit l'élève et résume ses compétences.</p>
-                    <button class="btn btn-primary mt-3" onclick="openDocModal('livret')">
-                        <i data-feather="book-open"></i> Générer
-                    </button>
-                </div>
-            </div>
-
-            <!-- Relevé de Notes -->
-            <div class="col-md-6 col-lg-4">
-                <div class="card glass-card p-4 text-center" style="border-radius:16px; min-height:250px;">
-                    <div style="font-size:50px; margin-bottom:15px;">📋</div>
-                    <h5>Relevé de Notes</h5>
-                    <p style="color:#888; font-size:0.9rem;">Relevé détaillé des notes par période.</p>
-                    <button class="btn btn-primary mt-3" onclick="openDocModal('releve')">
-                        <i data-feather="list"></i> Générer
-                    </button>
-                </div>
-            </div>
-
-            <!-- Convocation -->
-            <div class="col-md-6 col-lg-4">
-                <div class="card glass-card p-4 text-center" style="border-radius:16px; min-height:250px;">
-                    <div style="font-size:50px; margin-bottom:15px;">📨</div>
-                    <h5>Convocation</h5>
-                    <p style="color:#888; font-size:0.9rem;">Générer des convocations pour les parents.</p>
-                    <button class="btn btn-primary mt-3" onclick="openDocModal('convocation')">
-                        <i data-feather="send"></i> Générer
+                    <div class="mb-3">
+                        <label class="form-label">Motif de départ</label>
+                        <select class="form-select" id="sortieMotif" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
+                            <option value="demangement">Déménagement</option>
+                            <option value="changement_ecole">Changement d'école</option>
+                            <option value="fin_cycle">Fin de cycle</option>
+                            <option value="autre">Autre</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Date de sortie</label>
+                        <input type="date" class="form-control" id="sortieDate" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
+                    </div>
+                    <button class="btn btn-primary w-100" onclick="generateDocument('sortie')">
+                        Générer et Télécharger PDF
                     </button>
                 </div>
             </div>
 
             <!-- Archives -->
             <div class="col-md-6 col-lg-4">
-                <div class="card glass-card p-4 text-center" style="border-radius:16px; min-height:250px;">
-                    <div style="font-size:50px; margin-bottom:15px;">🗄️</div>
+                <div class="card glass-card p-4" style="border-radius:16px; min-height:200px;">
                     <h5>Archives</h5>
                     <p style="color:#888; font-size:0.9rem;">Consulter les documents déjà générés.</p>
-                    <button class="btn btn-primary mt-3" onclick="loadArchives()">
-                        <i data-feather="archive"></i> Consulter
+                    <button class="btn btn-primary w-100 mt-3" onclick="loadArchives()">
+                        Consulter les archives
                     </button>
                 </div>
             </div>
@@ -144,7 +86,7 @@
 
         <!-- Section Archives -->
         <div class="card glass-card mt-4 p-4" style="border-radius:16px; display:none;" id="archivesSection">
-            <h4 class="mb-3">📁 Documents Archivés</h4>
+            <h4 class="mb-3">Documents Archivés</h4>
             <div class="table-responsive">
                 <table class="table table-hover" id="archivesTable">
                     <thead>
@@ -166,36 +108,17 @@
     </div>
 </div>
 
-<!-- Modal Générique pour tous les documents -->
-<div class="modal fade" id="docModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content" style="background:rgba(30,30,50,0.95); color:white; border-radius:16px; border:1px solid rgba(255,255,255,0.1);">
-            <div class="modal-header" style="border-bottom:1px solid rgba(255,255,255,0.1);">
-                <h5 class="modal-title" id="docModalTitle">📜 Document</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body" id="docModalBody">
-                <!-- Rempli dynamiquement -->
-            </div>
-            <div class="modal-footer" style="border-top:1px solid rgba(255,255,255,0.1);">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                <button type="button" class="btn btn-primary" id="btnGenerateDoc">
-                    <i data-feather="printer"></i> Imprimer
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <script>
     var allStudents = [];
     var allClasses = [];
     var selectedStudentId = null;
     var selectedClassName = null;
-    var currentDocType = '';
+    var currentUser = { name: '<%= user.name %>', establishment: '<%= user.establishment_name || "Établissement" %>' };
 
     document.addEventListener('DOMContentLoaded', function() {
-        if (typeof feather !== 'undefined') feather.replace();
         loadClassesAndStudents();
         
         document.getElementById('filterClass').addEventListener('change', function() {
@@ -211,65 +134,53 @@
         document.getElementById('btnFilter').addEventListener('click', function() {
             updateSelectedInfo();
         });
-
-        document.getElementById('btnGenerateDoc').addEventListener('click', function() {
-            generateDocument(currentDocType);
-        });
     });
 
     function loadClassesAndStudents() {
-    // Charger les élèves (API qui fonctionne)
-    fetch('/api/all-students')
-        .then(function(r) { return r.json(); })
-        .then(function(students) {
-            allStudents = students;
-            populateStudentSelect(students);
-            
-            // Extraire les classes des élèves (puisque l'API all-classes ne marche pas)
-            var classSet = {};
-            students.forEach(function(s) {
-                if (s.student_class && s.student_class.trim() !== '') {
-                    classSet[s.student_class] = true;
-                }
+        fetch('/api/all-students')
+            .then(function(r) { return r.json(); })
+            .then(function(students) {
+                allStudents = students;
+                populateStudentSelect(students);
+                
+                var classSet = {};
+                students.forEach(function(s) {
+                    if (s.student_class && s.student_class.trim() !== '') {
+                        classSet[s.student_class] = true;
+                    }
+                });
+                allClasses = Object.keys(classSet).sort();
+                
+                var classSelect = document.getElementById('filterClass');
+                classSelect.innerHTML = '<option value="">-- Toutes les classes --</option>';
+                allClasses.forEach(function(c) {
+                    classSelect.innerHTML += '<option value="' + c + '">' + c + '</option>';
+                });
+            })
+            .catch(function(error) {
+                console.error('Erreur chargement élèves:', error);
             });
-            allClasses = Object.keys(classSet).sort();
-            
-            // Remplir le sélecteur de classes
-            var classSelect = document.getElementById('filterClass');
-            classSelect.innerHTML = '<option value="">-- Toutes les classes --</option>';
-            allClasses.forEach(function(c) {
-                classSelect.innerHTML += '<option value="' + c + '" style="background:#1a1a2e;">' + c + '</option>';
-            });
-            
-            console.log('📋 Classes extraites:', allClasses);
-        })
-        .catch(function(error) {
-            console.error('Erreur chargement élèves:', error);
-        });
-}
+    }
 
     function populateStudentSelect(students) {
         var studentSelect = document.getElementById('filterStudent');
         studentSelect.innerHTML = '<option value="">-- Tous les élèves --</option>';
         students.forEach(function(s) {
-            studentSelect.innerHTML += '<option value="' + s.id + '" style="background:#1a1a2e;">' + s.name + ' (' + (s.student_class || 'N/A') + ')</option>';
+            studentSelect.innerHTML += '<option value="' + s.id + '">' + s.name + ' (' + (s.student_class || 'N/A') + ')</option>';
         });
     }
 
     function filterStudentsByClass(className) {
         var studentSelect = document.getElementById('filterStudent');
-        
         if (!className) {
             populateStudentSelect(allStudents);
             return;
         }
-        
         var filtered = allStudents.filter(function(s) { return s.student_class === className; });
         studentSelect.innerHTML = '<option value="">-- Tous les élèves de ' + className + ' --</option>';
         filtered.forEach(function(s) {
-            studentSelect.innerHTML += '<option value="' + s.id + '" style="background:#1a1a2e;">' + s.name + '</option>';
+            studentSelect.innerHTML += '<option value="' + s.id + '">' + s.name + '</option>';
         });
-        
         selectedStudentId = null;
         updateSelectedInfo();
     }
@@ -278,376 +189,134 @@
         var info = document.getElementById('selectedStudentInfo');
         selectedStudentId = document.getElementById('filterStudent').value;
         selectedClassName = document.getElementById('filterClass').value;
-        
         if (selectedStudentId) {
             var student = allStudents.find(function(s) { return s.id == selectedStudentId; });
             if (student) {
-                info.textContent = '✓ Élève : ' + student.name + ' (' + (student.student_class || 'N/A') + ')';
+                info.textContent = '✓ ' + student.name + ' (' + (student.student_class || 'N/A') + ')';
             }
         } else if (selectedClassName) {
-            info.textContent = '✓ Classe : ' + selectedClassName + ' (tous les élèves)';
+            info.textContent = '✓ Classe : ' + selectedClassName;
         } else {
             info.textContent = '';
         }
     }
 
-    function openDocModal(type) {
-        currentDocType = type;
-        
-        if (!selectedStudentId && !selectedClassName) {
-            alert('Veuillez sélectionner une classe ou un élève dans le filtre ci-dessus.');
+    function generateDocument(type) {
+        if (!selectedStudentId) {
+            alert('Veuillez sélectionner un élève.');
             return;
         }
-        
-        var title = '';
-        var body = '';
-        
-        switch(type) {
-            case 'certificate':
-                title = '📜 Certificat de Scolarité';
-                body = getCertificateBody();
-                break;
-            case 'bulletin':
-                title = '📊 Bulletin de Notes';
-                body = getBulletinBody();
-                break;
-            case 'attestation':
-                title = '🏆 Attestation de Réussite';
-                body = getAttestationBody();
-                break;
-            case 'inscription':
-                title = '📝 Fiche d\'Inscription';
-                body = getInscriptionBody();
-                break;
-            case 'sortie':
-                title = '🚪 Certificat de Sortie';
-                body = getSortieBody();
-                break;
-            case 'livret':
-                title = '📖 Livret Scolaire';
-                body = getLivretBody();
-                break;
-            default:
-                title = '📄 Document';
-                body = '<p style="color:#888;">Fonctionnalité en cours de développement.</p>';
-        }
-        
-        document.getElementById('docModalTitle').textContent = title;
-        document.getElementById('docModalBody').innerHTML = body;
-        
-        new bootstrap.Modal(document.getElementById('docModal')).show();
-    }
 
-    function getCertificateBody() {
-        return '<div class="mb-3"><label class="form-label">Année Scolaire</label><input type="text" class="form-control" id="certYear" value="2024-2025" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);"></div>' +
-            '<div class="mb-3"><label class="form-label">Établissement</label><input type="text" class="form-control" id="certSchool" placeholder="Nom de l\'établissement" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);"></div>' +
-            '<div style="background:rgba(13,202,240,0.1); padding:10px; border-radius:8px; color:#0dcaf0;">📌 Document pour : <strong>' + (selectedStudentId ? '1 élève sélectionné' : 'Classe ' + selectedClassName) + '</strong></div>';
-    }
-
-    function getBulletinBody() {
-        return '<div class="mb-3"><label class="form-label">Période</label><select class="form-select" id="bulletinPeriod" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);"><option value="1">1er Trimestre</option><option value="2">2ème Trimestre</option><option value="3">3ème Trimestre</option></select></div>' +
-            '<div style="background:rgba(13,202,240,0.1); padding:10px; border-radius:8px; color:#0dcaf0;">📌 Document pour : <strong>' + (selectedStudentId ? '1 élève sélectionné' : 'Classe ' + selectedClassName) + '</strong></div>';
-    }
-
-    function getAttestationBody() {
-        return '<div class="mb-3"><label class="form-label">Type</label><select class="form-select" id="attestType" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);"><option value="passage">Attestation de Passage</option><option value="reussite">Attestation de Réussite</option><option value="fin_cycle">Attestation de Fin de Cycle</option></select></div>' +
-            '<div style="background:rgba(13,202,240,0.1); padding:10px; border-radius:8px; color:#0dcaf0;">📌 Document pour : <strong>' + (selectedStudentId ? '1 élève sélectionné' : 'Classe ' + selectedClassName) + '</strong></div>';
-    }
-
-    function getInscriptionBody() {
-        return '<div class="row"><div class="col-md-6 mb-3"><label class="form-label">Type</label><select class="form-select" id="inscType" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);"><option value="inscription">Nouvelle Inscription</option><option value="reinscription">Réinscription</option></select></div><div class="col-md-6 mb-3"><label class="form-label">Année Scolaire</label><input type="text" class="form-control" id="inscYear" value="2024-2025" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);"></div></div>' +
-            '<div style="background:rgba(13,202,240,0.1); padding:10px; border-radius:8px; color:#0dcaf0;">📌 Document pour : <strong>' + (selectedStudentId ? '1 élève sélectionné' : 'Classe ' + selectedClassName) + '</strong></div>';
-    }
-
-    function getSortieBody() {
-        return '<div class="mb-3"><label class="form-label">Motif de départ</label><select class="form-select" id="sortieMotif" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);"><option value="demangement">Déménagement</option><option value="changement_ecole">Changement d\'école</option><option value="fin_cycle">Fin de cycle</option><option value="autre">Autre</option></select></div>' +
-            '<div class="mb-3"><label class="form-label">Date de sortie</label><input type="date" class="form-control" id="sortieDate" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);"></div>' +
-            '<div class="mb-3"><label class="form-label">Nouvel établissement</label><input type="text" class="form-control" id="sortieNewSchool" placeholder="Nom du nouvel établissement" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);"></div>' +
-            '<div style="background:rgba(13,202,240,0.1); padding:10px; border-radius:8px; color:#0dcaf0;">📌 Document pour : <strong>' + (selectedStudentId ? '1 élève sélectionné' : 'Classe ' + selectedClassName) + '</strong></div>';
-    }
-
-    function getLivretBody() {
-        return '<div class="row"><div class="col-md-6 mb-3"><label class="form-label">Année Scolaire</label><input type="text" class="form-control" id="livretYear" value="2024-2025" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);"></div><div class="col-md-6 mb-3"><label class="form-label">Période</label><select class="form-select" id="livretPeriod" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);"><option value="1">1er Trimestre</option><option value="2">2ème Trimestre</option><option value="3">3ème Trimestre</option><option value="annuel">Annuel</option></select></div></div>' +
-            '<div style="background:rgba(13,202,240,0.1); padding:10px; border-radius:8px; color:#0dcaf0;">📌 Document pour : <strong>' + (selectedStudentId ? '1 élève sélectionné' : 'Classe ' + selectedClassName) + '</strong></div>';
-    }
-
-    // ========================================================================
-    // GÉNÉRATION DE DOCUMENTS AVEC DÉTAILS ÉLÈVE
-    // ========================================================================
-    
-    function generateDocument(type) {
-    if (!selectedStudentId && !selectedClassName) {
-        alert('Veuillez sélectionner une classe ou un élève.');
-        return;
-    }
-    
-    var docNames = {
-        'certificate': 'Certificat de scolarité',
-        'bulletin': 'Bulletin de notes',
-        'attestation': 'Attestation de réussite',
-        'inscription': 'Fiche d\'inscription',
-        'sortie': 'Certificat de sortie',
-        'livret': 'Livret scolaire'
-    };
-    
-    // Fermer le modal docModal
-    var docModal = bootstrap.Modal.getInstance(document.getElementById('docModal'));
-    if (docModal) docModal.hide();
-    
-    if (selectedStudentId) {
         var student = allStudents.find(function(s) { return s.id == selectedStudentId; });
-        
+        if (!student) return;
+
         fetch('/api/student-details/' + selectedStudentId)
             .then(function(r) { return r.json(); })
             .then(function(details) {
-                // Fusionner les infos de base avec les détails
                 var studentData = details;
-                if (!studentData.name && student) studentData.name = student.name;
-                if (!studentData.student_class && student) studentData.student_class = student.student_class;
+                if (!studentData.name) studentData.name = student.name;
+                if (!studentData.student_class) studentData.student_class = student.student_class;
                 
-                // Archiver le document avec le nom de l'élève
-                return fetch('/api/documents/generate', {
+                // Archiver
+                fetch('/api/documents/generate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         type: type,
                         student_id: selectedStudentId,
                         class_name: studentData.student_class || selectedClassName,
-                        data: {
-                            student_name: studentData.name,
-                            student_class: studentData.student_class
-                        }
+                        data: { student_name: studentData.name, student_class: studentData.student_class }
                     })
-                }).then(function() { return studentData; });
-            })
-            .then(function(studentData) {
-                // Afficher dans une MODALE (pas de popup bloqué)
-                showPrintModal(type, studentData);
+                });
+                
+                // Générer PDF
+                if (type === 'certificate') {
+                    generateCertificatePDF(studentData);
+                } else if (type === 'sortie') {
+                    generateSortiePDF(studentData);
+                }
             })
             .catch(function(error) {
-                console.error('❌ Erreur:', error);
-                alert('✅ ' + (docNames[type] || 'Document') + ' généré avec succès !');
+                console.error('Erreur:', error);
+                alert('Erreur lors de la génération.');
             });
-    } else {
-        alert('✅ ' + (docNames[type] || 'Document') + ' généré pour la classe ' + selectedClassName + ' !');
     }
-}
 
-function showPrintModal(type, student) {
-    var docTitle = '';
-    var docBody = '';
-    
-    switch(type) {
-        case 'certificate':
-            docTitle = 'CERTIFICAT DE SCOLARITÉ';
-            docBody = generateCertificateHTML(student);
-            break;
-        case 'inscription':
-            docTitle = "FICHE D'INSCRIPTION";
-            docBody = generateInscriptionHTML(student);
-            break;
-        case 'sortie':
-            docTitle = 'CERTIFICAT DE SORTIE';
-            docBody = generateSortieHTML(student);
-            break;
-        case 'livret':
-            docTitle = 'LIVRET SCOLAIRE';
-            docBody = generateLivretHTML(student);
-            break;
-        case 'attestation':
-            docTitle = 'ATTESTATION';
-            docBody = generateAttestationHTML(student);
-            break;
-        default:
-            docTitle = 'DOCUMENT';
-            docBody = generateGenericHTML(student);
-    }
-    
-    // Supprimer l'ancienne modale si elle existe
-    var oldModal = document.getElementById('printModal');
-    if (oldModal) oldModal.remove();
-    
-    // Créer la modale d'impression
-    var modalHTML = '<div class="modal fade" id="printModal" tabindex="-1">' +
-        '<div class="modal-dialog modal-lg">' +
-        '<div class="modal-content" style="background:white; color:#333; border-radius:16px;">' +
-        '<div class="modal-header">' +
-        '<h5 class="modal-title" style="color:#333;">' + docTitle + '</h5>' +
-        '<button type="button" class="btn-close" data-bs-dismiss="modal"></button>' +
-        '</div>' +
-        '<div class="modal-body" style="max-height:70vh; overflow-y:auto; padding:30px;">' +
-        docBody +
-        '</div>' +
-        '<div class="modal-footer">' +
-        '<button class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>' +
-        '<button class="btn btn-primary" onclick="window.print()">🖨️ Imprimer</button>' +
-        '</div>' +
-        '</div></div></div>';
-    
-    document.body.insertAdjacentHTML('beforeend', modalHTML);
-    
-    var printModal = new bootstrap.Modal(document.getElementById('printModal'));
-    printModal.show();
-    
-    // Nettoyer après fermeture
-    document.getElementById('printModal').addEventListener('hidden.bs.modal', function() {
-        this.remove();
-    });
-}
-
-   function generateCertificateHTML(student) {
+    function generateCertificatePDF(student) {
+    var year = document.getElementById('certYear').value || '2025-2026';
     var date = new Date().toLocaleDateString('fr-FR');
-    var year = document.getElementById('certYear') ? document.getElementById('certYear').value : '2024-2025';
-    var school = document.getElementById('certSchool') ? document.getElementById('certSchool').value : 'Établissement';
-    
-    // Fusionner tous les parents
+    var school = currentUser.establishment;
+    var adminName = currentUser.name;
+
+    // Récupérer seulement les noms des parents (max 2)
     var allParents = [];
     if (student.linkedParents) allParents = allParents.concat(student.linkedParents);
     if (student.manualParents) allParents = allParents.concat(student.manualParents);
-    
-    var parentsHTML = '';
-    if (allParents.length > 0) {
-        parentsHTML = '<tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">Parent(s)</td><td style="padding:8px;border:1px solid #ddd;">';
-        allParents.forEach(function(p, i) {
-            parentsHTML += (i > 0 ? '<br>' : '') + (p.name || 'N/A') + ' - Tél: ' + (p.phone || p.phone_number || 'Non renseigné');
-        });
-        parentsHTML += '</td></tr>';
-    }
-    
-    return '<div style="text-align:center;margin-bottom:30px;">' +
-        '<h1 style="font-size:20px;">CERTIFICAT DE SCOLARITÉ</h1>' +
-        '<h2 style="font-size:16px;color:#666;">Année Scolaire ' + year + '</h2></div>' +
-        '<p>Je soussigné, Directeur de l\'établissement <strong>' + school + '</strong>, certifie que :</p>' +
-        '<table style="width:100%;border-collapse:collapse;margin:10px 0;">' +
-        '<tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;width:200px;">Nom et Prénom</td><td style="padding:8px;border:1px solid #ddd;"><strong>' + (student.name || '') + '</strong></td></tr>' +
-        '<tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">Né(e) le</td><td style="padding:8px;border:1px solid #ddd;">' + (student.date_of_birth ? new Date(student.date_of_birth).toLocaleDateString('fr-FR') : 'Non renseigné') + '</td></tr>' +
-        '<tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">À</td><td style="padding:8px;border:1px solid #ddd;">' + (student.place_of_birth || 'Non renseigné') + '</td></tr>' +
-        '<tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">Matricule</td><td style="padding:8px;border:1px solid #ddd;">' + (student.matricule || 'N/A') + '</td></tr>' +
-        '<tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">Classe</td><td style="padding:8px;border:1px solid #ddd;">' + (student.student_class || 'N/A') + '</td></tr>' +
-        '<tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">Adresse</td><td style="padding:8px;border:1px solid #ddd;">' + (student.address || 'Non renseignée') + '</td></tr>' +
-        parentsHTML +
-        '</table>' +
-        '<p>Est régulièrement inscrit(e) dans notre établissement pour l\'année scolaire en cours.</p>' +
-        '<div style="margin-top:40px;text-align:right;">Fait à _______________, le ' + date + '<br>Le Directeur</div>';
-}
 
-function generateInscriptionHTML(student) {
-    var date = new Date().toLocaleDateString('fr-FR');
-    var year = document.getElementById('inscYear') ? document.getElementById('inscYear').value : '2024-2025';
-    
-    // Fusionner tous les parents
-    var allParents = [];
-    if (student.linkedParents) allParents = allParents.concat(student.linkedParents);
-    if (student.manualParents) allParents = allParents.concat(student.manualParents);
-    
-    var parentsHTML = '';
+    var parentsText = '';
     if (allParents.length > 0) {
-        parentsHTML = '<table style="width:100%;border-collapse:collapse;margin:10px 0;">';
-        allParents.forEach(function(p) {
-            parentsHTML += '<tr><td style="padding:8px;border:1px solid #ddd;">' + (p.name || 'N/A') + '</td><td style="padding:8px;border:1px solid #ddd;">' + (p.phone || p.phone_number || 'Non renseigné') + '</td></tr>';
-        });
-        parentsHTML += '</table>';
-    } else {
-        parentsHTML = '<p>Aucun parent enregistré.</p>';
+        var names = allParents.slice(0, 2).map(function(p) { return p.name || ''; }).filter(Boolean);
+        if (names.length > 0) {
+            parentsText = 'Parents : ' + names.join(' et ');
+        }
     }
-    
-    return '<div style="text-align:center;margin-bottom:30px;">' +
-        '<h1 style="font-size:20px;">FICHE D\'INSCRIPTION / RÉINSCRIPTION</h1>' +
-        '<h2 style="font-size:16px;color:#666;">Année Scolaire ' + year + '</h2></div>' +
-        '<h3 style="border-bottom:2px solid #0d6efd;padding-bottom:5px;">Informations de l\'élève</h3>' +
-        '<table style="width:100%;border-collapse:collapse;margin:10px 0;">' +
-        '<tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;width:200px;">Nom et Prénom</td><td style="padding:8px;border:1px solid #ddd;"><strong>' + (student.name || '') + '</strong></td></tr>' +
-        '<tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">Date de naissance</td><td style="padding:8px;border:1px solid #ddd;">' + (student.date_of_birth ? new Date(student.date_of_birth).toLocaleDateString('fr-FR') : 'Non renseigné') + '</td></tr>' +
-        '<tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">Lieu de naissance</td><td style="padding:8px;border:1px solid #ddd;">' + (student.place_of_birth || 'Non renseigné') + '</td></tr>' +
-        '<tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">Matricule</td><td style="padding:8px;border:1px solid #ddd;">' + (student.matricule || 'N/A') + '</td></tr>' +
-        '<tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">Classe</td><td style="padding:8px;border:1px solid #ddd;">' + (student.student_class || 'N/A') + '</td></tr>' +
-        '<tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">Adresse</td><td style="padding:8px;border:1px solid #ddd;">' + (student.address || 'Non renseignée') + '</td></tr>' +
-        '</table>' +
-        '<h3 style="border-bottom:2px solid #0d6efd;padding-bottom:5px;">Parents / Tuteurs</h3>' + parentsHTML +
-        '<div style="margin-top:40px;text-align:right;">Fait à _______________, le ' + date + '<br>Signature du parent/tuteur : _________________</div>';
+
+    var { jsPDF } = window.jspdf;
+    var doc = new jsPDF();
+    doc.setFontSize(16);
+    doc.text('CERTIFICAT DE SCOLARITE', 105, 20, { align: 'center' });
+    doc.setFontSize(11);
+    doc.text('Année Scolaire : ' + year, 105, 28, { align: 'center' });
+    doc.text('Etablissement : ' + school, 105, 36, { align: 'center' });
+    doc.text('_'.repeat(60), 25, 44);
+    doc.setFontSize(10);
+    doc.text('Je soussigné, ' + adminName + ', Directeur de ' + school + ', certifie que :', 25, 54);
+    doc.text('Nom et Prénom : ' + (student.name || ''), 30, 64);
+    doc.text('Né(e) le : ' + (student.date_of_birth ? new Date(student.date_of_birth).toLocaleDateString('fr-FR') : 'Non renseigné'), 30, 72);
+    doc.text('Lieu de naissance : ' + (student.place_of_birth || 'Non renseigné'), 30, 80);
+    doc.text('Matricule : ' + (student.matricule || 'N/A'), 30, 88);
+    doc.text('Classe : ' + (student.student_class || 'N/A'), 30, 96);
+    doc.text('Adresse : ' + (student.address || 'Non renseignée'), 30, 104);
+    if (parentsText) doc.text(parentsText, 30, 112);
+    doc.text('Est régulièrement inscrit(e) dans notre établissement pour l\'année scolaire en cours.', 25, 124);
+    doc.text('Fait à ' + school + ', le ' + date, 140, 140, { align: 'right' });
+    doc.text(adminName, 140, 148, { align: 'right' });
+    doc.text('Directeur', 140, 156, { align: 'right' });
+    doc.save('Certificat_Scolarite_' + (student.name || 'eleve').replace(/ /g, '_') + '.pdf');
 }
-    function generateSortieHTML(student) {
+    function generateSortiePDF(student) {
         var date = new Date().toLocaleDateString('fr-FR');
-        var sortieDateEl = document.getElementById('sortieDate');
-        var sortieDate = sortieDateEl && sortieDateEl.value ? new Date(sortieDateEl.value).toLocaleDateString('fr-FR') : date;
-        var motifEl = document.getElementById('sortieMotif');
-        var motif = motifEl ? motifEl.value : 'autre';
+        var sortieDate = document.getElementById('sortieDate').value || date;
+        var motif = document.getElementById('sortieMotif').value || 'autre';
         var motifs = { 'demangement': 'Déménagement', 'changement_ecole': "Changement d'école", 'fin_cycle': 'Fin de cycle', 'autre': 'Autre' };
-        var newSchoolEl = document.getElementById('sortieNewSchool');
-        var newSchool = newSchoolEl ? newSchoolEl.value : 'Non précisé';
-        
-        return '<div class="header"><h1>CERTIFICAT DE SORTIE (RADIATION)</h1></div>' +
-            '<div class="section"><p>Je soussigné, Directeur de l\'établissement, certifie que :</p></div>' +
-            '<table><tr><td>Nom et Prénom</td><td><strong>' + student.name + '</strong></td></tr>' +
-            '<tr><td>Né(e) le</td><td>' + (student.date_of_birth ? new Date(student.date_of_birth).toLocaleDateString('fr-FR') : 'Non renseigné') + '</td></tr>' +
-            '<tr><td>Matricule</td><td>' + (student.matricule || 'N/A') + '</td></tr>' +
-            '<tr><td>Dernière classe fréquentée</td><td>' + (student.student_class || 'N/A') + '</td></tr>' +
-            '<tr><td>Date de sortie</td><td>' + sortieDate + '</td></tr>' +
-            '<tr><td>Motif</td><td>' + (motifs[motif] || motif) + '</td></tr>' +
-            '<tr><td>Nouvel établissement</td><td>' + newSchool + '</td></tr></table>' +
-            '<div class="section"><p>Est libéré(e) de toute obligation envers notre établissement à compter de la date indiquée.</p></div>' +
-            '<div class="footer"><p>Fait à _______________, le ' + date + '</p><p>Le Directeur</p></div>';
+        var school = currentUser.establishment;
+        var adminName = currentUser.name;
+
+        var { jsPDF } = window.jspdf;
+        var doc = new jsPDF();
+        doc.setFontSize(16);
+        doc.text('CERTIFICAT DE SORTIE (RADIATION)', 105, 20, { align: 'center' });
+        doc.setFontSize(11);
+        doc.text('Etablissement : ' + school, 105, 30, { align: 'center' });
+        doc.text('_'.repeat(60), 25, 38);
+        doc.setFontSize(10);
+        doc.text('Je soussigné, ' + adminName + ', Directeur de ' + school + ', certifie que :', 25, 48);
+        doc.text('Nom et Prénom : ' + (student.name || ''), 30, 58);
+        doc.text('Né(e) le : ' + (student.date_of_birth ? new Date(student.date_of_birth).toLocaleDateString('fr-FR') : 'Non renseigné'), 30, 66);
+        doc.text('Matricule : ' + (student.matricule || 'N/A'), 30, 74);
+        doc.text('Dernière classe fréquentée : ' + (student.student_class || 'N/A'), 30, 82);
+        doc.text('Date de sortie : ' + new Date(sortieDate).toLocaleDateString('fr-FR'), 30, 90);
+        doc.text('Motif : ' + (motifs[motif] || motif), 30, 98);
+        doc.text('Est libéré(e) de toute obligation envers notre établissement.', 25, 110);
+        doc.text('Fait à ' + school + ', le ' + date, 140, 130, { align: 'right' });
+        doc.text(adminName, 140, 138, { align: 'right' });
+        doc.text('Directeur', 140, 146, { align: 'right' });
+        doc.save('Certificat_Sortie_' + (student.name || 'eleve').replace(/ /g, '_') + '.pdf');
     }
 
-    function generateLivretHTML(student) {
-        var date = new Date().toLocaleDateString('fr-FR');
-        var yearEl = document.getElementById('livretYear');
-        var year = yearEl ? yearEl.value : '2024-2025';
-        var periodEl = document.getElementById('livretPeriod');
-        var periodVal = periodEl ? periodEl.value : '1';
-        var period = periodVal === 'annuel' ? 'Annuel' : periodVal + 'er Trimestre';
-        
-        return '<div class="header"><h1>LIVRET SCOLAIRE</h1><h2>Année Scolaire ' + year + '</h2></div>' +
-            '<div class="section"><h3>Informations de l\'élève</h3></div>' +
-            '<table><tr><td>Nom et Prénom</td><td><strong>' + student.name + '</strong></td></tr>' +
-            '<tr><td>Date de naissance</td><td>' + (student.date_of_birth ? new Date(student.date_of_birth).toLocaleDateString('fr-FR') : 'Non renseigné') + '</td></tr>' +
-            '<tr><td>Lieu de naissance</td><td>' + (student.place_of_birth || 'Non renseigné') + '</td></tr>' +
-            '<tr><td>Matricule</td><td>' + (student.matricule || 'N/A') + '</td></tr>' +
-            '<tr><td>Classe</td><td>' + (student.student_class || 'N/A') + '</td></tr>' +
-            '<tr><td>Année Scolaire</td><td>' + year + '</td></tr>' +
-            '<tr><td>Période</td><td>' + period + '</td></tr></table>' +
-            '<div class="section"><h3>Compétences et Appréciations</h3></div>' +
-            '<table><tr><td>Français</td><td>_______________________________</td></tr>' +
-            '<tr><td>Mathématiques</td><td>_______________________________</td></tr>' +
-            '<tr><td>Sciences</td><td>_______________________________</td></tr>' +
-            '<tr><td>Histoire-Géographie</td><td>_______________________________</td></tr>' +
-            '<tr><td>Langues</td><td>_______________________________</td></tr>' +
-            '<tr><td>EPS</td><td>_______________________________</td></tr></table>' +
-            '<div class="footer"><p>Fait à _______________, le ' + date + '</p><p>Le Directeur / Professeur Principal</p></div>';
-    }
-
-    function generateAttestationHTML(student) {
-        var date = new Date().toLocaleDateString('fr-FR');
-        var typeEl = document.getElementById('attestType');
-        var type = typeEl ? typeEl.value : 'passage';
-        var types = { 'passage': 'PASSAGE EN CLASSE SUPÉRIEURE', 'reussite': 'RÉUSSITE', 'fin_cycle': 'FIN DE CYCLE' };
-        
-        return '<div class="header"><h1>ATTESTATION DE ' + (types[type] || 'RÉUSSITE') + '</h1></div>' +
-            '<table><tr><td>Nom et Prénom</td><td><strong>' + student.name + '</strong></td></tr>' +
-            '<tr><td>Matricule</td><td>' + (student.matricule || 'N/A') + '</td></tr>' +
-            '<tr><td>Classe</td><td>' + (student.student_class || 'N/A') + '</td></tr>' +
-            '<tr><td>Année Scolaire</td><td>2024-2025</td></tr></table>' +
-            '<div class="section"><p>Est admis(e) en classe supérieure pour l\'année scolaire suivante.</p></div>' +
-            '<div class="footer"><p>Fait à _______________, le ' + date + '</p><p>Le Directeur</p></div>';
-    }
-
-    function generateGenericHTML(student) {
-        var date = new Date().toLocaleDateString('fr-FR');
-        return '<div class="header"><h1>DOCUMENT SCOLAIRE</h1></div>' +
-            '<table><tr><td>Nom</td><td><strong>' + student.name + '</strong></td></tr>' +
-            '<tr><td>Classe</td><td>' + (student.student_class || 'N/A') + '</td></tr>' +
-            '<tr><td>Matricule</td><td>' + (student.matricule || 'N/A') + '</td></tr></table>' +
-            '<div class="footer"><p>Fait le ' + date + '</p></div>';
-    }
-
-    // ========================================================================
-    // ARCHIVES
-    // ========================================================================
-    
     function loadArchives() {
         var section = document.getElementById('archivesSection');
         section.style.display = 'block';
-        
         fetch('/api/documents/archives')
             .then(function(r) { return r.json(); })
             .then(function(data) {
@@ -663,7 +332,7 @@ function generateInscriptionHTML(student) {
                         '<td>' + (d.student_name || '-') + '</td>' +
                         '<td>' + (d.student_class || '-') + '</td>' +
                         '<td>' + (d.created_by_name || '-') + '</td>' +
-                        '<td><button class="btn btn-sm btn-outline-primary" onclick="window.open(\'/uploads/documents/' + (d.file_url || '') + '\')">📥</button></td>' +
+                        '<td><button class="btn btn-sm btn-outline-primary">📥</button></td>' +
                     '</tr>';
                 }).join('');
             })
