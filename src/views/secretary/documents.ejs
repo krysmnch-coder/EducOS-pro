@@ -40,21 +40,21 @@
                         <div class="mb-3">
                             <label class="form-label">Année Scolaire</label>
                             <select class="form-select" id="certYear" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
-    <option value="2026-2027">2026-2027</option>
-    <option value="2027-2028">2027-2028</option>
-    <option value="2028-2029">2028-2029</option>
-    <option value="2029-2030">2029-2030</option>
-    <option value="2030-2031">2030-2031</option>
-    <option value="2031-2032">2031-2032</option>
-    <option value="2032-2033">2032-2033</option>
-    <option value="2033-2034">2033-2034</option>
-    <option value="2034-2035">2034-2035</option>
-    <option value="2035-2036">2035-2036</option>
-    <option value="2036-2037">2036-2037</option>
-    <option value="2037-2038">2037-2038</option>
-    <option value="2038-2039">2038-2039</option>
-    <option value="2039-2040">2039-2040</option>
-</select>
+                                <option value="2026-2027">2026-2027</option>
+                                <option value="2027-2028">2027-2028</option>
+                                <option value="2028-2029">2028-2029</option>
+                                <option value="2029-2030">2029-2030</option>
+                                <option value="2030-2031">2030-2031</option>
+                                <option value="2031-2032">2031-2032</option>
+                                <option value="2032-2033">2032-2033</option>
+                                <option value="2033-2034">2033-2034</option>
+                                <option value="2034-2035">2034-2035</option>
+                                <option value="2035-2036">2035-2036</option>
+                                <option value="2036-2037">2036-2037</option>
+                                <option value="2037-2038">2037-2038</option>
+                                <option value="2038-2039">2038-2039</option>
+                                <option value="2039-2040">2039-2040</option>
+                            </select>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Ville / Région</label>
@@ -325,9 +325,9 @@
     doc.setFont('helvetica', 'normal');
     doc.text('Fait à ' + city + ', le ' + date, pageWidth - leftMargin, sigY, { align: 'right' });
     doc.setFont('helvetica', 'bold');
-    doc.text(directorTitle, pageWidth - leftMargin, sigY + 7, { align: 'right' });
+    doc.text(directorTitle, pageWidth - leftMargin, sigY + 10, { align: 'right' });
     doc.setFont('helvetica', 'normal');
-    doc.text(directorName, pageWidth - leftMargin, sigY + 13, { align: 'right' });
+    doc.text(directorName, pageWidth - leftMargin, sigY + 16, { align: 'right' });
 
     doc.save('Certificat_Scolarite_' + (student.name || 'eleve').replace(/ /g, '_') + '.pdf');
 }
@@ -398,9 +398,9 @@ function generateSortiePDF(student) {
     doc.setFont('helvetica', 'normal');
     doc.text('Fait à ' + city + ', le ' + date, pageWidth - leftMargin, sigY, { align: 'right' });
     doc.setFont('helvetica', 'bold');
-    doc.text(directorTitle, pageWidth - leftMargin, sigY + 7, { align: 'right' });
+    doc.text(directorTitle, pageWidth - leftMargin, sigY + 10, { align: 'right' });
     doc.setFont('helvetica', 'normal');
-    doc.text(directorName, pageWidth - leftMargin, sigY + 13, { align: 'right' });
+    doc.text(directorName, pageWidth - leftMargin, sigY + 16, { align: 'right' });
 
     doc.save('Certificat_Sortie_' + (student.name || 'eleve').replace(/ /g, '_') + '.pdf');
 }
