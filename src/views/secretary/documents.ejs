@@ -233,121 +233,162 @@
             .catch(function(error) { console.error('Erreur:', error); alert('Erreur lors de la génération.'); });
     }
 
-    function generateCertificatePDF(student) {
-        var year = document.getElementById('certYear').value || '_______________';
-        var city = document.getElementById('certCity').value || '_______________';
-        var date = new Date().toLocaleDateString('fr-FR');
-        var school = currentUser.establishmentName;
-        var directorTitle = 'Le/La Directeur(rice)';
-        var directorName = currentUser.adminName;
+   function generateCertificatePDF(student) {
+    var year = document.getElementById('certYear').value || '2025-2026';
+    var city = document.getElementById('certCity').value || '_______________';
+    var date = new Date().toLocaleDateString('fr-FR');
+    var school = currentUser.establishmentName;
+    var directorTitle = 'Le/La Directeur(rice)';
+    var directorName = currentUser.adminName;
 
-        var allParents = [];
-        if (student.linkedParents) allParents = allParents.concat(student.linkedParents);
-        if (student.manualParents) allParents = allParents.concat(student.manualParents);
+    var allParents = [];
+    if (student.linkedParents) allParents = allParents.concat(student.linkedParents);
+    if (student.manualParents) allParents = allParents.concat(student.manualParents);
 
-        var { jsPDF } = window.jspdf;
-        var doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [210, 148] });
+    var { jsPDF } = window.jspdf;
+    var doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [210, 148] });
 
-        // En-tête
-        doc.setFontSize(13);
+    var pageWidth = 210;
+    var centerX = pageWidth / 2;
+    var leftMargin = 25;
+    var labelX = leftMargin;
+    var valueX = leftMargin + 45;
+
+    // === EN-TÊTE ===
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('CERTIFICAT DE SCOLARITÉ', centerX, 15, { align: 'center' });
+    
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Année Scolaire : ' + year, centerX, 23, { align: 'center' });
+    doc.text('Établissement : ' + school, centerX, 30, { align: 'center' });
+    
+    doc.setDrawColor(13, 110, 253);
+    doc.line(leftMargin, 36, pageWidth - leftMargin, 36);
+
+    // === CORPS ===
+    doc.setFontSize(10);
+    doc.text('Je soussigné, ' + directorTitle + ' ' + directorName + ' de ' + school + ', certifie que :', leftMargin, 45);
+
+    var y = 56;
+    var lineHeight = 8;
+    
+    var lines = [
+        { label: 'Nom et Prénom :', value: student.name || '' },
+        { label: 'Né(e) le :', value: student.date_of_birth ? new Date(student.date_of_birth).toLocaleDateString('fr-FR') : 'Non renseigné' },
+        { label: 'Lieu de naissance :', value: student.place_of_birth || 'Non renseigné' },
+        { label: 'Matricule :', value: student.matricule || 'N/A' },
+        { label: 'Classe :', value: student.student_class || 'N/A' },
+        { label: 'Adresse :', value: student.address || 'Non renseignée' }
+    ];
+
+    lines.forEach(function(line) {
         doc.setFont('helvetica', 'bold');
-        doc.text('CERTIFICAT DE SCOLARITÉ', 74, 15, { align: 'center' });
-        doc.setFontSize(9);
+        doc.text(line.label, labelX, y);
         doc.setFont('helvetica', 'normal');
-        doc.text('Année Scolaire : ' + year, 74, 23, { align: 'center' });
-        doc.text('Établissement : ' + school, 74, 30, { align: 'center' });
-        doc.setDrawColor(13, 110, 253);
-        doc.line(15, 35, 133, 35);
+        doc.text(line.value, valueX, y);
+        y += lineHeight;
+    });
 
-        doc.setFontSize(9);
-        doc.text('Je soussigné, ' + directorTitle + ' ' + directorName + ' de/du ' + school + ', certifie que :', 15, 43);
-
-        var y = 54;
-        var lines = [
-            ['Nom et Prénom :', student.name || ''],
-            ['Né(e) le :', student.date_of_birth ? new Date(student.date_of_birth).toLocaleDateString('fr-FR') : 'Non renseigné'],
-            ['Lieu de naissance :', student.place_of_birth || 'Non renseigné'],
-            ['Matricule :', student.matricule || 'N/A'],
-            ['Classe :', student.student_class || 'N/A'],
-            ['Adresse :', student.address || 'Non renseignée']
-        ];
-
-        lines.forEach(function(line) {
-            doc.setFont('helvetica', 'bold');
-            doc.text(line[0], 18, y);
-            doc.setFont('helvetica', 'normal');
-            doc.text(line[1], 65, y);
-            y += 7;
-        });
-
-        if (allParents.length > 0) {
-            doc.setFont('helvetica', 'bold');
-            doc.text('Parent(s) :', 18, y + 2);
-            doc.setFont('helvetica', 'normal');
-            doc.text(allParents.map(function(p) { return p.name; }).join(' | '), 65, y + 2, { maxWidth: 70 });
-            y += 10;
-        }
-
-        y += 5;
-        doc.text('Est régulièrement inscrit(e) dans notre établissement pour l\'année scolaire ' + year + '.', 15, y);
-        doc.text('Fait à ' + city + ', le ' + date, 100, y + 20, { align: 'right' });
-        doc.text(directorTitle + ' ' + directorName, 100, y + 28, { align: 'right' });
-
-        doc.save('Certificat_Scolarite_' + (student.name || 'eleve').replace(/ /g, '_') + '.pdf');
+    // Parents
+    if (allParents.length > 0) {
+        doc.setFont('helvetica', 'bold');
+        doc.text('Parent(s) :', labelX, y + 2);
+        doc.setFont('helvetica', 'normal');
+        doc.text(allParents.map(function(p) { return p.name; }).join(' | '), valueX, y + 2, { maxWidth: pageWidth - valueX - leftMargin });
+        y += 12;
     }
 
-    function generateSortiePDF(student) {
-        var date = new Date().toLocaleDateString('fr-FR');
-        var sortieDate = new Date().toLocaleDateString('fr-FR');
-        var motif = document.getElementById('sortieMotif').value || 'autre';
-        var city = document.getElementById('sortieCity').value || '_______________';
-        var motifs = { 'demangement': 'Déménagement', 'changement_ecole': "Changement d'école", 'fin_cycle': 'Fin de cycle', 'autre': 'Autre' };
-        var school = currentUser.establishmentName;
-        var directorTitle = 'Le/La Directeur(rice)';
-        var directorName = currentUser.adminName;
+    // Texte de certification
+    y += 4;
+    doc.setFont('helvetica', 'normal');
+    doc.text('Est régulièrement inscrit(e) dans notre établissement pour l\'année scolaire ' + year + '.', leftMargin, y);
 
-        var { jsPDF } = window.jspdf;
-        var doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [210, 148] });
+    // === SIGNATURE ===
+    var sigY = 115; // Position fixe en bas
+    doc.setFont('helvetica', 'normal');
+    doc.text('Fait à ' + city + ', le ' + date, pageWidth - leftMargin, sigY, { align: 'right' });
+    doc.setFont('helvetica', 'bold');
+    doc.text(directorTitle, pageWidth - leftMargin, sigY + 8, { align: 'right' });
+    doc.setFont('helvetica', 'normal');
+    doc.text(directorName, pageWidth - leftMargin, sigY + 15, { align: 'right' });
 
-        doc.setFontSize(13);
+    doc.save('Certificat_Scolarite_' + (student.name || 'eleve').replace(/ /g, '_') + '.pdf');
+}
+
+function generateSortiePDF(student) {
+    var date = new Date().toLocaleDateString('fr-FR');
+    var sortieDate = new Date().toLocaleDateString('fr-FR');
+    var motif = document.getElementById('sortieMotif').value || 'autre';
+    var city = document.getElementById('sortieCity').value || '_______________';
+    var motifs = { 'demangement': 'Déménagement', 'changement_ecole': "Changement d'école", 'fin_cycle': 'Fin de cycle', 'autre': 'Autre' };
+    var school = currentUser.establishmentName;
+    var directorTitle = 'Le/La Directeur(rice)';
+    var directorName = currentUser.adminName;
+
+    var { jsPDF } = window.jspdf;
+    var doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [210, 148] });
+
+    var pageWidth = 210;
+    var centerX = pageWidth / 2;
+    var leftMargin = 25;
+    var labelX = leftMargin;
+    var valueX = leftMargin + 45;
+
+    // === EN-TÊTE ===
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('CERTIFICAT DE SORTIE', centerX, 15, { align: 'center' });
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.text('(RADIATION)', centerX, 22, { align: 'center' });
+    doc.setFontSize(10);
+    doc.text('Établissement : ' + school, centerX, 30, { align: 'center' });
+    
+    doc.setDrawColor(220, 53, 69);
+    doc.line(leftMargin, 36, pageWidth - leftMargin, 36);
+
+    // === CORPS ===
+    doc.setFontSize(10);
+    doc.text('Je soussigné, ' + directorTitle + ' ' + directorName + ' de ' + school + ', certifie que :', leftMargin, 45);
+
+    var y = 56;
+    var lineHeight = 8;
+    
+    var lines = [
+        { label: 'Nom et Prénom :', value: student.name || '' },
+        { label: 'Né(e) le :', value: student.date_of_birth ? new Date(student.date_of_birth).toLocaleDateString('fr-FR') : 'Non renseigné' },
+        { label: 'Matricule :', value: student.matricule || 'N/A' },
+        { label: 'Dernière classe :', value: student.student_class || 'N/A' },
+        { label: 'Date de sortie :', value: sortieDate },
+        { label: 'Motif :', value: motifs[motif] || motif }
+    ];
+
+    lines.forEach(function(line) {
         doc.setFont('helvetica', 'bold');
-        doc.text('CERTIFICAT DE SORTIE', 74, 15, { align: 'center' });
-        doc.setFontSize(8);
+        doc.text(line.label, labelX, y);
         doc.setFont('helvetica', 'normal');
-        doc.text('(RADIATION)', 74, 21, { align: 'center' });
-        doc.setFontSize(9);
-        doc.text('Établissement : ' + school, 74, 28, { align: 'center' });
-        doc.setDrawColor(220, 53, 69);
-        doc.line(15, 33, 133, 33);
+        doc.text(line.value, valueX, y);
+        y += lineHeight;
+    });
 
-        doc.text('Je soussigné, ' + directorTitle + ' ' + directorName + ' de/du ' + school + ', certifie que :', 15, 41);
+    // Texte
+    y += 4;
+    doc.setFont('helvetica', 'normal');
+    doc.text('Est libéré(e) de toute obligation envers notre établissement à compter de la date indiquée.', leftMargin, y);
 
-        var y = 52;
-        var lines = [
-            ['Nom et Prénom :', student.name || ''],
-            ['Né(e) le :', student.date_of_birth ? new Date(student.date_of_birth).toLocaleDateString('fr-FR') : 'Non renseigné'],
-            ['Matricule :', student.matricule || 'N/A'],
-            ['Dernière classe :', student.student_class || 'N/A'],
-            ['Date de sortie :', sortieDate],
-            ['Motif :', motifs[motif] || motif]
-        ];
+    // === SIGNATURE ===
+    var sigY = 115;
+    doc.setFont('helvetica', 'normal');
+    doc.text('Fait à ' + city + ', le ' + date, pageWidth - leftMargin, sigY, { align: 'right' });
+    doc.setFont('helvetica', 'bold');
+    doc.text(directorTitle, pageWidth - leftMargin, sigY + 8, { align: 'right' });
+    doc.setFont('helvetica', 'normal');
+    doc.text(directorName, pageWidth - leftMargin, sigY + 15, { align: 'right' });
 
-        lines.forEach(function(line) {
-            doc.setFont('helvetica', 'bold');
-            doc.text(line[0], 18, y);
-            doc.setFont('helvetica', 'normal');
-            doc.text(line[1], 65, y);
-            y += 7;
-        });
-
-        y += 5;
-        doc.text('Est libéré(e) de toute obligation envers notre établissement.', 15, y);
-        doc.text('Fait à ' + city + ', le ' + date, 100, y + 18, { align: 'right' });
-        doc.text(directorTitle + ' ' + directorName, 100, y + 26, { align: 'right' });
-
-        doc.save('Certificat_Sortie_' + (student.name || 'eleve').replace(/ /g, '_') + '.pdf');
-    }
-
+    doc.save('Certificat_Sortie_' + (student.name || 'eleve').replace(/ /g, '_') + '.pdf');
+}
     function loadArchives() {
         var section = document.getElementById('archivesSection');
         section.style.display = 'block';
