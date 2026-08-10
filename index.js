@@ -1107,6 +1107,53 @@ app.get('/api/professor/classes', async (req, res) => {
         res.json(classes);
     } catch (error) { res.status(500).json([]); }
 });
+
+// API - Récupérer les matières du professeur
+app.get('/api/professor/subjects', async (req, res) => {
+    if (!req.user) return res.status(401).json([]);
+    try {
+        // 1. D'abord chercher dans l'emploi du temps
+        let subjects = await db('timetables')
+            .where({ establishment_id: req.user.establishment_id, teacher: req.user.name })
+            .distinct('subject')
+            .whereNotNull('subject')
+            .orderBy('subject')
+            .pluck('subject');
+        
+        // 2. Si rien trouvé, chercher dans les notes déjà saisies
+        if (subjects.length === 0) {
+            subjects = await db('grades')
+                .where({ establishment_id: req.user.establishment_id, created_by: req.user.id })
+                .distinct('subject')
+                .whereNotNull('subject')
+                .orderBy('subject')
+                .pluck('subject');
+        }
+        
+        // 3. Si toujours rien, utiliser une liste par défaut
+        if (subjects.length === 0) {
+            subjects = [
+                'Français', 'Mathématiques', 'SVT', 'Physique-Chimie', 
+                'Histoire-Géo', 'Anglais', 'EPS', 'Arts plastiques', 
+                'Musique', 'Technologie', 'Espagnol', 'Allemand', 'Latin',
+                'Philosophie', 'SES', 'Informatique', 'SNT', 'NSI'
+            ];
+        }
+        
+        console.log('📚 Matières pour', req.user.name, ':', subjects.length);
+        res.json(subjects);
+    } catch (error) {
+        console.error('Erreur professor/subjects:', error);
+        // En cas d'erreur, renvoyer la liste par défaut
+        res.json([
+            'Français', 'Mathématiques', 'SVT', 'Physique-Chimie', 
+            'Histoire-Géo', 'Anglais', 'EPS', 'Arts plastiques', 
+            'Musique', 'Technologie', 'Espagnol', 'Allemand', 'Latin',
+            'Philosophie', 'SES', 'Informatique', 'SNT', 'NSI'
+        ]);
+    }
+});
+
 // API - Récupérer les élèves d'une classe
 app.get('/api/grades/students/:className', async (req, res) => {
     if (!req.user) return res.status(401).json([]);
