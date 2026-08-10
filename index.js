@@ -474,6 +474,8 @@ createEventsTable();
 // ==========================================================================
 // ROUTES EMPLOI DU TEMPS
 // ==========================================================================
+
+// Page emplois du temps (Vie Scolaire - édition)
 app.get('/school-life/timetables', async (req, res) => {
     if (!req.user) return res.redirect('/login');
     try {
@@ -484,6 +486,7 @@ app.get('/school-life/timetables', async (req, res) => {
     } catch (error) { req.flash('error_msg', 'Erreur lors du chargement.'); res.redirect('/dashboard'); }
 });
 
+// Page emploi du temps (Consultation pour tous les rôles)
 app.get('/timetable-view', async (req, res) => {
     if (!req.user) return res.redirect('/login');
     try {
@@ -507,6 +510,7 @@ app.get('/timetable-view', async (req, res) => {
     } catch (error) { req.flash('error_msg', 'Erreur lors du chargement.'); res.redirect('/dashboard'); }
 });
 
+// API - Récupérer l'emploi du temps d'une classe
 app.get('/api/timetables/:className', async (req, res) => {
     if (!req.user) return res.status(401).json([]);
     try {
@@ -518,6 +522,48 @@ app.get('/api/timetables/:className', async (req, res) => {
         }
         res.json(entries.map(e => ({ id: e.id, day: e.day, time_slot: e.time_slot, subject: e.subject, teacher: e.teacher, room: e.room, color: e.color })));
     } catch (error) { res.status(500).json([]); }
+});
+
+// API - Sauvegarder une entrée d'emploi du temps (Vie Scolaire)
+app.post('/api/timetables', async (req, res) => {
+    if (!req.user) return res.status(401).json({ error: 'Non authentifié' });
+    try {
+        const { class_name, day, time_slot, subject, teacher, room, color } = req.body;
+        const classMap = { 'Sixième': '6ème', 'Cinquième': '5ème', 'Quatrième': '4ème', 'Troisième': '3ème', 'Seconde': '2nde', 'Première': '1ère', 'Terminale': 'Tle' };
+        const normalizedClassName = classMap[class_name] || class_name;
+        const dayOrder = { 'Lundi': 1, 'Mardi': 2, 'Mercredi': 3, 'Jeudi': 4, 'Vendredi': 5 };
+        const existing = await db('timetables').where({ establishment_id: req.user.establishment_id, class_name, day, time_slot }).first();
+        if (existing) {
+            await db('timetables').where({ id: existing.id }).update({ subject, teacher: teacher || null, room: room || null, color: color || '#0d6efd', day_order: dayOrder[day] || 0, updated_at: new Date() });
+        } else {
+            await db('timetables').insert({ establishment_id: req.user.establishment_id, class_name, day, day_order: dayOrder[day] || 0, time_slot, subject, teacher: teacher || null, room: room || null, color: color || '#0d6efd', created_by: req.user.id, created_at: new Date(), updated_at: new Date() });
+        }
+        res.json({ success: true });
+    } catch (error) { res.status(500).json({ error: error.message }); }
+});
+
+// API - Supprimer une entrée
+app.delete('/api/timetables/:id', async (req, res) => {
+    if (!req.user) return res.status(401).json({ error: 'Non authentifié' });
+    try {
+        await db('timetables').where({ id: req.params.id, establishment_id: req.user.establishment_id }).del();
+        res.json({ success: true });
+    } catch (error) { res.status(500).json({ error: error.message }); }
+});
+
+// API - Sauvegarder tout l'emploi du temps d'une classe (en masse)
+app.post('/api/timetables/bulk', async (req, res) => {
+    if (!req.user) return res.status(401).json({ error: 'Non authentifié' });
+    try {
+        const { class_name, entries } = req.body;
+        if (!class_name || !entries || !Array.isArray(entries)) return res.status(400).json({ error: 'Données invalides' });
+        await db('timetables').where({ establishment_id: req.user.establishment_id, class_name }).del();
+        const dayOrder = { 'Lundi': 1, 'Mardi': 2, 'Mercredi': 3, 'Jeudi': 4, 'Vendredi': 5 };
+        for (const entry of entries) {
+            await db('timetables').insert({ establishment_id: req.user.establishment_id, class_name, day: entry.day, day_order: dayOrder[entry.day] || 0, time_slot: entry.time_slot, subject: entry.subject, teacher: entry.teacher || null, room: entry.room || null, color: entry.color || '#0d6efd', created_by: req.user.id, created_at: new Date(), updated_at: new Date() });
+        }
+        res.json({ success: true });
+    } catch (error) { res.status(500).json({ error: error.message }); }
 });
 
 // API - Récupérer la liste des professeurs (version unique et robuste)
@@ -539,45 +585,7 @@ app.get('/api/professors-list', async (req, res) => {
     }
 });
 
-app.post('/api/timetables', async (req, res) => {
-    if (!req.user) return res.status(401).json({ error: 'Non authentifié' });
-    try {
-        const { class_name, day, time_slot, subject, teacher, room, color } = req.body;
-        const classMap = { 'Sixième': '6ème', 'Cinquième': '5ème', 'Quatrième': '4ème', 'Troisième': '3ème', 'Seconde': '2nde', 'Première': '1ère', 'Terminale': 'Tle' };
-        const normalizedClassName = classMap[class_name] || class_name;
-        const dayOrder = { 'Lundi': 1, 'Mardi': 2, 'Mercredi': 3, 'Jeudi': 4, 'Vendredi': 5 };
-        const existing = await db('timetables').where({ establishment_id: req.user.establishment_id, class_name, day, time_slot }).first();
-        if (existing) {
-            await db('timetables').where({ id: existing.id }).update({ subject, teacher: teacher || null, room: room || null, color: color || '#0d6efd', day_order: dayOrder[day] || 0, updated_at: new Date() });
-        } else {
-            await db('timetables').insert({ establishment_id: req.user.establishment_id, class_name, day, day_order: dayOrder[day] || 0, time_slot, subject, teacher: teacher || null, room: room || null, color: color || '#0d6efd', created_by: req.user.id, created_at: new Date(), updated_at: new Date() });
-        }
-        res.json({ success: true });
-    } catch (error) { res.status(500).json({ error: error.message }); }
-});
-
-app.delete('/api/timetables/:id', async (req, res) => {
-    if (!req.user) return res.status(401).json({ error: 'Non authentifié' });
-    try {
-        await db('timetables').where({ id: req.params.id, establishment_id: req.user.establishment_id }).del();
-        res.json({ success: true });
-    } catch (error) { res.status(500).json({ error: error.message }); }
-});
-
-app.post('/api/timetables/bulk', async (req, res) => {
-    if (!req.user) return res.status(401).json({ error: 'Non authentifié' });
-    try {
-        const { class_name, entries } = req.body;
-        if (!class_name || !entries || !Array.isArray(entries)) return res.status(400).json({ error: 'Données invalides' });
-        await db('timetables').where({ establishment_id: req.user.establishment_id, class_name }).del();
-        const dayOrder = { 'Lundi': 1, 'Mardi': 2, 'Mercredi': 3, 'Jeudi': 4, 'Vendredi': 5 };
-        for (const entry of entries) {
-            await db('timetables').insert({ establishment_id: req.user.establishment_id, class_name, day: entry.day, day_order: dayOrder[entry.day] || 0, time_slot: entry.time_slot, subject: entry.subject, teacher: entry.teacher || null, room: entry.room || null, color: entry.color || '#0d6efd', created_by: req.user.id, created_at: new Date(), updated_at: new Date() });
-        }
-        res.json({ success: true });
-    } catch (error) { res.status(500).json({ error: error.message }); }
-});
-
+// Créer la table timetables si elle n'existe pas
 async function createTimetablesTable() {
     try {
         const hasTable = await db.schema.hasTable('timetables');
@@ -606,6 +614,7 @@ async function createTimetablesTable() {
     } catch (error) { console.error('❌ Erreur création table timetables:', error.message); }
 }
 
+// Normaliser les noms de classes dans la table timetables
 async function normalizeTimetableClassNames() {
     try {
         const classMap = {
@@ -623,9 +632,9 @@ async function normalizeTimetableClassNames() {
     } catch (error) { console.error('❌ Erreur normalisation:', error.message); }
 }
 
+// Exécuter les créations/normalisations au démarrage
 createTimetablesTable();
 normalizeTimetableClassNames();
-
 // ==========================================================================
 // ROUTES ABSENCES
 // ==========================================================================
