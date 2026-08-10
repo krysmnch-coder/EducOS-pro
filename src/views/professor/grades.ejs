@@ -21,14 +21,14 @@
                         <% } %>
                     </select>
                 </div>
+                
                 <div class="col-md-2 mb-2">
                     <label class="form-label">Matière</label>
-<div class="col-md-2 mb-2">
-    <label class="form-label">Matière</label>
-    <select class="form-select" id="filtreMatiere" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
-        <option value="">-- Choisir --</option>
-    </select>
-</div>                </div>
+                    <select class="form-select" id="filtreMatiere" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
+                        <option value="">-- Choisir --</option>
+                    </select>
+                </div>       
+
                 <div class="col-md-2 mb-2">
                     <label class="form-label">Trimestre</label>
                     <select class="form-select" id="filtreTrimestre" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
@@ -301,29 +301,124 @@
         .catch(function(err) { alert('Erreur réseau.'); });
     }
 
-    function loadSubjects() {
+    // ==========================================================================
+// CHARGEMENT DES MATIÈRES DU PROFESSEUR
+// ==========================================================================
+
+// Variable globale pour stocker les matières
+var professorSubjects = [];
+
+// Charger les matières du professeur depuis l'API
+function loadProfessorSubjects() {
     fetch('/api/professor/subjects')
         .then(function(r) { return r.json(); })
         .then(function(subjects) {
-            var select = document.getElementById('filtreMatiere');
-            // Garder l'option par défaut
-            select.innerHTML = '<option value="">-- Choisir --</option>';
-            subjects.forEach(function(s) {
-                select.innerHTML += '<option value="' + s + '">' + s + '</option>';
-            });
-            // Si une matière est déjà pré-remplie (ex: depuis l'URL), on la sélectionne
-            // Optionnel : select.value = "...";
+            professorSubjects = subjects;
+            
+            // Remplir le select de matière (input devenu select ?)
+            var subjectSelect = document.getElementById('filtreMatiere');
+            if (subjectSelect && subjectSelect.tagName === 'SELECT') {
+                subjectSelect.innerHTML = '<option value="">-- Choisir une matière --</option>';
+                if (subjects.length === 0) {
+                    subjectSelect.innerHTML += '<option value="" disabled>Aucune matière trouvée</option>';
+                } else {
+                    subjects.forEach(function(s) {
+                        subjectSelect.innerHTML += '<option value="' + s + '">' + s + '</option>';
+                    });
+                }
+            }
+            
+            console.log('📚 Matières chargées:', subjects.length);
         })
         .catch(function(err) {
-            console.error('Erreur chargement matières:', err);
+            console.error('❌ Erreur chargement matières:', err);
         });
 }
 
-// Appeler au chargement
+// Charger les élèves d'une classe
+function loadStudentsForGrade() {
+    var className = document.getElementById('filtreClasse').value;
+    var subject = document.getElementById('filtreMatiere').value.trim();
+    var period = document.getElementById('filtreTrimestre').value;
+
+    if (!className) {
+        alert('Veuillez sélectionner une classe.');
+        return;
+    }
+    if (!subject) {
+        alert('Veuillez sélectionner une matière.');
+        return;
+    }
+
+    currentClass = className;
+    currentSubject = subject;
+    currentPeriod = period;
+    document.getElementById('matiereProf').textContent = subject + ' (' + (period == 1 ? '1er Trimestre' : period == 2 ? '2ème Trimestre' : '3ème Trimestre') + ')';
+    document.getElementById('tableContainer').style.display = 'block';
+
+    // Charger les élèves de la classe
+    fetch('/api/grades/students/' + encodeURIComponent(className))
+        .then(function(r) { return r.json(); })
+        .then(function(students) {
+            currentStudents = students;
+            // Charger les notes existantes
+            return fetch('/api/grades/' + encodeURIComponent(className) + '/' + encodeURIComponent(subject) + '?period=' + period);
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(grades) {
+            existingGrades = {};
+            if (grades && Array.isArray(grades)) {
+                grades.forEach(function(g) {
+                    existingGrades[g.student_id] = g;
+                });
+            }
+            renderTable();
+        })
+        .catch(function(err) {
+            console.error('Erreur:', err);
+            existingGrades = {};
+            renderTable();
+        });
+}
+
+// Modifier la fonction loadNotes existante pour utiliser loadStudentsForGrade
+function loadNotes() {
+    loadStudentsForGrade();
+}
+
+// ==========================================================================
+// INITIALISATION
+// ==========================================================================
+
 document.addEventListener('DOMContentLoaded', function() {
-    loadSubjects();
-    // ... vos autres initialisations
+    // Initialiser Feather Icons si nécessaire
+    if (typeof feather !== 'undefined') feather.replace();
+    
+    // Charger les matières du professeur
+    loadProfessorSubjects();
+    
+    // Mettre à jour la formule au changement du coefficient
+    document.getElementById('coefExamen').addEventListener('change', function() {
+        updateFormula();
+        if (currentStudents.length > 0) recalcAll();
+    });
+    
+    // Initialiser la formule
+    updateFormula();
+    
+    // Charger les classes dans le select (si nécessaire)
+    loadClasses();
 });
+
+// Charger les classes du professeur (depuis l'emploi du temps)
+function loadClasses() {
+    var classSelect = document.getElementById('filtreClasse');
+    if (!classSelect) return;
+    
+    // Les classes sont déjà pré-remplies par EJS, mais on peut les recharger dynamiquement
+    // Si vous voulez les charger depuis l'API :
+    // fetch('/api/professor/classes').then(...)
+}
 </script>
 
 <style>
