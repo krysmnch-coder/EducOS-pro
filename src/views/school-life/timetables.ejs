@@ -136,13 +136,12 @@
                         <option value="" disabled selected style="background:#1a1a2e;">-- Choisir une matière --</option>
                     </select>
                 </div>
-                <!-- Champ Professeur modifié en select -->
                 <div class="mb-3">
-                    <label class="form-label">Professeur</label>
-                    <select class="form-select" id="entryTeacher" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);">
-                        <option value="" style="background:#1a1a2e;">-- Aucun / Autre --</option>
-                    </select>
-                </div>
+    <label class="form-label">Professeur</label>
+    <select class="form-select" id="entryTeacher" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);">
+        <option value="" style="background:#1a1a2e;">-- Aucun / Autre --</option>
+    </select>
+</div>
                 <div class="mb-3">
                     <label class="form-label">Salle</label>
                     <input type="text" class="form-control" id="entryRoom" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);">
@@ -219,29 +218,8 @@
         });
     }
 
-    // ✅ Nouvelle fonction pour charger les professeurs
-    function loadProfessors() {
-        fetch('/api/professors-list')
-            .then(function(r) { return r.json(); })
-            .then(function(professors) {
-                var select = document.getElementById('entryTeacher');
-                select.innerHTML = '<option value="" style="background:#1a1a2e;">-- Aucun / Autre --</option>';
-                if (professors.length === 0) {
-                    select.innerHTML += '<option value="" disabled style="background:#1a1a2e;">Aucun professeur trouvé</option>';
-                } else {
-                    professors.forEach(function(p) {
-                        select.innerHTML += '<option value="' + p.name + '" style="background:#1a1a2e;">' + p.name + '</option>';
-                    });
-                }
-            })
-            .catch(function(err) {
-                console.error('Erreur chargement professeurs:', err);
-            });
-    }
-
     document.addEventListener('DOMContentLoaded', function() {
         if (typeof feather !== 'undefined') feather.replace();
-        loadProfessors(); // Chargement initial de la liste
 
         function updateClassNameDisplay() {
             const level = document.getElementById('classLevel').value || '';
@@ -296,12 +274,14 @@
     });
 
     function loadTimetable(className) {
-        // Utilisation de la fonction normalizeClassName définie plus bas
-        fetch('/api/timetables/' + encodeURIComponent(className))
-            .then(function(r) { return r.json(); })
-            .then(function(data) { timetableData = data; renderTimetable(data); })
-            .catch(function() { timetableData = []; renderTimetable([]); });
-    }
+    var normalizedClass = normalizeClassName(className);
+    console.log('📅 Chargement - Original:', className, '→ Normalisé:', normalizedClass);
+    
+    fetch('/api/timetables/' + encodeURIComponent(normalizedClass))
+        .then(function(r) { return r.json(); })
+        .then(function(data) { timetableData = data; renderTimetable(data); })
+        .catch(function() { timetableData = []; renderTimetable([]); });
+}
 
     function renderTimetable(data) {
         const tbody = document.getElementById('timetableBody');
@@ -358,7 +338,7 @@
             days.forEach(function(day) {
                 const entry = timetableData.find(function(e) { return e.day === day && e.time_slot === slot; });
                 if (!entry) {
-                    selectedCells.push({ day: day, time_slot: timeSlot });
+                    selectedCells.push({ day: day, time_slot: slot });
                 }
             });
         });
@@ -390,7 +370,7 @@
         document.getElementById('entryDay').value = '';
         document.getElementById('entryTimeSlot').value = '';
         document.getElementById('entrySubject').value = '';
-        document.getElementById('entryTeacher').value = ''; // Réinitialiser le select
+        document.getElementById('entryTeacher').value = '';
         document.getElementById('entryRoom').value = '';
         document.getElementById('entryColor').value = '#0d6efd';
         document.getElementById('btnDeleteEntry').style.display = 'none';
@@ -409,7 +389,7 @@
         document.getElementById('entryDay').value = day;
         document.getElementById('entryTimeSlot').value = timeSlot;
         document.getElementById('entrySubject').value = '';
-        document.getElementById('entryTeacher').value = ''; // Réinitialiser le select
+        document.getElementById('entryTeacher').value = '';
         document.getElementById('entryRoom').value = '';
         document.getElementById('entryColor').value = '#0d6efd';
         document.getElementById('btnDeleteEntry').style.display = 'none';
@@ -426,100 +406,108 @@
         document.getElementById('isBulkMode').value = 'false';
         document.getElementById('entryDay').value = day;
         document.getElementById('entryTimeSlot').value = timeSlot;
-        document.getElementById('entrySubject').value = subject;
-        // Pour le select professeur, on définit la valeur si elle existe
-        var teacherSelect = document.getElementById('entryTeacher');
-        if (teacher) {
-            // Vérifier si l'option existe, sinon l'ajouter
-            if (!teacherSelect.querySelector('option[value="' + teacher + '"]')) {
-                var opt = document.createElement('option');
-                opt.value = teacher;
-                opt.textContent = teacher;
-                opt.style.background = '#1a1a2e';
-                teacherSelect.appendChild(opt);
-            }
-            teacherSelect.value = teacher;
-        } else {
-            teacherSelect.value = '';
-        }
+        document.getElementById('entryTeacher').value = teacher;
         document.getElementById('entryRoom').value = room;
         document.getElementById('entryColor').value = color || '#0d6efd';
         document.getElementById('btnDeleteEntry').style.display = 'block';
         document.getElementById('bulkModeInfo').style.display = 'none';
         document.getElementById('modalTitle').textContent = 'Modifier - ' + day + ' ' + timeSlot;
         populateSubjects(document.getElementById('classLevel').value);
+        document.getElementById('entrySubject').value = subject;
         new bootstrap.Modal(document.getElementById('entryModal')).show();
     }
 
-    function normalizeClassName(className) {
-        if (!className) return '';
-        var classMap = {
-            'Sixième': '6ème', 'Cinquième': '5ème', 'Quatrième': '4ème', 'Troisième': '3ème',
-            'Seconde': '2nde', 'Première': '1ère', 'Terminale': 'Tle',
-            'Grande Section': 'GS', 'Moyenne Section': 'MS', 'Petite Section': 'PS', 'Toute Petite Section': 'TPS'
-        };
-        var parts = className.trim().split(' ');
-        var level = parts[0];
-        var rest = parts.slice(1).join(' ');
-        var normalizedLevel = classMap[level] || level;
-        return normalizedLevel + (rest ? ' ' + rest : '');
-    }
+   // Ajoutez cette fonction AVANT saveEntry
+function normalizeClassName(className) {
+    if (!className) return '';
+    
+    // Table de correspondance : noms longs → noms courts
+    var classMap = {
+        'Sixième': '6ème', 'Cinquième': '5ème', 'Quatrième': '4ème', 'Troisième': '3ème',
+        'Seconde': '2nde', 'Première': '1ère', 'Terminale': 'Tle',
+        'Grande Section': 'GS', 'Moyenne Section': 'MS', 'Petite Section': 'PS', 'Toute Petite Section': 'TPS'
+    };
+    
+    // Extraire le premier mot (le niveau)
+    var parts = className.trim().split(' ');
+    var level = parts[0];
+    var rest = parts.slice(1).join(' '); // lettre + numéro
+    
+    // Normaliser le niveau
+    var normalizedLevel = classMap[level] || level;
+    
+    // Reconstruire
+    return normalizedLevel + (rest ? ' ' + rest : '');
+}
 
-    function saveEntry() {
-        var subject = document.getElementById('entrySubject').value;
-        if (!subject) return alert('Veuillez choisir une matière.');
-        var isBulk = document.getElementById('isBulkMode').value === 'true';
-        var className = normalizeClassName(currentClass.trim());
-        console.log('💾 Sauvegarde:', currentClass.trim(), '→', className);
+// MODIFIEZ saveEntry pour utiliser la normalisation
+function saveEntry() {
+    var subject = document.getElementById('entrySubject').value;
+    if (!subject) return alert('Veuillez choisir une matière.');
+    var isBulk = document.getElementById('isBulkMode').value === 'true';
 
-        if (isBulk && selectedCells.length > 0) {
-            var promises = selectedCells.map(function(cell) {
-                return fetch('/api/timetables', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        class_name: className,
-                        day: cell.day,
-                        time_slot: cell.timeSlot, // Attention : clé 'time_slot' dans l'API
-                        subject: subject,
-                        teacher: document.getElementById('entryTeacher').value.trim(),
-                        room: document.getElementById('entryRoom').value.trim(),
-                        color: document.getElementById('entryColor').value
-                    })
-                });
-            });
-            Promise.all(promises).then(function() {
-                selectedCells = [];
-                updateSelectionUI();
-                loadTimetable(currentClass.trim());
-                bootstrap.Modal.getInstance(document.getElementById('entryModal')).hide();
-            }).catch(function(err) { alert('Erreur: ' + err.message); });
-        } else {
-            var data = {
-                class_name: className,
-                day: document.getElementById('entryDay').value,
-                time_slot: document.getElementById('entryTimeSlot').value,
-                subject: subject,
-                teacher: document.getElementById('entryTeacher').value.trim(),
-                room: document.getElementById('entryRoom').value.trim(),
-                color: document.getElementById('entryColor').value
-            };
-            fetch('/api/timetables', {
+    // NORMALISER LE NOM DE CLASSE
+    var className = normalizeClassName(currentClass.trim());
+    console.log('💾 Sauvegarde:', currentClass.trim(), '→', className);
+
+    if (isBulk && selectedCells.length > 0) {
+        var promises = selectedCells.map(function(cell) {
+            return fetch('/api/timetables', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            })
-            .then(function(r) { return r.json(); })
-            .then(function(result) {
-                if (result.success) {
-                    loadTimetable(currentClass.trim());
-                    bootstrap.Modal.getInstance(document.getElementById('entryModal')).hide();
-                } else { alert('Erreur: ' + (result.error || 'Inconnue')); }
-            })
-            .catch(function(err) { alert('Erreur réseau: ' + err.message); });
-        }
+                body: JSON.stringify({
+                    class_name: className,
+                    day: cell.day,
+                    time_slot: cell.time_slot,
+                    subject: subject,
+                    teacher: document.getElementById('entryTeacher').value.trim(),
+                    room: document.getElementById('entryRoom').value.trim(),
+                    color: document.getElementById('entryColor').value
+                })
+            });
+        });
+        Promise.all(promises).then(function() {
+            selectedCells = [];
+            updateSelectionUI();
+            loadTimetable(currentClass.trim());
+            bootstrap.Modal.getInstance(document.getElementById('entryModal')).hide();
+        }).catch(function(err) { alert('Erreur: ' + err.message); });
+    } else {
+        var data = {
+            class_name: className,
+            day: document.getElementById('entryDay').value,
+            time_slot: document.getElementById('entryTimeSlot').value,
+            subject: subject,
+            teacher: document.getElementById('entryTeacher').value.trim(),
+            room: document.getElementById('entryRoom').value.trim(),
+            color: document.getElementById('entryColor').value
+        };
+        fetch('/api/timetables', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(result) {
+            if (result.success) {
+                loadTimetable(currentClass.trim());
+                bootstrap.Modal.getInstance(document.getElementById('entryModal')).hide();
+            } else { alert('Erreur: ' + (result.error || 'Inconnue')); }
+        })
+        .catch(function(err) { alert('Erreur réseau: ' + err.message); });
     }
+}
 
+// MODIFIEZ AUSSI loadTimetable
+function loadTimetable(className) {
+    var normalizedClass = normalizeClassName(className);
+    console.log('Chargement:', className, '→', normalizedClass);
+    
+    fetch('/api/timetables/' + encodeURIComponent(normalizedClass))
+        .then(function(r) { return r.json(); })
+        .then(function(data) { timetableData = data; renderTimetable(data); })
+        .catch(function() { timetableData = []; renderTimetable([]); });
+}
     function deleteEntry() {
         const id = document.getElementById('entryId').value;
         if (!id || !confirm('Supprimer ce cours ?')) return;
@@ -529,6 +517,31 @@
 
     function escapeHtml(text) { if (!text) return ''; const d = document.createElement('div'); d.textContent = text; return d.innerHTML; }
     function escapeJs(text) { if (!text) return ''; return text.replace(/'/g, "\\'").replace(/"/g, '\\"').replace(/\n/g, '\\n'); }
+     // Charger la liste des professeurs dans le select
+function loadProfessors() {
+    fetch('/api/professors-list')
+        .then(function(r) { return r.json(); })
+        .then(function(professors) {
+            var select = document.getElementById('entryTeacher');
+            // Conserver l'option par défaut
+            select.innerHTML = '<option value="" style="background:#1a1a2e;">-- Aucun / Autre --</option>';
+            if (professors.length === 0) {
+                select.innerHTML += '<option value="" disabled style="background:#1a1a2e;">Aucun professeur trouvé</option>';
+            } else {
+                professors.forEach(function(p) {
+                    select.innerHTML += '<option value="' + p.name + '" style="background:#1a1a2e;">' + p.name + '</option>';
+                });
+            }
+        })
+        .catch(function(err) {
+            console.error('Erreur chargement professeurs:', err);
+        });
+}
+
+// Appeler au chargement de la page
+document.addEventListener('DOMContentLoaded', function() {
+    loadProfessors();
+});
 </script>
 
 <style>
