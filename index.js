@@ -524,7 +524,6 @@ app.get('/api/timetables/:className', async (req, res) => {
     } catch (error) { res.status(500).json([]); }
 });
 
-// API - Sauvegarder une entrée d'emploi du temps (Vie Scolaire)
 app.post('/api/timetables', async (req, res) => {
     if (!req.user) return res.status(401).json({ error: 'Non authentifié' });
     try {
