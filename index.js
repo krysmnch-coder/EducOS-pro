@@ -1086,44 +1086,27 @@ app.get('/professor/grades', async (req, res) => {
     }
 });
 
-// API - Récupérer les classes du professeur (depuis l'emploi du temps)
+// API - Récupérer les classes (depuis les élèves)
 app.get('/api/professor/classes', async (req, res) => {
     if (!req.user) return res.status(401).json([]);
     try {
-        const classes = await db('timetables')
+        // D'abord depuis timetables
+        let classes = await db('timetables')
             .where({ establishment_id: req.user.establishment_id, teacher: req.user.name })
-            .distinct('class_name')
-            .whereNotNull('class_name')
-            .orderBy('class_name')
-            .pluck('class_name');
+            .distinct('class_name').whereNotNull('class_name').orderBy('class_name').pluck('class_name');
         
-        console.log('📋 Classes pour', req.user.name, ':', classes.length);
+        // Si vide, depuis les élèves
+        if (classes.length === 0) {
+            classes = await db('users')
+                .where({ establishment_id: req.user.establishment_id, approved: 1 })
+                .whereIn('role', ['STUDENT', 'student', 'eleve', 'élève'])
+                .distinct('student_class').whereNotNull('student_class').orderBy('student_class').pluck('student_class');
+        }
+        
+        console.log('📋 Classes:', classes);
         res.json(classes);
-    } catch (error) {
-        console.error('Erreur professor/classes:', error);
-        res.status(500).json([]);
-    }
+    } catch (error) { res.status(500).json([]); }
 });
-
-// API - Récupérer les matières du professeur (depuis l'emploi du temps)
-app.get('/api/professor/subjects', async (req, res) => {
-    if (!req.user) return res.status(401).json([]);
-    try {
-        const subjects = await db('timetables')
-            .where({ establishment_id: req.user.establishment_id, teacher: req.user.name })
-            .distinct('subject')
-            .whereNotNull('subject')
-            .orderBy('subject')
-            .pluck('subject');
-        
-        console.log('📚 Matières pour', req.user.name, ':', subjects.length);
-        res.json(subjects);
-    } catch (error) {
-        console.error('Erreur professor/subjects:', error);
-        res.status(500).json([]);
-    }
-});
-
 // API - Récupérer les élèves d'une classe
 app.get('/api/grades/students/:className', async (req, res) => {
     if (!req.user) return res.status(401).json([]);
