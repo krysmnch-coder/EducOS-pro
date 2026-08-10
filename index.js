@@ -520,6 +520,25 @@ app.get('/api/timetables/:className', async (req, res) => {
     } catch (error) { res.status(500).json([]); }
 });
 
+// API - Récupérer la liste des professeurs (version unique et robuste)
+app.get('/api/professors-list', async (req, res) => {
+    if (!req.user) return res.status(401).json([]);
+    try {
+        const professors = await db('users')
+            .where({ 
+                establishment_id: req.user.establishment_id,
+                approved: 1 
+            })
+            .whereIn('role', ['PROFESSOR', 'professor', 'professeur', 'Professeur'])
+            .select('id', 'name')
+            .orderBy('name');
+        res.json(professors);
+    } catch (error) {
+        console.error('Erreur professors-list:', error);
+        res.status(500).json([]);
+    }
+});
+
 app.post('/api/timetables', async (req, res) => {
     if (!req.user) return res.status(401).json({ error: 'Non authentifié' });
     try {
