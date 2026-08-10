@@ -613,7 +613,6 @@ async function createTimetablesTable() {
     } catch (error) { console.error('❌ Erreur création table timetables:', error.message); }
 }
 
-// Normaliser les noms de classes dans la table timetables
 async function normalizeTimetableClassNames() {
     try {
         const classMap = {
@@ -631,9 +630,8 @@ async function normalizeTimetableClassNames() {
     } catch (error) { console.error('❌ Erreur normalisation:', error.message); }
 }
 
-// Exécuter les créations/normalisations au démarrage
 createTimetablesTable();
-normalizeTimetableClassNames();
+normalizeTimetableClassNames(); 
 // ==========================================================================
 // ROUTES ABSENCES
 // ==========================================================================
