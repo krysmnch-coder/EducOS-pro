@@ -1027,6 +1027,159 @@ async function createPaymentsTable() {
 
 createPaymentsTable();
 
+// ==========================================================================
+// ROUTES NOTES (PROFESSEUR)
+// ==========================================================================
+
+// Page saisie des notes
+app.get('/professor/grades', async (req, res) => {
+    if (!req.user) return res.redirect('/login');
+    if (req.user.role !== 'PROFESSOR' && req.user.role !== 'professeur') {
+        req.flash('error_msg', 'Accès réservé aux professeurs.');
+        return res.redirect('/dashboard');
+    }
+    try {
+        // Récupérer les classes où le professeur a des entrées dans l'emploi du temps
+        const classes = await db('timetables')
+            .where({ establishment_id: req.user.establishment_id, teacher: req.user.name })
+            .distinct('class_name')
+            .pluck('class_name');
+        
+        res.render('professor/grades', {
+            title: 'Saisie des Notes',
+            user: req.user,
+            classes: classes || []
+        });
+    } catch (error) {
+        console.error('Erreur professor/grades:', error);
+        req.flash('error_msg', 'Erreur lors du chargement.');
+        res.redirect('/dashboard');
+    }
+});
+
+// API - Récupérer les élèves d'une classe
+app.get('/api/grades/students/:className', async (req, res) => {
+    if (!req.user) return res.status(401).json([]);
+    try {
+        const students = await db('users')
+            .where({ 
+                establishment_id: req.user.establishment_id,
+                student_class: req.params.className,
+                approved: 1
+            })
+            .whereIn('role', ['STUDENT', 'student', 'eleve', 'élève', 'Eleve', 'Élève'])
+            .select('id', 'name', 'student_class')
+            .orderBy('name');
+        res.json(students);
+    } catch (error) {
+        res.status(500).json([]);
+    }
+});
+
+// API - Récupérer les notes d'une classe pour une matière
+app.get('/api/grades/:className/:subject', async (req, res) => {
+    if (!req.user) return res.status(401).json({});
+    try {
+        const grades = await db('grades')
+            .where({
+                establishment_id: req.user.establishment_id,
+                class_name: req.params.className,
+                subject: req.params.subject,
+                period: req.query.period || '1'
+            });
+        res.json(grades);
+    } catch (error) {
+        res.status(500).json({});
+    }
+});
+
+// API - Sauvegarder/modifier une note
+app.post('/api/grades', async (req, res) => {
+    if (!req.user) return res.status(401).json({ error: 'Non authentifié' });
+    try {
+        const { student_id, class_name, subject, period, grade, comment } = req.body;
+        
+        const existing = await db('grades')
+            .where({ establishment_id: req.user.establishment_id, student_id, class_name, subject, period })
+            .first();
+        
+        if (existing) {
+            await db('grades').where({ id: existing.id }).update({
+                grade, comment, updated_at: new Date(), created_by: req.user.id
+            });
+        } else {
+            await db('grades').insert({
+                establishment_id: req.user.establishment_id,
+                student_id, class_name, subject, period,
+                grade, comment: comment || '',
+                created_by: req.user.id,
+                created_at: new Date(), updated_at: new Date()
+            });
+        }
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// API - Sauvegarder toutes les notes d'un coup
+app.post('/api/grades/bulk', async (req, res) => {
+    if (!req.user) return res.status(401).json({ error: 'Non authentifié' });
+    try {
+        const { class_name, subject, period, grades } = req.body;
+        if (!grades || !Array.isArray(grades)) return res.status(400).json({ error: 'Données invalides' });
+        
+        for (const g of grades) {
+            const existing = await db('grades')
+                .where({ establishment_id: req.user.establishment_id, student_id: g.student_id, class_name, subject, period })
+                .first();
+            if (existing) {
+                await db('grades').where({ id: existing.id }).update({
+                    grade: g.grade, comment: g.comment || '', updated_at: new Date()
+                });
+            } else {
+                await db('grades').insert({
+                    establishment_id: req.user.establishment_id,
+                    student_id: g.student_id, class_name, subject, period,
+                    grade: g.grade, comment: g.comment || '',
+                    created_by: req.user.id, created_at: new Date(), updated_at: new Date()
+                });
+            }
+        }
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Créer la table grades
+async function createGradesTable() {
+    try {
+        const hasTable = await db.schema.hasTable('grades');
+        if (!hasTable) {
+            await db.schema.createTable('grades', function(table) {
+                table.increments('id').primary();
+                table.integer('establishment_id').notNullable().index();
+                table.integer('student_id').notNullable();
+                table.string('class_name', 100).notNullable();
+                table.string('subject', 100).notNullable();
+                table.string('period', 10).defaultTo('1');
+                table.decimal('grade', 5, 2);
+                table.text('comment');
+                table.integer('created_by').notNullable();
+                table.timestamps(true, true);
+                table.unique(['student_id', 'class_name', 'subject', 'period'], 'unique_grade');
+            });
+            console.log('✅ Table grades créée');
+        } else {
+            console.log('✅ Table grades existe déjà');
+        }
+    } catch (error) {
+        console.error('❌ Erreur création table grades:', error.message);
+    }
+}
+
+createGradesTable();
 const timetableRoutes = require('./src/routes/timetableRoutes');
 app.use('/', timetableRoutes);
 

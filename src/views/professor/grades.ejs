@@ -1,0 +1,177 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+
+<div class="container-fluid page-shell py-4">
+    <div class="themed-container" style="max-width: 100%; padding: 0 20px;">
+        <h2 class="mb-4">📝 Saisie des Notes</h2>
+        <%- include('../partials/messages') %>
+
+        <!-- Sélecteurs -->
+        <div class="card glass-card mb-4 p-3" style="border-radius:16px;">
+            <div class="row align-items-end">
+                <div class="col-md-3 mb-2">
+                    <label class="form-label">Classe</label>
+                    <select class="form-select" id="gradeClass" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
+                        <option value="">-- Choisir --</option>
+                        <% if (typeof classes !== 'undefined' && classes.length > 0) { %>
+                            <% classes.forEach(function(cls) { %>
+                                <option value="<%= cls %>"><%= cls %></option>
+                            <% }); %>
+                        <% } %>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <label class="form-label">Matière</label>
+                    <input type="text" class="form-control" id="gradeSubject" placeholder="Ex: Mathématiques" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
+                </div>
+                <div class="col-md-2 mb-2">
+                    <label class="form-label">Période</label>
+                    <select class="form-select" id="gradePeriod" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
+                        <option value="1">1er Trimestre</option>
+                        <option value="2">2ème Trimestre</option>
+                        <option value="3">3ème Trimestre</option>
+                    </select>
+                </div>
+                <div class="col-md-2 mb-2">
+                    <button class="btn btn-primary w-100" onclick="loadGradeForm()">📋 Charger</button>
+                </div>
+                <div class="col-md-2 mb-2">
+                    <button class="btn btn-success w-100" onclick="saveAllGrades()">💾 Tout sauver</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tableau de notes -->
+        <div class="card glass-card p-4" style="border-radius:16px; display:none;" id="gradeTableContainer">
+            <h5 class="mb-3" id="gradeTableTitle">Notes</h5>
+            <div class="table-responsive">
+                <table class="table table-hover" id="gradeTable">
+                    <thead>
+                        <tr>
+                            <th>N°</th>
+                            <th>Élève</th>
+                            <th>Note (/20)</th>
+                            <th>Commentaire</th>
+                        </tr>
+                    </thead>
+                    <tbody id="gradeBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var currentStudents = [];
+    var existingGrades = {};
+
+    function loadGradeForm() {
+        var className = document.getElementById('gradeClass').value;
+        var subject = document.getElementById('gradeSubject').value.trim();
+        var period = document.getElementById('gradePeriod').value;
+
+        if (!className || !subject) return alert('Veuillez sélectionner une classe et entrer une matière.');
+
+        document.getElementById('gradeTableTitle').textContent = 'Notes - ' + className + ' - ' + subject + ' (' + (period === '1' ? '1er Trimestre' : period === '2' ? '2ème Trimestre' : '3ème Trimestre') + ')';
+        document.getElementById('gradeTableContainer').style.display = 'block';
+
+        // Charger les élèves
+        fetch('/api/grades/students/' + encodeURIComponent(className))
+            .then(function(r) { return r.json(); })
+            .then(function(students) {
+                currentStudents = students;
+                
+                // Charger les notes existantes
+                return fetch('/api/grades/' + encodeURIComponent(className) + '/' + encodeURIComponent(subject) + '?period=' + period);
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(grades) {
+                grades.forEach(function(g) {
+                    existingGrades[g.student_id] = g;
+                });
+                renderGradeTable();
+            })
+            .catch(function() { renderGradeTable(); });
+    }
+
+    function renderGradeTable() {
+        var tbody = document.getElementById('gradeBody');
+        if (currentStudents.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center py-3 text-muted">Aucun élève dans cette classe.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = currentStudents.map(function(s, i) {
+            var existing = existingGrades[s.id];
+            return '<tr>' +
+                '<td>' + (i + 1) + '</td>' +
+                '<td>' + s.name + '</td>' +
+                '<td><input type="number" class="form-control grade-input" data-student="' + s.id + '" value="' + (existing ? existing.grade : '') + '" min="0" max="20" step="0.5" style="width:80px; background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);"></td>' +
+                '<td><input type="text" class="form-control comment-input" data-student="' + s.id + '" value="' + (existing ? (existing.comment || '') : '') + '" placeholder="Appréciation" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);"></td>' +
+            '</tr>';
+        }).join('');
+    }
+
+    function saveAllGrades() {
+        var className = document.getElementById('gradeClass').value;
+        var subject = document.getElementById('gradeSubject').value.trim();
+        var period = document.getElementById('gradePeriod').value;
+
+        if (!className || !subject) return alert('Veuillez charger une classe et une matière.');
+
+        var gradeInputs = document.querySelectorAll('.grade-input');
+        var commentInputs = document.querySelectorAll('.comment-input');
+        var grades = [];
+
+        gradeInputs.forEach(function(input) {
+            var studentId = input.getAttribute('data-student');
+            var grade = parseFloat(input.value);
+            if (!isNaN(grade) && grade >= 0 && grade <= 20) {
+                var comment = '';
+                commentInputs.forEach(function(c) {
+                    if (c.getAttribute('data-student') == studentId) comment = c.value;
+                });
+                grades.push({ student_id: studentId, grade: grade, comment: comment });
+            }
+        });
+
+        if (grades.length === 0) return alert('Aucune note valide à sauvegarder.');
+
+        fetch('/api/grades/bulk', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ class_name: className, subject: subject, period: period, grades: grades })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(result) {
+            if (result.success) {
+                alert('✅ ' + grades.length + ' note(s) sauvegardée(s) !');
+            } else {
+                alert('Erreur : ' + (result.error || 'inconnue'));
+            }
+        })
+        .catch(function(err) { alert('Erreur réseau.'); });
+    }
+</script>
+
+<style>
+    .glass-card {
+        background: rgba(255,255,255,0.05) !important;
+        backdrop-filter: blur(20px) !important;
+        -webkit-backdrop-filter: blur(20px) !important;
+        border: 1px solid rgba(255,255,255,0.08) !important;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3) !important;
+        transition: all 0.3s ease;
+    }
+    .glass-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.4) !important;
+        border-color: rgba(13,110,253,0.3) !important;
+    }
+    #gradeTable th, #gradeTable td { border-color: rgba(128,128,128,0.15); vertical-align: middle; }
+    #gradeTable th { background: rgba(13,110,253,0.08); font-weight: 600; color: #0d6efd; }
+    [data-theme="dark"] #gradeTable th { background: rgba(255,255,255,0.05); color: #fff; }
+    .form-label { color: rgba(255,255,255,0.8); font-weight: 500; }
+</style>
+
+<%- include('../partials/footer') %>
