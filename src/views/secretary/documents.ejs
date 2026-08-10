@@ -284,7 +284,7 @@
 
     // === CORPS ===
     doc.setFontSize(10);
-    doc.text('Je soussigné, ' + directorName + ', ' + directorTitle + ' de ' + school + ', certifie que :', leftMargin, 45);
+    doc.text('Je soussigné(e), ' + directorName + ', ' + directorTitle + ' de ' + school + ', certifie que :', leftMargin, 45);
 
     var y = 55;                  // début légèrement remonté
     var lineHeight = 7;          // interligne réduit (au lieu de 8)
@@ -311,7 +311,7 @@
         doc.setFont('helvetica', 'bold');
         doc.text('Parent(s) :', labelX, y + 1);
         doc.setFont('helvetica', 'normal');
-        doc.text(allParents.map(function(p) { return p.name; }).join(' | '), valueX, y + 1, { maxWidth: pageWidth - valueX - leftMargin });
+        doc.text(allParents.map(function(p) { return p.name; }).join(' et '), valueX, y + 1, { maxWidth: pageWidth - valueX - leftMargin });
         y += 10;   // un peu moins d'espace
     }
 
@@ -366,7 +366,7 @@ function generateSortiePDF(student) {
 
     // === CORPS ===
     doc.setFontSize(10);
-    doc.text('Je soussigné, ' + directorName + ', ' + directorTitle + ' de ' + school + ', certifie que :', leftMargin, 45);
+    doc.text('Je soussigné(e), ' + directorName + ', ' + directorTitle + ' de ' + school + ', certifie que :', leftMargin, 45);
 
     var y = 55;
     var lineHeight = 7;   // réduit
