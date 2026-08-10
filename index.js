@@ -1234,8 +1234,24 @@ async function createGradesTable() {
 }
 createGradesTable();
 
+// API - Récupérer les matières du professeur (depuis l'emploi du temps)
+app.get('/api/professor/subjects', async (req, res) => {
+    if (!req.user) return res.status(401).json([]);
+    try {
+        const subjects = await db('timetables')
+            .where({ establishment_id: req.user.establishment_id, teacher: req.user.name })
+            .distinct('subject')
+            .orderBy('subject')
+            .pluck('subject');
+        res.json(subjects);
+    } catch (error) {
+        res.status(500).json([]);
+    }
+}); 
+
 const timetableRoutes = require('./src/routes/timetableRoutes');
 app.use('/', timetableRoutes);
 
+
 // Lancement de l'application
-startServer();
+startServer(); 

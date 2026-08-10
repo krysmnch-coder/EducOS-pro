@@ -137,9 +137,11 @@
                     </select>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Professeur</label>
-                    <input type="text" class="form-control" id="entryTeacher" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);">
-                </div>
+    <label class="form-label">Professeur</label>
+    <select class="form-select" id="entryTeacher" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);">
+        <option value="" style="background:#1a1a2e;">-- Aucun / Autre --</option>
+    </select>
+</div>
                 <div class="mb-3">
                     <label class="form-label">Salle</label>
                     <input type="text" class="form-control" id="entryRoom" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);">
@@ -515,6 +517,28 @@ function loadTimetable(className) {
 
     function escapeHtml(text) { if (!text) return ''; const d = document.createElement('div'); d.textContent = text; return d.innerHTML; }
     function escapeJs(text) { if (!text) return ''; return text.replace(/'/g, "\\'").replace(/"/g, '\\"').replace(/\n/g, '\\n'); }
+
+     // Charger la liste des professeurs dans le select
+function loadProfessors() {
+    fetch('/api/professors-list')
+        .then(function(r) { return r.json(); })
+        .then(function(professors) {
+            var select = document.getElementById('entryTeacher');
+            // Conserver l'option par défaut
+            select.innerHTML = '<option value="" style="background:#1a1a2e;">-- Aucun / Autre --</option>';
+            professors.forEach(function(p) {
+                select.innerHTML += '<option value="' + p.name + '" style="background:#1a1a2e;">' + p.name + '</option>';
+            });
+        })
+        .catch(function(err) {
+            console.error('Erreur chargement professeurs:', err);
+        });
+}
+
+// Appeler la fonction au chargement de la page
+document.addEventListener('DOMContentLoaded', function() {
+    loadProfessors();
+});
 </script>
 
 <style>

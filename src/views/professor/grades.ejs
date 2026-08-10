@@ -23,8 +23,12 @@
                 </div>
                 <div class="col-md-2 mb-2">
                     <label class="form-label">Matière</label>
-                    <input type="text" class="form-control" id="filtreMatiere" placeholder="Ex: Mathématiques" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
-                </div>
+<div class="col-md-2 mb-2">
+    <label class="form-label">Matière</label>
+    <select class="form-select" id="filtreMatiere" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
+        <option value="">-- Choisir --</option>
+    </select>
+</div>                </div>
                 <div class="col-md-2 mb-2">
                     <label class="form-label">Trimestre</label>
                     <select class="form-select" id="filtreTrimestre" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
@@ -296,6 +300,30 @@
         })
         .catch(function(err) { alert('Erreur réseau.'); });
     }
+
+    function loadSubjects() {
+    fetch('/api/professor/subjects')
+        .then(function(r) { return r.json(); })
+        .then(function(subjects) {
+            var select = document.getElementById('filtreMatiere');
+            // Garder l'option par défaut
+            select.innerHTML = '<option value="">-- Choisir --</option>';
+            subjects.forEach(function(s) {
+                select.innerHTML += '<option value="' + s + '">' + s + '</option>';
+            });
+            // Si une matière est déjà pré-remplie (ex: depuis l'URL), on la sélectionne
+            // Optionnel : select.value = "...";
+        })
+        .catch(function(err) {
+            console.error('Erreur chargement matières:', err);
+        });
+}
+
+// Appeler au chargement
+document.addEventListener('DOMContentLoaded', function() {
+    loadSubjects();
+    // ... vos autres initialisations
+});
 </script>
 
 <style>
