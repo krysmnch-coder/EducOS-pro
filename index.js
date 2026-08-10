@@ -1039,25 +1039,22 @@ app.get('/professor/grades', async (req, res) => {
         return res.redirect('/dashboard');
     }
     try {
-        // Récupérer les classes où le professeur a des entrées dans l'emploi du temps
         const classes = await db('timetables')
             .where({ establishment_id: req.user.establishment_id, teacher: req.user.name })
             .distinct('class_name')
             .pluck('class_name');
-        
         res.render('professor/grades', {
             title: 'Saisie des Notes',
             user: req.user,
             classes: classes || []
         });
     } catch (error) {
-        console.error('Erreur professor/grades:', error);
-        req.flash('error_msg', 'Erreur lors du chargement.');
+        req.flash('error_msg', 'Erreur.');
         res.redirect('/dashboard');
     }
 });
 
-// API - Récupérer les élèves d'une classe
+// API - Récupérer les élèves d'une classe (inchangé)
 app.get('/api/grades/students/:className', async (req, res) => {
     if (!req.user) return res.status(401).json([]);
     try {
@@ -1076,6 +1073,62 @@ app.get('/api/grades/students/:className', async (req, res) => {
     }
 });
 
+// API - Récupérer les notes (avec nj1, nj2, examen)
+app.get('/api/grades/:className/:subject', async (req, res) => {
+    if (!req.user) return res.status(401).json([]);
+    try {
+        const grades = await db('grades')
+            .where({
+                establishment_id: req.user.establishment_id,
+                class_name: req.params.className,
+                subject: req.params.subject,
+                period: req.query.period || '1'
+            })
+            .select('student_id', 'nj1', 'nj2', 'examen', 'comment');
+        res.json(grades);
+    } catch (error) {
+        res.status(500).json([]);
+    }
+});
+
+// API - Sauvegarde groupée (bulk)
+app.post('/api/grades/bulk', async (req, res) => {
+    if (!req.user) return res.status(401).json({ error: 'Non authentifié' });
+    try {
+        const { class_name, subject, period, grades } = req.body;
+        if (!grades || !Array.isArray(grades)) return res.status(400).json({ error: 'Données invalides' });
+
+        for (const g of grades) {
+            const existing = await db('grades')
+                .where({ establishment_id: req.user.establishment_id, student_id: g.student_id, class_name, subject, period })
+                .first();
+            const data = {
+                nj1: g.nj1 !== undefined ? g.nj1 : null,
+                nj2: g.nj2 !== undefined ? g.nj2 : null,
+                examen: g.examen !== undefined ? g.examen : null,
+                comment: g.comment || '',
+                updated_at: new Date()
+            };
+            if (existing) {
+                await db('grades').where({ id: existing.id }).update(data);
+            } else {
+                await db('grades').insert({
+                    establishment_id: req.user.establishment_id,
+                    student_id: g.student_id,
+                    class_name,
+                    subject,
+                    period,
+                    ...data,
+                    created_by: req.user.id,
+                    created_at: new Date()
+                });
+            }
+        }
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
 // API - Récupérer les notes d'une classe pour une matière
 app.get('/api/grades/:className/:subject', async (req, res) => {
     if (!req.user) return res.status(401).json({});
@@ -1152,7 +1205,6 @@ app.post('/api/grades/bulk', async (req, res) => {
     }
 });
 
-// Créer la table grades
 async function createGradesTable() {
     try {
         const hasTable = await db.schema.hasTable('grades');
@@ -1164,13 +1216,15 @@ async function createGradesTable() {
                 table.string('class_name', 100).notNullable();
                 table.string('subject', 100).notNullable();
                 table.string('period', 10).defaultTo('1');
-                table.decimal('grade', 5, 2);
+                table.decimal('nj1', 5, 2);
+                table.decimal('nj2', 5, 2);
+                table.decimal('examen', 5, 2);
                 table.text('comment');
                 table.integer('created_by').notNullable();
                 table.timestamps(true, true);
                 table.unique(['student_id', 'class_name', 'subject', 'period'], 'unique_grade');
             });
-            console.log('✅ Table grades créée');
+            console.log('✅ Table grades créée (avec nj1, nj2, examen)');
         } else {
             console.log('✅ Table grades existe déjà');
         }
@@ -1178,8 +1232,8 @@ async function createGradesTable() {
         console.error('❌ Erreur création table grades:', error.message);
     }
 }
-
 createGradesTable();
+
 const timetableRoutes = require('./src/routes/timetableRoutes');
 app.use('/', timetableRoutes);
 

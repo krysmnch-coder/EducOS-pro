@@ -3,15 +3,16 @@
 
 <div class="container-fluid page-shell py-4">
     <div class="themed-container" style="max-width: 100%; padding: 0 20px;">
-        <h2 class="mb-4">📝 Saisie des Notes</h2>
-        <%- include('../partials/messages') %>
+        <h2 style="display:flex;align-items:center;gap:10px;margin-bottom:20px; color: #0d6efd;">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#002FA7" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            Grille de notes - <span id="matiereProf"></span>
+        </h2>
 
-        <!-- Sélecteurs -->
         <div class="card glass-card mb-4 p-3" style="border-radius:16px;">
             <div class="row align-items-end">
                 <div class="col-md-3 mb-2">
                     <label class="form-label">Classe</label>
-                    <select class="form-select" id="gradeClass" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
+                    <select class="form-select" id="filtreClasse" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
                         <option value="">-- Choisir --</option>
                         <% if (typeof classes !== 'undefined' && classes.length > 0) { %>
                             <% classes.forEach(function(cls) { %>
@@ -20,41 +21,61 @@
                         <% } %>
                     </select>
                 </div>
-                <div class="col-md-3 mb-2">
+                <div class="col-md-2 mb-2">
                     <label class="form-label">Matière</label>
-                    <input type="text" class="form-control" id="gradeSubject" placeholder="Ex: Mathématiques" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
+                    <input type="text" class="form-control" id="filtreMatiere" placeholder="Ex: Mathématiques" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
                 </div>
                 <div class="col-md-2 mb-2">
-                    <label class="form-label">Période</label>
-                    <select class="form-select" id="gradePeriod" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
-                        <option value="1">1er Trimestre</option>
-                        <option value="2">2ème Trimestre</option>
-                        <option value="3">3ème Trimestre</option>
+                    <label class="form-label">Trimestre</label>
+                    <select class="form-select" id="filtreTrimestre" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
+                        <option value="1">Trimestre 1</option>
+                        <option value="2">Trimestre 2</option>
+                        <option value="3">Trimestre 3</option>
                     </select>
                 </div>
                 <div class="col-md-2 mb-2">
-                    <button class="btn btn-primary w-100" onclick="loadGradeForm()">📋 Charger</button>
+                    <label class="form-label">Coef Examen</label>
+                    <select class="form-select" id="coefExamen" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
+                        <option value="1">1</option>
+                        <option value="2" selected>2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                    </select>
                 </div>
                 <div class="col-md-2 mb-2">
-                    <button class="btn btn-success w-100" onclick="saveAllGrades()">💾 Tout sauver</button>
+                    <button class="btn btn-primary w-100" onclick="loadNotes()">📋 Charger</button>
+                </div>
+                <div class="col-md-1 mb-2">
+                    <button class="btn btn-success w-100" onclick="saveAllNotes()">💾</button>
                 </div>
             </div>
         </div>
 
-        <!-- Tableau de notes -->
-        <div class="card glass-card p-4" style="border-radius:16px; display:none;" id="gradeTableContainer">
-            <h5 class="mb-3" id="gradeTableTitle">Notes</h5>
-            <div class="table-responsive">
-                <table class="table table-hover" id="gradeTable">
+        <div class="formula-info glass-card mb-3 p-2" style="border-radius:12px; display:flex; align-items:center; gap:8px; font-size:0.85rem; font-weight:500;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#002FA7" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <span>Formule : <strong>((NJ1 + NJ2) ÷ 2 + Examen sur <span id="noteMaxLabel">40</span>) ÷ (<span id="diviseur">3</span>)</strong></span>
+        </div>
+
+        <div class="card glass-card p-3" style="border-radius:16px; display:none;" id="tableContainer">
+            <div style="overflow-x:auto;">
+                <table class="table data-table" id="notesTable">
                     <thead>
                         <tr>
-                            <th>N°</th>
                             <th>Élève</th>
-                            <th>Note (/20)</th>
-                            <th>Commentaire</th>
+                            <th>NJ1 <span class="coef-badge">/20</span></th>
+                            <th>NJ2 <span class="coef-badge">/20</span></th>
+                            <th>Moy NJ <span class="coef-badge">/20</span></th>
+                            <th>Examen <span class="coef-badge" id="examHeader">/40</span></th>
+                            <th>Total</th>
+                            <th>Moyenne <span class="coef-badge">/20</span></th>
+                            <th>Appréciation</th>
+                            <th>Rang</th>
                         </tr>
                     </thead>
-                    <tbody id="gradeBody"></tbody>
+                    <tbody id="notesBody">
+                        <tr><td colspan="9" style="text-align:center;padding:30px;">Sélectionnez une classe</td></tr>
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -63,89 +84,212 @@
 
 <script>
     var currentStudents = [];
-    var existingGrades = {};
+    var existingGrades = {}; // clé = student_id, valeur = {nj1, nj2, examen, comment}
+    var currentClass = '';
+    var currentSubject = '';
+    var currentPeriod = '1';
+    var coefExamen = 2;
 
-    function loadGradeForm() {
-        var className = document.getElementById('gradeClass').value;
-        var subject = document.getElementById('gradeSubject').value.trim();
-        var period = document.getElementById('gradePeriod').value;
+    // Met à jour les libellés de la formule
+    function updateFormula() {
+        coefExamen = parseInt(document.getElementById('coefExamen').value) || 2;
+        var maxNote = coefExamen * 20;
+        document.getElementById('noteMaxLabel').textContent = maxNote;
+        document.getElementById('examHeader').textContent = '/' + maxNote;
+        document.getElementById('diviseur').textContent = (2 + coefExamen);
+    }
 
-        if (!className || !subject) return alert('Veuillez sélectionner une classe et entrer une matière.');
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('coefExamen').addEventListener('change', function() {
+            updateFormula();
+            if (currentStudents.length > 0) recalcAll();
+        });
+        updateFormula();
+    });
 
-        document.getElementById('gradeTableTitle').textContent = 'Notes - ' + className + ' - ' + subject + ' (' + (period === '1' ? '1er Trimestre' : period === '2' ? '2ème Trimestre' : '3ème Trimestre') + ')';
-        document.getElementById('gradeTableContainer').style.display = 'block';
+    function loadNotes() {
+        var className = document.getElementById('filtreClasse').value;
+        var subject = document.getElementById('filtreMatiere').value.trim();
+        var period = document.getElementById('filtreTrimestre').value;
 
-        // Charger les élèves
+        if (!className || !subject) {
+            alert('Veuillez sélectionner une classe et saisir une matière.');
+            return;
+        }
+
+        currentClass = className;
+        currentSubject = subject;
+        currentPeriod = period;
+        document.getElementById('matiereProf').textContent = subject + ' (' + (period==1?'1er Trimestre':period==2?'2ème Trimestre':'3ème Trimestre') + ')';
+        document.getElementById('tableContainer').style.display = 'block';
+
+        // Charger les élèves de la classe
         fetch('/api/grades/students/' + encodeURIComponent(className))
             .then(function(r) { return r.json(); })
             .then(function(students) {
                 currentStudents = students;
-                
                 // Charger les notes existantes
                 return fetch('/api/grades/' + encodeURIComponent(className) + '/' + encodeURIComponent(subject) + '?period=' + period);
             })
             .then(function(r) { return r.json(); })
             .then(function(grades) {
-                grades.forEach(function(g) {
-                    existingGrades[g.student_id] = g;
-                });
-                renderGradeTable();
+                existingGrades = {};
+                if (grades && Array.isArray(grades)) {
+                    grades.forEach(function(g) {
+                        existingGrades[g.student_id] = g;
+                    });
+                }
+                renderTable();
             })
-            .catch(function() { renderGradeTable(); });
+            .catch(function(err) {
+                console.error(err);
+                existingGrades = {};
+                renderTable();
+            });
     }
 
-    function renderGradeTable() {
-        var tbody = document.getElementById('gradeBody');
-        if (currentStudents.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4" class="text-center py-3 text-muted">Aucun élève dans cette classe.</td></tr>';
+    function renderTable() {
+        var tbody = document.getElementById('notesBody');
+        if (!currentStudents.length) {
+            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:30px;">Aucun élève dans cette classe.</td></tr>';
             return;
         }
 
-        tbody.innerHTML = currentStudents.map(function(s, i) {
-            var existing = existingGrades[s.id];
+        tbody.innerHTML = currentStudents.map(function(s, idx) {
+            var g = existingGrades[s.id] || {};
+            var nj1 = g.nj1 !== undefined && g.nj1 !== null ? parseFloat(g.nj1) : '';
+            var nj2 = g.nj2 !== undefined && g.nj2 !== null ? parseFloat(g.nj2) : '';
+            var examen = g.examen !== undefined && g.examen !== null ? parseFloat(g.examen) : '';
+            var comment = g.comment || '';
+            // Calculs temporaires pour l'affichage initial
+            var moyNJ = (nj1 !== '' && nj2 !== '') ? ((parseFloat(nj1) + parseFloat(nj2)) / 2).toFixed(1) : '';
+            var maxExam = coefExamen * 20;
+            var total = '';
+            var moyenne = '';
+            if (moyNJ !== '' && examen !== '') {
+                total = (parseFloat(moyNJ) + parseFloat(examen)).toFixed(1);
+                moyenne = (parseFloat(total) / (2 + coefExamen)).toFixed(2);
+            }
             return '<tr>' +
-                '<td>' + (i + 1) + '</td>' +
-                '<td>' + s.name + '</td>' +
-                '<td><input type="number" class="form-control grade-input" data-student="' + s.id + '" value="' + (existing ? existing.grade : '') + '" min="0" max="20" step="0.5" style="width:80px; background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);"></td>' +
-                '<td><input type="text" class="form-control comment-input" data-student="' + s.id + '" value="' + (existing ? (existing.comment || '') : '') + '" placeholder="Appréciation" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);"></td>' +
+                '<td>' + (idx+1) + '. ' + s.name + '</td>' +
+                '<td><input type="number" class="form-control nj1-input" data-student="' + s.id + '" value="' + nj1 + '" min="0" max="20" step="0.5" onchange="recalcRow(this)" style="width:80px;"></td>' +
+                '<td><input type="number" class="form-control nj2-input" data-student="' + s.id + '" value="' + nj2 + '" min="0" max="20" step="0.5" onchange="recalcRow(this)" style="width:80px;"></td>' +
+                '<td class="moyNJ-cell">' + (moyNJ || '-') + '</td>' +
+                '<td><input type="number" class="form-control examen-input" data-student="' + s.id + '" value="' + examen + '" min="0" max="' + (coefExamen*20) + '" step="0.5" onchange="recalcRow(this)" style="width:80px;"></td>' +
+                '<td class="total-cell">' + (total || '-') + '</td>' +
+                '<td class="moyenne-cell"><strong>' + (moyenne || '-') + '</strong></td>' +
+                '<td><input type="text" class="form-control comment-input" data-student="' + s.id + '" value="' + comment + '" placeholder="Appréciation" style="min-width:120px;"></td>' +
+                '<td class="rang-cell">-</td>' +
             '</tr>';
         }).join('');
+
+        // Recalculer les rangs après affichage
+        recalcRanks();
     }
 
-    function saveAllGrades() {
-        var className = document.getElementById('gradeClass').value;
-        var subject = document.getElementById('gradeSubject').value.trim();
-        var period = document.getElementById('gradePeriod').value;
+    function recalcRow(input) {
+        var row = input.closest('tr');
+        var studentId = input.getAttribute('data-student');
+        var nj1 = parseFloat(row.querySelector('.nj1-input').value) || 0;
+        var nj2 = parseFloat(row.querySelector('.nj2-input').value) || 0;
+        var examen = parseFloat(row.querySelector('.examen-input').value) || 0;
+        var maxExam = coefExamen * 20;
 
-        if (!className || !subject) return alert('Veuillez charger une classe et une matière.');
+        var moyNJ = (nj1 + nj2) / 2;
+        row.querySelector('.moyNJ-cell').textContent = moyNJ.toFixed(1);
+        var total = moyNJ + examen;
+        row.querySelector('.total-cell').textContent = total.toFixed(1);
+        var moyenne = total / (2 + coefExamen);
+        row.querySelector('.moyenne-cell').innerHTML = '<strong>' + moyenne.toFixed(2) + '</strong>';
 
-        var gradeInputs = document.querySelectorAll('.grade-input');
-        var commentInputs = document.querySelectorAll('.comment-input');
-        var grades = [];
+        recalcRanks();
+    }
 
-        gradeInputs.forEach(function(input) {
-            var studentId = input.getAttribute('data-student');
-            var grade = parseFloat(input.value);
-            if (!isNaN(grade) && grade >= 0 && grade <= 20) {
-                var comment = '';
-                commentInputs.forEach(function(c) {
-                    if (c.getAttribute('data-student') == studentId) comment = c.value;
-                });
-                grades.push({ student_id: studentId, grade: grade, comment: comment });
+    function recalcAll() {
+        var rows = document.querySelectorAll('#notesBody tr');
+        rows.forEach(function(row) {
+            var nj1 = parseFloat(row.querySelector('.nj1-input')?.value) || 0;
+            var nj2 = parseFloat(row.querySelector('.nj2-input')?.value) || 0;
+            var examen = parseFloat(row.querySelector('.examen-input')?.value) || 0;
+            var moyNJ = (nj1 + nj2) / 2;
+            row.querySelector('.moyNJ-cell').textContent = moyNJ.toFixed(1);
+            var total = moyNJ + examen;
+            row.querySelector('.total-cell').textContent = total.toFixed(1);
+            var moyenne = total / (2 + coefExamen);
+            row.querySelector('.moyenne-cell').innerHTML = '<strong>' + moyenne.toFixed(2) + '</strong>';
+        });
+        recalcRanks();
+    }
+
+    function recalcRanks() {
+        var rows = document.querySelectorAll('#notesBody tr');
+        var moyennes = [];
+        rows.forEach(function(row, idx) {
+            var moyText = row.querySelector('.moyenne-cell')?.textContent || '';
+            var moy = parseFloat(moyText);
+            moyennes.push({ idx: idx, moy: isNaN(moy) ? -1 : moy });
+        });
+        moyennes.sort(function(a, b) { return b.moy - a.moy; });
+        var rank = 1;
+        var prevMoy = null;
+        var sameRankCount = 0;
+        moyennes.forEach(function(item, i) {
+            if (item.moy === -1) {
+                rows[item.idx].querySelector('.rang-cell').textContent = '-';
+                return;
             }
+            if (prevMoy !== null && item.moy === prevMoy) {
+                sameRankCount++;
+            } else {
+                rank += sameRankCount;
+                sameRankCount = 0;
+            }
+            rows[item.idx].querySelector('.rang-cell').textContent = rank;
+            prevMoy = item.moy;
+        });
+    }
+
+    function saveAllNotes() {
+        if (!currentClass || !currentSubject) {
+            alert('Veuillez charger une classe et une matière.');
+            return;
+        }
+
+        var rows = document.querySelectorAll('#notesBody tr');
+        var grades = [];
+        rows.forEach(function(row) {
+            var studentId = row.querySelector('.nj1-input')?.getAttribute('data-student');
+            if (!studentId) return;
+            var nj1 = parseFloat(row.querySelector('.nj1-input').value) || null;
+            var nj2 = parseFloat(row.querySelector('.nj2-input').value) || null;
+            var examen = parseFloat(row.querySelector('.examen-input').value) || null;
+            var comment = row.querySelector('.comment-input')?.value || '';
+
+            grades.push({
+                student_id: studentId,
+                nj1: nj1,
+                nj2: nj2,
+                examen: examen,
+                comment: comment
+            });
         });
 
-        if (grades.length === 0) return alert('Aucune note valide à sauvegarder.');
+        if (grades.length === 0) return;
 
         fetch('/api/grades/bulk', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ class_name: className, subject: subject, period: period, grades: grades })
+            body: JSON.stringify({
+                class_name: currentClass,
+                subject: currentSubject,
+                period: currentPeriod,
+                grades: grades
+            })
         })
         .then(function(r) { return r.json(); })
         .then(function(result) {
             if (result.success) {
-                alert('✅ ' + grades.length + ' note(s) sauvegardée(s) !');
+                alert('✅ Notes sauvegardées avec succès !');
             } else {
                 alert('Erreur : ' + (result.error || 'inconnue'));
             }
@@ -168,10 +312,47 @@
         box-shadow: 0 15px 40px rgba(0,0,0,0.4) !important;
         border-color: rgba(13,110,253,0.3) !important;
     }
-    #gradeTable th, #gradeTable td { border-color: rgba(128,128,128,0.15); vertical-align: middle; }
-    #gradeTable th { background: rgba(13,110,253,0.08); font-weight: 600; color: #0d6efd; }
-    [data-theme="dark"] #gradeTable th { background: rgba(255,255,255,0.05); color: #fff; }
-    .form-label { color: rgba(255,255,255,0.8); font-weight: 500; }
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        color: #fff;
+    }
+    .data-table th, .data-table td {
+        border: 1px solid rgba(255,255,255,0.08);
+        padding: 10px 8px;
+        text-align: center;
+        vertical-align: middle;
+    }
+    .data-table th {
+        background: rgba(13,110,253,0.08);
+        font-weight: 600;
+        color: #0d6efd;
+        font-size: 0.85rem;
+    }
+    .coef-badge {
+        font-size: 0.7rem;
+        background: rgba(13,110,253,0.2);
+        padding: 2px 6px;
+        border-radius: 4px;
+        margin-left: 4px;
+    }
+    .data-table input {
+        background: rgba(255,255,255,0.08) !important;
+        border: 1px solid rgba(255,255,255,0.15) !important;
+        color: white !important;
+        text-align: center;
+        border-radius: 6px;
+        padding: 6px;
+    }
+    .formula-info {
+        background: rgba(13,110,253,0.08);
+        color: #0d6efd;
+        border: 1px solid rgba(13,110,253,0.15);
+    }
+    .form-label {
+        color: rgba(255,255,255,0.8);
+        font-weight: 500;
+    }
 </style>
 
 <%- include('../partials/footer') %>
