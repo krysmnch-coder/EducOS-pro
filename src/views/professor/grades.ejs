@@ -10,25 +10,18 @@
 
         <div class="card glass-card mb-4 p-3" style="border-radius:16px;">
             <div class="row align-items-end">
-                <div class="col-md-3 mb-2">
+                <div class="col-md-2 mb-2">
                     <label class="form-label">Classe</label>
                     <select class="form-select" id="filtreClasse" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
                         <option value="">-- Choisir --</option>
-                        <% if (typeof classes !== 'undefined' && classes.length > 0) { %>
-                            <% classes.forEach(function(cls) { %>
-                                <option value="<%= cls %>"><%= cls %></option>
-                            <% }); %>
-                        <% } %>
                     </select>
                 </div>
-                
-                <div class="col-md-2 mb-2">
+                <div class="col-md-3 mb-2">
                     <label class="form-label">Matière</label>
                     <select class="form-select" id="filtreMatiere" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
                         <option value="">-- Choisir --</option>
                     </select>
-                </div>       
-
+                </div>
                 <div class="col-md-2 mb-2">
                     <label class="form-label">Trimestre</label>
                     <select class="form-select" id="filtreTrimestre" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.15);">
@@ -66,19 +59,20 @@
                 <table class="table data-table" id="notesTable">
                     <thead>
                         <tr>
+                            <th>N°</th>
                             <th>Élève</th>
-                            <th>NJ1 <span class="coef-badge">/20</span></th>
-                            <th>NJ2 <span class="coef-badge">/20</span></th>
-                            <th>Moy NJ <span class="coef-badge">/20</span></th>
-                            <th>Examen <span class="coef-badge" id="examHeader">/40</span></th>
+                            <th>NJ1 /20</th>
+                            <th>NJ2 /20</th>
+                            <th>Moy NJ /20</th>
+                            <th>Examen <span id="examHeader">/40</span></th>
                             <th>Total</th>
-                            <th>Moyenne <span class="coef-badge">/20</span></th>
+                            <th>Moyenne /20</th>
                             <th>Appréciation</th>
                             <th>Rang</th>
                         </tr>
                     </thead>
                     <tbody id="notesBody">
-                        <tr><td colspan="9" style="text-align:center;padding:30px;">Sélectionnez une classe</td></tr>
+                        <tr><td colspan="10" style="text-align:center;padding:30px;">Sélectionnez une classe et une matière</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -88,13 +82,12 @@
 
 <script>
     var currentStudents = [];
-    var existingGrades = {}; // clé = student_id, valeur = {nj1, nj2, examen, comment}
+    var existingGrades = {};
     var currentClass = '';
     var currentSubject = '';
     var currentPeriod = '1';
     var coefExamen = 2;
 
-    // Met à jour les libellés de la formule
     function updateFormula() {
         coefExamen = parseInt(document.getElementById('coefExamen').value) || 2;
         var maxNote = coefExamen * 20;
@@ -103,50 +96,86 @@
         document.getElementById('diviseur').textContent = (1 + coefExamen);
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
-        document.getElementById('coefExamen').addEventListener('change', function() {
-            updateFormula();
-            if (currentStudents.length > 0) recalcAll();
-        });
-        updateFormula();
-    });
+    // ==========================================================================
+    // CHARGEMENT DES CLASSES
+    // ==========================================================================
+    function loadClasses() {
+        fetch('/api/professor/classes')
+            .then(function(r) { return r.json(); })
+            .then(function(classes) {
+                var select = document.getElementById('filtreClasse');
+                select.innerHTML = '<option value="">-- Choisir une classe --</option>';
+                if (classes.length === 0) {
+                    select.innerHTML += '<option value="" disabled>Aucune classe trouvée</option>';
+                } else {
+                    classes.forEach(function(c) {
+                        select.innerHTML += '<option value="' + c + '">' + c + '</option>';
+                    });
+                }
+                console.log('📋 Classes chargées:', classes.length);
+            })
+            .catch(function(err) {
+                console.error('❌ Erreur chargement classes:', err);
+            });
+    }
 
+    // ==========================================================================
+    // CHARGEMENT DES MATIÈRES
+    // ==========================================================================
+    function loadProfessorSubjects() {
+        fetch('/api/professor/subjects')
+            .then(function(r) { return r.json(); })
+            .then(function(subjects) {
+                var select = document.getElementById('filtreMatiere');
+                select.innerHTML = '<option value="">-- Choisir une matière --</option>';
+                if (subjects.length === 0) {
+                    select.innerHTML += '<option value="" disabled>Aucune matière trouvée</option>';
+                } else {
+                    subjects.forEach(function(s) {
+                        select.innerHTML += '<option value="' + s + '">' + s + '</option>';
+                    });
+                }
+                console.log('📚 Matières chargées:', subjects.length);
+            })
+            .catch(function(err) {
+                console.error('❌ Erreur chargement matières:', err);
+            });
+    }
+
+    // ==========================================================================
+    // CHARGEMENT DES NOTES
+    // ==========================================================================
     function loadNotes() {
         var className = document.getElementById('filtreClasse').value;
-        var subject = document.getElementById('filtreMatiere').value.trim();
-        var period = document.getElementById('filtreTrimestre').value;
+        var subject = document.getElementById('filtreMatiere').value;
 
-        if (!className || !subject) {
-            alert('Veuillez sélectionner une classe et saisir une matière.');
-            return;
-        }
+        if (!className) { alert('Veuillez sélectionner une classe.'); return; }
+        if (!subject) { alert('Veuillez sélectionner une matière.'); return; }
 
         currentClass = className;
         currentSubject = subject;
-        currentPeriod = period;
-        document.getElementById('matiereProf').textContent = subject + ' (' + (period==1?'1er Trimestre':period==2?'2ème Trimestre':'3ème Trimestre') + ')';
+        currentPeriod = document.getElementById('filtreTrimestre').value;
+        
+        var periodLabel = currentPeriod == 1 ? '1er Trimestre' : currentPeriod == 2 ? '2ème Trimestre' : '3ème Trimestre';
+        document.getElementById('matiereProf').textContent = subject + ' (' + periodLabel + ')';
         document.getElementById('tableContainer').style.display = 'block';
 
-        // Charger les élèves de la classe
         fetch('/api/grades/students/' + encodeURIComponent(className))
             .then(function(r) { return r.json(); })
             .then(function(students) {
                 currentStudents = students;
-                // Charger les notes existantes
-                return fetch('/api/grades/' + encodeURIComponent(className) + '/' + encodeURIComponent(subject) + '?period=' + period);
+                return fetch('/api/grades/' + encodeURIComponent(className) + '/' + encodeURIComponent(subject) + '?period=' + currentPeriod);
             })
             .then(function(r) { return r.json(); })
             .then(function(grades) {
                 existingGrades = {};
                 if (grades && Array.isArray(grades)) {
-                    grades.forEach(function(g) {
-                        existingGrades[g.student_id] = g;
-                    });
+                    grades.forEach(function(g) { existingGrades[g.student_id] = g; });
                 }
                 renderTable();
             })
             .catch(function(err) {
-                console.error(err);
+                console.error('Erreur:', err);
                 existingGrades = {};
                 renderTable();
             });
@@ -155,19 +184,17 @@
     function renderTable() {
         var tbody = document.getElementById('notesBody');
         if (!currentStudents.length) {
-            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:30px;">Aucun élève dans cette classe.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:30px;">Aucun élève dans cette classe.</td></tr>';
             return;
         }
 
         tbody.innerHTML = currentStudents.map(function(s, idx) {
             var g = existingGrades[s.id] || {};
-            var nj1 = g.nj1 !== undefined && g.nj1 !== null ? parseFloat(g.nj1) : '';
-            var nj2 = g.nj2 !== undefined && g.nj2 !== null ? parseFloat(g.nj2) : '';
-            var examen = g.examen !== undefined && g.examen !== null ? parseFloat(g.examen) : '';
+            var nj1 = g.nj1 != null ? parseFloat(g.nj1) : '';
+            var nj2 = g.nj2 != null ? parseFloat(g.nj2) : '';
+            var examen = g.examen != null ? parseFloat(g.examen) : '';
             var comment = g.comment || '';
-            // Calculs temporaires pour l'affichage initial
             var moyNJ = (nj1 !== '' && nj2 !== '') ? ((parseFloat(nj1) + parseFloat(nj2)) / 2).toFixed(1) : '';
-            var maxExam = coefExamen * 20;
             var total = '';
             var moyenne = '';
             if (moyNJ !== '' && examen !== '') {
@@ -175,43 +202,38 @@
                 moyenne = (parseFloat(total) / (2 + coefExamen)).toFixed(2);
             }
             return '<tr>' +
-                '<td>' + (idx+1) + '. ' + s.name + '</td>' +
-                '<td><input type="number" class="form-control nj1-input" data-student="' + s.id + '" value="' + nj1 + '" min="0" max="20" step="0.5" onchange="recalcRow(this)" style="width:80px;"></td>' +
-                '<td><input type="number" class="form-control nj2-input" data-student="' + s.id + '" value="' + nj2 + '" min="0" max="20" step="0.5" onchange="recalcRow(this)" style="width:80px;"></td>' +
+                '<td>' + (idx + 1) + '</td>' +
+                '<td style="text-align:left;">' + s.name + '</td>' +
+                '<td><input type="number" class="form-control nj1-input" data-student="' + s.id + '" value="' + nj1 + '" min="0" max="20" step="0.5" onchange="recalcRow(this)" style="width:70px;"></td>' +
+                '<td><input type="number" class="form-control nj2-input" data-student="' + s.id + '" value="' + nj2 + '" min="0" max="20" step="0.5" onchange="recalcRow(this)" style="width:70px;"></td>' +
                 '<td class="moyNJ-cell">' + (moyNJ || '-') + '</td>' +
-                '<td><input type="number" class="form-control examen-input" data-student="' + s.id + '" value="' + examen + '" min="0" max="' + (coefExamen*20) + '" step="0.5" onchange="recalcRow(this)" style="width:80px;"></td>' +
+                '<td><input type="number" class="form-control examen-input" data-student="' + s.id + '" value="' + examen + '" min="0" max="' + (coefExamen * 20) + '" step="0.5" onchange="recalcRow(this)" style="width:70px;"></td>' +
                 '<td class="total-cell">' + (total || '-') + '</td>' +
                 '<td class="moyenne-cell"><strong>' + (moyenne || '-') + '</strong></td>' +
-                '<td><input type="text" class="form-control comment-input" data-student="' + s.id + '" value="' + comment + '" placeholder="Appréciation" style="min-width:120px;"></td>' +
+                '<td><input type="text" class="form-control comment-input" data-student="' + s.id + '" value="' + comment + '" placeholder="..." style="min-width:100px;"></td>' +
                 '<td class="rang-cell">-</td>' +
             '</tr>';
         }).join('');
 
-        // Recalculer les rangs après affichage
         recalcRanks();
     }
 
     function recalcRow(input) {
         var row = input.closest('tr');
-        var studentId = input.getAttribute('data-student');
         var nj1 = parseFloat(row.querySelector('.nj1-input').value) || 0;
         var nj2 = parseFloat(row.querySelector('.nj2-input').value) || 0;
         var examen = parseFloat(row.querySelector('.examen-input').value) || 0;
-        var maxExam = coefExamen * 20;
-
         var moyNJ = (nj1 + nj2) / 2;
         row.querySelector('.moyNJ-cell').textContent = moyNJ.toFixed(1);
         var total = moyNJ + examen;
         row.querySelector('.total-cell').textContent = total.toFixed(1);
         var moyenne = total / (2 + coefExamen);
         row.querySelector('.moyenne-cell').innerHTML = '<strong>' + moyenne.toFixed(2) + '</strong>';
-
         recalcRanks();
     }
 
     function recalcAll() {
-        var rows = document.querySelectorAll('#notesBody tr');
-        rows.forEach(function(row) {
+        document.querySelectorAll('#notesBody tr').forEach(function(row) {
             var nj1 = parseFloat(row.querySelector('.nj1-input')?.value) || 0;
             var nj2 = parseFloat(row.querySelector('.nj2-input')?.value) || 0;
             var examen = parseFloat(row.querySelector('.examen-input')?.value) || 0;
@@ -229,196 +251,60 @@
         var rows = document.querySelectorAll('#notesBody tr');
         var moyennes = [];
         rows.forEach(function(row, idx) {
-            var moyText = row.querySelector('.moyenne-cell')?.textContent || '';
-            var moy = parseFloat(moyText);
-            moyennes.push({ idx: idx, moy: isNaN(moy) ? -1 : moy });
+            var moy = parseFloat(row.querySelector('.moyenne-cell')?.textContent) || -1;
+            moyennes.push({ idx: idx, moy: moy });
         });
         moyennes.sort(function(a, b) { return b.moy - a.moy; });
-        var rank = 1;
-        var prevMoy = null;
-        var sameRankCount = 0;
-        moyennes.forEach(function(item, i) {
-            if (item.moy === -1) {
-                rows[item.idx].querySelector('.rang-cell').textContent = '-';
-                return;
-            }
-            if (prevMoy !== null && item.moy === prevMoy) {
-                sameRankCount++;
-            } else {
-                rank += sameRankCount;
-                sameRankCount = 0;
-            }
+        var rank = 1, prevMoy = null, skip = 0;
+        moyennes.forEach(function(item) {
+            if (item.moy === -1) { rows[item.idx].querySelector('.rang-cell').textContent = '-'; return; }
+            if (prevMoy !== null && item.moy === prevMoy) { skip++; }
+            else { rank += skip; skip = 0; }
             rows[item.idx].querySelector('.rang-cell').textContent = rank;
             prevMoy = item.moy;
         });
     }
 
     function saveAllNotes() {
-        if (!currentClass || !currentSubject) {
-            alert('Veuillez charger une classe et une matière.');
-            return;
-        }
-
-        var rows = document.querySelectorAll('#notesBody tr');
+        if (!currentClass || !currentSubject) { alert('Veuillez charger une classe et une matière.'); return; }
         var grades = [];
-        rows.forEach(function(row) {
+        document.querySelectorAll('#notesBody tr').forEach(function(row) {
             var studentId = row.querySelector('.nj1-input')?.getAttribute('data-student');
             if (!studentId) return;
-            var nj1 = parseFloat(row.querySelector('.nj1-input').value) || null;
-            var nj2 = parseFloat(row.querySelector('.nj2-input').value) || null;
-            var examen = parseFloat(row.querySelector('.examen-input').value) || null;
-            var comment = row.querySelector('.comment-input')?.value || '';
-
             grades.push({
                 student_id: studentId,
-                nj1: nj1,
-                nj2: nj2,
-                examen: examen,
-                comment: comment
+                nj1: parseFloat(row.querySelector('.nj1-input').value) || null,
+                nj2: parseFloat(row.querySelector('.nj2-input').value) || null,
+                examen: parseFloat(row.querySelector('.examen-input').value) || null,
+                comment: row.querySelector('.comment-input')?.value || ''
             });
         });
-
         if (grades.length === 0) return;
-
         fetch('/api/grades/bulk', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                class_name: currentClass,
-                subject: currentSubject,
-                period: currentPeriod,
-                grades: grades
-            })
+            body: JSON.stringify({ class_name: currentClass, subject: currentSubject, period: currentPeriod, grades: grades })
         })
         .then(function(r) { return r.json(); })
         .then(function(result) {
-            if (result.success) {
-                alert('✅ Notes sauvegardées avec succès !');
-            } else {
-                alert('Erreur : ' + (result.error || 'inconnue'));
-            }
+            alert(result.success ? '✅ Notes sauvegardées !' : 'Erreur : ' + (result.error || 'inconnue'));
         })
-        .catch(function(err) { alert('Erreur réseau.'); });
+        .catch(function() { alert('Erreur réseau.'); });
     }
 
     // ==========================================================================
-// CHARGEMENT DES MATIÈRES DU PROFESSEUR
-// ==========================================================================
-
-// Variable globale pour stocker les matières
-var professorSubjects = [];
-
-// Charger les matières du professeur depuis l'API
-function loadProfessorSubjects() {
-    fetch('/api/professor/subjects')
-        .then(function(r) { return r.json(); })
-        .then(function(subjects) {
-            professorSubjects = subjects;
-            
-            // Remplir le select de matière (input devenu select ?)
-            var subjectSelect = document.getElementById('filtreMatiere');
-            if (subjectSelect && subjectSelect.tagName === 'SELECT') {
-                subjectSelect.innerHTML = '<option value="">-- Choisir une matière --</option>';
-                if (subjects.length === 0) {
-                    subjectSelect.innerHTML += '<option value="" disabled>Aucune matière trouvée</option>';
-                } else {
-                    subjects.forEach(function(s) {
-                        subjectSelect.innerHTML += '<option value="' + s + '">' + s + '</option>';
-                    });
-                }
-            }
-            
-            console.log('📚 Matières chargées:', subjects.length);
-        })
-        .catch(function(err) {
-            console.error('❌ Erreur chargement matières:', err);
-        });
-}
-
-// Charger les élèves d'une classe
-function loadStudentsForGrade() {
-    var className = document.getElementById('filtreClasse').value;
-    var subject = document.getElementById('filtreMatiere').value.trim();
-    var period = document.getElementById('filtreTrimestre').value;
-
-    if (!className) {
-        alert('Veuillez sélectionner une classe.');
-        return;
-    }
-    if (!subject) {
-        alert('Veuillez sélectionner une matière.');
-        return;
-    }
-
-    currentClass = className;
-    currentSubject = subject;
-    currentPeriod = period;
-    document.getElementById('matiereProf').textContent = subject + ' (' + (period == 1 ? '1er Trimestre' : period == 2 ? '2ème Trimestre' : '3ème Trimestre') + ')';
-    document.getElementById('tableContainer').style.display = 'block';
-
-    // Charger les élèves de la classe
-    fetch('/api/grades/students/' + encodeURIComponent(className))
-        .then(function(r) { return r.json(); })
-        .then(function(students) {
-            currentStudents = students;
-            // Charger les notes existantes
-            return fetch('/api/grades/' + encodeURIComponent(className) + '/' + encodeURIComponent(subject) + '?period=' + period);
-        })
-        .then(function(r) { return r.json(); })
-        .then(function(grades) {
-            existingGrades = {};
-            if (grades && Array.isArray(grades)) {
-                grades.forEach(function(g) {
-                    existingGrades[g.student_id] = g;
-                });
-            }
-            renderTable();
-        })
-        .catch(function(err) {
-            console.error('Erreur:', err);
-            existingGrades = {};
-            renderTable();
-        });
-}
-
-// Modifier la fonction loadNotes existante pour utiliser loadStudentsForGrade
-function loadNotes() {
-    loadStudentsForGrade();
-}
-
-// ==========================================================================
-// INITIALISATION
-// ==========================================================================
-
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialiser Feather Icons si nécessaire
-    if (typeof feather !== 'undefined') feather.replace();
-    
-    // Charger les matières du professeur
-    loadProfessorSubjects();
-    
-    // Mettre à jour la formule au changement du coefficient
-    document.getElementById('coefExamen').addEventListener('change', function() {
+    // INITIALISATION
+    // ==========================================================================
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof feather !== 'undefined') feather.replace();
         updateFormula();
-        if (currentStudents.length > 0) recalcAll();
+        loadClasses();
+        loadProfessorSubjects();
+        document.getElementById('coefExamen').addEventListener('change', function() {
+            updateFormula();
+            if (currentStudents.length > 0) recalcAll();
+        });
     });
-    
-    // Initialiser la formule
-    updateFormula();
-    
-    // Charger les classes dans le select (si nécessaire)
-    loadClasses();
-});
-
-// Charger les classes du professeur (depuis l'emploi du temps)
-function loadClasses() {
-    var classSelect = document.getElementById('filtreClasse');
-    if (!classSelect) return;
-    
-    // Les classes sont déjà pré-remplies par EJS, mais on peut les recharger dynamiquement
-    // Si vous voulez les charger depuis l'API :
-    // fetch('/api/professor/classes').then(...)
-}
 </script>
 
 <style>
@@ -430,52 +316,13 @@ function loadClasses() {
         box-shadow: 0 8px 32px rgba(0,0,0,0.3) !important;
         transition: all 0.3s ease;
     }
-    .glass-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 15px 40px rgba(0,0,0,0.4) !important;
-        border-color: rgba(13,110,253,0.3) !important;
-    }
-    .data-table {
-        width: 100%;
-        border-collapse: collapse;
-        color: #fff;
-    }
-    .data-table th, .data-table td {
-        border: 1px solid rgba(255,255,255,0.08);
-        padding: 10px 8px;
-        text-align: center;
-        vertical-align: middle;
-    }
-    .data-table th {
-        background: rgba(13,110,253,0.08);
-        font-weight: 600;
-        color: #0d6efd;
-        font-size: 0.85rem;
-    }
-    .coef-badge {
-        font-size: 0.7rem;
-        background: rgba(13,110,253,0.2);
-        padding: 2px 6px;
-        border-radius: 4px;
-        margin-left: 4px;
-    }
-    .data-table input {
-        background: rgba(255,255,255,0.08) !important;
-        border: 1px solid rgba(255,255,255,0.15) !important;
-        color: white !important;
-        text-align: center;
-        border-radius: 6px;
-        padding: 6px;
-    }
-    .formula-info {
-        background: rgba(13,110,253,0.08);
-        color: #0d6efd;
-        border: 1px solid rgba(13,110,253,0.15);
-    }
-    .form-label {
-        color: rgba(255,255,255,0.8);
-        font-weight: 500;
-    }
+    .glass-card:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(0,0,0,0.4) !important; border-color: rgba(13,110,253,0.3) !important; }
+    .data-table { width: 100%; border-collapse: collapse; color: #fff; }
+    .data-table th, .data-table td { border: 1px solid rgba(255,255,255,0.08); padding: 8px 6px; text-align: center; vertical-align: middle; font-size: 0.85rem; }
+    .data-table th { background: rgba(13,110,253,0.08); font-weight: 600; color: #0d6efd; }
+    .data-table input { background: rgba(255,255,255,0.08) !important; border: 1px solid rgba(255,255,255,0.15) !important; color: white !important; text-align: center; border-radius: 6px; padding: 5px; font-size: 0.85rem; }
+    .formula-info { background: rgba(13,110,253,0.08); color: #0d6efd; border: 1px solid rgba(13,110,253,0.15); }
+    .form-label { color: rgba(255,255,255,0.8); font-weight: 500; font-size: 0.85rem; }
 </style>
 
 <%- include('../partials/footer') %>
