@@ -137,6 +137,7 @@ async function initializeDatabase() {
     console.log('Création de la table "grades"...');
     await db.schema.createTable('grades', table => {
       table.increments('id').primary();
+      table.integer('establishment_id').unsigned().references('id').inTable('establishments').onDelete('SET NULL');
       table.integer('student_id').unsigned().notNullable().references('id').inTable('users').onDelete('CASCADE');
       table.integer('professor_id').unsigned().notNullable().references('id').inTable('users').onDelete('CASCADE');
       table.string('subject').notNullable();

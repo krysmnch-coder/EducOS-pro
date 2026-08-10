@@ -1275,6 +1275,12 @@ async function createGradesTable() {
             console.log('✅ Table grades créée (avec nj1, nj2, examen)');
         } else {
             console.log('✅ Table grades existe déjà');
+            // Vérifier si la colonne establishment_id existe, sinon l'ajouter
+            const hasEstablishmentId = await db.schema.hasColumn('grades', 'establishment_id');
+            if (!hasEstablishmentId) {
+                await db.schema.alterTable('grades', table => { table.integer('establishment_id').notNullable().index(); });
+                console.log('✅ Colonne establishment_id ajoutée à la table grades');
+            }
         }
     } catch (error) {
         console.error('❌ Erreur création table grades:', error.message);
