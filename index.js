@@ -1279,6 +1279,10 @@ async function createGradesTable() {
             const hasEstablishmentId = await db.schema.hasColumn('grades', 'establishment_id');
             if (!hasEstablishmentId) {
                 await db.schema.alterTable('grades', table => { table.integer('establishment_id').notNullable().index(); });
+                await db.schema.alterTable('grades', table => { 
+                    // Utiliser .defaultTo(0) temporairement si la table a des données, puis le retirer
+                    table.integer('establishment_id').notNullable().defaultTo(0).index(); 
+                });
                 console.log('✅ Colonne establishment_id ajoutée à la table grades');
             }
         }
