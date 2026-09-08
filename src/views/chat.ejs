@@ -16,12 +16,24 @@
       --chat-glass-border: rgba(255, 255, 255, 0.15);
       --chat-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
       --chat-transition: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      --chat-surface: rgba(255, 255, 255, 0.82);
+      --chat-surface-soft: rgba(248, 250, 252, 0.9);
+      --chat-border: rgba(15, 23, 42, 0.1);
+      --chat-text: #172033;
+      --chat-muted: #64748b;
+      --chat-received: #ffffff;
     }
 
     [data-theme="dark"] {
       --chat-glass-bg: rgba(255, 255, 255, 0.03);
       --chat-glass-border: rgba(255, 255, 255, 0.06);
       --chat-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      --chat-surface: rgba(22, 33, 62, 0.86);
+      --chat-surface-soft: rgba(26, 26, 46, 0.9);
+      --chat-border: rgba(255, 255, 255, 0.1);
+      --chat-text: #f1f5f9;
+      --chat-muted: #a7b0c0;
+      --chat-received: rgba(255, 255, 255, 0.08);
     }
     
     /* ==========================================================================
@@ -53,6 +65,7 @@
       display: flex;
       flex-direction: column;
       transition: all 0.4s var(--chat-transition) !important;
+      color: var(--chat-text);
     }
     
     .chat-sidebar:hover {
@@ -316,6 +329,7 @@
       display: flex;
       flex-direction: column;
       transition: all 0.4s var(--chat-transition) !important;
+      color: var(--chat-text);
     }
     
     .chat-main:hover {
@@ -358,7 +372,7 @@
     
     .chat-header-status {
       font-size: 0.75rem;
-      color: #6c757d;
+      color: var(--chat-muted);
     }
     
     .chat-header-status.online {
@@ -372,6 +386,7 @@
       border-radius: 0.75rem !important;
       padding: 0.4rem 0.75rem !important;
       transition: all 0.3s ease !important;
+      color: var(--chat-text) !important;
     }
     
     .btn-back:hover {
@@ -438,8 +453,9 @@
     }
     
     .message-received .message-bubble {
-      background: rgba(255, 255, 255, 0.08) !important;
-      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      background: var(--chat-received) !important;
+      border: 1px solid var(--chat-border) !important;
+      color: var(--chat-text);
       border-bottom-left-radius: 0.25rem !important;
     }
     
@@ -468,7 +484,7 @@
     .typing-indicator {
       padding: 0.5rem;
       font-size: 0.85rem;
-      color: #6c757d;
+      color: var(--chat-muted);
       font-style: italic;
       display: flex;
       align-items: center;
@@ -483,7 +499,7 @@
     .typing-dots span {
       width: 8px;
       height: 8px;
-      background: #6c757d;
+      background: var(--chat-muted);
       border-radius: 50%;
       animation: typingBounce 1.4s infinite;
     }
@@ -539,7 +555,7 @@
       border: none !important;
       padding: 0.6rem 0.75rem !important;
       font-size: 0.95rem;
-      color: var(--text-color, #212529) !important;
+      color: var(--chat-text) !important;
       outline: none !important;
     }
     
@@ -548,7 +564,7 @@
     }
     
     .message-input::placeholder {
-      color: #adb5bd;
+      color: var(--chat-muted);
     }
     
     .btn-send {
@@ -910,7 +926,6 @@
 
   <!-- Scripts -->
   <script src="/socket.io/socket.io.js"></script>
-  <script src="/js/chat.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       // Initialiser Feather Icons
@@ -963,7 +978,15 @@
           // Réception d'un nouveau message
           socket.on('newMessage', function(data) {
             console.log('📩 Nouveau message reçu:', data);
-            handleNewMessage(data);
+            handleNewMessage({
+              conversationId: String(data.senderId),
+              message: {
+                id: data.message.id,
+                senderId: String(data.message.sender_id || data.senderId),
+                content: data.message.message || data.message.content || '',
+                timestamp: data.message.created_at || data.timestamp
+              }
+            });
           });
           
           // Mise à jour des conversations
@@ -997,14 +1020,24 @@
       function loadConversations() {
         console.log('Chargement des conversations...');
         
-        fetch('/api/conversations')
+        fetch('/chat/api/conversations')
           .then(function(response) {
             if (!response.ok) throw new Error('Erreur réseau');
             return response.json();
           })
           .then(function(data) {
             console.log('Conversations chargées:', data);
-            conversations = data.conversations || [];
+            conversations = (Array.isArray(data) ? data : data.conversations || []).map(function(conversation) {
+              return {
+                id: String(conversation.id),
+                name: conversation.name || 'Utilisateur',
+                avatar: conversation.avatar_url || '/img/user.png',
+                lastMessage: conversation.last_message || 'Aucun message',
+                lastMessageTime: conversation.last_activity || null,
+                unreadCount: Number(conversation.unread_count) || 0,
+                online: false
+              };
+            });
             renderConversations();
             
             if (loadingIndicator) {
@@ -1133,7 +1166,7 @@
         
         // Marquer comme lu
         if (socket) {
-          socket.emit('markAsRead', { conversationId: conversationId });
+          socket.emit('markRead', { senderId: conversationId });
         }
       }
 
@@ -1147,14 +1180,23 @@
         
         messageContainer.innerHTML = '<div class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary" role="status"></div></div>';
         
-        fetch('/api/messages/' + conversationId)
+        fetch('/chat/api/messages/' + conversationId)
           .then(function(response) {
             if (!response.ok) throw new Error('Erreur réseau');
             return response.json();
           })
           .then(function(data) {
             console.log('Messages chargés:', data);
-            var msgList = data.messages || [];
+            var msgList = Array.isArray(data) ? data : data.messages || [];
+            msgList = msgList.map(function(message) {
+              return {
+                id: message.id,
+                senderId: String(message.sender_id || message.senderId),
+                content: message.message || message.content || '',
+                timestamp: message.created_at || message.timestamp,
+                isRead: Boolean(message.is_read)
+              };
+            });
             messages[conversationId] = msgList;
             renderMessages(msgList);
           })
@@ -1199,7 +1241,7 @@
 
       function createMessageElement(msg, index) {
         var wrapper = document.createElement('div');
-        var isSent = msg.senderId === currentUserId;
+        var isSent = String(msg.senderId) === String(currentUserId);
         
         wrapper.className = 'message-wrapper ' + (isSent ? 'message-sent' : 'message-received');
         wrapper.style.animationDelay = (index * 0.03) + 's';
@@ -1219,7 +1261,7 @@
       // Gestion des nouveaux messages
       // ==========================================================================
       function handleNewMessage(data) {
-        var conversationId = data.conversationId;
+        var conversationId = String(data.conversationId);
         var message = data.message;
         
         // Ajouter le message à la conversation
@@ -1229,11 +1271,11 @@
         messages[conversationId].push(message);
         
         // Mettre à jour la conversation dans la liste
-        var conv = conversations.find(function(c) { return c.id === conversationId; });
+        var conv = conversations.find(function(c) { return String(c.id) === conversationId; });
         if (conv) {
           conv.lastMessage = message.content;
           conv.lastMessageTime = message.timestamp;
-          if (activeConversationId !== conversationId) {
+          if (String(activeConversationId) !== conversationId) {
             conv.unreadCount = (conv.unreadCount || 0) + 1;
           }
         }
@@ -1241,14 +1283,14 @@
         renderConversations();
         
         // Si la conversation est active, afficher le message
-        if (activeConversationId === conversationId) {
+        if (String(activeConversationId) === conversationId) {
           var msgElement = createMessageElement(message, messages[conversationId].length - 1);
           messageContainer.appendChild(msgElement);
           scrollToBottom();
           
           // Marquer comme lu
           if (socket) {
-            socket.emit('markAsRead', { conversationId: conversationId });
+            socket.emit('markRead', { senderId: conversationId });
           }
         }
         
@@ -1275,27 +1317,29 @@
         console.log('Envoi du message:', content);
         
         var messageData = {
-          conversationId: activeConversationId,
-          content: content,
-          senderId: currentUserId,
-          timestamp: new Date().toISOString()
+          receiverId: activeConversationId,
+          message: content
         };
         
         socket.emit('sendMessage', messageData, function(response) {
           if (response && response.success) {
             messageInput.value = '';
             messageInput.focus();
+            handleNewMessage({
+              conversationId: String(activeConversationId),
+              message: {
+                id: response.message.id,
+                senderId: String(currentUserId),
+                content: response.message.message,
+                timestamp: response.message.created_at || new Date().toISOString()
+              }
+            });
           } else {
             console.error('Erreur lors de l\'envoi du message:', response);
             showNotification('Erreur lors de l\'envoi du message', 'danger');
           }
         });
         
-        // Optimistic update
-        handleNewMessage({
-          conversationId: activeConversationId,
-          message: messageData
-        });
       }
 
       // ==========================================================================
@@ -1307,11 +1351,11 @@
         messageInput.addEventListener('input', function() {
           if (!socket || !activeConversationId) return;
           
-          socket.emit('typing', { conversationId: activeConversationId });
+          socket.emit('typing', { receiverId: activeConversationId });
           
           clearTimeout(typingTimer);
           typingTimer = setTimeout(function() {
-            socket.emit('stopTyping', { conversationId: activeConversationId });
+            socket.emit('stopTyping', { receiverId: activeConversationId });
           }, 1500);
         });
       }
@@ -1335,7 +1379,7 @@
       // ==========================================================================
       function updateUserStatus(userId, online) {
         conversations.forEach(function(conv) {
-          if (conv.userId === userId) {
+          if (String(conv.id) === String(userId)) {
             conv.online = online;
           }
         });
@@ -1371,21 +1415,9 @@
           
           console.log('Création d\'une nouvelle conversation avec:', userName);
           
-          if (socket) {
-            socket.emit('createConversation', { userId: userId }, function(response) {
-              if (response && response.success) {
-                // Fermer le modal
-                var modal = bootstrap.Modal.getInstance(document.getElementById('new-chat-modal'));
-                if (modal) modal.hide();
-                
-                // Ouvrir la nouvelle conversation
-                openConversation(response.conversationId, userName, null);
-                
-                // Recharger la liste
-                loadConversations();
-              }
-            });
-          }
+          var modal = bootstrap.Modal.getInstance(document.getElementById('new-chat-modal'));
+          if (modal) modal.hide();
+          openConversation(userId, userName, null);
         }
       });
 
