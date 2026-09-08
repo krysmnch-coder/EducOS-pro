@@ -725,6 +725,38 @@
           font-size: 0.8rem;
         }
       }
+      /* Au lieu de object-fit: cover, on utilise object-fit: contain avec un positionnement spécifique */
+.hero-carousel .carousel-item img {
+  object-fit: cover;
+  height: 100%;
+  width: 100%;
+  object-position: 70% center; /* Décale le focus vers la droite pour couper le pot à gauche */
+}
+
+/* Pour mobile et tablette, on ajuste encore plus */
+@media (max-width: 992px) {
+  .hero-carousel .carousel-item img {
+    object-fit: cover;
+    object-position: 80% center; /* Décale encore plus à droite */
+    transform: scale(1.1); /* Légèrement zoomé pour couper plus */
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-carousel .carousel-item img {
+    object-fit: cover;
+    object-position: 85% center; /* Décale à droite pour ne montrer que la moitié du pot */
+    transform: scale(1.2); /* Zoom plus fort sur mobile */
+  }
+}
+
+@media (max-width: 576px) {
+  .hero-carousel .carousel-item img {
+    object-fit: cover;
+    object-position: 90% center; /* Maximum à droite */
+    transform: scale(1.3);
+  }
+}
     </style>
   </head>
   <body>

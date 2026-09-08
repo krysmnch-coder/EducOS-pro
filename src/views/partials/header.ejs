@@ -123,13 +123,13 @@
 
           <!-- Profil -->
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" id="navbarUserDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarUserDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="gap: 8px; flex-direction: row;">
               <% if (user.avatar_url && user.avatar_url !== '/img/user.png') { %>
                 <img src="<%= user.avatar_url %>" alt="Avatar" class="navbar-avatar">
               <% } else { %>
                 <div class="navbar-avatar-placeholder"><%= user.name.charAt(0).toUpperCase() %></div>
               <% } %>
-              <span class="d-none d-lg-inline"><%= user.name %></span>
+              <span class="d-none d-lg-inline" style="flex-shrink: 0;"><%= user.name %></span>
             </a>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarUserDropdown">
               <li><a class="dropdown-item d-flex align-items-center" href="/profile"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>Mon Profil</a></li>
