@@ -293,7 +293,10 @@ authNamespace.on('connection', (socket) => {
       emitNotificationUpdate(receiverId);
     } catch (error) {
       console.error('Erreur sendMessage:', error);
-      if (typeof callback === 'function') callback({ success: false, error: 'Impossible d\'enregistrer le message.' });
+            if (typeof callback === 'function') callback({
+                success: false,
+                error: error.message || 'Impossible d\'enregistrer le message.'
+            });
     }
   });
 

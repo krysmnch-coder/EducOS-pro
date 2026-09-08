@@ -1,13 +1,25 @@
 const db = require('./db');
 
+async function getNotificationColumns(connection = db) {
+    const hasMessage = await connection.schema.hasColumn('notifications', 'message');
+    const hasBody = await connection.schema.hasColumn('notifications', 'body');
+    const hasReadAt = await connection.schema.hasColumn('notifications', 'read_at');
+    return {
+        textColumn: hasMessage ? 'message' : (hasBody ? 'body' : null),
+        hasReadAt
+    };
+}
+
 const notificationModel = {
     // Récupérer les notifications récentes
     async getRecentNotifications(userId, limit = 10) {
+        const { textColumn } = await getNotificationColumns();
+        if (!textColumn) throw new Error('La table notifications ne possède aucune colonne de contenu.');
         const notifications = await db('notifications')
             .where({ user_id: userId })
             .orderBy('created_at', 'desc')
             .limit(limit)
-            .select('id', 'title', 'message', 'type', 'link', 'is_read', 'created_at');
+            .select('id', 'title', `${textColumn} as message`, 'type', 'link', 'is_read', 'created_at');
 
         const unreadCount = await this.getUnreadCount(userId);
 
@@ -27,10 +39,12 @@ const notificationModel = {
 
     // Récupérer toutes les notifications
     async getAllNotifications(userId) {
+        const { textColumn } = await getNotificationColumns();
+        if (!textColumn) throw new Error('La table notifications ne possède aucune colonne de contenu.');
         return db('notifications')
             .where({ user_id: userId })
             .orderBy('created_at', 'desc')
-            .select('*');
+            .select('id', 'user_id', 'type', 'title', `${textColumn} as message`, 'link', 'is_read', 'created_at');
     },
 
     // Compter les notifications non lues
@@ -50,26 +64,34 @@ const notificationModel = {
 
     // Marquer une notification comme lue
     async markAsRead(notificationId, userId) {
+        const { hasReadAt } = await getNotificationColumns();
+        const update = { is_read: true };
+        if (hasReadAt) update.read_at = new Date();
         return db('notifications')
             .where({ id: notificationId, user_id: userId })
-            .update({ is_read: true, read_at: new Date() });
+            .update(update);
     },
 
     // Marquer toutes les notifications comme lues
     async markAllAsRead(userId) {
+        const { hasReadAt } = await getNotificationColumns();
+        const update = { is_read: true };
+        if (hasReadAt) update.read_at = new Date();
         return db('notifications')
             .where({ user_id: userId, is_read: false })
-            .update({ is_read: true, read_at: new Date() });
+            .update(update);
     },
 
     // Créer une notification
     async createNotification({ user_id, type, title, message, link }, trx = null) {
         const query = trx || db;
+        const { textColumn } = await getNotificationColumns(query);
+        if (!textColumn) throw new Error('La table notifications ne possède aucune colonne de contenu.');
         return query('notifications').insert({
             user_id,
             type: type || 'info',
             title,
-            message,
+            [textColumn]: message,
             link: link || null
         });
     },
