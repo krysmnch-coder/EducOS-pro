@@ -23,6 +23,9 @@ router.post('/api/:id/read', isAuthenticated, notificationController.markAsRead)
 // API - Marquer toutes les notifications comme lues
 router.post('/api/read-all', isAuthenticated, notificationController.markAllAsRead);
 
+router.delete('/api/:id', isAuthenticated, notificationController.deleteNotification);
+router.delete('/api', isAuthenticated, notificationController.deleteAllNotifications);
+
 // Page complète des notifications
 router.get('/', isAuthenticated, notificationController.getAllNotifications);
 

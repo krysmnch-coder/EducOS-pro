@@ -82,6 +82,18 @@ const notificationModel = {
             .update(update);
     },
 
+    async deleteNotification(notificationId, userId) {
+        return db('notifications')
+            .where({ id: notificationId, user_id: userId })
+            .del();
+    },
+
+    async deleteAllNotifications(userId) {
+        return db('notifications')
+            .where({ user_id: userId })
+            .del();
+    },
+
     // Créer une notification
     async createNotification({ user_id, type, title, message, link }, trx = null) {
         const query = trx || db;
