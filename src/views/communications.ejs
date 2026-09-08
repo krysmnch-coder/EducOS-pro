@@ -80,6 +80,62 @@
       flex-direction: column;
       overflow: hidden;
     }
+
+    /* Mise en page stable du composeur de messages. */
+    .comm-left .card-body {
+      padding: 1.25rem 1.35rem 1.35rem !important;
+      overflow-y: auto;
+    }
+
+    .comm-left .nav-tabs {
+      margin: 0 0 1.25rem !important;
+      gap: 0.35rem;
+    }
+
+    .comm-left .nav-tabs .nav-item {
+      min-width: 0;
+    }
+
+    .comm-left .nav-tabs .nav-link {
+      min-height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1.2;
+    }
+
+    .comm-left .tab-content,
+    .comm-left .tab-pane {
+      overflow: visible;
+    }
+
+    .comm-left .tab-pane form {
+      gap: 0.95rem;
+    }
+
+    .comm-left .tab-pane form > div {
+      margin-bottom: 0 !important;
+    }
+
+    .comm-left .form-label {
+      display: block;
+      margin: 0 0 0.4rem !important;
+    }
+
+    .comm-left .form-control,
+    .comm-left .ts-wrapper .ts-control {
+      min-height: 42px;
+    }
+
+    .comm-left textarea.form-control {
+      min-height: 150px;
+      height: 150px !important;
+    }
+
+    .comm-left .glass-btn-send {
+      margin-top: 0.15rem;
+      min-height: 44px;
+    }
     
     /* Onglets Glassmorphism */
     .nav-tabs {
@@ -341,6 +397,8 @@
       .accordion-button { padding: 0.5rem 0.65rem !important; }
       .accordion-body { padding: 0.65rem !important; }
       .glass-card-comm { border-radius: 0.75rem !important; }
+      .comm-left .card-body { padding: 1rem !important; }
+      .comm-left .nav-tabs .nav-link { padding: 0.55rem 0.5rem !important; font-size: 0.78rem; }
     }
   </style>
 </head>
