@@ -657,10 +657,34 @@ app.get('/school-life/absences', async (req, res) => {
 app.get('/api/absences', async (req, res) => {
     if (!req.user) return res.status(401).json([]);
     try {
-        const { user_id, user_type, class_name, date_debut, date_fin, status } = req.query;
+        const { user_id, user_type, class_name, date_debut, date_fin, status, scope } = req.query;
+        const isStudent = ['STUDENT', 'student', 'eleve', 'élève'].includes(req.user.role);
+        const isParent = ['PARENT', 'parent'].includes(req.user.role);
+        const canManage = ['ADMINISTRATOR', 'administrateur', 'SECRETARY', 'secretaire', 'SCHOOL_LIFE_MANAGER', 'responsable vie scolaire'].includes(req.user.role);
+
+        if (scope === 'management') {
+            if (!canManage || !req.user.establishment_id) return res.status(403).json([]);
+        } else if (!isStudent && !isParent) {
+            // La consultation personnelle ne doit jamais exposer les absences d'un autre compte.
+            return res.json([]);
+        }
+
         let query = db('absences').where({ 'absences.establishment_id': req.user.establishment_id })
             .leftJoin('users', 'absences.user_id', 'users.id').select('absences.*', 'users.name as user_name', 'users.student_class');
-        if (user_id && user_id !== '') query = query.where({ 'absences.user_id': parseInt(user_id) });
+        if (scope === 'management') {
+            // La gestion est limitée à l'établissement de l'utilisateur connecté.
+            if (user_id && user_id !== '') query = query.where({ 'absences.user_id': parseInt(user_id, 10) });
+        } else if (isStudent) {
+            query = query.where({ 'absences.user_id': req.user.id });
+        } else {
+            const linkedChildren = await userModel.getLinkedChildrenForParent(req.user.id);
+            const linkedChildIds = linkedChildren.map(child => child.id);
+            if (!linkedChildIds.length) return res.json([]);
+            query = query.whereIn('absences.user_id', linkedChildIds);
+            if (user_id && user_id !== '' && linkedChildIds.includes(parseInt(user_id, 10))) {
+                query = query.where({ 'absences.user_id': parseInt(user_id, 10) });
+            }
+        }
         if (user_type) query = query.where({ 'absences.user_type': user_type });
         if (status && status !== '') query = query.where({ 'absences.status': status });
         if (date_debut && date_debut !== '') query = query.where('absences.date', '>=', date_debut);
@@ -675,7 +699,11 @@ app.post('/api/absences', async (req, res) => {
     if (!req.user) return res.status(401).json({ error: 'Non authentifié' });
     try {
         const { user_id, user_type, type, date, heure_arrivee, motif, commentaire, status } = req.body;
+        const canManage = ['ADMINISTRATOR', 'administrateur', 'SECRETARY', 'secretaire', 'SCHOOL_LIFE_MANAGER', 'responsable vie scolaire'].includes(req.user.role);
+        if (!canManage || !req.user.establishment_id) return res.status(403).json({ error: 'Vous n\'êtes pas autorisé à gérer les absences.' });
         if (!user_id || !date) return res.status(400).json({ success: false, error: 'Champs obligatoires manquants' });
+        const targetUser = await db('users').where({ id: parseInt(user_id, 10), establishment_id: req.user.establishment_id }).first('id');
+        if (!targetUser) return res.status(400).json({ success: false, error: 'Utilisateur invalide pour cet établissement.' });
         const result = await db('absences').insert({
             establishment_id: req.user.establishment_id, user_id: parseInt(user_id), user_type: user_type || 'student',
             type: type || 'absence', status: status || 'non_justifiee', date,
@@ -689,15 +717,22 @@ app.post('/api/absences', async (req, res) => {
 app.put('/api/absences/:id', async (req, res) => {
     if (!req.user) return res.status(401).json({ error: 'Non authentifié' });
     try {
+        const canManage = ['ADMINISTRATOR', 'administrateur', 'SECRETARY', 'secretaire', 'SCHOOL_LIFE_MANAGER', 'responsable vie scolaire'].includes(req.user.role);
+        if (!canManage || !req.user.establishment_id) return res.status(403).json({ error: 'Non autorisé' });
         const { status, motif, commentaire } = req.body;
-        await db('absences').where({ id: req.params.id }).update({ status: status || 'non_justifiee', motif: motif || '', commentaire: commentaire || '', updated_at: new Date() });
+        await db('absences').where({ id: req.params.id, establishment_id: req.user.establishment_id }).update({ status: status || 'non_justifiee', motif: motif || '', commentaire: commentaire || '', updated_at: new Date() });
         res.json({ success: true });
     } catch (error) { res.status(500).json({ error: error.message }); }
 });
 
 app.delete('/api/absences/:id', async (req, res) => {
     if (!req.user) return res.status(401).json({ error: 'Non authentifié' });
-    try { await db('absences').where({ id: req.params.id }).del(); res.json({ success: true }); }
+    try {
+        const canManage = ['ADMINISTRATOR', 'administrateur', 'SECRETARY', 'secretaire', 'SCHOOL_LIFE_MANAGER', 'responsable vie scolaire'].includes(req.user.role);
+        if (!canManage || !req.user.establishment_id) return res.status(403).json({ error: 'Non autorisé' });
+        await db('absences').where({ id: req.params.id, establishment_id: req.user.establishment_id }).del();
+        res.json({ success: true });
+    }
     catch (error) { res.status(500).json({ error: error.message }); }
 });
 

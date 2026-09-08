@@ -75,7 +75,7 @@
                     '<tr><td colspan="6" class="text-center py-4 text-muted">Veuillez sélectionner un enfant ci-dessus pour voir ses absences.</td></tr>';
             }
         }
-        // AUTRES : charger tout
+        // AUTRES : aucune absence personnelle à afficher
         else {
             loadAbsences();
         }
@@ -109,9 +109,11 @@
                 return;
             }
         }
-        // AUTRES : voir tout
+        // Les autres rôles n'ont pas accès aux absences personnelles.
         else {
-            url += 'user_type=student';
+            document.getElementById('absencesBody').innerHTML =
+                '<tr><td colspan="6" class="text-center py-4 text-muted">Aucune absence personnelle à afficher.</td></tr>';
+            return;
         }
         
         console.log('📊 Chargement absences:', url);

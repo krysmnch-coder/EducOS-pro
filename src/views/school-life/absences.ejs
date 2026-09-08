@@ -286,7 +286,7 @@
         var d1 = document.getElementById('filterDateDebut').value;
         var d2 = document.getElementById('filterDateFin').value;
         
-        var url = '/api/absences?user_type=' + type;
+        var url = '/api/absences?scope=management&user_type=' + type;
         if (cls && cls !== '') url += '&class_name=' + encodeURIComponent(cls);
         if (st && st !== '') url += '&status=' + encodeURIComponent(st);
         if (d1 && d1 !== '') url += '&date_debut=' + d1;
@@ -448,7 +448,7 @@
     var d1 = document.getElementById('filterDateDebut').value;
     var d2 = document.getElementById('filterDateFin').value;
     
-    var url = '/api/absences?user_type=' + type;
+    var url = '/api/absences?scope=management&user_type=' + type;
     if (cls && cls !== '') url += '&class_name=' + encodeURIComponent(cls);
     if (st && st !== '') url += '&status=' + st;
     if (d1 && d1 !== '') url += '&date_debut=' + d1;
