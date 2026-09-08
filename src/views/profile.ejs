@@ -6,6 +6,27 @@
     /* ==========================================================================
        Page Profil - Style Glassmorphism
        ========================================================================== */
+
+    body.profile-page {
+      min-height: 100vh;
+      background-position: center center;
+      background-size: cover;
+      background-attachment: fixed;
+      background-repeat: no-repeat;
+    }
+
+    body.profile-page::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.2));
+    }
+
+    html[data-theme="dark"] body.profile-page::before {
+      background: linear-gradient(180deg, rgba(10, 15, 30, 0.12), rgba(10, 15, 30, 0.35));
+    }
     
     /* Carte principale Glassmorphism */
     .glass-profile-card {
@@ -361,7 +382,7 @@
     }
   </style>
 </head>
-<body>
+<body class="profile-page">
   <div class="page-shell container-xl py-4">
     <%- include('partials/header') %>
 

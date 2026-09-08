@@ -305,6 +305,9 @@ html:not([data-theme="dark"]) #themeToggle .moon-icon { display: none; }
     }
   }
 
+  window.updateNotificationBadge = updateBadge;
+  window.refreshNotifications = loadNotifications;
+
   window.markAllAsRead = function() {
     fetch('/api/notifications/read-all', { method: 'POST' })
       .then(function() { updateBadge(0); loadNotifications(); })

@@ -64,7 +64,7 @@ const createOrUpdateGrade = async (req, res) => {
             const notificationPayload = {
                 type: 'grade',
                 title: `Nouvelle note en ${subject}`,
-                body: `La note de ${grade} a été ajoutée.`,
+                message: `La note de ${grade} a été ajoutée.`,
                 link: '/students/grades'
             };
 
