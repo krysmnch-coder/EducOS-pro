@@ -625,6 +625,23 @@
         window.notificationSocket.on('unreadNotificationUpdate', function(data) {
             handleNotificationUpdate({ unreadCount: data.count });
         });
+        window.notificationSocket.on('unreadCommunicationUpdate', function(data) {
+            window.updateNavigationBadge?.('communication', data.count);
+        });
+        window.notificationSocket.on('unreadChatUpdate', function(data) {
+            var chatBadge = document.getElementById('chat-badge');
+            if (!chatBadge) return;
+            var count = Math.max(0, parseInt(data.count, 10) || 0);
+            chatBadge.textContent = count > 99 ? '99+' : count;
+            chatBadge.style.display = count > 0 ? 'flex' : 'none';
+        });
+        window.notificationSocket.on('shortcutHighlight', function(data) {
+            if (data.shortcutKey === 'mass_communication') {
+                window.updateNavigationBadge?.('communication', 1);
+            } else if (data.shortcutKey === 'user_management') {
+                window.updateNavigationBadge?.('admin', 1);
+            }
+        });
     }
 </script>
 <script src="/js/chat-widget.js"></script>

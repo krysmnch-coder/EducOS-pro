@@ -72,6 +72,11 @@ const sendMessage = async (req, res) => {
         // 2. Animer le raccourci pour les administrateurs qui ont reçu le message
         const authIo = req.app.get('authIo');
         if (authIo) {
+          for (const id of recipientIds) {
+            const count = await communicationModel.countUnreadMessages(id);
+            authIo.to(`user_${id}`).emit('unreadCommunicationUpdate', { count });
+          }
+
             const admins = await db('users')
                 .whereIn('id', recipientIds)
                 .andWhere(function() {
@@ -94,7 +99,22 @@ const sendMessage = async (req, res) => {
 };
 
 const getUnreadCommunicationCount = (req, res) => {
-  res.json({ count: 0 });
+  communicationModel.countUnreadMessages(req.user.id)
+    .then(count => res.json({ count }))
+    .catch(error => {
+      console.error('Erreur compteur communications:', error);
+      res.status(500).json({ count: 0 });
+    });
+};
+
+const markCommunicationsAsRead = async (req, res) => {
+  try {
+    await communicationModel.markAllMessagesAsRead(req.user.id);
+    res.json({ success: true, count: 0 });
+  } catch (error) {
+    console.error('Erreur lecture communications:', error);
+    res.status(500).json({ success: false });
+  }
 };
 
 const deleteMessage = async (req, res) => {
@@ -113,4 +133,4 @@ const deleteMessage = async (req, res) => {
   }
 };
 
-module.exports = { listMessages, sendMessage, getUnreadCommunicationCount, deleteMessage };
+module.exports = { listMessages, sendMessage, getUnreadCommunicationCount, markCommunicationsAsRead, deleteMessage };

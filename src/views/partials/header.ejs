@@ -32,13 +32,13 @@
           <!-- Admin / Admins -->
           <% if (['superadmin', 'administrateur'].includes(user.role)) { %>
             <li class="nav-item nav-item-spaced">
-              <a class="nav-link d-flex flex-column align-items-center gap-1 <%= currentPath.startsWith('/admin') ? 'active' : '' %>" href="/admin">
+              <a class="nav-link d-flex flex-column align-items-center gap-1 <%= currentPath.startsWith('/admin') ? 'active' : '' %>" href="/admin" data-nav-badge-link="admin">
                 <% if (user.role === 'superadmin') { %>
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
-                  <span class="nav-text small">Admins</span>
+                  <span class="nav-text small">Admins <span class="nav-counter" id="admin-badge">0</span></span>
                 <% } else { %>
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z" /><path d="M2 17l10 5 10-5" /><path d="M2 12l10 5 10-5" /></svg>
-                  <span class="nav-text small">Admin</span>
+                  <span class="nav-text small">Admin <span class="nav-counter" id="admin-badge">0</span></span>
                 <% } %>
               </a>
             </li>
@@ -70,7 +70,7 @@
               <span class="icon-badge-wrapper">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2" /><path d="M22 7L12 13L2 7" /></svg>
               </span>
-              <span class="nav-text small">Messages</span>
+              <span class="nav-text small">Messages <span class="nav-counter" id="communication-badge">0</span></span>
             </a>
           </li>
 
@@ -185,6 +185,7 @@
 .navbar-nav .nav-item .nav-link:hover .nav-text { color: var(--hover-text-color) !important; }
 .nav-divider { color: var(--nav-divider-color); padding: 0 0.3rem; user-select: none; }
 .nav-icon-btn { display: flex; align-items: center; justify-content: center; padding: 0.6rem 0.8rem; color: #6c757d; background-color: transparent !important; border: none !important; border-radius: 0.7rem; cursor: pointer; min-width: 50px; }
+.nav-counter { display: none; min-width: 16px; height: 16px; margin-left: 0.2rem; padding: 0 0.25rem; border-radius: 999px; background: #dc3545; color: #fff; font-size: 0.6rem; line-height: 16px; text-align: center; vertical-align: middle; }
 .nav-icon-btn svg { width: 24px !important; height: 24px !important; color: #6c757d; stroke: currentColor; fill: none; stroke-width: 2; }
 .nav-icon-btn:hover { color: var(--hover-text-color) !important; }
 .nav-icon-btn:hover svg { color: var(--hover-color) !important; filter: drop-shadow(0 0 12px var(--hover-shadow-color)); }
@@ -307,6 +308,46 @@ html:not([data-theme="dark"]) #themeToggle .moon-icon { display: none; }
 
   window.updateNotificationBadge = updateBadge;
   window.refreshNotifications = loadNotifications;
+
+  window.updateNavigationBadge = function(type, count) {
+    var element = document.getElementById(type + '-badge');
+    if (!element) return;
+    var normalizedCount = Math.max(0, parseInt(count, 10) || 0);
+    element.textContent = normalizedCount > 99 ? '99+' : normalizedCount;
+    element.style.display = normalizedCount > 0 ? 'inline-block' : 'none';
+  };
+
+  function loadNavigationBadges() {
+    fetch('/admin/api/pending-count')
+      .then(function(response) { return response.json(); })
+      .then(function(data) { window.updateNavigationBadge('admin', data.count); })
+      .catch(function() {});
+    fetch('/communications/api/unread-count')
+      .then(function(response) { return response.json(); })
+      .then(function(data) { window.updateNavigationBadge('communication', data.count); })
+      .catch(function() {});
+    fetch('/chat/api/unread')
+      .then(function(response) { return response.json(); })
+      .then(function(data) {
+        var chatBadge = document.getElementById('chat-badge');
+        if (!chatBadge) return;
+        var count = Math.max(0, parseInt(data.count, 10) || 0);
+        chatBadge.textContent = count > 99 ? '99+' : count;
+        chatBadge.style.display = count > 0 ? 'flex' : 'none';
+      })
+      .catch(function() {});
+  }
+
+  loadNavigationBadges();
+
+  document.querySelector('[data-nav-badge-link="admin"]')?.addEventListener('click', function() {
+    window.updateNavigationBadge('admin', 0);
+  });
+  document.querySelector('a[href="/communications"]')?.addEventListener('click', function() {
+    fetch('/communications/api/read-all', { method: 'POST' })
+      .then(function() { window.updateNavigationBadge('communication', 0); })
+      .catch(function() {});
+  });
 
   if (document.getElementById('notificationList')) {
     document.getElementById('notificationList').addEventListener('click', function(e) {

@@ -66,6 +66,20 @@ async function countTotalMessages() {
   return result ? result.count : 0;
 }
 
+async function countUnreadMessages(userId) {
+  const result = await db('communication_recipients')
+    .where({ recipient_id: userId, is_read: false })
+    .count('id as count')
+    .first();
+  return result ? Number(result.count) : 0;
+}
+
+function markAllMessagesAsRead(userId) {
+  return db('communication_recipients')
+    .where({ recipient_id: userId, is_read: false })
+    .update({ is_read: true });
+}
+
 /**
  * Supprime une communication pour un utilisateur spécifique.
  * Cela ne supprime pas le message lui-même, mais seulement l'entrée
@@ -84,5 +98,7 @@ module.exports = {
   sendCommunication,
   getCommunicationsForUser,
   countTotalMessages,
+  countUnreadMessages,
+  markAllMessagesAsRead,
   deleteCommunicationForUser
 };

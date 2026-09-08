@@ -153,6 +153,18 @@ const renderAdmin = async (req, res) => {
     });
   }
 };
+const getPendingCount = async (req, res) => {
+  try {
+    const users = await userModel.getAllUsers();
+    const count = users.filter(user => !user.approved && (
+      req.user.role === ROLES.SUPER_ADMIN || user.establishment_id === req.user.establishment_id
+    )).length;
+    res.json({ count });
+  } catch (error) {
+    console.error('Erreur compteur admin:', error);
+    res.status(500).json({ count: 0 });
+  }
+};
 
 /**
  * Approuve un utilisateur.
@@ -238,6 +250,8 @@ const deleteUser = async (req, res) => {
 module.exports = {
   renderAdminDashboard,
   renderAdmin,
+  getPendingCount,
   approveUser,
   deleteUser
 };
+

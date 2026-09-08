@@ -7,6 +7,8 @@ const communicationController = require('../controllers/communicationController'
 router.get('/', ensureAuthenticated, communicationController.listMessages);
 // La route pour gérer l'envoi du formulaire
 router.post('/send', ensureAuthenticated, communicationController.sendMessage);
+router.get('/api/unread-count', ensureAuthenticated, communicationController.getUnreadCommunicationCount);
+router.post('/api/read-all', ensureAuthenticated, communicationController.markCommunicationsAsRead);
 // La route pour supprimer un message reçu
 router.post('/delete/:id', ensureAuthenticated, communicationController.deleteMessage);
 

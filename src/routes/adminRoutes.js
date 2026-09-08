@@ -10,6 +10,7 @@ router.use(isAuthenticated, hasRole([ROLES.ADMINISTRATOR, ROLES.SUPER_ADMIN]));
 
 // Affiche la page principale d'administration (liste des utilisateurs ou des admins)
 router.get('/', adminController.renderAdmin);
+router.get('/api/pending-count', adminController.getPendingCount);
 
 // Approuve un utilisateur
 router.post('/users/:id/approve', adminController.approveUser);
