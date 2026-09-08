@@ -3,362 +3,390 @@
 <head>
   <%- include('partials/head') %>
   <style>
-    /* ==========================================================================
-       Page Profil - Style Glassmorphism
-       ========================================================================== */
-    
-    /* Carte principale Glassmorphism */
-    .glass-profile-card {
-      background: rgba(255, 255, 255, 0.08) !important;
-      backdrop-filter: blur(12px) !important;
-      -webkit-backdrop-filter: blur(12px) !important;
-      border: 1px solid rgba(255, 255, 255, 0.15) !important;
-      border-radius: 1.25rem !important;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06) !important;
-      overflow: hidden;
-      animation: card-fade-in 0.6s ease forwards !important;
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    
-    @keyframes card-fade-in {
-      from {
-        opacity: 0;
-        transform: translateY(20px) scale(0.98);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
-    }
-    
-    [data-theme="dark"] .glass-profile-card {
-      background: rgba(255, 255, 255, 0.03) !important;
-      border: 1px solid rgba(255, 255, 255, 0.06) !important;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
-    }
-    
-    .glass-profile-card .card-body {
-      padding: 2.5rem !important;
-    }
-    
-    /* Avatar */
-    .profile-avatar-wrapper {
-      position: relative;
-      display: inline-block;
-      border-radius: 50%;
-      padding: 4px;
-      background: linear-gradient(135deg, rgba(13, 110, 253, 0.3), rgba(13, 202, 240, 0.3));
-      animation: avatar-glow 3s ease-in-out infinite;
-    }
-    
-    @keyframes avatar-glow {
-      0%, 100% {
-        box-shadow: 0 0 20px rgba(13, 110, 253, 0.1);
-      }
-      50% {
-        box-shadow: 0 0 40px rgba(13, 110, 253, 0.2);
-      }
-    }
-    
-    .profile-avatar {
-      width: 150px;
-      height: 150px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 3px solid rgba(255, 255, 255, 0.8);
-      transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    }
-    
-    [data-theme="dark"] .profile-avatar {
-      border-color: rgba(255, 255, 255, 0.1);
-    }
-    
-    .profile-avatar:hover {
-      transform: scale(1.03);
-      box-shadow: 0 0 40px rgba(13, 110, 253, 0.15);
-    }
-    
-    /* Upload label pour l'avatar */
-    .upload-label {
-      position: absolute;
-      bottom: 5px;
-      right: 5px;
-      background: rgba(13, 110, 253, 0.9);
-      color: white;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-      border: 2px solid rgba(255, 255, 255, 0.8);
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
-    }
-    
-    [data-theme="dark"] .upload-label {
-      border-color: rgba(255, 255, 255, 0.1);
-    }
-    
-    .upload-label:hover {
-      transform: scale(1.15);
-      background: rgba(13, 110, 253, 1);
-      box-shadow: 0 4px 20px rgba(13, 110, 253, 0.3);
-    }
-    
-    .upload-label svg {
-      stroke: white;
-    }
-    
-    #avatarUpload {
-      display: none;
-    }
-    
-    /* Badge de rôle */
-    .role-badge {
-      background: rgba(13, 110, 253, 0.08) !important;
-      border: 1px solid rgba(13, 110, 253, 0.15) !important;
-      padding: 0.4rem 1.2rem !important;
-      border-radius: 2rem !important;
-      font-weight: 500 !important;
-      color: var(--bs-primary, #0d6efd) !important;
-      transition: all 0.3s ease !important;
-    }
-    
-    .role-badge:hover {
-      transform: scale(1.05);
-      background: rgba(13, 110, 253, 0.15) !important;
-    }
-    
-    [data-theme="dark"] .role-badge {
-      color: #ffffff !important;
-      background: rgba(255, 255, 255, 0.05) !important;
-      border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    }
-    
-    [data-theme="dark"] .role-badge:hover {
-      background: rgba(255, 255, 255, 0.1) !important;
-    }
-    
-    /* Titres */
-    .profile-title {
-      color: var(--text-color, #212529);
-      font-weight: 700;
-      animation: title-slide 0.6s ease forwards !important;
-      opacity: 0;
-      transform: translateX(-10px);
-    }
-    
-    @keyframes title-slide {
-      from {
-        opacity: 0;
-        transform: translateX(-10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
-    }
-    
-    .profile-subtitle {
-      color: var(--text-muted, #6c757d);
-    }
-    
-    /* Formulaires */
-    .glass-form .form-label {
-      font-weight: 500;
-      color: var(--text-color, #212529);
-    }
-    
-    .glass-form .form-control {
-      background: rgba(255, 255, 255, 0.06) !important;
-      border: 1px solid rgba(255, 255, 255, 0.12) !important;
-      border-radius: 0.75rem !important;
-      color: var(--text-color, #212529) !important;
-      transition: all 0.3s ease !important;
-      padding: 0.6rem 1rem !important;
-    }
-    
-    .glass-form .form-control:focus {
-      background: rgba(255, 255, 255, 0.1) !important;
-      border-color: var(--bs-primary, #0d6efd) !important;
-      box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15) !important;
-    }
-    
-    .glass-form .form-control:disabled,
-    .glass-form .form-control[readonly] {
-      background: rgba(255, 255, 255, 0.03) !important;
-      opacity: 0.7;
-      cursor: not-allowed;
-    }
-    
-    [data-theme="dark"] .glass-form .form-control {
-      background: rgba(255, 255, 255, 0.04) !important;
-      border: 1px solid rgba(255, 255, 255, 0.08) !important;
-      color: #e4e4e4 !important;
-    }
-    
-    [data-theme="dark"] .glass-form .form-control:focus {
-      background: rgba(255, 255, 255, 0.08) !important;
-      border-color: #ffffff !important;
-      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1) !important;
-    }
-    
-    [data-theme="dark"] .glass-form .form-control:disabled,
-    [data-theme="dark"] .glass-form .form-control[readonly] {
-      background: rgba(255, 255, 255, 0.02) !important;
-    }
-    
-    .glass-form .form-text {
-      color: var(--text-muted, #6c757d) !important;
-      font-size: 0.8rem;
-    }
-    
-    /* Bouton d'enregistrement */
-    .glass-btn-save {
-      background: linear-gradient(135deg, rgba(13, 110, 253, 0.15), rgba(13, 202, 240, 0.15)) !important;
-      backdrop-filter: blur(8px) !important;
-      -webkit-backdrop-filter: blur(8px) !important;
-      border: 1px solid rgba(13, 110, 253, 0.2) !important;
-      border-radius: 0.75rem !important;
-      padding: 0.6rem 2rem !important;
-      font-weight: 600 !important;
-      transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
-      color: var(--bs-primary, #0d6efd) !important;
-    }
-    
-    .glass-btn-save:hover {
-      transform: translateY(-2px) scale(1.02) !important;
-      box-shadow: 0 8px 30px rgba(13, 110, 253, 0.2) !important;
-      border-color: var(--bs-primary, #0d6efd) !important;
-      background: linear-gradient(135deg, rgba(13, 110, 253, 0.25), rgba(13, 202, 240, 0.25)) !important;
-    }
-    
-    [data-theme="dark"] .glass-btn-save {
-      color: #ffffff !important;
-      border: 1px solid rgba(255, 255, 255, 0.15) !important;
-      background: rgba(255, 255, 255, 0.05) !important;
-    }
-    
-    [data-theme="dark"] .glass-btn-save:hover {
-      background: rgba(255, 255, 255, 0.1) !important;
-      box-shadow: 0 8px 30px rgba(255, 255, 255, 0.1) !important;
-      border-color: #ffffff !important;
-    }
-    
-    /* Bouton supprimer avatar */
-    .btn-outline-danger {
-      background: rgba(220, 53, 69, 0.05) !important;
-      border: 1px solid rgba(220, 53, 69, 0.15) !important;
-      border-radius: 0.5rem !important;
-      transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
-      color: #dc3545 !important;
-    }
-    
-    .btn-outline-danger:hover:not(:disabled) {
-      background: rgba(220, 53, 69, 0.15) !important;
-      transform: translateY(-2px) scale(1.02) !important;
-      box-shadow: 0 4px 15px rgba(220, 53, 69, 0.15) !important;
-    }
-    
-    .btn-outline-danger:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-    }
-    
-    [data-theme="dark"] .btn-outline-danger {
-      color: #ff6b6b !important;
-      border-color: rgba(255, 107, 107, 0.15) !important;
-    }
-    
-    [data-theme="dark"] .btn-outline-danger:hover:not(:disabled) {
-      background: rgba(255, 107, 107, 0.15) !important;
-    }
-    
-    /* Titre de section */
-    .section-title {
-      color: var(--text-color, #212529);
-      font-weight: 600;
-      position: relative;
-      padding-bottom: 0.5rem;
-    }
-    
-    .section-title::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 50px;
-      height: 3px;
-      background: linear-gradient(90deg, var(--bs-primary, #0d6efd), var(--bs-info, #0dcaf0));
-      border-radius: 10px;
-    }
-    
-    [data-theme="dark"] .section-title {
-      color: #e4e4e4;
-    }
-    
-    /* Animation des éléments du formulaire */
-    .form-group-animated {
-      animation: form-fade 0.5s ease forwards !important;
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    
-    @keyframes form-fade {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-    
-    .form-group-animated:nth-child(1) { animation-delay: 0.1s; }
-    .form-group-animated:nth-child(2) { animation-delay: 0.2s; }
-    .form-group-animated:nth-child(3) { animation-delay: 0.3s; }
-    .form-group-animated:nth-child(4) { animation-delay: 0.4s; }
-    
-    /* Adaptation mobile */
-    @media (max-width: 768px) {
-      .glass-profile-card .card-body {
-        padding: 1.25rem !important;
-      }
-      
-      .profile-avatar {
-        width: 120px;
-        height: 120px;
-      }
-      
-      .upload-label {
-        width: 34px;
-        height: 34px;
-        bottom: 2px;
-        right: 2px;
-      }
-      
-      .upload-label svg {
-        width: 14px;
-        height: 14px;
-      }
-    }
-    
-    @media (max-width: 576px) {
-      .profile-avatar {
-        width: 100px;
-        height: 100px;
-      }
-      
-      .glass-btn-save {
-        width: 100%;
-        justify-content: center;
-      }
-    }
+   /* ==========================================================================
+   Page Profil - Style Glassmorphism
+   ========================================================================== */
+
+body.profile-page {
+  min-height: 100vh;
+  background-position: center center;
+  background-size: cover;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+}
+
+body.profile-page::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.2));
+}
+
+html[data-theme="dark"] body.profile-page::before {
+  background: linear-gradient(180deg, rgba(10, 15, 30, 0.12), rgba(10, 15, 30, 0.35));
+}
+
+/* Carte principale Glassmorphism */
+.glass-profile-card {
+  background: rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 1.25rem !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06) !important;
+  overflow: hidden;
+  animation: card-fade-in 0.6s ease forwards !important;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+@keyframes card-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+[data-theme="dark"] .glass-profile-card {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+}
+
+.glass-profile-card .card-body {
+  padding: 2.5rem !important;
+}
+
+/* Avatar - Version corrigée */
+.profile-avatar-wrapper {
+  position: relative;
+  display: inline-block;
+  border-radius: 50%;
+  padding: 4px;
+  background: linear-gradient(135deg, rgba(13, 110, 253, 0.3), rgba(13, 202, 240, 0.3));
+  animation: avatar-glow 3s ease-in-out infinite;
+  width: 158px;
+  height: 158px;
+  line-height: 0;
+}
+
+@keyframes avatar-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(13, 110, 253, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(13, 110, 253, 0.2);
+  }
+}
+
+.profile-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid rgba(255, 255, 255, 0.8);
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  display: block;
+  margin: 0;
+  padding: 0;
+}
+
+[data-theme="dark"] .profile-avatar {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.profile-avatar:hover {
+  transform: scale(1.03);
+  box-shadow: 0 0 40px rgba(13, 110, 253, 0.15);
+}
+
+/* Upload label pour l'avatar */
+.upload-label {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  background: rgba(13, 110, 253, 0.9);
+  color: white;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 2;
+}
+
+[data-theme="dark"] .upload-label {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.upload-label:hover {
+  transform: scale(1.15);
+  background: rgba(13, 110, 253, 1);
+  box-shadow: 0 4px 20px rgba(13, 110, 253, 0.3);
+}
+
+.upload-label svg {
+  stroke: white;
+}
+
+#avatarUpload {
+  display: none;
+}
+
+/* Badge de rôle */
+.role-badge {
+  background: rgba(13, 110, 253, 0.08) !important;
+  border: 1px solid rgba(13, 110, 253, 0.15) !important;
+  padding: 0.4rem 1.2rem !important;
+  border-radius: 2rem !important;
+  font-weight: 500 !important;
+  color: var(--bs-primary, #0d6efd) !important;
+  transition: all 0.3s ease !important;
+}
+
+.role-badge:hover {
+  transform: scale(1.05);
+  background: rgba(13, 110, 253, 0.15) !important;
+}
+
+[data-theme="dark"] .role-badge {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .role-badge:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Titres */
+.profile-title {
+  color: var(--text-color, #212529);
+  font-weight: 700;
+  animation: title-slide 0.6s ease forwards !important;
+  opacity: 0;
+  transform: translateX(-10px);
+}
+
+@keyframes title-slide {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.profile-subtitle {
+  color: var(--text-muted, #6c757d);
+}
+
+/* Formulaires */
+.glass-form .form-label {
+  font-weight: 500;
+  color: var(--text-color, #212529);
+}
+
+.glass-form .form-control {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 0.75rem !important;
+  color: var(--text-color, #212529) !important;
+  transition: all 0.3s ease !important;
+  padding: 0.6rem 1rem !important;
+}
+
+.glass-form .form-control:focus {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: var(--bs-primary, #0d6efd) !important;
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15) !important;
+}
+
+.glass-form .form-control:disabled,
+.glass-form .form-control[readonly] {
+  background: rgba(255, 255, 255, 0.03) !important;
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+[data-theme="dark"] .glass-form .form-control {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #e4e4e4 !important;
+}
+
+[data-theme="dark"] .glass-form .form-control:focus {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: #ffffff !important;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme="dark"] .glass-form .form-control:disabled,
+[data-theme="dark"] .glass-form .form-control[readonly] {
+  background: rgba(255, 255, 255, 0.02) !important;
+}
+
+.glass-form .form-text {
+  color: var(--text-muted, #6c757d) !important;
+  font-size: 0.8rem;
+}
+
+/* Bouton d'enregistrement */
+.glass-btn-save {
+  background: linear-gradient(135deg, rgba(13, 110, 253, 0.15), rgba(13, 202, 240, 0.15)) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(13, 110, 253, 0.2) !important;
+  border-radius: 0.75rem !important;
+  padding: 0.6rem 2rem !important;
+  font-weight: 600 !important;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+  color: var(--bs-primary, #0d6efd) !important;
+}
+
+.glass-btn-save:hover {
+  transform: translateY(-2px) scale(1.02) !important;
+  box-shadow: 0 8px 30px rgba(13, 110, 253, 0.2) !important;
+  border-color: var(--bs-primary, #0d6efd) !important;
+  background: linear-gradient(135deg, rgba(13, 110, 253, 0.25), rgba(13, 202, 240, 0.25)) !important;
+}
+
+[data-theme="dark"] .glass-btn-save {
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+[data-theme="dark"] .glass-btn-save:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 8px 30px rgba(255, 255, 255, 0.1) !important;
+  border-color: #ffffff !important;
+}
+
+/* Bouton supprimer avatar */
+.btn-outline-danger {
+  background: rgba(220, 53, 69, 0.05) !important;
+  border: 1px solid rgba(220, 53, 69, 0.15) !important;
+  border-radius: 0.5rem !important;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+  color: #dc3545 !important;
+}
+
+.btn-outline-danger:hover:not(:disabled) {
+  background: rgba(220, 53, 69, 0.15) !important;
+  transform: translateY(-2px) scale(1.02) !important;
+  box-shadow: 0 4px 15px rgba(220, 53, 69, 0.15) !important;
+}
+
+.btn-outline-danger:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+[data-theme="dark"] .btn-outline-danger {
+  color: #ff6b6b !important;
+  border-color: rgba(255, 107, 107, 0.15) !important;
+}
+
+[data-theme="dark"] .btn-outline-danger:hover:not(:disabled) {
+  background: rgba(255, 107, 107, 0.15) !important;
+}
+
+/* Titre de section */
+.section-title {
+  color: var(--text-color, #212529);
+  font-weight: 600;
+  position: relative;
+  padding-bottom: 0.5rem;
+}
+
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 50px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--bs-primary, #0d6efd), var(--bs-info, #0dcaf0));
+  border-radius: 10px;
+}
+
+[data-theme="dark"] .section-title {
+  color: #e4e4e4;
+}
+
+/* Animation des éléments du formulaire */
+.form-group-animated {
+  animation: form-fade 0.5s ease forwards !important;
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+@keyframes form-fade {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.form-group-animated:nth-child(1) { animation-delay: 0.1s; }
+.form-group-animated:nth-child(2) { animation-delay: 0.2s; }
+.form-group-animated:nth-child(3) { animation-delay: 0.3s; }
+.form-group-animated:nth-child(4) { animation-delay: 0.4s; }
+
+/* Adaptation mobile */
+@media (max-width: 768px) {
+  .glass-profile-card .card-body {
+    padding: 1.25rem !important;
+  }
+  
+  .profile-avatar-wrapper {
+    width: 128px;
+    height: 128px;
+  }
+  
+  .upload-label {
+    width: 34px;
+    height: 34px;
+    bottom: 2px;
+    right: 2px;
+  }
+  
+  .upload-label svg {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+@media (max-width: 576px) {
+  .profile-avatar-wrapper {
+    width: 108px;
+    height: 108px;
+  }
+  
+  .glass-btn-save {
+    width: 100%;
+    justify-content: center;
+  }
+}
   </style>
 </head>
 <body>
