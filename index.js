@@ -1,5 +1,11 @@
 const dotenv = require('dotenv');
 dotenv.config();
+
+// Utilise le fuseau du système par défaut ; TZ permet de le préciser en production.
+if (!process.env.TZ) {
+    process.env.TZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
+}
+
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
