@@ -42,3 +42,75 @@
     --#{$key}: #{$value};
     }
 }
+
+body {
+  background-color: var(--body-bg);
+  color: var(--body-color);
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+body,
+.card,
+.modal-content,
+.dropdown-menu,
+.list-group-item,
+.table,
+.table thead,
+.table tbody,
+.table tfoot,
+.form-control,
+.form-select,
+.input-group-text {
+  border-color: var(--surface-border);
+}
+
+.card,
+.modal-content,
+.list-group-item,
+.input-group-text {
+  background-color: var(--surface-bg);
+  color: var(--body-color);
+}
+
+.table {
+  color: var(--body-color);
+  --bs-table-bg: transparent;
+  --bs-table-color: var(--body-color);
+  --bs-table-border-color: var(--surface-border);
+}
+
+.form-control,
+.form-select,
+.input-group-text {
+  background-color: var(--control-bg);
+  color: var(--control-color);
+}
+
+.form-control::placeholder {
+  color: var(--control-placeholder);
+}
+
+.form-control:focus,
+.form-select:focus {
+  background-color: var(--control-bg);
+  color: var(--control-color);
+}
+
+[data-theme="dark"] .text-dark,
+[data-theme="dark"] .text-body,
+[data-theme="dark"] .text-muted {
+  color: var(--body-color) !important;
+}
+
+[data-theme="dark"] .bg-white,
+[data-theme="dark"] .bg-light {
+  background-color: var(--surface-bg) !important;
+}
+
+[data-theme="dark"] .border,
+[data-theme="dark"] .border-top,
+[data-theme="dark"] .border-end,
+[data-theme="dark"] .border-bottom,
+[data-theme="dark"] .border-start {
+  border-color: var(--surface-border) !important;
+}

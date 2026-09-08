@@ -244,51 +244,6 @@ html:not([data-theme="dark"]) #themeToggle .moon-icon { display: none; }
   'use strict';
   
   // ========================================================================
-  // GESTION DU THÈME
-  // ========================================================================
-  function setTheme(theme) {
-    if (theme === 'dark') {
-      document.documentElement.setAttribute('data-theme', 'dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.removeAttribute('data-theme');
-      localStorage.setItem('theme', 'light');
-    }
-  }
-  
-  function toggleTheme() {
-    var currentTheme = localStorage.getItem('theme') || 'light';
-    var newTheme = currentTheme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-  }
-  
-  function applySavedTheme() {
-    var savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-      document.documentElement.setAttribute('data-theme', 'dark');
-    } else {
-      document.documentElement.removeAttribute('data-theme');
-    }
-  }
-  
-  // Appliquer immédiatement
-  applySavedTheme();
-  
-  document.addEventListener('DOMContentLoaded', function() {
-    var themeToggle = document.getElementById('themeToggle');
-    if (themeToggle) {
-      themeToggle.addEventListener('click', function(e) {
-        e.preventDefault();
-        toggleTheme();
-      });
-    }
-  });
-  
-  window.addEventListener('storage', function(e) {
-    if (e.key === 'theme') applySavedTheme();
-  });
-
-  // ========================================================================
   // POPUP NOTIFICATIONS
   // ========================================================================
   var btn = document.getElementById('notificationBtn');

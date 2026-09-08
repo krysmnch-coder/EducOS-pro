@@ -34,7 +34,13 @@ $theme-light: (
   "chat-input-border-color": #dee2e6,
   "chat-input-color": #212529,
   "chat-input-placeholder-color": #6c757d,
-  "online-status-border-color": $white-color
+  "online-status-border-color": $white-color,
+  "surface-bg": $white-color,
+  "surface-subtle-bg": #f8f9fa,
+  "surface-border": #dee2e6,
+  "control-bg": $white-color,
+  "control-color": #212529,
+  "control-placeholder": #6c757d
 );
 
 // Variables pour le thème sombre
@@ -64,5 +70,11 @@ $theme-dark: (
   "chat-input-border-color": #3d3d5c,
   "chat-input-color": #e0e0e0,
   "chat-input-placeholder-color": #8888aa,
-  "online-status-border-color": #16213e
+  "online-status-border-color": #16213e,
+  "surface-bg": #16213e,
+  "surface-subtle-bg": #1a1a2e,
+  "surface-border": #2d2d44,
+  "control-bg": #2d2d44,
+  "control-color": #e0e0e0,
+  "control-placeholder": #8888aa
 );

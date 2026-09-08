@@ -1,63 +1,66 @@
 (function() {
-    /**
-     * Détermine le thème initial à appliquer.
-     * Priorité : 1. Thème sauvegardé dans localStorage, 2. Préférence système, 3. Thème clair par défaut.
-     * @returns {'light' | 'dark'}
-     */
-    function getInitialTheme() {
+    'use strict';
+
+    const storageKey = 'theme';
+    const validThemes = ['light', 'dark'];
+
+    function getStoredTheme() {
         try {
-            const storedTheme = localStorage.getItem('theme');
-            if (storedTheme) {
-                return storedTheme;
+            const storedTheme = localStorage.getItem(storageKey);
+            return validThemes.includes(storedTheme) ? storedTheme : null;
+        } catch (error) {
+            return null;
+        }
+    }
+
+    function getInitialTheme() {
+        // Clair par défaut ; le choix enregistré par l'utilisateur reste prioritaire.
+        return getStoredTheme() || 'light';
+    }
+
+    function applyTheme(theme, persist = false) {
+        const normalizedTheme = validThemes.includes(theme) ? theme : 'light';
+        const root = document.documentElement;
+
+        root.setAttribute('data-theme', normalizedTheme);
+        root.setAttribute('data-bs-theme', normalizedTheme);
+        document.body?.classList.toggle('dark-mode', normalizedTheme === 'dark');
+
+        document.querySelectorAll('[data-theme-toggle], #themeToggle, #theme-toggle-btn').forEach(button => {
+            button.setAttribute('aria-pressed', String(normalizedTheme === 'dark'));
+            button.setAttribute('aria-label', normalizedTheme === 'dark' ? 'Activer le thème clair' : 'Activer le thème sombre');
+            button.setAttribute('title', normalizedTheme === 'dark' ? 'Activer le thème clair' : 'Activer le thème sombre');
+        });
+
+        if (persist) {
+            try {
+                localStorage.setItem(storageKey, normalizedTheme);
+            } catch (error) {
+                // Le thème reste fonctionnel même si le stockage est indisponible.
             }
-        } catch (e) {
-            // Si localStorage n'est pas accessible, on continue sans erreur.
         }
-        
-        // Vérifie la préférence système de l'utilisateur
-        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            return 'dark';
-        }
-
-        return 'light'; // Thème par défaut si rien n'est trouvé
     }
 
-    /**
-     * Applique un thème donné à l'élément <html>.
-     * @param {'light' | 'dark'} theme 
-     */
-    function applyTheme(theme) {
-        document.documentElement.setAttribute('data-theme', theme); // Pour vos styles personnalisés
-        document.documentElement.setAttribute('data-bs-theme', theme); // Pour les composants Bootstrap
+    function toggleTheme() {
+        const currentTheme = document.documentElement.getAttribute('data-theme') || getInitialTheme();
+        applyTheme(currentTheme === 'dark' ? 'light' : 'dark', true);
     }
 
-    /**
-     * --- 1. Application instantanée du thème ---
-     * S'exécute immédiatement pour éviter le "Flash of Unstyled Content" (FOUC).
-     */
-    const initialTheme = getInitialTheme();
-    applyTheme(initialTheme);
+    applyTheme(getInitialTheme());
 
-    /**
-     * --- 2. Logique du bouton de bascule ---
-     * Cette partie attend que la page soit complètement chargée pour attacher l'écouteur d'événement.
-     */
     document.addEventListener('DOMContentLoaded', () => {
-        const themeToggle = document.getElementById('themeToggle');
-
-        if (themeToggle) {
-            themeToggle.addEventListener('click', () => {
-                const currentTheme = document.documentElement.getAttribute('data-theme');
-                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-                
-                applyTheme(newTheme);
-
-                try {
-                    localStorage.setItem('theme', newTheme);
-                } catch (e) {
-                    console.error('Impossible de sauvegarder le thème dans le localStorage :', e);
-                }
+        document.querySelectorAll('[data-theme-toggle], #themeToggle, #theme-toggle-btn').forEach(button => {
+            if (button.dataset.themeBound === 'true') return;
+            button.dataset.themeBound = 'true';
+            button.addEventListener('click', event => {
+                event.preventDefault();
+                toggleTheme();
             });
-        }
+        });
+        applyTheme(document.documentElement.getAttribute('data-theme') || getInitialTheme());
+    });
+
+    window.addEventListener('storage', event => {
+        if (event.key === storageKey) applyTheme(event.newValue || getInitialTheme());
     });
 })();
