@@ -170,6 +170,56 @@
       margin: 0 -0.5rem;
     }
 
+    .notification-item.unread {
+      background: rgba(13, 110, 253, 0.06);
+      box-shadow: inset 3px 0 0 var(--bs-primary, #0d6efd);
+    }
+
+    .notification-item.is-updating {
+      opacity: 0.55;
+      pointer-events: none;
+    }
+
+    .notification-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.25rem;
+    }
+
+    .notification-filter {
+      display: inline-flex;
+      gap: 0.25rem;
+      padding: 0.25rem;
+      border: 1px solid var(--surface-border, #dee2e6);
+      border-radius: 0.75rem;
+      background: var(--surface-subtle-bg, #f8f9fa);
+    }
+
+    .notification-filter button {
+      border: 0;
+      border-radius: 0.55rem;
+      padding: 0.45rem 0.75rem;
+      background: transparent;
+      color: var(--body-color, #212529);
+      font-size: 0.8rem;
+    }
+
+    .notification-filter button.active {
+      background: var(--bs-primary, #0d6efd);
+      color: #fff;
+    }
+
+    .mark-read-btn {
+      border: 0;
+      background: transparent;
+      color: var(--bs-primary, #0d6efd);
+      font-size: 0.75rem;
+      padding: 0.35rem;
+      white-space: nowrap;
+    }
+
     .notification-item:last-child {
       border-bottom: none;
     }
@@ -184,6 +234,10 @@
 
     [data-theme="dark"] .notification-item:hover {
       background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    [data-theme="dark"] .notification-item.unread {
+      background: rgba(77, 171, 247, 0.12);
     }
 
     [data-theme="light"] .notification-item {
@@ -341,8 +395,21 @@
             </div>
             <span class="badge bg-primary">
               <i data-feather="bell" class="me-1" style="width: 12px; height: 12px;"></i>
-              <%= typeof notifications !== 'undefined' ? notifications.length : 0 %>
+              <%= typeof unreadCount !== 'undefined' ? unreadCount : 0 %>
             </span>
+          </div>
+
+          <div class="notification-actions">
+            <div class="notification-filter" role="tablist" aria-label="Filtrer les notifications">
+              <button type="button" class="active" data-filter="all">Toutes</button>
+              <button type="button" data-filter="unread">Non lues</button>
+            </div>
+            <% if (typeof unreadCount !== 'undefined' && unreadCount > 0) { %>
+              <button type="button" class="btn btn-sm btn-outline-primary ms-auto" id="mark-all-read">
+                <i data-feather="check-circle" class="me-1" style="width: 14px; height: 14px;"></i>
+                Tout marquer comme lu
+              </button>
+            <% } %>
           </div>
 
           <% if (typeof notifications !== 'undefined' && notifications.length > 0) { %>
@@ -359,7 +426,7 @@
                     case 'communication': icon = 'send'; break;
                   }
                 %>
-                <a href="<%= notification.link || '#' %>" class="notification-item">
+                <a href="<%= notification.link || '#' %>" class="notification-item <%= notification.is_read ? '' : 'unread' %>" data-notification-id="<%= notification.id %>" data-read="<%= notification.is_read ? 'true' : 'false' %>">
                   <div class="notification-icon">
                     <i data-feather="<%= icon %>"></i>
                   </div>
@@ -371,6 +438,9 @@
                   </div>
                   <% if (!notification.is_read) { %>
                     <span class="notification-dot"></span>
+                    <button type="button" class="mark-read-btn" data-mark-read aria-label="Marquer comme lue">
+                      <i data-feather="check" style="width: 15px; height: 15px;"></i>
+                    </button>
                   <% } %>
                 </a>
               <% }) %>
@@ -395,9 +465,73 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // Remplacer les icônes Feather
       if (typeof feather !== 'undefined') {
         feather.replace();
+      }
+
+      const notificationItems = Array.from(document.querySelectorAll('[data-notification-id]'));
+      const filterButtons = Array.from(document.querySelectorAll('[data-filter]'));
+      const counter = document.querySelector('.glass-notif-card .badge');
+      const markAllButton = document.getElementById('mark-all-read');
+
+      function updateCounter() {
+        const unreadCount = notificationItems.filter(item => item.dataset.read !== 'true').length;
+        if (counter) counter.lastChild.textContent = ` ${unreadCount}`;
+        if (markAllButton && unreadCount === 0) markAllButton.remove();
+      }
+
+      function applyFilter(filter) {
+        notificationItems.forEach(item => {
+          item.hidden = filter === 'unread' && item.dataset.read === 'true';
+        });
+        filterButtons.forEach(button => button.classList.toggle('active', button.dataset.filter === filter));
+      }
+
+      filterButtons.forEach(button => {
+        button.addEventListener('click', () => applyFilter(button.dataset.filter));
+      });
+
+      notificationItems.forEach(item => {
+        const markReadButton = item.querySelector('[data-mark-read]');
+        if (!markReadButton) return;
+
+        markReadButton.addEventListener('click', async event => {
+          event.preventDefault();
+          event.stopPropagation();
+          item.classList.add('is-updating');
+          try {
+            const response = await fetch(`/notifications/api/${item.dataset.notificationId}/read`, { method: 'POST' });
+            if (!response.ok) throw new Error('Impossible de marquer la notification.');
+            item.dataset.read = 'true';
+            item.classList.remove('unread');
+            markReadButton.remove();
+            item.querySelector('.notification-dot')?.remove();
+            updateCounter();
+          } catch (error) {
+            item.classList.remove('is-updating');
+            console.error(error);
+          }
+        });
+      });
+
+      if (markAllButton) {
+        markAllButton.addEventListener('click', async () => {
+          markAllButton.disabled = true;
+          try {
+            const response = await fetch('/notifications/api/read-all', { method: 'POST' });
+            if (!response.ok) throw new Error('Impossible de marquer les notifications.');
+            notificationItems.forEach(item => {
+              item.dataset.read = 'true';
+              item.classList.remove('unread');
+              item.querySelector('[data-mark-read]')?.remove();
+              item.querySelector('.notification-dot')?.remove();
+            });
+            updateCounter();
+          } catch (error) {
+            markAllButton.disabled = false;
+            console.error(error);
+          }
+        });
       }
     });
   </script>

@@ -42,7 +42,11 @@ const getAllNotifications = async (req, res) => {
         const notifications = await notificationModel.getAllNotifications(req.user.id);
         res.render('notifications', {
             title: 'Notifications',
-            notifications: notifications,
+            notifications: notifications.map(notification => ({
+                ...notification,
+                timeAgo: notificationModel.formatTimeAgo(notification.created_at)
+            })),
+            unreadCount: notifications.filter(notification => !notification.is_read).length,
             user: req.user
         });
     } catch (error) {
