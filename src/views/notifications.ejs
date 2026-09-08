@@ -564,6 +564,28 @@
       notificationItems.forEach(item => {
         const markReadButton = item.querySelector('[data-mark-read]');
         const deleteButton = item.querySelector('[data-delete-notification]');
+        const notificationLink = item.querySelector('.notification-link');
+
+        if (notificationLink && item.dataset.read !== 'true') notificationLink.addEventListener('click', async event => {
+          event.preventDefault();
+          const targetUrl = notificationLink.href;
+          item.classList.add('is-updating');
+          try {
+            const response = await fetch(`/notifications/api/${item.dataset.notificationId}/read`, { method: 'POST' });
+            if (!response.ok) throw new Error('Impossible de marquer la notification.');
+            const data = await response.json();
+            item.dataset.read = 'true';
+            item.classList.remove('unread', 'is-updating');
+            item.querySelector('[data-mark-read]')?.remove();
+            item.querySelector('.notification-dot')?.remove();
+            updateCounter();
+            window.location.href = targetUrl;
+          } catch (error) {
+            item.classList.remove('is-updating');
+            console.error(error);
+            window.location.href = targetUrl;
+          }
+        });
 
         if (markReadButton) markReadButton.addEventListener('click', async event => {
           event.preventDefault();

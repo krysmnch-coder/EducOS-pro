@@ -101,7 +101,7 @@
             
             <div class="notification-popup" id="notificationPopup">
               <div class="notification-popup-header">
-                <h6>🔔 Notifications</h6>
+                <h6>Notifications</h6>
                 <button class="btn btn-sm btn-outline-primary" onclick="markAllAsRead()">Tout lu</button>
               </div>
               <div class="notification-list" id="notificationList">
@@ -278,7 +278,7 @@ html:not([data-theme="dark"]) #themeToggle .moon-icon { display: none; }
     var list = document.getElementById('notificationList');
     if (!list) return;
     list.innerHTML = '<div class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary"></div></div>';
-    fetch('/api/notifications/recent')
+    fetch('/notifications/api/recent')
       .then(function(r) { return r.json(); })
       .then(function(data) { renderNotifications(data.notifications || [], data.unreadCount || 0); })
       .catch(function() { renderNotifications([], 0); });
@@ -289,12 +289,11 @@ html:not([data-theme="dark"]) #themeToggle .moon-icon { display: none; }
     if (!list) return;
     updateBadge(unreadCount);
     if (!notifs || notifs.length === 0) {
-      list.innerHTML = '<div class="notification-empty">🔔<p class="small mt-1 mb-0">Aucune notification</p></div>';
+      list.innerHTML = '<div class="notification-empty"><p class="small mt-1 mb-0">Aucune notification</p></div>';
       return;
     }
-    var icons = { success: '✅', warning: '⚠️', danger: '❌', info: '📢' };
     list.innerHTML = notifs.map(function(n) {
-      return '<a href="' + (n.link || '#') + '" class="notification-item' + (n.unread ? ' unread' : '') + '"><div class="notification-icon-circle ' + (n.type || 'info') + '">' + (icons[n.type] || '📢') + '</div><div class="notification-content"><div class="notif-title">' + escapeHtml(n.title) + '</div><div class="notif-msg">' + escapeHtml(n.message) + '</div><div class="notif-time">' + escapeHtml(n.time) + '</div></div>' + (n.unread ? '<div class="notification-dot"></div>' : '') + '</a>';
+      return '<a href="' + (n.link || '#') + '" class="notification-item' + (n.unread ? ' unread' : '') + '" data-notification-id="' + escapeHtml(n.id) + '" data-read="' + (n.unread ? 'false' : 'true') + '"><div class="notification-content"><div class="notif-title">' + escapeHtml(n.title) + '</div><div class="notif-msg">' + escapeHtml(n.message) + '</div><div class="notif-time">' + escapeHtml(n.time) + '</div></div>' + (n.unread ? '<div class="notification-dot"></div>' : '') + '</a>';
     }).join('');
   }
 
@@ -309,8 +308,34 @@ html:not([data-theme="dark"]) #themeToggle .moon-icon { display: none; }
   window.updateNotificationBadge = updateBadge;
   window.refreshNotifications = loadNotifications;
 
+  if (document.getElementById('notificationList')) {
+    document.getElementById('notificationList').addEventListener('click', function(e) {
+      var item = e.target.closest('[data-notification-id]');
+      if (!item || item.dataset.read === 'true') return;
+      e.preventDefault();
+      var targetUrl = item.href;
+      item.classList.add('is-updating');
+      fetch('/notifications/api/' + encodeURIComponent(item.dataset.notificationId) + '/read', { method: 'POST' })
+        .then(function(response) {
+          if (!response.ok) throw new Error('Impossible de marquer la notification comme lue.');
+          return response.json().then(function(data) {
+            item.dataset.read = 'true';
+            item.classList.remove('unread', 'is-updating');
+            item.querySelector('.notification-dot')?.remove();
+            updateBadge(data.unreadCount);
+            window.location.href = targetUrl;
+          });
+        })
+        .catch(function(error) {
+          item.classList.remove('is-updating');
+          console.error(error);
+          window.location.href = targetUrl;
+        });
+    });
+  }
+
   window.markAllAsRead = function() {
-    fetch('/api/notifications/read-all', { method: 'POST' })
+    fetch('/notifications/api/read-all', { method: 'POST' })
       .then(function() { updateBadge(0); loadNotifications(); })
       .catch(function() { updateBadge(0); });
   };
@@ -318,7 +343,7 @@ html:not([data-theme="dark"]) #themeToggle .moon-icon { display: none; }
   function escapeHtml(t) { if (!t) return ''; var d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
 
   // Charger le badge au démarrage
-  fetch('/api/notifications/unread-count')
+  fetch('/notifications/api/unread-count')
     .then(function(r) { return r.json(); })
     .then(function(data) { updateBadge(data.count || 0); })
     .catch(function() {});

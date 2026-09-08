@@ -621,7 +621,7 @@
                 window.refreshNotifications();
             }
         }
-        window.notificationSocket.on('newNotification', handleNotificationUpdate);
+    window.notificationSocket.on('newNotification', handleNotificationUpdate);
         window.notificationSocket.on('unreadNotificationUpdate', function(data) {
             handleNotificationUpdate({ unreadCount: data.count });
         });

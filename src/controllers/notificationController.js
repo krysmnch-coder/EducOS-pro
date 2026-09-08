@@ -22,7 +22,8 @@ const getUnreadCount = async (req, res) => {
 const markAsRead = async (req, res) => {
     try {
         await notificationModel.markAsRead(req.params.id, req.user.id);
-        res.json({ success: true });
+        const unreadCount = await notificationModel.getUnreadCount(req.user.id);
+        res.json({ success: true, unreadCount });
     } catch (error) {
         res.status(500).json({ success: false });
     }
