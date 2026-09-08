@@ -66,7 +66,7 @@
     box-shadow: 0 8px 32px rgba(13, 110, 253, 0.3);
     color: white;
     cursor: pointer;
-    z-index: 1050;
+    z-index: 2000 !important;
     transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     display: flex;
     align-items: center;
@@ -138,7 +138,7 @@
     border-radius: 1.25rem !important;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15) !important;
     overflow: hidden;
-    z-index: 1051;
+    z-index: 2001 !important;
     display: none;
     flex-direction: column;
     animation: panel-slide-up 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -586,6 +586,21 @@
     .chat-conversation-item .conv-avatar {
         width: 34px;
         height: 34px;
+    }
+}
+
+/* Le widget reste au-dessus des contenus et des navigations de chaque page. */
+@media (max-width: 575.98px) {
+    .chat-float-btn {
+        right: max(1rem, env(safe-area-inset-right));
+        bottom: max(1rem, env(safe-area-inset-bottom));
+    }
+
+    .chat-panel {
+        right: max(0.75rem, env(safe-area-inset-right));
+        bottom: calc(5.25rem + env(safe-area-inset-bottom));
+        width: min(360px, calc(100vw - 1.5rem));
+        max-height: min(520px, calc(100dvh - 7rem));
     }
 }
 </style>
