@@ -38,17 +38,34 @@
 
 		sendMessage(socket, receiverId, message) {
 			return new Promise((resolve, reject) => {
-				if (!socket || !socket.connected) {
+				if (!socket) {
 					reject(new Error('La connexion au chat est indisponible.'));
 					return;
 				}
-				socket.emit('sendMessage', { receiverId, message }, response => {
+
+				const emitMessage = () => socket.emit('sendMessage', { receiverId, message }, response => {
 					if (!response || !response.success) {
 						reject(new Error(response?.error || 'Impossible d’envoyer le message.'));
 						return;
 					}
 					resolve(normalizeMessage(response.message));
 				});
+
+				if (socket.connected) {
+					emitMessage();
+					return;
+				}
+
+				const timeout = window.setTimeout(() => {
+					socket.off('connect', onConnect);
+					reject(new Error('Connexion au chat indisponible. Réessayez dans un instant.'));
+				}, 5000);
+				const onConnect = () => {
+					window.clearTimeout(timeout);
+					emitMessage();
+				};
+				socket.once('connect', onConnect);
+				if (!socket.active) socket.connect();
 			});
 		},
 

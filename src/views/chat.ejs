@@ -942,6 +942,7 @@
       var messageContainer = document.getElementById('message-container');
       var messageForm = document.getElementById('message-form');
       var messageInput = document.getElementById('message-input');
+      var messageSendButton = messageForm ? messageForm.querySelector('.btn-send') : null;
       var userList = document.getElementById('user-list');
       var loadingIndicator = document.getElementById('loading-indicator');
       var emptyState = document.getElementById('empty-state');
@@ -1152,6 +1153,7 @@
           messageInput.disabled = false;
           messageInput.focus();
         }
+        if (messageSendButton) messageSendButton.disabled = false;
         
         // Mettre à jour la liste
         renderConversations();

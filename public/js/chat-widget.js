@@ -171,6 +171,10 @@ document.addEventListener('DOMContentLoaded', function() {
             messageInput.focus();
         } catch (error) {
             console.error('Failed to send message from widget:', error);
+            const errorEl = document.createElement('p');
+            errorEl.className = 'chat-send-error';
+            errorEl.textContent = error.message || 'Impossible d’envoyer le message.';
+            messageContainerEl.appendChild(errorEl);
         } finally {
             sendBtn.disabled = false;
         }
