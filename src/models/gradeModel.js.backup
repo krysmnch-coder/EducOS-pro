@@ -1,3 +1,4 @@
+// src/models/gradeModel.js
 const db = require('./db');
 
 const GradeModel = {
@@ -136,6 +137,7 @@ const GradeModel = {
       .first();
     
     if (existing) {
+      // Mettre à jour
       await db('grades')
         .where({ id: existing.id })
         .update({
@@ -147,6 +149,7 @@ const GradeModel = {
         });
       return existing.id;
     } else {
+      // Insérer
       const [id] = await db('grades').insert({
         establishment_id: establishment_id,
         student_id: student_id,
