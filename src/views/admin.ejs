@@ -126,7 +126,10 @@
     border-radius: 1rem;
     padding: 0.5rem;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
-    overflow: hidden;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
 }
 
 [data-theme="dark"] .glass-table-container {
@@ -140,6 +143,13 @@
     margin-bottom: 0;
     border-radius: 0.75rem;
     overflow: hidden;
+    min-width: 760px;
+}
+
+.glass-table th:last-child,
+.glass-table td:last-child {
+    min-width: 190px;
+    white-space: nowrap;
 }
 
 .glass-table thead th {
@@ -362,6 +372,14 @@
     .glass-btn-small {
         padding: 0.2rem 0.5rem;
         font-size: 0.7rem;
+    }
+
+    .glass-table-container {
+        overflow-x: auto;
+    }
+
+    .glass-table {
+        min-width: 700px;
     }
 }
 </style>
