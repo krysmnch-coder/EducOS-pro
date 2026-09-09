@@ -256,48 +256,93 @@
             eventResize: function(info) { updateEvent(info.event); },
             eventDidMount: function(info) {
                 const type = info.event.extendedProps.type || '';
-                info.el.style.fontSize = '0.8rem';
-                info.el.style.padding = '5px 8px';
-                info.el.style.margin = '2px 0';
-                info.el.style.borderRadius = '6px';
+                // Style pour tous les événements
+                info.el.style.fontSize = '0.75rem';
+                info.el.style.padding = '3px 6px';
+                info.el.style.margin = '1px 0';
+                info.el.style.borderRadius = '4px';
                 info.el.style.border = 'none';
                 info.el.style.color = '#fff';
                 info.el.style.fontWeight = '500';
-                info.el.style.boxShadow = '0 2px 8px rgba(0,0,0,0.25)';
-                info.el.style.minHeight = '22px';
+                info.el.style.boxShadow = '0 1px 4px rgba(0,0,0,0.2)';
+                info.el.style.minHeight = '18px';
                 info.el.style.display = 'flex';
                 info.el.style.alignItems = 'center';
                 info.el.style.overflow = 'hidden';
                 info.el.style.textOverflow = 'ellipsis';
                 info.el.style.whiteSpace = 'nowrap';
+                info.el.style.position = 'relative';
+                info.el.style.width = '100%';
 
+                // Ajout d'un petit indicateur de type
+                const typeIndicator = document.createElement('span');
+                typeIndicator.style.display = 'inline-block';
+                typeIndicator.style.width = '6px';
+                typeIndicator.style.height = '6px';
+                typeIndicator.style.borderRadius = '50%';
+                typeIndicator.style.marginRight = '4px';
+                typeIndicator.style.flexShrink = '0';
+                const colors = {
+                    'Rentrée des classes': '#198754',
+                    'Période scolaire': '#0d6efd',
+                    'Vacances scolaires': '#fd7e14',
+                    'Jours fériés': '#dc3545',
+                    'Événements': '#6f42c1',
+                    'Examens trimestriels': '#ffc107'
+                };
+                typeIndicator.style.backgroundColor = colors[type] || '#0d6efd';
+                info.el.prepend(typeIndicator);
+
+                // Gestion des couleurs
+                if (!info.event.backgroundColor) {
+                    info.el.style.backgroundColor = colors[type] || '#0d6efd';
+                }
+
+                // Pour la vue semaine, on garde le style mais plus petit
                 if (calendar.view.type === 'timeGridWeek') {
                     info.el.style.justifyContent = 'center';
                     info.el.style.textAlign = 'center';
                     info.el.style.whiteSpace = 'normal';
-                    info.el.style.fontSize = '0.75rem';
+                    info.el.style.fontSize = '0.65rem';
                     info.el.style.padding = '2px 4px';
+                    info.el.style.minHeight = '16px';
                 }
 
-                if (!info.event.backgroundColor) {
-                    const colors = {
-                        'Rentrée des classes': '#198754',
-                        'Période scolaire': '#0d6efd',
-                        'Vacances scolaires': '#fd7e14',
-                        'Jours fériés': '#dc3545',
-                        'Événements': '#6f42c1',
-                        'Examens trimestriels': '#ffc107'
-                    };
-                    info.el.style.backgroundColor = colors[type] || '#0d6efd';
-                }
-
+                // Pour les événements multi-jours
                 const start = info.event.start;
                 const end = info.event.end;
                 if (end && (end - start) > 86400000) {
-                    info.el.style.borderLeft = '5px solid ' + (info.event.backgroundColor || '#0d6efd');
-                    info.el.style.borderRadius = '0 6px 6px 0';
-                    info.el.style.paddingLeft = '10px';
+                    info.el.style.borderLeft = '3px solid ' + (info.event.backgroundColor || '#0d6efd');
+                    info.el.style.borderRadius = '0 4px 4px 0';
+                    info.el.style.paddingLeft = '8px';
                 }
+
+                // Réduire la taille du texte si plusieurs événements
+                const dayCell = info.el.closest('.fc-daygrid-day');
+                if (dayCell) {
+                    const eventsInDay = dayCell.querySelectorAll('.fc-daygrid-event');
+                    if (eventsInDay.length > 3) {
+                        info.el.style.fontSize = '0.65rem';
+                        info.el.style.padding = '2px 4px';
+                        info.el.style.minHeight = '14px';
+                    }
+                }
+
+                // Rendre les événements cliquables
+                info.el.style.cursor = 'pointer';
+            },
+            // Désactiver l'empilement automatique qui pose problème
+            eventOrder: function(a, b) {
+                return 0; // Ordre de chargement
+            },
+            // Configurer les limites d'événements par jour
+            dayMaxEvents: 6, // Limite à 6 événements visibles
+            moreLinkText: function(num) {
+                return '+' + num + ' autre' + (num > 1 ? 's' : '');
+            },
+            moreLinkClick: function(info) {
+                // Permet d'afficher tous les événements d'un jour dans une popup
+                // Le comportement par défaut de FullCalendar gère déjà cela
             }
         });
         calendar.render();
@@ -449,15 +494,81 @@
     .fc .fc-col-header-cell-cushion { color: #ccc; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px; }
     .fc .fc-day-today { background: rgba(13, 110, 253, 0.08) !important; }
     .fc .fc-highlight { background: rgba(13, 110, 253, 0.15) !important; }
-    .fc-daygrid-event { font-size: 0.8rem !important; padding: 5px 8px !important; margin: 2px 0 !important; border-radius: 6px !important; border: none !important; min-height: 24px !important; display: flex !important; align-items: center !important; }
-    .fc-daygrid-event .fc-event-title { color: #fff !important; font-weight: 500 !important; }
-    .fc-daygrid-event-harness { margin: 1px 0 !important; }
-    .fc-timegrid-event { border-radius: 6px !important; border: none !important; box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important; min-height: 24px !important; }
-    .fc-timegrid-event .fc-event-title { text-align: center !important; font-weight: 500 !important; font-size: 0.8rem !important; padding: 2px 4px !important; }
-    .fc-timegrid-event-harness { margin: 1px 0 !important; }
-    .fc-list-event { border-radius: 6px !important; margin: 2px 4px !important; border: none !important; }
-    .fc-list-event-graphic { padding: 8px !important; }
-    .fc-list-event-title { font-weight: 500 !important; }
+    
+    /* Styles pour l'affichage multi-événements */
+    .fc-daygrid-day-events {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 1px !important;
+        padding: 2px 4px !important;
+        min-height: 20px !important;
+    }
+    
+    .fc-daygrid-day-frame {
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    
+    .fc-daygrid-day-events .fc-daygrid-event {
+        flex-shrink: 0 !important;
+        width: 100% !important;
+        font-size: 0.7rem !important;
+        padding: 2px 4px !important;
+        margin: 0 !important;
+        border-radius: 3px !important;
+        min-height: 16px !important;
+        line-height: 1.2 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+    
+    .fc-daygrid-day-events .fc-daygrid-event .fc-event-title {
+        font-size: 0.7rem !important;
+    }
+    
+    /* Événements multi-jours */
+    .fc-daygrid-day-events .fc-daygrid-event.fc-daygrid-block-event {
+        border-radius: 3px !important;
+    }
+    
+    /* Ajustement pour la vue semaine */
+    .fc-timegrid-event-harness-inset .fc-timegrid-event {
+        margin: 1px 0 !important;
+        border-radius: 3px !important;
+        min-height: 16px !important;
+        font-size: 0.65rem !important;
+        padding: 1px 4px !important;
+    }
+    
+    /* Ajustement pour la vue liste */
+    .fc-list-event {
+        border-radius: 6px !important;
+        margin: 2px 4px !important;
+        border: none !important;
+        padding: 4px 8px !important;
+    }
+    .fc-list-event-graphic { padding: 4px !important; }
+    .fc-list-event-title { font-weight: 500 !important; font-size: 0.85rem !important; }
+    
+    /* Limiteur d'événements */
+    .fc-daygrid-more-link {
+        font-size: 0.7rem !important;
+        color: #888 !important;
+        cursor: pointer !important;
+        padding: 2px 4px !important;
+        border-radius: 3px !important;
+        transition: color 0.3s ease !important;
+        background: rgba(255,255,255,0.05) !important;
+        text-align: center !important;
+        display: block !important;
+        width: 100% !important;
+    }
+    .fc-daygrid-more-link:hover {
+        color: #fff !important;
+        background: rgba(255,255,255,0.1) !important;
+    }
+    
     .legend-item { border-radius: 8px !important; transition: all 0.3s ease !important; cursor: pointer !important; user-select: none !important; }
     .legend-item:hover { background: rgba(255,255,255,0.08) !important; transform: translateX(5px) !important; box-shadow: 0 2px 12px rgba(0,0,0,0.2) !important; }
     .btn-type { transition: all 0.3s ease !important; font-weight: 500 !important; font-size: 0.85rem !important; border-radius: 10px !important; padding: 10px 12px !important; height: 44px !important; display: flex !important; align-items: center !important; justify-content: center !important; }
