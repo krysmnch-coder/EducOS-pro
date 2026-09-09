@@ -4,57 +4,57 @@
 <div class="container-fluid page-shell py-4">
     <div class="themed-container" style="max-width: 100%; padding: 0 20px;">
         
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2><i data-feather="calendar"></i> Calendrier Scolaire</h2>
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+            <h2 style="font-size: clamp(1.2rem, 4vw, 2rem);"><i data-feather="calendar"></i> Calendrier Scolaire</h2>
         </div>
 
         <%- include('../partials/messages') %>
 
-        <div class="card glass-card" style="border-radius: 16px; padding: 20px;">
+        <div class="card glass-card" style="border-radius: 16px; padding: clamp(12px, 2vw, 20px);">
             <div class="row" style="margin: 0; gap: 0;">
                 <!-- Légende à gauche -->
-                <div class="col-md-3" style="padding: 0; padding-right: 15px;">
-                    <div class="legend-container glass-panel" style="border-radius: 12px; padding: 20px; height: 100%;">
-                        <h5 style="color: #fff; margin-bottom: 20px; font-weight: 600;">
+                <div class="col-lg-3 col-md-12" style="padding: 0; padding-right: 15px;">
+                    <div class="legend-container glass-panel" style="border-radius: 12px; padding: clamp(15px, 2vw, 20px); height: 100%; max-height: 500px; overflow-y: auto;">
+                        <h5 style="color: #fff; margin-bottom: 20px; font-weight: 600; font-size: clamp(1rem, 1.5vw, 1.25rem);">
                             <i data-feather="info" style="width: 18px; height: 18px; margin-right: 8px;"></i>
                             Légende
                         </h5>
-                        <div class="legend-item" data-type="Rentrée des classes" style="display: flex; align-items: center; margin-bottom: 12px; cursor: pointer; padding: 8px 12px; border-radius: 8px; transition: all 0.3s ease;">
-                            <span style="display: inline-block; width: 24px; height: 24px; border-radius: 6px; background: #198754; margin-right: 12px; box-shadow: 0 2px 8px rgba(25, 135, 84, 0.3);"></span>
-                            <span style="color: #e4e4e4; font-size: 0.95rem;">Rentrée des classes</span>
+                        <div class="legend-item" data-type="Rentrée des classes" style="display: flex; align-items: center; margin-bottom: 10px; cursor: pointer; padding: 8px 12px; border-radius: 8px; transition: all 0.3s ease;">
+                            <span style="display: inline-block; width: clamp(18px, 2vw, 24px); height: clamp(18px, 2vw, 24px); border-radius: 6px; background: #198754; margin-right: 12px; flex-shrink: 0; box-shadow: 0 2px 8px rgba(25, 135, 84, 0.3);"></span>
+                            <span style="color: #e4e4e4; font-size: clamp(0.8rem, 1.2vw, 0.95rem);">Rentrée des classes</span>
                         </div>
-                        <div class="legend-item" data-type="Période scolaire" style="display: flex; align-items: center; margin-bottom: 12px; cursor: pointer; padding: 8px 12px; border-radius: 8px; transition: all 0.3s ease;">
-                            <span style="display: inline-block; width: 24px; height: 24px; border-radius: 6px; background: #0d6efd; margin-right: 12px; box-shadow: 0 2px 8px rgba(13, 110, 253, 0.3);"></span>
-                            <span style="color: #e4e4e4; font-size: 0.95rem;">Période scolaire</span>
+                        <div class="legend-item" data-type="Période scolaire" style="display: flex; align-items: center; margin-bottom: 10px; cursor: pointer; padding: 8px 12px; border-radius: 8px; transition: all 0.3s ease;">
+                            <span style="display: inline-block; width: clamp(18px, 2vw, 24px); height: clamp(18px, 2vw, 24px); border-radius: 6px; background: #0d6efd; margin-right: 12px; flex-shrink: 0; box-shadow: 0 2px 8px rgba(13, 110, 253, 0.3);"></span>
+                            <span style="color: #e4e4e4; font-size: clamp(0.8rem, 1.2vw, 0.95rem);">Période scolaire</span>
                         </div>
-                        <div class="legend-item" data-type="Vacances scolaires" style="display: flex; align-items: center; margin-bottom: 12px; cursor: pointer; padding: 8px 12px; border-radius: 8px; transition: all 0.3s ease;">
-                            <span style="display: inline-block; width: 24px; height: 24px; border-radius: 6px; background: #fd7e14; margin-right: 12px; box-shadow: 0 2px 8px rgba(253, 126, 20, 0.3);"></span>
-                            <span style="color: #e4e4e4; font-size: 0.95rem;">Vacances scolaires</span>
+                        <div class="legend-item" data-type="Vacances scolaires" style="display: flex; align-items: center; margin-bottom: 10px; cursor: pointer; padding: 8px 12px; border-radius: 8px; transition: all 0.3s ease;">
+                            <span style="display: inline-block; width: clamp(18px, 2vw, 24px); height: clamp(18px, 2vw, 24px); border-radius: 6px; background: #fd7e14; margin-right: 12px; flex-shrink: 0; box-shadow: 0 2px 8px rgba(253, 126, 20, 0.3);"></span>
+                            <span style="color: #e4e4e4; font-size: clamp(0.8rem, 1.2vw, 0.95rem);">Vacances scolaires</span>
                         </div>
-                        <div class="legend-item" data-type="Jours fériés" style="display: flex; align-items: center; margin-bottom: 12px; cursor: pointer; padding: 8px 12px; border-radius: 8px; transition: all 0.3s ease;">
-                            <span style="display: inline-block; width: 24px; height: 24px; border-radius: 6px; background: #dc3545; margin-right: 12px; box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);"></span>
-                            <span style="color: #e4e4e4; font-size: 0.95rem;">Jours fériés</span>
+                        <div class="legend-item" data-type="Jours fériés" style="display: flex; align-items: center; margin-bottom: 10px; cursor: pointer; padding: 8px 12px; border-radius: 8px; transition: all 0.3s ease;">
+                            <span style="display: inline-block; width: clamp(18px, 2vw, 24px); height: clamp(18px, 2vw, 24px); border-radius: 6px; background: #dc3545; margin-right: 12px; flex-shrink: 0; box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);"></span>
+                            <span style="color: #e4e4e4; font-size: clamp(0.8rem, 1.2vw, 0.95rem);">Jours fériés</span>
                         </div>
-                        <div class="legend-item" data-type="Événements" style="display: flex; align-items: center; margin-bottom: 12px; cursor: pointer; padding: 8px 12px; border-radius: 8px; transition: all 0.3s ease;">
-                            <span style="display: inline-block; width: 24px; height: 24px; border-radius: 6px; background: #6f42c1; margin-right: 12px; box-shadow: 0 2px 8px rgba(111, 66, 193, 0.3);"></span>
-                            <span style="color: #e4e4e4; font-size: 0.95rem;">Événements</span>
+                        <div class="legend-item" data-type="Événements" style="display: flex; align-items: center; margin-bottom: 10px; cursor: pointer; padding: 8px 12px; border-radius: 8px; transition: all 0.3s ease;">
+                            <span style="display: inline-block; width: clamp(18px, 2vw, 24px); height: clamp(18px, 2vw, 24px); border-radius: 6px; background: #6f42c1; margin-right: 12px; flex-shrink: 0; box-shadow: 0 2px 8px rgba(111, 66, 193, 0.3);"></span>
+                            <span style="color: #e4e4e4; font-size: clamp(0.8rem, 1.2vw, 0.95rem);">Événements</span>
                         </div>
-                        <div class="legend-item" data-type="Examens trimestriels" style="display: flex; align-items: center; margin-bottom: 12px; cursor: pointer; padding: 8px 12px; border-radius: 8px; transition: all 0.3s ease;">
-                            <span style="display: inline-block; width: 24px; height: 24px; border-radius: 6px; background: #ffc107; margin-right: 12px; box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);"></span>
-                            <span style="color: #e4e4e4; font-size: 0.95rem;">Examens trimestriels</span>
+                        <div class="legend-item" data-type="Examens trimestriels" style="display: flex; align-items: center; margin-bottom: 10px; cursor: pointer; padding: 8px 12px; border-radius: 8px; transition: all 0.3s ease;">
+                            <span style="display: inline-block; width: clamp(18px, 2vw, 24px); height: clamp(18px, 2vw, 24px); border-radius: 6px; background: #ffc107; margin-right: 12px; flex-shrink: 0; box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);"></span>
+                            <span style="color: #e4e4e4; font-size: clamp(0.8rem, 1.2vw, 0.95rem);">Examens trimestriels</span>
                         </div>
                         <hr style="border-color: rgba(255,255,255,0.1); margin: 20px 0;">
-                        <div style="color: #888; font-size: 0.85rem;">
+                        <div style="color: #888; font-size: clamp(0.75rem, 1vw, 0.85rem);">
                             <p style="margin: 8px 0; display: flex; align-items: center;">
-                                <i data-feather="mouse-pointer" style="width: 16px; height: 16px; margin-right: 8px;"></i>
+                                <i data-feather="mouse-pointer" style="width: clamp(14px, 1.2vw, 16px); height: clamp(14px, 1.2vw, 16px); margin-right: 8px; flex-shrink: 0;"></i>
                                 Cliquez sur une date pour ajouter
                             </p>
                             <p style="margin: 8px 0; display: flex; align-items: center;">
-                                <i data-feather="edit-2" style="width: 16px; height: 16px; margin-right: 8px;"></i>
+                                <i data-feather="edit-2" style="width: clamp(14px, 1.2vw, 16px); height: clamp(14px, 1.2vw, 16px); margin-right: 8px; flex-shrink: 0;"></i>
                                 Cliquez sur un événement pour modifier
                             </p>
                             <p style="margin: 8px 0; display: flex; align-items: center;">
-                                <i data-feather="filter" style="width: 16px; height: 16px; margin-right: 8px;"></i>
+                                <i data-feather="filter" style="width: clamp(14px, 1.2vw, 16px); height: clamp(14px, 1.2vw, 16px); margin-right: 8px; flex-shrink: 0;"></i>
                                 Filtrez par type ci-dessus
                             </p>
                         </div>
@@ -62,9 +62,9 @@
                 </div>
                 
                 <!-- Calendrier -->
-                <div class="col-md-9" style="padding: 0; padding-left: 15px;">
-                    <div class="mb-3">
-                        <select class="form-select" id="typeFilter" style="width: 200px; background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(10px);">
+                <div class="col-lg-9 col-md-12" style="padding: 0; padding-left: 15px; overflow-x: auto;">
+                    <div class="mb-3 d-flex flex-wrap gap-2 align-items-center">
+                        <select class="form-select" id="typeFilter" style="width: clamp(180px, 30vw, 200px); background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(10px); font-size: clamp(0.8rem, 1vw, 0.95rem);">
                             <option value="all" style="background:#1a1a2e;">📅 Tous les types</option>
                             <option value="Rentrée des classes" style="background:#1a1a2e;">🎓 Rentrée des classes</option>
                             <option value="Période scolaire" style="background:#1a1a2e;">📚 Période scolaire</option>
@@ -74,7 +74,7 @@
                             <option value="Examens trimestriels" style="background:#1a1a2e;">📝 Examens trimestriels</option>
                         </select>
                     </div>
-                    <div id="calendar"></div>
+                    <div id="calendar" style="min-height: 400px; overflow-x: auto; -webkit-overflow-scrolling: touch;"></div>
                 </div>
             </div>
         </div>
@@ -84,59 +84,59 @@
 
 <!-- Modal -->
 <div class="modal fade" id="eventModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content glass-modal" style="background: rgba(30,30,50,0.92); color: white; border-radius: 16px; backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1);">
-            <div class="modal-header" style="border-bottom: 1px solid rgba(255,255,255,0.1);">
-                <h5 class="modal-title" id="modalTitle">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content glass-modal" style="background: rgba(30,30,50,0.92); color: white; border-radius: 16px; backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); max-height: 90vh;">
+            <div class="modal-header" style="border-bottom: 1px solid rgba(255,255,255,0.1); flex-wrap: wrap; gap: 8px;">
+                <h5 class="modal-title" id="modalTitle" style="font-size: clamp(1rem, 1.5vw, 1.25rem);">
                     <i data-feather="plus-circle" style="width: 20px; height: 20px; margin-right: 8px;"></i>
                     Ajouter un événement
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" style="padding: clamp(16px, 2vw, 24px); overflow-y: auto;">
                 <input type="hidden" id="eventId">
                 
                 <div class="mb-3">
-                    <label class="form-label" style="font-weight: 500;">Titre *</label>
-                    <input type="text" class="form-control" id="eventTitle" placeholder="Ex: Rentrée des classes" required style="background: rgba(255,255,255,0.08); color: white; border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 10px; padding: 12px;">
+                    <label class="form-label" style="font-weight: 500; font-size: clamp(0.9rem, 1.1vw, 1rem);">Titre *</label>
+                    <input type="text" class="form-control" id="eventTitle" placeholder="Ex: Rentrée des classes" required style="background: rgba(255,255,255,0.08); color: white; border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 10px; padding: clamp(10px, 1.2vw, 12px); font-size: clamp(0.9rem, 1vw, 1rem);">
                 </div>
                 
                 <div class="mb-4">
-                    <label class="form-label" style="font-weight: 500; display: block; margin-bottom: 10px;">Type d'événement</label>
-                    <div class="row" style="gap: 8px;">
-                        <div class="col-md-4 col-6" style="padding: 0 4px;">
-                            <button type="button" class="btn btn-type w-100" data-type="Rentrée des classes" data-color="#198754" style="background: rgba(25, 135, 84, 0.2); border: 2px solid #198754; color: #fff; border-radius: 10px; padding: 8px 12px; transition: all 0.3s ease;">
-                                <span style="display: inline-block; width: 12px; height: 12px; border-radius: 3px; background: #198754; margin-right: 8px;"></span>
+                    <label class="form-label" style="font-weight: 500; display: block; margin-bottom: 10px; font-size: clamp(0.9rem, 1.1vw, 1rem);">Type d'événement</label>
+                    <div class="row" style="gap: 8px; margin: 0;">
+                        <div class="col-6 col-md-4" style="padding: 0 4px; margin-bottom: 8px;">
+                            <button type="button" class="btn btn-type w-100" data-type="Rentrée des classes" data-color="#198754" style="background: rgba(25, 135, 84, 0.2); border: 2px solid #198754; color: #fff; border-radius: 10px; padding: clamp(6px, 1vw, 10px) clamp(8px, 1.2vw, 12px); transition: all 0.3s ease; font-size: clamp(0.7rem, 0.9vw, 0.85rem); min-height: clamp(32px, 4vw, 44px);">
+                                <span style="display: inline-block; width: clamp(8px, 1vw, 12px); height: clamp(8px, 1vw, 12px); border-radius: 3px; background: #198754; margin-right: 6px; flex-shrink: 0;"></span>
                                 Rentrée
                             </button>
                         </div>
-                        <div class="col-md-4 col-6" style="padding: 0 4px;">
-                            <button type="button" class="btn btn-type w-100" data-type="Période scolaire" data-color="#0d6efd" style="background: rgba(13, 110, 253, 0.2); border: 2px solid #0d6efd; color: #fff; border-radius: 10px; padding: 8px 12px; transition: all 0.3s ease;">
-                                <span style="display: inline-block; width: 12px; height: 12px; border-radius: 3px; background: #0d6efd; margin-right: 8px;"></span>
+                        <div class="col-6 col-md-4" style="padding: 0 4px; margin-bottom: 8px;">
+                            <button type="button" class="btn btn-type w-100" data-type="Période scolaire" data-color="#0d6efd" style="background: rgba(13, 110, 253, 0.2); border: 2px solid #0d6efd; color: #fff; border-radius: 10px; padding: clamp(6px, 1vw, 10px) clamp(8px, 1.2vw, 12px); transition: all 0.3s ease; font-size: clamp(0.7rem, 0.9vw, 0.85rem); min-height: clamp(32px, 4vw, 44px);">
+                                <span style="display: inline-block; width: clamp(8px, 1vw, 12px); height: clamp(8px, 1vw, 12px); border-radius: 3px; background: #0d6efd; margin-right: 6px; flex-shrink: 0;"></span>
                                 Période scolaire
                             </button>
                         </div>
-                        <div class="col-md-4 col-6" style="padding: 0 4px;">
-                            <button type="button" class="btn btn-type w-100" data-type="Vacances scolaires" data-color="#fd7e14" style="background: rgba(253, 126, 20, 0.2); border: 2px solid #fd7e14; color: #fff; border-radius: 10px; padding: 8px 12px; transition: all 0.3s ease;">
-                                <span style="display: inline-block; width: 12px; height: 12px; border-radius: 3px; background: #fd7e14; margin-right: 8px;"></span>
+                        <div class="col-6 col-md-4" style="padding: 0 4px; margin-bottom: 8px;">
+                            <button type="button" class="btn btn-type w-100" data-type="Vacances scolaires" data-color="#fd7e14" style="background: rgba(253, 126, 20, 0.2); border: 2px solid #fd7e14; color: #fff; border-radius: 10px; padding: clamp(6px, 1vw, 10px) clamp(8px, 1.2vw, 12px); transition: all 0.3s ease; font-size: clamp(0.7rem, 0.9vw, 0.85rem); min-height: clamp(32px, 4vw, 44px);">
+                                <span style="display: inline-block; width: clamp(8px, 1vw, 12px); height: clamp(8px, 1vw, 12px); border-radius: 3px; background: #fd7e14; margin-right: 6px; flex-shrink: 0;"></span>
                                 Vacances
                             </button>
                         </div>
-                        <div class="col-md-4 col-6" style="padding: 0 4px;">
-                            <button type="button" class="btn btn-type w-100" data-type="Jours fériés" data-color="#dc3545" style="background: rgba(220, 53, 69, 0.2); border: 2px solid #dc3545; color: #fff; border-radius: 10px; padding: 8px 12px; transition: all 0.3s ease;">
-                                <span style="display: inline-block; width: 12px; height: 12px; border-radius: 3px; background: #dc3545; margin-right: 8px;"></span>
+                        <div class="col-6 col-md-4" style="padding: 0 4px; margin-bottom: 8px;">
+                            <button type="button" class="btn btn-type w-100" data-type="Jours fériés" data-color="#dc3545" style="background: rgba(220, 53, 69, 0.2); border: 2px solid #dc3545; color: #fff; border-radius: 10px; padding: clamp(6px, 1vw, 10px) clamp(8px, 1.2vw, 12px); transition: all 0.3s ease; font-size: clamp(0.7rem, 0.9vw, 0.85rem); min-height: clamp(32px, 4vw, 44px);">
+                                <span style="display: inline-block; width: clamp(8px, 1vw, 12px); height: clamp(8px, 1vw, 12px); border-radius: 3px; background: #dc3545; margin-right: 6px; flex-shrink: 0;"></span>
                                 Jours fériés
                             </button>
                         </div>
-                        <div class="col-md-4 col-6" style="padding: 0 4px;">
-                            <button type="button" class="btn btn-type w-100" data-type="Événements" data-color="#6f42c1" style="background: rgba(111, 66, 193, 0.2); border: 2px solid #6f42c1; color: #fff; border-radius: 10px; padding: 8px 12px; transition: all 0.3s ease;">
-                                <span style="display: inline-block; width: 12px; height: 12px; border-radius: 3px; background: #6f42c1; margin-right: 8px;"></span>
+                        <div class="col-6 col-md-4" style="padding: 0 4px; margin-bottom: 8px;">
+                            <button type="button" class="btn btn-type w-100" data-type="Événements" data-color="#6f42c1" style="background: rgba(111, 66, 193, 0.2); border: 2px solid #6f42c1; color: #fff; border-radius: 10px; padding: clamp(6px, 1vw, 10px) clamp(8px, 1.2vw, 12px); transition: all 0.3s ease; font-size: clamp(0.7rem, 0.9vw, 0.85rem); min-height: clamp(32px, 4vw, 44px);">
+                                <span style="display: inline-block; width: clamp(8px, 1vw, 12px); height: clamp(8px, 1vw, 12px); border-radius: 3px; background: #6f42c1; margin-right: 6px; flex-shrink: 0;"></span>
                                 Événements
                             </button>
                         </div>
-                        <div class="col-md-4 col-6" style="padding: 0 4px;">
-                            <button type="button" class="btn btn-type w-100" data-type="Examens trimestriels" data-color="#ffc107" style="background: rgba(255, 193, 7, 0.2); border: 2px solid #ffc107; color: #fff; border-radius: 10px; padding: 8px 12px; transition: all 0.3s ease;">
-                                <span style="display: inline-block; width: 12px; height: 12px; border-radius: 3px; background: #ffc107; margin-right: 8px;"></span>
+                        <div class="col-6 col-md-4" style="padding: 0 4px; margin-bottom: 8px;">
+                            <button type="button" class="btn btn-type w-100" data-type="Examens trimestriels" data-color="#ffc107" style="background: rgba(255, 193, 7, 0.2); border: 2px solid #ffc107; color: #fff; border-radius: 10px; padding: clamp(6px, 1vw, 10px) clamp(8px, 1.2vw, 12px); transition: all 0.3s ease; font-size: clamp(0.7rem, 0.9vw, 0.85rem); min-height: clamp(32px, 4vw, 44px);">
+                                <span style="display: inline-block; width: clamp(8px, 1vw, 12px); height: clamp(8px, 1vw, 12px); border-radius: 3px; background: #ffc107; margin-right: 6px; flex-shrink: 0;"></span>
                                 Examens
                             </button>
                         </div>
@@ -146,30 +146,30 @@
                 </div>
                 
                 <div class="mb-3">
-                    <label class="form-label" style="font-weight: 500;">Description</label>
-                    <textarea class="form-control" id="eventDesc" rows="2" placeholder="Description de l'événement..." style="background: rgba(255,255,255,0.08); color: white; border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 10px; padding: 12px;"></textarea>
+                    <label class="form-label" style="font-weight: 500; font-size: clamp(0.9rem, 1.1vw, 1rem);">Description</label>
+                    <textarea class="form-control" id="eventDesc" rows="2" placeholder="Description de l'événement..." style="background: rgba(255,255,255,0.08); color: white; border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 10px; padding: clamp(10px, 1.2vw, 12px); font-size: clamp(0.9rem, 1vw, 1rem);"></textarea>
                 </div>
                 
                 <div class="row">
                     <div class="col-6 mb-3">
-                        <label class="form-label" style="font-weight: 500;">Date début *</label>
-                        <input type="date" class="form-control" id="eventStart" required style="background: rgba(255,255,255,0.08); color: white; border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 10px; padding: 12px;">
+                        <label class="form-label" style="font-weight: 500; font-size: clamp(0.9rem, 1.1vw, 1rem);">Date début *</label>
+                        <input type="date" class="form-control" id="eventStart" required style="background: rgba(255,255,255,0.08); color: white; border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 10px; padding: clamp(10px, 1.2vw, 12px); font-size: clamp(0.9rem, 1vw, 1rem);">
                     </div>
                     <div class="col-6 mb-3">
-                        <label class="form-label" style="font-weight: 500;">Date fin *</label>
-                        <input type="date" class="form-control" id="eventEnd" required style="background: rgba(255,255,255,0.08); color: white; border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 10px; padding: 12px;">
+                        <label class="form-label" style="font-weight: 500; font-size: clamp(0.9rem, 1.1vw, 1rem);">Date fin *</label>
+                        <input type="date" class="form-control" id="eventEnd" required style="background: rgba(255,255,255,0.08); color: white; border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 10px; padding: clamp(10px, 1.2vw, 12px); font-size: clamp(0.9rem, 1vw, 1rem);">
                     </div>
                 </div>
             </div>
-            <div class="modal-footer" style="border-top: 1px solid rgba(255,255,255,0.1); padding: 16px 24px;">
-                <button type="button" class="btn btn-danger me-auto" id="btnDelete" style="display:none; border-radius: 10px; padding: 10px 24px;">
+            <div class="modal-footer" style="border-top: 1px solid rgba(255,255,255,0.1); padding: clamp(12px, 1.5vw, 16px) clamp(16px, 2vw, 24px); flex-wrap: wrap; gap: 8px;">
+                <button type="button" class="btn btn-danger me-auto" id="btnDelete" style="display:none; border-radius: 10px; padding: clamp(8px, 1vw, 10px) clamp(16px, 2vw, 24px); font-size: clamp(0.85rem, 1vw, 0.95rem);">
                     <i data-feather="trash-2" style="width: 16px; height: 16px; margin-right: 6px;"></i>
                     Supprimer
                 </button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius: 10px; padding: 10px 24px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius: 10px; padding: clamp(8px, 1vw, 10px) clamp(16px, 2vw, 24px); background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); font-size: clamp(0.85rem, 1vw, 0.95rem);">
                     Annuler
                 </button>
-                <button type="button" class="btn btn-primary" id="btnSave" style="border-radius: 10px; padding: 10px 32px;">
+                <button type="button" class="btn btn-primary" id="btnSave" style="border-radius: 10px; padding: clamp(8px, 1vw, 10px) clamp(20px, 2.5vw, 32px); font-size: clamp(0.85rem, 1vw, 0.95rem);">
                     <i data-feather="save" style="width: 16px; height: 16px; margin-right: 6px;"></i>
                     Enregistrer
                 </button>
@@ -256,16 +256,15 @@
             eventResize: function(info) { updateEvent(info.event); },
             eventDidMount: function(info) {
                 const type = info.event.extendedProps.type || '';
-                // Style pour tous les événements
-                info.el.style.fontSize = '0.75rem';
-                info.el.style.padding = '3px 6px';
+                info.el.style.fontSize = 'clamp(0.6rem, 0.9vw, 0.75rem)';
+                info.el.style.padding = 'clamp(2px, 0.4vw, 5px) clamp(4px, 0.6vw, 8px)';
                 info.el.style.margin = '1px 0';
                 info.el.style.borderRadius = '4px';
                 info.el.style.border = 'none';
                 info.el.style.color = '#fff';
                 info.el.style.fontWeight = '500';
                 info.el.style.boxShadow = '0 1px 4px rgba(0,0,0,0.2)';
-                info.el.style.minHeight = '18px';
+                info.el.style.minHeight = 'clamp(14px, 2vw, 18px)';
                 info.el.style.display = 'flex';
                 info.el.style.alignItems = 'center';
                 info.el.style.overflow = 'hidden';
@@ -273,12 +272,12 @@
                 info.el.style.whiteSpace = 'nowrap';
                 info.el.style.position = 'relative';
                 info.el.style.width = '100%';
+                info.el.style.cursor = 'pointer';
 
-                // Ajout d'un petit indicateur de type
                 const typeIndicator = document.createElement('span');
                 typeIndicator.style.display = 'inline-block';
-                typeIndicator.style.width = '6px';
-                typeIndicator.style.height = '6px';
+                typeIndicator.style.width = 'clamp(4px, 0.6vw, 6px)';
+                typeIndicator.style.height = 'clamp(4px, 0.6vw, 6px)';
                 typeIndicator.style.borderRadius = '50%';
                 typeIndicator.style.marginRight = '4px';
                 typeIndicator.style.flexShrink = '0';
@@ -293,59 +292,80 @@
                 typeIndicator.style.backgroundColor = colors[type] || '#0d6efd';
                 info.el.prepend(typeIndicator);
 
-                // Gestion des couleurs
                 if (!info.event.backgroundColor) {
                     info.el.style.backgroundColor = colors[type] || '#0d6efd';
                 }
 
-                // Pour la vue semaine, on garde le style mais plus petit
                 if (calendar.view.type === 'timeGridWeek') {
                     info.el.style.justifyContent = 'center';
                     info.el.style.textAlign = 'center';
                     info.el.style.whiteSpace = 'normal';
-                    info.el.style.fontSize = '0.65rem';
-                    info.el.style.padding = '2px 4px';
-                    info.el.style.minHeight = '16px';
+                    info.el.style.fontSize = 'clamp(0.55rem, 0.7vw, 0.65rem)';
+                    info.el.style.padding = 'clamp(1px, 0.3vw, 3px) clamp(2px, 0.4vw, 4px)';
+                    info.el.style.minHeight = 'clamp(12px, 1.5vw, 16px)';
                 }
 
-                // Pour les événements multi-jours
                 const start = info.event.start;
                 const end = info.event.end;
                 if (end && (end - start) > 86400000) {
                     info.el.style.borderLeft = '3px solid ' + (info.event.backgroundColor || '#0d6efd');
                     info.el.style.borderRadius = '0 4px 4px 0';
-                    info.el.style.paddingLeft = '8px';
+                    info.el.style.paddingLeft = '6px';
                 }
 
-                // Réduire la taille du texte si plusieurs événements
                 const dayCell = info.el.closest('.fc-daygrid-day');
                 if (dayCell) {
                     const eventsInDay = dayCell.querySelectorAll('.fc-daygrid-event');
                     if (eventsInDay.length > 3) {
-                        info.el.style.fontSize = '0.65rem';
-                        info.el.style.padding = '2px 4px';
-                        info.el.style.minHeight = '14px';
+                        info.el.style.fontSize = 'clamp(0.5rem, 0.7vw, 0.65rem)';
+                        info.el.style.padding = 'clamp(1px, 0.3vw, 3px) clamp(2px, 0.4vw, 4px)';
+                        info.el.style.minHeight = 'clamp(10px, 1.2vw, 14px)';
+                    }
+                    if (eventsInDay.length > 5) {
+                        info.el.style.fontSize = 'clamp(0.45rem, 0.6vw, 0.6rem)';
+                        info.el.style.padding = 'clamp(1px, 0.2vw, 2px) clamp(2px, 0.3vw, 3px)';
+                        info.el.style.minHeight = 'clamp(8px, 1vw, 12px)';
                     }
                 }
-
-                // Rendre les événements cliquables
-                info.el.style.cursor = 'pointer';
             },
-            // Désactiver l'empilement automatique qui pose problème
             eventOrder: function(a, b) {
-                return 0; // Ordre de chargement
+                return 0;
             },
-            // Configurer les limites d'événements par jour
-            dayMaxEvents: 6, // Limite à 6 événements visibles
+            dayMaxEvents: 6,
             moreLinkText: function(num) {
                 return '+' + num + ' autre' + (num > 1 ? 's' : '');
             },
             moreLinkClick: function(info) {
                 // Permet d'afficher tous les événements d'un jour dans une popup
-                // Le comportement par défaut de FullCalendar gère déjà cela
+            },
+            // Configuration responsive
+            views: {
+                dayGridMonth: {
+                    titleFormat: { year: 'numeric', month: 'long' },
+                    dayHeaderFormat: { weekday: 'short' },
+                    dayCellContent: function(info) {
+                        return info.dayNumberText.replace('日', '');
+                    }
+                },
+                timeGridWeek: {
+                    titleFormat: { year: 'numeric', month: 'short', day: 'numeric' }
+                },
+                listMonth: {
+                    titleFormat: { year: 'numeric', month: 'long' }
+                }
+            },
+            // Gestion du responsive pour les événements
+            handleWindowResize: true,
+            windowResize: function(view) {
+                // Ajustement automatique
             }
         });
         calendar.render();
+
+        // Forcer le re-render après le chargement pour un meilleur affichage
+        setTimeout(function() {
+            calendar.refetchEvents();
+        }, 100);
 
         document.getElementById('typeFilter').addEventListener('change', function() {
             calendar.refetchEvents();
@@ -484,39 +504,115 @@
     .glass-card { background: rgba(255, 255, 255, 0.05) !important; backdrop-filter: blur(20px) !important; -webkit-backdrop-filter: blur(20px) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important; }
     .glass-panel { background: rgba(255, 255, 255, 0.05) !important; backdrop-filter: blur(15px) !important; -webkit-backdrop-filter: blur(15px) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2) !important; }
     .glass-modal { backdrop-filter: blur(25px) !important; -webkit-backdrop-filter: blur(25px) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5) !important; }
-    .fc { color: #e4e4e4; }
-    .fc .fc-toolbar-title { color: #fff; font-size: 1.3rem; font-weight: 600; }
-    .fc .fc-button { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: #fff; text-transform: capitalize; backdrop-filter: blur(10px); border-radius: 8px; padding: 6px 14px; transition: all 0.3s ease; }
-    .fc .fc-button:hover { background: rgba(255,255,255,0.15); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
-    .fc .fc-button-active { background: rgba(13, 110, 253, 0.3) !important; border-color: #0d6efd !important; box-shadow: 0 0 20px rgba(13, 110, 253, 0.2); }
-    .fc-theme-standard td, .fc-theme-standard th { border-color: rgba(255,255,255,0.06); }
-    .fc .fc-daygrid-day-number { color: #ccc; font-weight: 500; }
-    .fc .fc-col-header-cell-cushion { color: #ccc; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px; }
-    .fc .fc-day-today { background: rgba(13, 110, 253, 0.08) !important; }
-    .fc .fc-highlight { background: rgba(13, 110, 253, 0.15) !important; }
     
-    /* Styles pour l'affichage multi-événements */
+    /* Styles généraux du calendrier */
+    .fc { color: #e4e4e4; max-width: 100%; }
+    .fc .fc-toolbar-title { color: #fff; font-size: clamp(1rem, 1.8vw, 1.3rem) !important; font-weight: 600; }
+    
+    .fc .fc-toolbar {
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+        margin-bottom: 16px !important;
+    }
+    
+    .fc .fc-toolbar-chunk {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 4px !important;
+        align-items: center !important;
+    }
+    
+    .fc .fc-button {
+        background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,0.12);
+        color: #fff;
+        text-transform: capitalize;
+        backdrop-filter: blur(10px);
+        border-radius: 8px;
+        padding: clamp(4px, 0.6vw, 8px) clamp(8px, 1vw, 14px);
+        transition: all 0.3s ease;
+        font-size: clamp(0.7rem, 0.9vw, 0.9rem) !important;
+        min-height: clamp(28px, 3.5vw, 38px);
+        white-space: nowrap;
+    }
+    
+    .fc .fc-button:hover {
+        background: rgba(255,255,255,0.15);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    
+    .fc .fc-button-active {
+        background: rgba(13, 110, 253, 0.3) !important;
+        border-color: #0d6efd !important;
+        box-shadow: 0 0 20px rgba(13, 110, 253, 0.2);
+    }
+    
+    .fc-theme-standard td, .fc-theme-standard th {
+        border-color: rgba(255,255,255,0.06);
+    }
+    
+    .fc .fc-daygrid-day-number {
+        color: #ccc;
+        font-weight: 500;
+        font-size: clamp(0.75rem, 1vw, 0.9rem);
+        padding: 4px !important;
+    }
+    
+    .fc .fc-col-header-cell-cushion {
+        color: #ccc;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: clamp(0.6rem, 0.8vw, 0.8rem);
+        letter-spacing: 0.5px;
+        padding: 4px !important;
+    }
+    
+    .fc .fc-day-today {
+        background: rgba(13, 110, 253, 0.08) !important;
+    }
+    
+    .fc .fc-highlight {
+        background: rgba(13, 110, 253, 0.15) !important;
+    }
+    
+    /* Styles pour les cellules des jours */
+    .fc-daygrid-day-frame {
+        min-height: clamp(60px, 10vw, 100px) !important;
+    }
+    
     .fc-daygrid-day-events {
         display: flex !important;
         flex-direction: column !important;
         gap: 1px !important;
-        padding: 2px 4px !important;
+        padding: clamp(1px, 0.3vw, 4px) clamp(2px, 0.4vw, 4px) !important;
         min-height: 20px !important;
+        max-height: clamp(80px, 15vw, 150px) !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
     }
     
-    .fc-daygrid-day-frame {
-        display: flex !important;
-        flex-direction: column !important;
+    /* Scrollbar personnalisée pour les événements */
+    .fc-daygrid-day-events::-webkit-scrollbar {
+        width: 3px;
+    }
+    .fc-daygrid-day-events::-webkit-scrollbar-track {
+        background: rgba(255,255,255,0.05);
+        border-radius: 10px;
+    }
+    .fc-daygrid-day-events::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,0.15);
+        border-radius: 10px;
     }
     
     .fc-daygrid-day-events .fc-daygrid-event {
         flex-shrink: 0 !important;
         width: 100% !important;
-        font-size: 0.7rem !important;
-        padding: 2px 4px !important;
+        font-size: clamp(0.55rem, 0.7vw, 0.7rem) !important;
+        padding: clamp(1px, 0.3vw, 3px) clamp(3px, 0.5vw, 6px) !important;
         margin: 0 !important;
         border-radius: 3px !important;
-        min-height: 16px !important;
+        min-height: clamp(12px, 1.5vw, 16px) !important;
         line-height: 1.2 !important;
         white-space: nowrap !important;
         overflow: hidden !important;
@@ -524,67 +620,240 @@
     }
     
     .fc-daygrid-day-events .fc-daygrid-event .fc-event-title {
-        font-size: 0.7rem !important;
+        font-size: clamp(0.5rem, 0.7vw, 0.7rem) !important;
     }
     
-    /* Événements multi-jours */
     .fc-daygrid-day-events .fc-daygrid-event.fc-daygrid-block-event {
         border-radius: 3px !important;
     }
     
-    /* Ajustement pour la vue semaine */
+    /* Vue semaine */
     .fc-timegrid-event-harness-inset .fc-timegrid-event {
         margin: 1px 0 !important;
         border-radius: 3px !important;
-        min-height: 16px !important;
-        font-size: 0.65rem !important;
-        padding: 1px 4px !important;
+        min-height: clamp(12px, 1.5vw, 16px) !important;
+        font-size: clamp(0.5rem, 0.7vw, 0.65rem) !important;
+        padding: clamp(1px, 0.3vw, 3px) clamp(2px, 0.4vw, 4px) !important;
     }
     
-    /* Ajustement pour la vue liste */
+    .fc-timegrid-slot {
+        height: clamp(40px, 6vw, 60px) !important;
+    }
+    
+    .fc-timegrid-axis {
+        font-size: clamp(0.6rem, 0.8vw, 0.75rem) !important;
+    }
+    
+    .fc-timegrid-col-events {
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+    
+    /* Vue liste */
     .fc-list-event {
         border-radius: 6px !important;
         margin: 2px 4px !important;
         border: none !important;
-        padding: 4px 8px !important;
+        padding: clamp(4px, 0.5vw, 8px) !important;
     }
     .fc-list-event-graphic { padding: 4px !important; }
-    .fc-list-event-title { font-weight: 500 !important; font-size: 0.85rem !important; }
+    .fc-list-event-title { font-weight: 500 !important; font-size: clamp(0.75rem, 1vw, 0.85rem) !important; }
+    .fc-list-event-time {
+        font-size: clamp(0.65rem, 0.9vw, 0.75rem) !important;
+    }
+    
+    .fc-list-table {
+        font-size: clamp(0.7rem, 1vw, 0.85rem) !important;
+    }
     
     /* Limiteur d'événements */
     .fc-daygrid-more-link {
-        font-size: 0.7rem !important;
+        font-size: clamp(0.55rem, 0.7vw, 0.7rem) !important;
         color: #888 !important;
         cursor: pointer !important;
-        padding: 2px 4px !important;
+        padding: clamp(1px, 0.2vw, 3px) !important;
         border-radius: 3px !important;
         transition: color 0.3s ease !important;
         background: rgba(255,255,255,0.05) !important;
         text-align: center !important;
         display: block !important;
         width: 100% !important;
+        flex-shrink: 0 !important;
+        margin: 1px 0 !important;
     }
     .fc-daygrid-more-link:hover {
         color: #fff !important;
         background: rgba(255,255,255,0.1) !important;
     }
     
+    /* Popup des événements supplémentaires */
+    .fc-popover {
+        background: rgba(30,30,50,0.95) !important;
+        backdrop-filter: blur(20px) !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
+        border-radius: 12px !important;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.5) !important;
+        max-height: 70vh !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+    .fc-popover-header {
+        background: rgba(255,255,255,0.05) !important;
+        border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+        padding: 8px 12px !important;
+    }
+    .fc-popover-body {
+        padding: 8px 12px !important;
+    }
+    .fc-popover-body .fc-daygrid-event {
+        font-size: clamp(0.65rem, 0.8vw, 0.8rem) !important;
+        padding: 4px 8px !important;
+        margin: 2px 0 !important;
+        border-radius: 6px !important;
+    }
+    .fc-popover .fc-daygrid-more-link {
+        display: none !important;
+    }
+    
     .legend-item { border-radius: 8px !important; transition: all 0.3s ease !important; cursor: pointer !important; user-select: none !important; }
     .legend-item:hover { background: rgba(255,255,255,0.08) !important; transform: translateX(5px) !important; box-shadow: 0 2px 12px rgba(0,0,0,0.2) !important; }
-    .btn-type { transition: all 0.3s ease !important; font-weight: 500 !important; font-size: 0.85rem !important; border-radius: 10px !important; padding: 10px 12px !important; height: 44px !important; display: flex !important; align-items: center !important; justify-content: center !important; }
+    .btn-type { transition: all 0.3s ease !important; font-weight: 500 !important; border-radius: 10px !important; padding: clamp(6px, 1vw, 10px) clamp(8px, 1.2vw, 12px) !important; min-height: clamp(32px, 4vw, 44px) !important; display: flex !important; align-items: center !important; justify-content: center !important; font-size: clamp(0.7rem, 0.9vw, 0.85rem) !important; }
     .btn-type:hover { transform: translateY(-2px) !important; box-shadow: 0 4px 20px rgba(0,0,0,0.3) !important; }
     .btn-type:active { transform: scale(0.95) !important; }
-    @media (max-width: 768px) {
-        .col-md-3, .col-md-9 { width: 100% !important; flex: 0 0 100% !important; max-width: 100% !important; padding: 0 !important; }
-        .col-md-3 { margin-bottom: 20px !important; padding-right: 0 !important; }
-        .col-md-9 { padding-left: 0 !important; }
-        .legend-container { height: auto !important; }
-        .btn-type { font-size: 0.75rem !important; padding: 6px 8px !important; height: 36px !important; }
+    
+    /* Responsive */
+    @media (max-width: 992px) {
+        .col-lg-3, .col-lg-9 { width: 100% !important; flex: 0 0 100% !important; max-width: 100% !important; padding: 0 !important; }
+        .col-lg-3 { margin-bottom: 20px !important; padding-right: 0 !important; }
+        .col-lg-9 { padding-left: 0 !important; }
+        .legend-container { height: auto !important; max-height: 300px !important; }
+        
+        .fc .fc-toolbar {
+            flex-direction: column !important;
+            align-items: center !important;
+        }
+        .fc .fc-toolbar-chunk {
+            justify-content: center !important;
+            width: 100% !important;
+        }
+        .fc .fc-toolbar-title {
+            text-align: center !important;
+        }
     }
-    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    
+    @media (max-width: 576px) {
+        .fc-daygrid-day-frame {
+            min-height: 50px !important;
+        }
+        .fc-daygrid-day-events {
+            max-height: 60px !important;
+            padding: 1px 2px !important;
+        }
+        .fc-daygrid-day-events .fc-daygrid-event {
+            font-size: 0.5rem !important;
+            padding: 1px 3px !important;
+            min-height: 10px !important;
+        }
+        .fc-daygrid-day-events .fc-daygrid-event .fc-event-title {
+            font-size: 0.45rem !important;
+        }
+        .fc .fc-daygrid-day-number {
+            font-size: 0.65rem !important;
+            padding: 2px !important;
+        }
+        .fc .fc-col-header-cell-cushion {
+            font-size: 0.55rem !important;
+            padding: 2px !important;
+        }
+        .fc .fc-button {
+            font-size: 0.6rem !important;
+            padding: 4px 8px !important;
+            min-height: 24px !important;
+        }
+        .fc-daygrid-more-link {
+            font-size: 0.45rem !important;
+            padding: 1px 2px !important;
+        }
+        .fc-timegrid-slot {
+            height: 30px !important;
+        }
+        .fc-timegrid-event-harness-inset .fc-timegrid-event {
+            font-size: 0.45rem !important;
+            min-height: 10px !important;
+        }
+        .fc-list-event {
+            padding: 4px !important;
+        }
+        .fc-list-event-title {
+            font-size: 0.65rem !important;
+        }
+        .fc-list-event-time {
+            font-size: 0.55rem !important;
+        }
+        .btn-type {
+            font-size: 0.6rem !important;
+            padding: 4px 6px !important;
+            min-height: 28px !important;
+        }
+        .legend-item span {
+            font-size: 0.7rem !important;
+        }
+        
+        /* Modal responsive */
+        .modal-dialog {
+            margin: 10px !important;
+        }
+        .modal-content {
+            border-radius: 12px !important;
+        }
+        .modal-body .row .col-6 {
+            padding: 0 4px !important;
+        }
+    }
+    
+    @media (max-width: 400px) {
+        .fc-daygrid-day-frame {
+            min-height: 40px !important;
+        }
+        .fc-daygrid-day-events {
+            max-height: 40px !important;
+        }
+        .fc-daygrid-day-events .fc-daygrid-event {
+            font-size: 0.4rem !important;
+            padding: 1px 2px !important;
+            min-height: 8px !important;
+        }
+        .fc-daygrid-day-events .fc-daygrid-event .fc-event-title {
+            font-size: 0.4rem !important;
+        }
+        .fc .fc-daygrid-day-number {
+            font-size: 0.55rem !important;
+        }
+        .fc .fc-col-header-cell-cushion {
+            font-size: 0.45rem !important;
+        }
+        .fc-daygrid-more-link {
+            font-size: 0.4rem !important;
+        }
+    }
+    
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 10px; }
-    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
+    
+    /* Support tactile */
+    .fc-daygrid-event {
+        touch-action: manipulation !important;
+        -webkit-tap-highlight-color: transparent !important;
+    }
+    .fc .fc-button {
+        touch-action: manipulation !important;
+    }
+    .legend-item, .btn-type {
+        touch-action: manipulation !important;
+        -webkit-tap-highlight-color: transparent !important;
+    }
 </style>
 
 <%- include('../partials/footer') %>
