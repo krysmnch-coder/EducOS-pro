@@ -23,6 +23,7 @@ const adminRoutes = require('./src/routes/adminRoutes');
 const apiRoutes = require('./src/routes/apiRoutes');
 const establishmentRoutes = require('./src/routes/establishmentRoutes');
 const notificationRoutes = require('./src/routes/notificationRoutes');
+const calendarRoutes = require('./src/routes/calendarRoutes');
 const chatModel = require('./src/models/chatModel');
 const http = require('http');
 const socketIo = require('socket.io');
@@ -108,7 +109,7 @@ const sessionMiddleware = session({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
-  cookie: { 
+  cookie: {
     maxAge: 1000 * 60 * 60 * 24 * 7,
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
@@ -122,38 +123,38 @@ app.use(passport.session());
 app.use(flash());
 
 app.use(async (req, res, next) => {
-  res.locals.success_msg = req.flash('success_msg');
-  res.locals.error_msg = req.flash('error_msg');
-  res.locals.error = req.flash('error');
-  res.locals.user = req.user || null;
-  res.locals.currentPath = req.path;
+    res.locals.success_msg = req.flash('success_msg');
+    res.locals.error_msg = req.flash('error_msg');
+    res.locals.error = req.flash('error');
+    res.locals.user = req.user || null;
+    res.locals.currentPath = req.path;
 
-  if (req.user) {
-    try {
-      const unreadGeneral = await notificationModel.getUnreadNotificationCountForUser(req.user);
-      res.locals.unreadCount = unreadGeneral;
-      const unreadChat = await chatModel.getUnreadCount(req.user.id);
-      res.locals.unreadChatCount = unreadChat;
-    } catch (error) {
-      res.locals.unreadCount = 0;
-      res.locals.unreadChatCount = 0;
+    if (req.user) {
+        try {
+            const unreadGeneral = await notificationModel.getUnreadNotificationCountForUser(req.user);
+            res.locals.unreadCount = unreadGeneral;
+            const unreadChat = await chatModel.getUnreadCount(req.user.id);
+            res.locals.unreadChatCount = unreadChat;
+        } catch (error) {
+            res.locals.unreadCount = 0;
+            res.locals.unreadChatCount = 0;
+        }
+    } else {
+        res.locals.unreadCount = 0;
+        res.locals.unreadChatCount = 0;
     }
-  } else {
-    res.locals.unreadCount = 0;
-    res.locals.unreadChatCount = 0;
-  }
-  next();
+    next();
 });
 
 app.use(forcePasswordChange);
 
 app.get('/api/dashboard-stats', async (req, res) => {
-  try {
-    const stats = await getDashboardStats();
-    res.json(stats);
-  } catch (error) {
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
+    try {
+        const stats = await getDashboardStats();
+        res.json(stats);
+    } catch (error) {
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
 });
 
 async function getDashboardStats() {
@@ -401,59 +402,7 @@ process.once('SIGUSR2', () => { gracefulShutdown('SIGUSR2', () => { process.kill
 // ==========================================================================
 // ROUTES CALENDRIER
 // ==========================================================================
-app.get('/school-life/calendar', async (req, res) => {
-    if (!req.user) return res.redirect('/login');
-    try {
-        res.render('school-life/calendar', { title: 'Calendrier Scolaire', events: [], user: req.user });
-    } catch (error) { req.flash('error_msg', 'Erreur: ' + error.message); res.redirect('/dashboard'); }
-});
-
-app.get('/api/calendar/events', async (req, res) => {
-    if (!req.user) return res.status(401).json([]);
-    try {
-        const type = req.query.type;
-        let query = db('events').where({ establishment_id: req.user.establishment_id });
-        if (type && type !== 'all') query = query.where({ event_type: type });
-        const events = await query.orderBy('start_date', 'asc').select('*');
-        const formatted = events.map(e => ({
-            id: e.id, title: e.title, start: e.start_date, end: e.end_date,
-            backgroundColor: e.color || '#0d6efd', borderColor: e.color || '#0d6efd', textColor: '#ffffff',
-            extendedProps: { description: e.description || '', type: e.event_type || 'Période scolaire' }
-        }));
-        res.json(formatted);
-    } catch (error) { res.status(500).json([]); }
-});
-
-app.post('/api/calendar/events', async (req, res) => {
-    if (!req.user) return res.status(401).json({ error: 'Non authentifié' });
-    try {
-        const { title, description, event_type, start_date, end_date, color } = req.body;
-        const [id] = await db('events').insert({
-            establishment_id: req.user.establishment_id, title, description: description || '',
-            event_type: event_type || 'Période scolaire', start_date, end_date, color: color || '#0d6efd',
-            created_by: req.user.id, created_at: new Date(), updated_at: new Date()
-        });
-        res.status(201).json({ success: true, event: { id, title, start: start_date, end: end_date, backgroundColor: color } });
-    } catch (error) { res.status(500).json({ error: error.message }); }
-});
-
-app.put('/api/calendar/events/:id', async (req, res) => {
-    if (!req.user) return res.status(401).json({ error: 'Non authentifié' });
-    try {
-        const { title, description, event_type, start_date, end_date, color } = req.body;
-        await db('events').where({ id: req.params.id, establishment_id: req.user.establishment_id })
-            .update({ title, description, event_type, start_date, end_date, color, updated_at: new Date() });
-        res.json({ success: true });
-    } catch (error) { res.status(500).json({ error: error.message }); }
-});
-
-app.delete('/api/calendar/events/:id', async (req, res) => {
-    if (!req.user) return res.status(401).json({ error: 'Non authentifié' });
-    try {
-        await db('events').where({ id: req.params.id, establishment_id: req.user.establishment_id }).del();
-        res.json({ success: true });
-    } catch (error) { res.status(500).json({ error: error.message }); }
-});
+app.use('/', calendarRoutes);
 
 const schoolLifeRoutes = require('./src/routes/schoolLifeRoutes');
 app.use('/', schoolLifeRoutes);
@@ -802,35 +751,35 @@ app.get('/absences-view', async (req, res) => {
 // ==========================================================================
 app.get('/secretary/documents', async (req, res) => {
     if (!req.user) return res.redirect('/login');
-    
-    if (req.user.role !== 'SECRETARY' && req.user.role !== 'secretaire' && 
+
+    if (req.user.role !== 'SECRETARY' && req.user.role !== 'secretaire' &&
         req.user.role !== 'ADMINISTRATOR' && req.user.role !== 'administrateur') {
         req.flash('error_msg', 'Accès non autorisé.');
         return res.redirect('/dashboard');
     }
-    
+
     try {
         // Récupérer le nom de l'admin (directeur) de l'établissement
         let adminName = req.user.name;
         let establishmentName = 'Établissement';
-        
+
         const admin = await db('users')
             .where({ establishment_id: req.user.establishment_id })
             .whereIn('role', ['ADMINISTRATOR', 'administrateur'])
             .select('name')
             .first();
-        
+
         if (admin) adminName = admin.name;
-        
+
         const establishment = await db('establishments')
             .where({ id: req.user.establishment_id })
             .select('name')
             .first();
-        
+
         if (establishment) establishmentName = establishment.name;
-        
+
         console.log('📄 Documents - Admin:', adminName, 'Établissement:', establishmentName);
-        
+
         res.render('secretary/documents', {
             title: 'Documents Scolaires',
             user: req.user,
